@@ -1,0 +1,47 @@
+{
+    "port": 8080,
+    "default_hosts": [
+        "https://gapi.innogrid.cf"
+    ],
+    "extra_config": {
+      "github_com/devopsfaith/krakend-cors": {
+        "allow_origins": [
+          "*"
+        ],
+        "allow_methods": [
+          "GET",
+          "POST",
+          "PUT",
+          "DELETE",
+          "PATCH"
+        ],
+        "allow_headers": [
+          "Origin",
+          "Authorization",
+          "Content-Type"
+        ],
+        "expose_headers": [
+          "Content-Length",
+          "Location"
+        ],
+        "max_age": "12h",
+        "allow_credentials": true,
+        "debug": true
+      },
+      "github_com/devopsfaith/krakend-gologging": {
+        "level": "DEBUG",
+        "prefix": "[KRAKEND]",
+        "syslog": false,
+        "stdout": true,
+        "format": "default"
+      },
+      "github_com/devopsfaith/krakend-metrics": {
+        "collection_time": "60s",
+        "proxy_disabled": false,
+        "router_disabled": false,
+        "backend_disabled": false,
+        "endpoint_disabled": false,
+        "listen_address": ":8090"
+      }
+    }
+}

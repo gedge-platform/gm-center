@@ -19,6 +19,7 @@ docker-compose up -d
 
 ### In Progress
 - [ ] Working on API Development
+  - https://gedge-platform.github.io/gm-center/
 - [ ] Working on API documentation
 
 

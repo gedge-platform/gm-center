@@ -4,6 +4,7 @@
   "port": {{ .service.port }},
   "cache_ttl": "3600s",
   "timeout": "3s",
+  "output_encoding": "json",
   "extra_config": {{ marshal .service.extra_config }},
   "host": {{ marshal .service.default_hosts }},
   "endpoints": [
@@ -11,8 +12,8 @@
       {{if $idx}},{{end}}
     {
       "endpoint": "{{ $val.endpoint }}",
-      "output_encoding": "{{ $val.output_encoding }}",
       "method": "{{ $val.method }}",
+      "output_encoding": "{{ $val.output_encoding }}",
       "headers_to_pass": [ "Authorization" ],
       "backend": [
         {
@@ -26,7 +27,7 @@
         }
       ]
     }
-     {{ end }},
+    {{ end }},
     {{ range $idx, $val := .api_endpoint.monitoring_group }}
       {{if $idx}},{{end}}
     {
@@ -45,6 +46,6 @@
         }
       ]
     }
-    {{ end }}
+     {{ end }}
   ]
 }

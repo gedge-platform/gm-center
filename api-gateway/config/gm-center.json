@@ -26,6 +26,25 @@
         }
       ]
     }
-     {{ end }}
+     {{ end }},
+    {{ range $idx, $val := .api_endpoint.monitoring_group }}
+      {{if $idx}},{{end}}
+    {
+      "endpoint": "{{ $val.endpoint }}",
+      "method": "{{ $val.method }}",
+      "headers_to_pass": [ "Authorization" ],
+      "backend": [
+        {
+          "host": "{{ $val.host }}",
+          "url_pattern": "{{ $val.backend }}",
+          "method": "{{ $val.method }}",
+          "disable_host_sanitize": "{{ $val.disable_host_sanitize }}",
+          "extra_config": {
+            {{ include "monitoring_exclusion.tmpl" }}
+          }
+        }
+      ]
+    }
+    {{ end }}
   ]
 }

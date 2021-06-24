@@ -35,5 +35,15 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/{resource_name}/{name}"
         }
+    ],
+    "monitoring_group": [
+        {
+            "endpoint": "/gmcapi/v1/monitoring/test",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)/node_memory_MemTotal_bytes"
+        }
     ]
 }

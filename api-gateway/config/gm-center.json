@@ -7,22 +7,25 @@
   "extra_config": {{ marshal .service.extra_config }},
   "host": {{ marshal .service.default_hosts }},
   "endpoints": [
-    {{ range $idx, $endpoint := .endpoint.kubernetes_group }}
+    {{ range $idx, $val := .api_endpoint.kubernetes_group }}
       {{if $idx}},{{end}}
     {
-      "endpoint": "{{ $endpoint.endpoint }}",
-      "method": "{{ $endpoint.method }}",
+      "endpoint": "{{ $val.endpoint }}",
+      "output_encoding": "{{ $val.output_encoding }}",
+      "method": "{{ $val.method }}",
       "headers_to_pass": [ "Authorization" ],
       "backend": [
         {
-          "url_pattern": "{{ $endpoint.backend }}",
-          "disable_host_sanitize": "{{ $endpoint.disable_host_sanitize }}",
+          "url_pattern": "{{ $val.backend }}",
+          "method": "{{ $val.method }}",
+          "encoding": "{{ $val.output_encoding }}",
+          "disable_host_sanitize": "{{ $val.disable_host_sanitize }}",
           "extra_config": {
             {{ include "kubernetes_exclusion.tmpl" }}
           }
         }
       ]
     }
-    {{ end }}
+     {{ end }}
   ]
 }

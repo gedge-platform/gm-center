@@ -1,0 +1,39 @@
+{
+    "kubernetes_group": [
+        {
+            "endpoint": "/gmcapi/v1/{resource_name}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "backend": "/api/v1/{resource_name}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/{resource_name}",
+            "method": "POST",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "backend": "/api/v1/{resource_name}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/{resource_name}/{name}",
+            "method": "DELETE",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "backend": "/api/v1/namespaces/{namespace}/{resource_name}/{name}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/{resource_name}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "backend": "/api/v1/namespaces/{namespace}/{resource_name}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/{resource_name}/{name}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "backend": "/api/v1/namespaces/{namespace}/{resource_name}/{name}"
+        }
+    ]
+}

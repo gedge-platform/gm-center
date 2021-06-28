@@ -6,7 +6,7 @@
     "extra_config": {
       "github_com/devopsfaith/krakend-cors": {
         "allow_origins": [ "*" ],
-        "allow_methods": [ "POST", "GET", "DELETE" ],
+        "allow_methods": [ "POST", "GET", "DELETE", "OPTION" ],
         "allow_headers": [
           "Origin",
           "Authorization",

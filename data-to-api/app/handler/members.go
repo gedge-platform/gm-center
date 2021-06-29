@@ -36,11 +36,11 @@ func GetMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	id := vars["id"]
-	project := getMemberOr404(db, id, w, r)
-	if project == nil {
+	member := getMemberOr404(db, id, w, r)
+	if member == nil {
 		return
 	}
-	respondJSON(w, http.StatusOK, project)
+	respondJSON(w, http.StatusOK, member)
 }
 
 func UpdateMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
@@ -59,7 +59,7 @@ func UpdateMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	if err := db.Save(&project).Error; err != nil {
+	if err := db.Save(&member).Error; err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -113,7 +113,7 @@ func DisabledMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, member)
 }
 
-// getMemberOr404 gets a project instance if exists, or respond the 404 error otherwise
+// getMemberOr404 gets a member instance if exists, or respond the 404 error otherwise
 func getMemberOr404(db *gorm.DB, title string, w http.ResponseWriter, r *http.Request) *model.Member {
 	member := model.Member{}
 	if err := db.First(&member, model.Member{Id: id}).Error; err != nil {

@@ -58,7 +58,7 @@ go build
 * `PUT` : Update a member
 * `DELETE` : Delete a member
 
-#### /projects/:title/enabled
+#### /members/:id/enabled
 * `PUT` : Enabled a member
 * `DELETE` : Disabled a member 
 

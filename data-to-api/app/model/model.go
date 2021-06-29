@@ -15,7 +15,7 @@ type Member struct {
 	Email 				string 			`json:"email"`
 	Contact 			string 			`json:"contact"`
 	Description 		string 			`json:"description"`
-	Enabled 			bool 			`json:"enabled"`
+	enabled 			bool 			`json:"enabled"`
 	Created_at 			*time.Time 		`json:"created_at"`
 	Logined_at 			*time.Time 		`json:"logined_at"`
 	RoleName 			string 			`json:"roleName"`
@@ -26,11 +26,11 @@ type Member struct {
   }
 
 func (m *Member) Enabled() {
-	m.Enabled = true
+	m.enabled = true
 }
 
 func (m *Member) Disabled() {
-	m.Enabled = false
+	m.enabled = false
 }
 
 

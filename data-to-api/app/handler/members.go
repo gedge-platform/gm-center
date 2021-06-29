@@ -114,7 +114,7 @@ func DisabledMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 // getMemberOr404 gets a member instance if exists, or respond the 404 error otherwise
-func getMemberOr404(db *gorm.DB, title string, w http.ResponseWriter, r *http.Request) *model.Member {
+func getMemberOr404(db *gorm.DB, id string, w http.ResponseWriter, r *http.Request) *model.Member {
 	member := model.Member{}
 	if err := db.First(&member, model.Member{Id: id}).Error; err != nil {
 		respondError(w, http.StatusNotFound, err.Error())

@@ -33,7 +33,7 @@ func (a *App) Initialize(config *config.Config) {
 		log.Fatal("Could not connect database")
 	}
 
-	// a.DB = model.DBMigrate(db)
+	a.DB = model.DBMigrate(db)
 	a.Router = mux.NewRouter()
 	a.setRouters()
 }
@@ -47,7 +47,7 @@ func (a *App) setRouters() {
 	a.Get("/members/{id}", a.handleRequest(handler.GetMember))
 	a.Put("/members/{id}", a.handleRequest(handler.UpdateMember))
 	a.Delete("/members/{id}", a.handleRequest(handler.DeleteMember))
-	a.Put("/members/{id}/enabled", a.handleRequest(handler.EnalbedMember))
+	a.Put("/members/{id}/enabled", a.handleRequest(handler.EnabledMember))
 	a.Delete("/members/{id}/enabled", a.handleRequest(handler.DisabledMember))
 
 }

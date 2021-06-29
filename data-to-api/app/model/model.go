@@ -8,21 +8,26 @@ import (
 )
 
 type Member struct {
-	gorm.Model
-	Num 				int 			`gorm:"primaryKey" json:"num"`
-	Id 					string 			`json:"id"`
-	Name 				string 			`json:"name"`
-	Email 				string 			`json:"email"`
-	Contact 			string 			`json:"contact"`
-	Description 		string 			`json:"description"`
-	enabled 			bool 			`json:"enabled"`
-	Created_at 			*time.Time 		`json:"created_at"`
-	Logined_at 			*time.Time 		`json:"logined_at"`
-	RoleName 			string 			`json:"roleName"`
+	// gorm.Model
+	Num 				int 			`gorm:"column:memberNum" json:"num"`
+	Id 					string 			`gorm:"column:memberId" json:"id"`
+	Name 				string 			`gorm:"column:memberName" json:"name"`
+	Email 				string 			`gorm:"column:memberEmail" json:"email"`
+	Contact 			string 			`gorm:"column:memberContact" json:"contact"`
+	Description 		string 			`gorm:"column:memberDescription" json:"description"`
+	enabled 			bool 			`gorm:"column:enabled" json:"enabled"`
+	Created_at 			*time.Time 		`gorm:"column:Created_at" json:"created_at"`
+	Logined_at 			*time.Time 		`gorm:"column:Logined_at" json:"logined_at"`
+	RoleName 			string 			`gorm:"column:roleName" json:"roleName"`
 	
 	// text    string `gorm:"unique" json:"text"`
 	// text bool   `json:"text"`
 	// text    []text `gorm:"ForeignKey:textID" json:"text"`
+  }
+
+// Set Member table name to be `MEMBER_INFO`
+func (Member) TableName() string {
+	return "MEMBER_INFO"
   }
 
 func (m *Member) Enabled() {
@@ -35,8 +40,8 @@ func (m *Member) Disabled() {
 
 
 // DBMigrate will create and migrate the tables, and then make the some relationships if necessary
-// func DBMigrate(db *gorm.DB) *gorm.DB {
-// 	db.AutoMigrate(&Project{}, &Task{})
-// 	db.Model(&Task{}).AddForeignKey("project_id", "projects(id)", "CASCADE", "CASCADE")
-// 	return db
-// }
+func DBMigrate(db *gorm.DB) *gorm.DB {
+	db.AutoMigrate(&Member{})
+	// db.Model(&Task{}).AddForeignKey("project_id", "projects(id)", "CASCADE", "CASCADE")
+	return db
+}

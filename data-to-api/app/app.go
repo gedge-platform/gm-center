@@ -7,9 +7,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	"github.com/mingrammer/go-todo-rest-api-example/app/handler"
-	"github.com/mingrammer/go-todo-rest-api-example/app/model"
-	"github.com/mingrammer/go-todo-rest-api-example/config"
+	"github.com/gedge-platform/gm-center/develop/data-to-api/app/handler"
+	"github.com/gedge-platform/gm-center/develop/data-to-api/app/model"
+	"github.com/gedge-platform/gm-center/develop/data-to-api/config"
 )
 
 // App has router and db instances
@@ -49,6 +49,7 @@ func (a *App) setRouters() {
 	a.Delete("/members/{id}", a.handleRequest(handler.DeleteMember))
 	a.Put("/members/{id}/enabled", a.handleRequest(handler.EnalbedMember))
 	a.Delete("/members/{id}/enabled", a.handleRequest(handler.DisabledMember))
+
 }
 
 // Get wraps the router for GET method

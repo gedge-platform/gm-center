@@ -18,10 +18,10 @@ func GetConfig() *Config {
 	return &Config{
 		DB: &DBConfig{
 			Dialect:  "mysql",
-			Host:     "192.168.150.102",
-			Port:     12003,
+			Host:     "127.0.0.1",
+			Port:     3306,
 			Username: "username",
-			Password: "password",
+			Password: "userpass",
 			Name:     "gedge",
 			Charset:  "utf8",
 		},

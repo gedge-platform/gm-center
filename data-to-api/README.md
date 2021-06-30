@@ -76,16 +76,32 @@ go build
 
 
 ### In Progress
-- [x] MEMBER_INFO
-  - [x] GetAllMembers(GET, "/members")
-  - [x] CreateMember(POST, "/members")
-  - [x] GetMember(GET, "/members/{id}")
-  - [ ] UpdateMember(PUT, "/members/{id}")
-  - [x] DeleteMember(DELETE, "/members/{id}")
-  - [ ] EnabledMember(PUT, "/members/{id}")
-  - [ ] DisabledMember(DELETE, "/members/{id}")
-
+- [x] CLUSTER_INFO
 
 ### Done ✓
 - [x] First Commit
+- [x] MEMBER_INFO
+  - [x] GetAllMembers(GET, "/members")
+  - [x] CreateMember(POST, "/members")
+```
+{
+    "memberId": "memberId",
+    "memberName": "memberName",
+    "memberEmail": "member@gedge.com",
+    "memberPassword": "memberPassword"
+}
+```
+  - [x] GetMember(GET, "/members/{id}")
+  - [x] UpdateMember(PUT, "/members/{id}")
+```
+{
+    "memberId": "memberId",
+    "memberName": "memberName",
+    "memberEmail": "member@gedge.com",
+    "memberPassword": "memberPassword"
+}
+```
+  - [x] DeleteMember(DELETE, "/members/{id}")
+  - [x] EnabledMember(PUT, "/members/{id}/enabled")
+  - [x] DisabledMember(DELETE, "/members/{id}/enabled")
 

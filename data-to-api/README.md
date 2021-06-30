@@ -62,8 +62,9 @@ go build
 * `PUT` : Enabled a member
 * `DELETE` : Disabled a member 
 
-## Todo
+---
 
+### To do ✓
 - [x] MEMBER_INFO
 - [ ] CLUSTER_INFO
 - [ ] APPSTORE_INFO
@@ -72,3 +73,19 @@ go build
 - [ ] ROLE_INFO
 - [ ] WORKSPACE_INFO
 - [ ] APP_DETAIL
+
+
+### In Progress
+- [x] MEMBER_INFO
+  - [x] GetAllMembers(GET, "/members")
+  - [x] CreateMember(POST, "/members")
+  - [x] GetMember(GET, "/members/{id}")
+  - [ ] UpdateMember(PUT, "/members/{id}")
+  - [x] DeleteMember(DELETE, "/members/{id}")
+  - [ ] EnabledMember(PUT, "/members/{id}")
+  - [ ] DisabledMember(DELETE, "/members/{id}")
+
+
+### Done ✓
+- [x] First Commit
+

@@ -13,6 +13,7 @@ func respondJSON(w http.ResponseWriter, status int, payload interface{}) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write([]byte(response))

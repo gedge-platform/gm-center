@@ -16,7 +16,7 @@ func GetAllMembers(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
-	member := model.Member{}
+	member := model.MemberWithPassword{}
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&member); err != nil {

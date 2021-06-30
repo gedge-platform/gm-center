@@ -1,0 +1,7 @@
+"github.com/devopsfaith/krakend-lua/router": {
+    "pre": "--custom_error('from endpoint router pre', 404)"
+},
+"github.com/devopsfaith/krakend-lua/proxy": {
+    "pre": "--custom_error('endpoint proxy pre', 404)",
+    "post": "custom_error('endpoint proxy post', 404)"
+}

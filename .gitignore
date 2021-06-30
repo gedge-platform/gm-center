@@ -1,4 +1,3 @@
-node_modules
-.idea
-.history
-package-lock.json
+.env
+database/.env
+database/mariadb_data

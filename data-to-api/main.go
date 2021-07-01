@@ -1,7 +1,7 @@
 package main
 
 import (
-  "fmt"
+  	"log"
   
 	"github.com/gedge-platform/gm-center/develop/data-to-api/app"
 	"github.com/gedge-platform/gm-center/develop/data-to-api/config"
@@ -12,6 +12,7 @@ func main() {
 
 	app := &app.App{}
 	app.Initialize(config)
-	fmt.Println("Server started on: http://localhost:8000")
+    log.Println("Starting API server at http://127.0.0.1:8000/")
+    log.Println("Quit the server with CONTROL-C.")
 	app.Run(":8000")
 }

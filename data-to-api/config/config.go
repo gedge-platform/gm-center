@@ -23,7 +23,7 @@ func GetConfig() *Config {
 			Username: "username",
 			Password: "userpass",
 			Name:     "gedge",
-			Charset:  "utf8",
+			Charset:  "utf8"
 		},
 	}
 }

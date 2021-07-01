@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	// "fmt"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -53,6 +54,7 @@ func UpdateMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
+
 	if err := decoder.Decode(&member); err != nil {
 		respondError(w, http.StatusBadRequest, err.Error())
 		return
@@ -89,7 +91,7 @@ func EnabledMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	if member == nil {
 		return
 	}
-	member.Enabled()
+	member.Enable()
 	if err := db.Save(&member).Error; err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -105,7 +107,7 @@ func DisabledMember(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	if member == nil {
 		return
 	}
-	member.Disabled()
+	member.Disable()
 	if err := db.Save(&member).Error; err != nil {
 		respondError(w, http.StatusInternalServerError, err.Error())
 		return

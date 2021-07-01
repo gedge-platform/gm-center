@@ -1,8 +1,8 @@
 package app
 
 import (
-	"fmt"
 	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -31,7 +31,9 @@ func (a *App) Initialize(config *config.Config) {
 	db, err := gorm.Open(config.DB.Dialect, dbURI)
 	if err != nil {
 		log.Fatal("Could not connect database")
+		// panic(err.Error())
 	}
+	log.Println("DB Connection was successful!!")
 
 	a.DB = model.DBMigrate(db)
 	a.Router = mux.NewRouter()
@@ -49,6 +51,13 @@ func (a *App) setRouters() {
 	a.Delete("/members/{id}", a.handleRequest(handler.DeleteMember))
 	a.Put("/members/{id}/enabled", a.handleRequest(handler.EnabledMember))
 	a.Delete("/members/{id}/enabled", a.handleRequest(handler.DisabledMember))
+
+	// Routing for handling the members
+	a.Get("/clusters", a.handleRequest(handler.GetAllClusters))
+	a.Post("/clusters", a.handleRequest(handler.CreateCluster))
+	a.Get("/clusters/{name}", a.handleRequest(handler.GetCluster))
+	a.Put("/clusters/{name}", a.handleRequest(handler.UpdateCluster))
+	a.Delete("/clusters/{name}", a.handleRequest(handler.DeleteCluster))
 
 }
 

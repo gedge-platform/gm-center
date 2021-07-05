@@ -1,13 +1,13 @@
-# Gedge Database to Rest API
-A RESTful API for GEdge Database with Go
+# GM-Center Database API Server
+A RESTful API for GM-Center Database with Go
 
 ## Installation & Run
 ```bash
 # Download this project
-go get github.com/gedge-platform/gm-center/develop/data-to-api
+go get github.com/gedge-platform/gm-center/main/gmc_database_api_server
 ```
 
-Before running API server, you should set the database config with yours or set the your database config with my values on [config.go](github.com/gedge-platform/gm-center/develop/data-to-api/blob/master/config/config.go)
+Before running API server, you should set the database config with yours or set the your database config with my values on [config.go](github.com/gedge-platform/gm-center/main/gmc_database_api_server/blob/main/config/config.go)
 ```go
 func GetConfig() *Config {
 	return &Config{
@@ -24,9 +24,9 @@ func GetConfig() *Config {
 
 ```bash
 # Build and Run
-cd data-to-api
+cd gmc_database_api_server
 go build
-./data-to-api
+./gmc_database_api_server
 
 # API Endpoint : http://127.0.0.1:8000
 ```
@@ -38,6 +38,7 @@ go build
 │   ├── handler          // Our API core handlers
 │   │   ├── common.go    // Common response functions
 │   │   ├── members.go  // APIs for Member model
+│   │   ├── clusters.go  // APIs for clusters model
 │   └── model
 │       └── model.go     // Models for our application
 ├── config
@@ -62,11 +63,20 @@ go build
 * `PUT` : Enabled a member
 * `DELETE` : Disabled a member 
 
+#### /clusters
+* `GET` : Get all clusters
+* `POST` : Create a new clusters
+
+#### /clusters/:name
+* `GET` : Get a clusters
+* `PUT` : Update a clusters
+* `DELETE` : Delete a clusters
+
 ---
 
 ### To do ✓
 - [x] MEMBER_INFO
-- [ ] CLUSTER_INFO
+- [x] CLUSTER_INFO
 - [ ] APPSTORE_INFO
 - [ ] PERMISSION_INFO
 - [ ] PROJECT_INFO
@@ -76,7 +86,7 @@ go build
 
 
 ### In Progress
-- [x] CLUSTER_INFO
+- [x] WORKSPACE_INFO
 
 ### Done ✓
 - [x] First Commit
@@ -102,6 +112,31 @@ go build
 }
 ```
   - [x] DeleteMember(DELETE, "/members/{id}")
-  - [x] EnabledMember(PUT, "/members/{id}/enabled")
-  - [x] DisabledMember(DELETE, "/members/{id}/enabled")
+
+- [x] CLUSTER_INFO
+  - [x] GetAllClusters(GET, "/clusters")
+  - [x] CreateCluster(POST, "/clusters")
+```
+{
+	"ipAddr": "127.0.0.1",
+	"clusterName": "value",
+	"clusterRole": "value",
+	"clusterType": "value",
+	"clusterEndpoint": "10.10.10.10",
+	"clusterCreator": "value",
+}
+```
+  - [x] GetCluster(GET, "/clusters/{name}")
+  - [x] UpdateCluster(PUT, "/clusters/{name}")
+```
+{
+	"ipAddr": "127.0.0.1",
+	"clusterName": "value",
+	"clusterRole": "value",
+	"clusterType": "value",
+	"clusterEndpoint": "10.10.10.10",
+	"clusterCreator": "value",
+}
+```
+  - [x] DeleteCluster(DELETE, "/clusters/{name}")
 

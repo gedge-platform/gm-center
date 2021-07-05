@@ -19,7 +19,7 @@
         {
           "url_pattern": "{{ $val.backend }}",
           "method": "{{ $val.method }}",
-          "encoding": "{{ $val.output_encoding }}",
+	  "encoding": "{{ $val.output_encoding }}",
           "disable_host_sanitize": "{{ $val.disable_host_sanitize }}",
           "extra_config": {
             {{ include "kubernetes_exclusion.tmpl" }}
@@ -46,6 +46,24 @@
         }
       ]
     }
-    {{ end }}
+    {{ end  }},
+     {{ range $idx, $val := .api_endpoint.custom_group }}
+       {{if $idx}},{{end}}
+     {
+       "endpoint": "{{ $val.endpoint }}",
+       "method": "{{ $val.method }}",
+       "headers_to_pass": [ "Authorization" ],
+       "backend": [
+         {
+           "url_pattern": "{{ $val.backend }}",
+           "method": "{{ $val.method }}",
+           "disable_host_sanitize": "{{ $val.disable_host_sanitize }}",
+           "extra_config": {
+             {{ include "custom_exclusion.tmpl" }}
+           }
+         }
+       ]
+     }
+     {{ end }}
   ]
 }

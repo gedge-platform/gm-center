@@ -469,8 +469,6 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/services/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/endpoints",
             "method": "GET",
@@ -534,8 +532,6 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/endpoints/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/configmaps",
             "method": "GET",
@@ -599,8 +595,6 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/configmaps/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/secrets",
             "method": "GET",
@@ -664,8 +658,6 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/secrets/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/persistentvolumeclaims",
             "method": "GET",
@@ -729,8 +721,6 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/persistentvolumeclaims/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/persistentvolumes",
             "method": "GET",
@@ -794,8 +784,6 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/persistentvolumes/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/serviceaccounts",
             "method": "GET",
@@ -852,8 +840,6 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/serviceaccounts/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/resourcequotas",
             "method": "GET",
@@ -910,8 +896,6 @@
             "disable_host_sanitize": true,
             "backend": "/api/v1/namespaces/{namespace}/resourcequotas/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/clusterroles",
             "method": "GET",
@@ -961,8 +945,6 @@
             "disable_host_sanitize": true,
             "backend": " /apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/clusterrolebindings",
             "method": "GET",
@@ -1012,8 +994,6 @@
             "disable_host_sanitize": true,
             "backend": " /apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/roles",
             "method": "GET",
@@ -1063,8 +1043,6 @@
             "disable_host_sanitize": true,
             "backend": " /apis/rbac.authorization.k8s.io/v1/roles/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/rolebindings",
             "method": "GET",
@@ -1114,8 +1092,6 @@
             "disable_host_sanitize": true,
             "backend": " /apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/customresourcedefinitions",
             "method": "GET",
@@ -1165,8 +1141,6 @@
             "disable_host_sanitize": true,
             "backend": " /apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
         },
-
-
         {
             "endpoint": "/gmcapi/v1/events",
             "method": "GET",

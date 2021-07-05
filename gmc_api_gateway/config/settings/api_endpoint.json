@@ -1199,6 +1199,14 @@
             "disable_host_sanitize": true,
             "host": "http://192.168.150.115:31298",
             "backend": "/api/v1/query?query=(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)/node_memory_MemTotal_bytes"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/test2/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=round(100-avg(irate(node_cpu_seconds_total{mode='idle'}[5m])*100)by(instance),0.1)&start={start_time}&end={current_time}&step={step}"
         }
     ],
     "custom_group": [

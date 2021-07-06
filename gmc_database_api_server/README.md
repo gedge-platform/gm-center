@@ -39,6 +39,9 @@ go build
 │   │   ├── common.go    // Common response functions
 │   │   ├── members.go  // APIs for Member model
 │   │   ├── clusters.go  // APIs for clusters model
+│   │   ├── projects.go  // APIs for clusters model
+│   │   ├── workspaces.go  // APIs for clusters model
+│   │   ├── apps.go  // APIs for clusters model
 │   └── model
 │       └── model.go     // Models for our application
 ├── config
@@ -50,43 +53,40 @@ go build
 
 ## API
 
-#### /members
-* `GET` : Get all members
-* `POST` : Create a new member
+#### Lists
+- members
+- clusters
+- projects
+- workspaces
+- apps
 
-#### /members/:id
-* `GET` : Get a member
-* `PUT` : Update a member
-* `DELETE` : Delete a member
+#### /{lists_name}
+* `GET` : Get all {lists_name}
+* `POST` : Create a new {lists_name}
+
+#### /{lists_name}/:{id or name}
+* `GET` : Get a {lists_name}
+* `PUT` : Update a {lists_name}
+* `DELETE` : Delete a {lists_name}
 
 #### /members/:id/enabled
-* `PUT` : Enabled a member
-* `DELETE` : Disabled a member 
+* `PUT` : Enabled a members
+* `DELETE` : Disabled a members
 
-#### /clusters
-* `GET` : Get all clusters
-* `POST` : Create a new clusters
-
-#### /clusters/:name
-* `GET` : Get a clusters
-* `PUT` : Update a clusters
-* `DELETE` : Delete a clusters
 
 ---
 
 ### To do ✓
 - [x] MEMBER_INFO
 - [x] CLUSTER_INFO
-- [ ] APPSTORE_INFO
-- [ ] PERMISSION_INFO
-- [ ] PROJECT_INFO
-- [ ] ROLE_INFO
-- [ ] WORKSPACE_INFO
+- [X] PROJECT_INFO
+- [x] WORKSPACE_INFO
+- [x] APPSTORE_INFO
 - [ ] APP_DETAIL
 
 
 ### In Progress
-- [x] WORKSPACE_INFO
+- [x] APP_DETAIL
 
 ### Done ✓
 - [x] First Commit
@@ -139,4 +139,85 @@ go build
 }
 ```
   - [x] DeleteCluster(DELETE, "/clusters/{name}")
+
+
+- [x] WORKSPACE_INFO
+  - [x] GetAllWorkspaces(GET, "/workspaces")
+  - [x] CreateWorkspace(POST, "/workspaces")
+```
+{
+	"clusterName": "value",
+	"workspaceName": "value",
+	"workspaceDescription": "value",
+	"selectCluster": "1,3",
+	"workspaceOwner": "value",
+	"workspaceCreator": "value"
+}
+```
+  - [x] GetWorkspace(GET, "/workspaces/{name}")
+  - [x] UpdateWorkspace(PUT, "/workspaces/{name}")
+```
+{
+	"clusterName": "value",
+	"workspaceName": "value",
+	"workspaceDescription": "value",
+	"selectCluster": "1,3",
+	"workspaceOwner": "value",
+	"workspaceCreator": "value"
+}
+```
+  - [x] DeleteWorkspace(DELETE, "/workspaces/{name}")
+
+
+- [x] PROJECT_INFO
+  - [x] GetAllProjects(GET, "/projects")
+  - [x] CreateProject(POST, "/projects")
+```
+{
+	"projectName": "value",
+	"projectPostfix": "value",
+	"projectDescription": "value",
+	"projectType": "value",
+	"projectOwner": "value",
+	"projectCreator": "value",
+	"workspaceName": "value"
+}
+```
+  - [x] GetProject(GET, "/projects/{name}")
+  - [x] UpdateProject(PUT, "/projects/{name}")
+```
+{
+	"projectName": "value",
+	"projectPostfix": "value",
+	"projectDescription": "value",
+	"projectType": "value",
+	"projectOwner": "value",
+	"projectCreator": "value",
+	"workspaceName": "value"
+}
+```
+  - [x] DeleteProject(DELETE, "/projects/{name}")
+
+- [x] APPSTORE_INFO
+  - [x] GetAllApps(GET, "/apps")
+  - [x] CreateApp(POST, "/apps")
+```
+{
+	"appName": "value",
+	"appDescription": "value",
+	"appCategory": "value",
+	"appInstalled": 0
+}
+```
+  - [x] GetApp(GET, "/apps/{name}")
+  - [x] UpdateApp(PUT, "/apps/{name}")
+```
+{
+	"appName": "value",
+	"appDescription": "value",
+	"appCategory": "value",
+	"appInstalled": 0
+}
+```
+  - [x] DeleteApp(DELETE, "/apps/{name}")
 

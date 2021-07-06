@@ -3,8 +3,8 @@ package main
 import (
   	"log"
   
-	"github.com/gedge-platform/gm-center/develop/data-to-api/app"
-	"github.com/gedge-platform/gm-center/develop/data-to-api/config"
+	"github.com/gedge-platform/gm-center/develop/gmc_database_api_server/app"
+	"github.com/gedge-platform/gm-center/develop/gmc_database_api_server/config"
 )
 
 func main() {

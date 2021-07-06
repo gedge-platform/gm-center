@@ -1,12 +1,13 @@
 version: "3"
 services:
-  kraken_designer:
-    image: devopsfaith/krakendesigner:latest
-    ports:
-      - "8787:80"
-  krakend_ce:
+  # kraken_designer:
+  #   image: devopsfaith/krakendesigner:latest
+  #   ports:
+  #     - "8787:80"
+  gmc_api_gateway:
     image: devopsfaith/krakend:config-watcher
-    container_name: gm-center-api
+    container_name: gmc_api_gateway
+    restart: unless-stopped
     volumes:
       - ./config:/etc/krakend
     environment:

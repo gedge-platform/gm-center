@@ -7,9 +7,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	"github.com/gedge-platform/gm-center/develop/data-to-api/app/handler"
-	"github.com/gedge-platform/gm-center/develop/data-to-api/app/model"
-	"github.com/gedge-platform/gm-center/develop/data-to-api/config"
+	"github.com/gedge-platform/gm-center/develop/gmc_database_api_server/app/handler"
+	"github.com/gedge-platform/gm-center/develop/gmc_database_api_server/app/model"
+	"github.com/gedge-platform/gm-center/develop/gmc_database_api_server/config"
 )
 
 // App has router and db instances
@@ -31,7 +31,7 @@ func (a *App) Initialize(config *config.Config) {
 	db, err := gorm.Open(config.DB.Dialect, dbURI)
 	if err != nil {
 		log.Fatal("Could not connect database")
-		// panic(err.Error())
+		panic(err.Error())
 	}
 	log.Println("DB Connection was successful!!")
 
@@ -58,6 +58,27 @@ func (a *App) setRouters() {
 	a.Get("/clusters/{name}", a.handleRequest(handler.GetCluster))
 	a.Put("/clusters/{name}", a.handleRequest(handler.UpdateCluster))
 	a.Delete("/clusters/{name}", a.handleRequest(handler.DeleteCluster))
+
+	// Routing for handling the workspaces
+	a.Get("/workspaces", a.handleRequest(handler.GetAllWorkspaces))
+	a.Post("/workspaces", a.handleRequest(handler.CreateWorkspace))
+	a.Get("/workspaces/{name}", a.handleRequest(handler.GetWorkspace))
+	a.Put("/workspaces/{name}", a.handleRequest(handler.UpdateWorkspace))
+	a.Delete("/workspaces/{name}", a.handleRequest(handler.DeleteWorkspace))
+
+	// Routing for handling the projects
+	a.Get("/projects", a.handleRequest(handler.GetAllProjects))
+	a.Post("/projects", a.handleRequest(handler.CreateProject))
+	a.Get("/projects/{name}", a.handleRequest(handler.GetProject))
+	a.Put("/projects/{name}", a.handleRequest(handler.UpdateProject))
+	a.Delete("/projects/{name}", a.handleRequest(handler.DeleteProject))
+
+	// Routing for handling the projects
+	a.Get("/apps", a.handleRequest(handler.GetAllApps))
+	a.Post("/apps", a.handleRequest(handler.CreateApp))
+	a.Get("/apps/{name}", a.handleRequest(handler.GetApp))
+	a.Put("/apps/{name}", a.handleRequest(handler.UpdateApp))
+	a.Delete("/apps/{name}", a.handleRequest(handler.DeleteApp))
 
 }
 

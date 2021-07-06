@@ -1201,12 +1201,68 @@
             "backend": "/api/v1/query?query=(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)/node_memory_MemTotal_bytes"
         },
         {
-            "endpoint": "/gmcapi/v1/monitoring/test2/{start_time}/{current_time}/{step}",
+            "endpoint": "/gmcapi/v1/monitoring/cluster_cpu_usage/{start_time}/{current_time}/{step}",
             "method": "GET",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
             "host": "http://192.168.150.115:31298",
-            "backend": "/api/v1/query_range?query=round(100-avg(irate(node_cpu_seconds_total{mode='idle'}[5m])*100)by(instance),0.1)&start={start_time}&end={current_time}&step={step}"
+            "backend": "/api/v1/query_range?query=sum(rate(container_cpu_usage_seconds_total{id='/'}[5m]))by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_cpu_core_total/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(machine_cpu_cores)by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_memory_usage/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(node_memory_MemTotal_bytes-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_memory_total/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(node_memory_MemTotal_bytes)by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_disk_usage/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs'})by(cluster))&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_disk_capacity/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_pod_running/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=count(count(container_spec_memory_reservation_limit_bytes{pod!=''})by(cluster,pod))by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_pod_quota/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(max(kube_node_status_capacity{resource='pods'})by(node,cluster)unless%20on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)&start={start_time}&end={current_time}&step={step}"
         }
     ],
     "custom_group": [

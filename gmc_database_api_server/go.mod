@@ -1,4 +1,4 @@
-module github.com/gedge-platform/gm-center/develop/data-to-api
+module github.com/gedge-platform/gm-center/develop/gmc_database_api_server
 
 go 1.16
 

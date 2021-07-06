@@ -20,10 +20,10 @@ func GetConfig() *Config {
 			Dialect:  "mysql",
 			Host:     "127.0.0.1",
 			Port:     3306,
-			Username: "username",
-			Password: "userpass",
-			Name:     "gedge",
-			Charset:  "utf8"
+			Username: "root",
+			Password: "username",
+			Name:     "userpass",
+			Charset:  "utf8",
 		},
 	}
 }

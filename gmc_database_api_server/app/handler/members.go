@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	"github.com/gedge-platform/gm-center/develop/data-to-api/app/model"
+	"github.com/gedge-platform/gm-center/develop/gmc_database_api_server/app/model"
 )
 
 func GetAllMembers(db *gorm.DB, w http.ResponseWriter, r *http.Request) {

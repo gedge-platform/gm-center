@@ -1,18 +1,41 @@
 package main
 
 import (
-  	"log"
+	"net/http"
   
-	"github.com/gedge-platform/gm-center/develop/gmc_database_api_server/app"
-	"github.com/gedge-platform/gm-center/develop/gmc_database_api_server/config"
+	"gmc_api_gateway/config"
+	"gmc_api_gateway/app/db"
+	"gmc_api_gateway/app/routes"
+
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 func main() {
+	config.Init()
 	config := config.GetConfig()
 
-	app := &app.App{}
+	app := &db.DB{}
 	app.Initialize(config)
-    log.Println("Starting API server at http://127.0.0.1:8000/")
-    log.Println("Quit the server with CONTROL-C.")
-	app.Run(":8000")
+
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	// e.Use(middleware.Gzip())
+	// e.Use(middleware.Secure())
+
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{config.COMMON.CorsOrigin},
+		AllowHeaders: []string{"Authorization"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodDelete},
+	}))
+
+	e.GET("/", func(c echo.Context) (err error) {
+		return c.JSON(http.StatusOK, "GEdge Platform :: GM-Center API Server")
+	})
+
+	routes.GEdgeRoute(e)
+
+	port := config.COMMON.Port
+	e.Logger.Fatal(e.Start(port))
 }

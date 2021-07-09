@@ -64,6 +64,26 @@
          }
        ]
      }
-     {{ end }}
+    {{ end }},
+    {{ range $idx, $val := .api_endpoint.database_group }}
+      {{if $idx}},{{end}}
+    {
+      "endpoint": "{{ $val.endpoint }}",
+      "method": "{{ $val.method }}",
+      "headers_to_pass": [ "Authorization" ],
+      "disable_host_sanitize": "{{ $val.disable_host_sanitize }}",
+      "backend": [
+        {
+          {{if $val.host }}
+          "host": "{{ $val.host }}",
+          {{end}}
+          "url_pattern": "{{ $val.backend }}",
+          "extra_config": {
+            {{ include "custom_exclusion.tmpl" }}
+          }
+        }
+      ]
+    }
+    {{ end }}
   ] 
 }

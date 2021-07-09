@@ -908,7 +908,7 @@
             "method": "GET",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/clusterroles",
@@ -929,21 +929,21 @@
             "method": "DELETE",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/clusterroles/{name}",
             "method": "PUT",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/clusterroles/{name}",
             "method": "PATCH",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/clusterroles/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/clusterrolebindings",
@@ -957,7 +957,7 @@
             "method": "GET",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/clusterrolebindings",
@@ -978,21 +978,21 @@
             "method": "DELETE",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/clusterrolebindings/{name}",
             "method": "PUT",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/clusterrolebindings/{name}",
             "method": "PATCH",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/roles",
@@ -1006,7 +1006,7 @@
             "method": "GET",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/roles/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/roles/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/roles",
@@ -1027,21 +1027,21 @@
             "method": "DELETE",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/roles/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/roles/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/roles/{name}",
             "method": "PUT",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/roles/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/roles/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/roles/{name}",
             "method": "PATCH",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/roles/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/roles/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/rolebindings",
@@ -1055,7 +1055,7 @@
             "method": "GET",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/rolebindings",
@@ -1076,21 +1076,21 @@
             "method": "DELETE",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/rolebindings/{name}",
             "method": "PUT",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/rolebindings/{name}",
             "method": "PATCH",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
+            "backend": "/apis/rbac.authorization.k8s.io/v1/rolebindings/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/customresourcedefinitions",
@@ -1104,7 +1104,7 @@
             "method": "GET",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
+            "backend": "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/customresourcedefinitions",
@@ -1125,21 +1125,21 @@
             "method": "DELETE",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
+            "backend": "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/customresourcedefinitions/{name}",
             "method": "PUT",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
+            "backend": "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/customresourcedefinitions/{name}",
             "method": "PATCH",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
+            "backend": "/apis/apiextensions.k8s.io/v1/customresourcedefinitions/{name}"
         },
         {
             "endpoint": "/gmcapi/v1/events",
@@ -1149,56 +1149,159 @@
             "backend": "/apis/events.k8s.io/v1/events"
         },
         {
-            "endpoint": "/gmcapi/v1/events/{name}",
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/events",
             "method": "GET",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/events.k8s.io/v1/events/{name}"
+            "backend": "/apis/events.k8s.io/v1/namespaces/{namespace}/events"
         },
         {
-            "endpoint": "/gmcapi/v1/events",
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/events/{name}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "backend": "/apis/events.k8s.io/v1/namespaces/{namespace}/events/{name}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/events",
             "method": "POST",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": "/apis/events.k8s.io/v1/events"
+            "backend": "/apis/events.k8s.io/v1/namespaces/{namespace}/events"
         },
         {
-            "endpoint": "/gmcapi/v1/events",
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/events/{name}",
             "method": "DELETE",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": "/apis/events.k8s.io/v1/events"
+            "backend": "/apis/events.k8s.io/v1/namespaces/{namespace}/events/{name}"
         },
         {
-            "endpoint": "/gmcapi/v1/events/{name}",
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/events",
             "method": "DELETE",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/events.k8s.io/v1/events/{name}"
+            "backend": "/apis/events.k8s.io/v1/namespaces/{namespace}/events"
         },
         {
-            "endpoint": "/gmcapi/v1/events/{name}",
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/events/{name}",
             "method": "PUT",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/events.k8s.io/v1/events/{name}"
+            "backend": "/apis/events.k8s.io/v1/namespaces/{namespace}/events/{name}"
         },
         {
-            "endpoint": "/gmcapi/v1/events/{name}",
+            "endpoint": "/gmcapi/v1/namespaces/{namespace}/events/{name}",
             "method": "PATCH",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
-            "backend": " /apis/events.k8s.io/v1/events/{name}"
+            "backend": "/apis/events.k8s.io/v1/namespaces/{namespace}/events/{name}"
         }
     ],
     "monitoring_group": [
         {
-            "endpoint": "/gmcapi/v1/monitoring/test",
+            "endpoint": "/gmcapi/v1/monitoring/clusters",
             "method": "GET",
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
             "host": "http://192.168.150.115:31298",
-            "backend": "/api/v1/query?query=(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)/node_memory_MemTotal_bytes"
+            "backend": "/api/v1/query?query=sum(kube_node_info)by(cluster)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_cpu_usage",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=sum(rate(container_cpu_usage_seconds_total{id='/'}[5m]))by(cluster)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_cpu_total",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=sum(machine_cpu_cores)by(cluster)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_memory_usage",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=sum(node_memory_MemTotal_bytes-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_memory_total",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=sum(node_memory_MemTotal_bytes)by(cluster)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_disk_size_usage",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs'})by(cluster))"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_disk_size_capacity",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})by(cluster)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_pod_running_count",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=count(count(container_spec_memory_reservation_limit_bytes{pod!=''})by(cluster,pod))by(cluster)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_pod_quota",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=sum(max(kube_node_status_capacity{resource='pods'})by(node,cluster)unless%20on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_cpu_util",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=round(100-(avg(irate(node_cpu_seconds_total{mode='idle'}[30s]))by(cluster)*100),0.1)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_memory_util",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=round(sum(node_memory_MemTotal_bytes-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_disk_util",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query?query=round(((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs'})by(cluster))/(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})by(cluster)))*100,0.1)"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_cpu_util/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=round(100-(avg(irate(node_cpu_seconds_total{mode='idle'}[30s]))by(cluster)*100),0.1)&start={start_time}&end={current_time}&step={step}"
         },
         {
             "endpoint": "/gmcapi/v1/monitoring/cluster_cpu_usage/{start_time}/{current_time}/{step}",
@@ -1206,7 +1309,7 @@
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
             "host": "http://192.168.150.115:31298",
-            "backend": "/api/v1/query_range?query=sum(rate(container_cpu_usage_seconds_total{id='/'}[5m]))by(cluster)&start={start_time}&end={current_time}&step={step}"
+            "backend": "/api/v1/query_range?query=round(sum(rate(container_cpu_usage_seconds_total{id='/'}[2m]))by(cluster),0.01)&start={start_time}&end={current_time}&step={step}"
         },
         {
             "endpoint": "/gmcapi/v1/monitoring/cluster_cpu_core_total/{start_time}/{current_time}/{step}",
@@ -1215,6 +1318,14 @@
             "disable_host_sanitize": true,
             "host": "http://192.168.150.115:31298",
             "backend": "/api/v1/query_range?query=sum(machine_cpu_cores)by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_memory_util/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=round(sum(node_memory_MemTotal_bytes-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)&start={start_time}&end={current_time}&step={step}"
         },
         {
             "endpoint": "/gmcapi/v1/monitoring/cluster_memory_usage/{start_time}/{current_time}/{step}",
@@ -1231,6 +1342,14 @@
             "disable_host_sanitize": true,
             "host": "http://192.168.150.115:31298",
             "backend": "/api/v1/query_range?query=sum(node_memory_MemTotal_bytes)by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_disk_util/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=round(((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs'})by(cluster))/(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})by(cluster)))*100,0.1)&start={start_time}&end={current_time}&step={step}"
         },
         {
             "endpoint": "/gmcapi/v1/monitoring/cluster_disk_usage/{start_time}/{current_time}/{step}",
@@ -1263,6 +1382,214 @@
             "disable_host_sanitize": true,
             "host": "http://192.168.150.115:31298",
             "backend": "/api/v1/query_range?query=sum(max(kube_node_status_capacity{resource='pods'})by(node,cluster)unless%20on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/pod_cpu_usage/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=round(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!=''}[5m]))by(namespace, pod),0.001)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/pod_net_bytes_transmitted/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(irate(container_network_transmit_bytes_total{pod!='',job='kubelet'}[5m]))by(namespace,pod)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/pod_net_bytes_received/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(irate(container_network_receive_bytes_total{pod!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)'',job='kubelet'}[5m]))by(namespace, pod)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_cpu_utilisation/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=100-(avg(irate(node_cpu_seconds_total{mode='idle'}[5m]))by(instance)*100)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_cpu_usage/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(rate(container_cpu_usage_seconds_total{id='/'}[5m]))by(node)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_cpu_total/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(machine_cpu_cores)by(node)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_memory_utilisation/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)/node_memory_MemTotal_bytes&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_memory_usage/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=node_memory_MemTotal_bytes-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_memory_total/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(node_memory_MemTotal_bytes)by(instance)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_size_utilisation/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=100-((node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs'} * 100)/node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_size_usage/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'}-(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs'}))&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_size_capacity/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query(node_filesystem_size_bytes{mountpoint='/'',fstype!='rootfs'})&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_pod_utilisation/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(kubelet_running_pods)by(node)/(max(kube_node_status_capacity{resource='pods'})by(node)unless%20on(node)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))*100&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_pod_running_count/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=sum(kubelet_running_pods)by(node)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_pod_quota/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=max(kube_node_status_capacity{resource='pods'})by(node)unless%20on(node)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_inode_utilisation/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=100-(node_filesystem_files_free{mountpoint='/'}/node_filesystem_files{mountpoint='/'}*100)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_inode_total/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=node_filesystem_files{mountpoint='/'}&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_inode_usage/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=node_filesystem_files{mountpoint='/'}-node_filesystem_files_free{mountpoint='/'}&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_read_iops/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=rate(node_disk_reads_completed_total[5m])&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_write_iops/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=rate(node_disk_writes_completed_total[5m])&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_read_throughput/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=irate(node_disk_read_bytes_total[5m])&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_disk_write_throughput/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=irate(node_disk_written_bytes_total[5m])&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_net_bytes_transmitted/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=irate(node_network_transmit_bytes_total{device='ens3'}[5m])&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/node_net_bytes_received/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=irate(node_network_receive_bytes_total{device='ens3'}[5m])&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/apiserver_request_rate/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=round(sum(irate(apiserver_request_total[5m]))by(cluster),0.001)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/scheduler_schedule_attempts/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=rate(scheduler_schedule_attempts_total[5m])&start={start_time}&end={current_time}&step={step}"
         }
     ],
     "custom_group": [
@@ -1272,6 +1599,31 @@
             "output_encoding": "no-op",
             "disable_host_sanitize": true,
             "backend": "/api/v1/nodes/{name}"
+        },
+        {
+            "endpoint": "/femsapi/v1/pods",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "backend": "/api/v1/pods"
+        }
+    ],
+    "database_group": [
+        {
+            "endpoint": "/gmcapi/v1/db/{category}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://db-api.innogrid.cf",
+            "backend": "/{category}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/db/{category}/{name}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://db-api.innogrid.cf",
+            "backend": "/{category}/{name}"
         }
     ]
 }

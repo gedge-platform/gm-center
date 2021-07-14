@@ -9,5 +9,3 @@ type messageFormat struct {
 	Message    string `json:"message"`
 	Error      string `json:"error,omitempty"`
 }
-
-var kubernetes_api="https://g-api.innogrid.cf/gmcapi/v1/"

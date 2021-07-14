@@ -7,26 +7,26 @@ A RESTful API for GM-Center Database with Go
 go get github.com/gedge-platform/gm-center/main/gmc_database_api_server
 ```
 
-Before running API server, you should set the database config with yours or set the your database config with my values on [config.go](github.com/gedge-platform/gm-center/main/gmc_database_api_server/blob/main/config/config.go)
+Before running API server, you should set the .env file with yours or set the your .env with my values on [.env](github.com/gedge-platform/gm-center/blob/main/gmc_database_api_server/config/config.go)
 ```go
-func GetConfig() *Config {
-	return &Config{
-		DB: &DBConfig{
-			Dialect:  "mysql",
-			Username: "username",
-			Password: "userpassword",
-			Name:     "gedge",
-			Charset:  "utf8",
-		},
-	}
-}
+DB_DIALECT=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=password
+DB_NAME=gedge
+DB_CHARSET=utf8
+
+PORT=:8008
+CORS=CORS_ORIGIN
 ```
 
 ```bash
 # Build and Run
 cd gmc_database_api_server
-go build
-./gmc_database_api_server
+go build && ./main
+# or
+go run main.go
 
 # API Endpoint : http://127.0.0.1:8000
 ```
@@ -35,17 +35,27 @@ go build
 ```
 ├── app
 │   ├── app.go
-│   ├── handler          // Our API core handlers
+│   ├── api          // Our API core handlers
 │   │   ├── common.go    // Common response functions
 │   │   ├── members.go  // APIs for Member model
 │   │   ├── clusters.go  // APIs for clusters model
 │   │   ├── projects.go  // APIs for clusters model
 │   │   ├── workspaces.go  // APIs for clusters model
 │   │   ├── apps.go  // APIs for clusters model
+│   │   ├── custom.go
+│   └── db
+│       └── db.go
 │   └── model
-│       └── model.go     // Models for our application
+│       └── apps.go
+│       └── clusters.go
+│       └── members.go
+│       └── projects.go
+│       └── workspaces.go
+│   └── routes
+│       └── routes.go
 ├── config
 │   └── config.go        // Configuration
+└── .env.sample
 └── main.go
 └── go.mod
 └── README.md
@@ -59,6 +69,7 @@ go build
 - projects
 - workspaces
 - apps
+- kubernetes
 
 #### /{lists_name}
 * `GET` : Get all {lists_name}
@@ -68,11 +79,6 @@ go build
 * `GET` : Get a {lists_name}
 * `PUT` : Update a {lists_name}
 * `DELETE` : Delete a {lists_name}
-
-#### /members/:id/enabled
-* `PUT` : Enabled a members
-* `DELETE` : Disabled a members
-
 
 ---
 

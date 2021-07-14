@@ -64,5 +64,9 @@ func GEdgeRoute(e *echo.Echo) {
 	r5.PUT("/:name", api.UpdateWorkspace)
 	r5.DELETE("/:name", api.DeleteWorkspace)
 	
-	e.Any("/api/v1/kubernetes/*", api.Kubernetes)
+	r6 := e.Group("/api/v2")
+	r6.Any("/:cluster_name", api.Kubernetes)
+	r6.Any("/:cluster_name/:namespace_name", api.Kubernetes)
+	r6.Any("/:cluster_name/:namespace_name/:kind_name", api.Kubernetes)
+	r6.Any("/:cluster_name/:namespace_name/:kind_name/*", api.Kubernetes)
 }

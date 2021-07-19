@@ -42,7 +42,7 @@ go run main.go
 │   │   ├── projects.go  // APIs for clusters model
 │   │   ├── workspaces.go  // APIs for clusters model
 │   │   ├── apps.go  // APIs for clusters model
-│   │   ├── custom.go
+│   │   ├── custom.go // APIs for kubernetes model
 │   └── db
 │       └── db.go
 │   └── model
@@ -51,6 +51,7 @@ go run main.go
 │       └── members.go
 │       └── projects.go
 │       └── workspaces.go
+│       └── kubernetes.go
 │   └── routes
 │       └── routes.go
 ├── config
@@ -71,14 +72,45 @@ go run main.go
 - apps
 - kubernetes
 
-#### /{lists_name}
+<br />
+
+### members, clusters, projects, workspaces, apps
+---
+#### /api/v1/{lists_name}
 * `GET` : Get all {lists_name}
 * `POST` : Create a new {lists_name}
 
-#### /{lists_name}/:{id or name}
-* `GET` : Get a {lists_name}
-* `PUT` : Update a {lists_name}
-* `DELETE` : Delete a {lists_name}
+#### /api/v1/{lists_name}/:{id or name}
+* `GET` : Get a {lists_name}/:{id or name}
+* `PUT` : Update a {lists_name}/:{id or name}
+* `DELETE` : Delete a {lists_name}/:{id or name}
+
+
+<br />
+
+### kubernetes
+---
+
+#### /api/v2/:cluster_name/:namespace_name
+* `GET` : Get a {lists_name}/:namespace_name
+* `CREATE` : Create a {lists_name}/:namespace_name
+* `PUT` : Update a {lists_name}/:namespace_name
+* `PATCH` : Patch a {lists_name}/:namespace_name
+* `DELETE` : Delete a {lists_name}/:namespace_name
+
+#### /api/v2/:cluster_name/:namespace_name/:kind_name
+* `GET` : Get a {lists_name}/:namespace_name/:kind_name
+* `CREATE` : Create a {lists_name}/:namespace_name/:kind_name
+* `PUT` : Update a {lists_name}/:namespace_name/:kind_name
+* `PATCH` : Patch a {lists_name}/:namespace_name/:kind_name
+* `DELETE` : Delete a {lists_name}/:namespace_name/:kind_name
+
+#### /api/v2/:cluster_name/:namespace_name/:kind_name/*
+* `GET` : Get a {lists_name}/:namespace_name/:kind_name/*
+* `CREATE` : Create a {lists_name}/:namespace_name/:kind_name/*
+* `PUT` : Update a {lists_name}/:namespace_name/:kind_name/*
+* `PATCH` : Patch a {lists_name}/:namespace_name/:kind_name/*
+* `DELETE` : Delete a {lists_name}/:namespace_name/:kind_name/*
 
 ---
 
@@ -88,6 +120,7 @@ go run main.go
 - [X] PROJECT_INFO
 - [x] WORKSPACE_INFO
 - [x] APPSTORE_INFO
+- [x] KUBERNETES
 - [ ] APP_DETAIL
 
 

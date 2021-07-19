@@ -1296,6 +1296,14 @@
             "backend": "/api/v1/query_range?query=sum(max(kube_node_status_capacity{resource='pods'})by(node,cluster)unless%20on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)&start={start_time}&end={current_time}&step={step}"
         },
         {
+            "endpoint": "/gmcapi/v1/monitoring/cluster_pod_util/{start_time}/{current_time}/{step}",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:31298",
+            "backend": "/api/v1/query_range?query=round((count(count(container_spec_memory_reservation_limit_bytes{pod!=''})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods'})by(node,cluster)unless%20on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
             "endpoint": "/gmcapi/v1/monitoring/pod_cpu_usage/{start_time}/{current_time}/{step}",
             "method": "GET",
             "output_encoding": "no-op",
@@ -1526,8 +1534,15 @@
             "disable_host_sanitize": true,
             "host": "http://192.168.150.115:31298",
             "backend": "/api/v1/query_range?query=sum(scheduler_pending_pods)by(cluster)&start={start_time}&end={current_time}&step={step}"
+        },
+        {
+            "endpoint": "/gmcapi/v1/monitoring/test",
+            "method": "POST",
+            "output_encoding": "no-op",
+            "disable_host_sanitize": true,
+            "host": "http://192.168.150.115:30650",
+            "backend": "/api/v2/query?org=influxdata"
         }
-        
     ],
     "custom_group": [
         {

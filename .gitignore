@@ -1,5 +1,5 @@
 .env
 database/.env
 database/mariadb_data
-gmc_database_api_server/.env
 gmc_api_gateway_test/
+gmc_database_api_server/.env

@@ -1,23 +1,23 @@
 package db
 
 import (
-	"log"
 	"fmt"
+	"log"
+
 	// "net/http"
 
 	"gmc_api_gateway/config"
-	
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 // App has router and db instances
 type DB struct {
-	DB     *gorm.DB
+	DB *gorm.DB
 }
 
 var cdb *gorm.DB
-
 
 // Initialize initializes the app with predefined configuration
 func (a *DB) Initialize(config *config.Config) {

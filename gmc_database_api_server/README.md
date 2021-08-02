@@ -4,7 +4,8 @@ A RESTful API for GM-Center Database with Go
 ## Installation & Run
 ```bash
 # Download this project
-go get github.com/gedge-platform/gm-center/main/gmc_database_api_server
+# (not yet) go get github.com/gedge-platform/gm-center/main/gmc_database_api_server
+git clone https://github.com/gedge-platform/gm-center.git
 ```
 
 Before running API server, you should set the .env file with yours or set the your .env with my values on [.env](github.com/gedge-platform/gm-center/blob/main/gmc_database_api_server/config/config.go)
@@ -122,6 +123,7 @@ go run main.go
 - [x] APPSTORE_INFO
 - [x] KUBERNETES
 - [ ] APP_DETAIL
+- [ ] REFACTORING
 
 
 ### In Progress
@@ -130,8 +132,8 @@ go run main.go
 ### Done ✓
 - [x] First Commit
 - [x] MEMBER_INFO
-  - [x] GetAllMembers(GET, "/members")
-  - [x] CreateMember(POST, "/members")
+  - [x] GetAllMembers(GET, "/api/v2/db/members")
+  - [x] CreateMember(POST, "/api/v2/db/members")
 ```
 {
     "memberId": "memberId",
@@ -140,8 +142,8 @@ go run main.go
     "memberPassword": "memberPassword"
 }
 ```
-  - [x] GetMember(GET, "/members/{id}")
-  - [x] UpdateMember(PUT, "/members/{id}")
+  - [x] GetMember(GET, "/api/v2/db/members/{id}")
+  - [x] UpdateMember(PUT, "/api/v2/db/members/{id}")
 ```
 {
     "memberId": "memberId",
@@ -150,11 +152,11 @@ go run main.go
     "memberPassword": "memberPassword"
 }
 ```
-  - [x] DeleteMember(DELETE, "/members/{id}")
+  - [x] DeleteMember(DELETE, "/api/v2/db/members/{id}")
 
 - [x] CLUSTER_INFO
-  - [x] GetAllClusters(GET, "/clusters")
-  - [x] CreateCluster(POST, "/clusters")
+  - [x] GetAllClusters(GET, "/api/v2/db/clusters")
+  - [x] CreateCluster(POST, "/api/v2/db/clusters")
 ```
 {
 	"ipAddr": "127.0.0.1",
@@ -165,8 +167,8 @@ go run main.go
 	"clusterCreator": "value",
 }
 ```
-  - [x] GetCluster(GET, "/clusters/{name}")
-  - [x] UpdateCluster(PUT, "/clusters/{name}")
+  - [x] GetCluster(GET, "/api/v2/db/clusters/{name}")
+  - [x] UpdateCluster(PUT, "/api/v2/db/clusters/{name}")
 ```
 {
 	"ipAddr": "127.0.0.1",
@@ -177,12 +179,12 @@ go run main.go
 	"clusterCreator": "value",
 }
 ```
-  - [x] DeleteCluster(DELETE, "/clusters/{name}")
+  - [x] DeleteCluster(DELETE, "/api/v2/db/clusters/{name}")
 
 
 - [x] WORKSPACE_INFO
-  - [x] GetAllWorkspaces(GET, "/workspaces")
-  - [x] CreateWorkspace(POST, "/workspaces")
+  - [x] GetAllWorkspaces(GET, "/api/v2/db/workspaces")
+  - [x] CreateWorkspace(POST, "/api/v2/db/workspaces")
 ```
 {
 	"clusterName": "value",
@@ -193,8 +195,8 @@ go run main.go
 	"workspaceCreator": "value"
 }
 ```
-  - [x] GetWorkspace(GET, "/workspaces/{name}")
-  - [x] UpdateWorkspace(PUT, "/workspaces/{name}")
+  - [x] GetWorkspace(GET, "/api/v2/db/workspaces/{name}")
+  - [x] UpdateWorkspace(PUT, "/api/v2/db/workspaces/{name}")
 ```
 {
 	"clusterName": "value",
@@ -205,12 +207,12 @@ go run main.go
 	"workspaceCreator": "value"
 }
 ```
-  - [x] DeleteWorkspace(DELETE, "/workspaces/{name}")
+  - [x] DeleteWorkspace(DELETE, "/api/v2/db/workspaces/{name}")
 
 
 - [x] PROJECT_INFO
-  - [x] GetAllProjects(GET, "/projects")
-  - [x] CreateProject(POST, "/projects")
+  - [x] GetAllProjects(GET, "/api/v2/db/projects")
+  - [x] CreateProject(POST, "/api/v2/db/projects")
 ```
 {
 	"projectName": "value",
@@ -222,8 +224,8 @@ go run main.go
 	"workspaceName": "value"
 }
 ```
-  - [x] GetProject(GET, "/projects/{name}")
-  - [x] UpdateProject(PUT, "/projects/{name}")
+  - [x] GetProject(GET, "/api/v2/db/projects/{name}")
+  - [x] UpdateProject(PUT, "/api/v2/db/projects/{name}")
 ```
 {
 	"projectName": "value",
@@ -235,11 +237,11 @@ go run main.go
 	"workspaceName": "value"
 }
 ```
-  - [x] DeleteProject(DELETE, "/projects/{name}")
+  - [x] DeleteProject(DELETE, "/api/v2/db/projects/{name}")
 
 - [x] APPSTORE_INFO
-  - [x] GetAllApps(GET, "/apps")
-  - [x] CreateApp(POST, "/apps")
+  - [x] GetAllApps(GET, "/api/v2/db/apps")
+  - [x] CreateApp(POST, "/api/v2/db/apps")
 ```
 {
 	"appName": "value",
@@ -248,8 +250,8 @@ go run main.go
 	"appInstalled": 0
 }
 ```
-  - [x] GetApp(GET, "/apps/{name}")
-  - [x] UpdateApp(PUT, "/apps/{name}")
+  - [x] GetApp(GET, "/api/v2/db/apps/{name}")
+  - [x] UpdateApp(PUT, "/api/v2/db/apps/{name}")
 ```
 {
 	"appName": "value",
@@ -258,5 +260,5 @@ go run main.go
 	"appInstalled": 0
 }
 ```
-  - [x] DeleteApp(DELETE, "/apps/{name}")
+  - [x] DeleteApp(DELETE, "/api/v2/db/apps/{name}")
 

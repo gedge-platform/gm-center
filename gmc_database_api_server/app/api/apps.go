@@ -4,24 +4,32 @@ import (
 	"net/http"
 	"strings"
 
+	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/db"
 	"gmc_api_gateway/app/model"
-	
+
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
+// ShowAccount godoc
+// @Summary Show a account
+// @Description get string by ID
+// @ID get-string-by-int
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Account ID"
+// @Success 200 {object} model.App
+// @Header 200 {string} Token "qwerty"
+// @Router /accounts/{id} [get]
 func GetAllApps(c echo.Context) (err error) {
-	var msgError messageFormat
 	db := db.DbManager()
 	models := []model.App{}
 	db.Find(&models)
 
 	if db.Find(&models).RowsAffected == 0 {
-		msgError.StatusCode = http.StatusOK
-		msgError.Message = "No Data"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+		return
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
@@ -33,11 +41,8 @@ func GetApp(c echo.Context) (err error) {
 	models := FindAppDB(db, "Name", search_val)
 
 	if models == nil {
-		var msgError messageFormat
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
@@ -46,21 +51,14 @@ func GetApp(c echo.Context) (err error) {
 func CreateApp(c echo.Context) (err error) {
 	db := db.DbManager()
 	models := new(model.App)
-	var msgError messageFormat
 
 	if err = c.Bind(models); err != nil {
-		msgError.StatusCode = http.StatusBadRequest
-		msgError.Message = "Bad Request"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return nil
 	}
 	if err = c.Validate(models); err != nil {
-		msgError.StatusCode = http.StatusUnprocessableEntity
-		msgError.Message = "The given data was invalid."
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return nil
 	}
 
 	if err != nil {
@@ -68,11 +66,8 @@ func CreateApp(c echo.Context) (err error) {
 	}
 
 	if err := db.Create(&models).Error; err != nil {
-		msgError.StatusCode = http.StatusExpectationFailed
-		msgError.Message = "Expectation Failed"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+		return nil
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{"data": models})
@@ -82,61 +77,54 @@ func UpdateApp(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")
 	models := model.App{}
-	var msgError messageFormat
 
 	if err := c.Bind(&models); err != nil {
-		return c.NoContent(http.StatusBadRequest)
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return nil
 	}
 
 	if err := FindAppDB(db, "Name", search_val); err == nil {
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
 	} else {
 		models.Name = search_val
 	}
 
 	models2 := FindAppDB(db, "Name", search_val)
 
-	if models.Name != "" { models2.Name = models.Name	} 
-	if models.Description != "" { models2.Description = models.Description	} 
-	if models.Category != "" { models2.Category = models.Category } 
-	if models.Installed != models2.Installed { models2.Installed = models.Installed } 
+	if models.Name != "" {
+		models2.Name = models.Name
+	}
+	if models.Description != "" {
+		models2.Description = models.Description
+	}
+	if models.Category != "" {
+		models2.Category = models.Category
+	}
+	if models.Installed != models2.Installed {
+		models2.Installed = models.Installed
+	}
 
 	if err := db.Save(&models2).Error; err != nil {
-		msgError.StatusCode = http.StatusExpectationFailed
-		msgError.Message = "Expectation Failed"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(http.StatusExpectationFailed, messageError)
+		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+		return nil
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models2})
 }
 
-
 func DeleteApp(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")
-	// models := model.App{}
-	var msgError messageFormat
 
 	if err := FindAppDB(db, "Name", search_val); err == nil {
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusExpectationFailed, common.ErrNotFound)
 	}
-	
+
 	models := FindAppDB(db, "Name", search_val)
 
 	if err := db.Delete(&models).Error; err != nil {
-		msgError.StatusCode = http.StatusInternalServerError
-		msgError.Message = "Internal Server Error"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(http.StatusInternalServerError, messageError)
+		common.ErrorMsg(c, http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})

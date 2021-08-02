@@ -1,0 +1,66 @@
+basePath: /api/v1
+definitions:
+  model.App:
+    properties:
+      appCategory:
+        type: string
+      appDescription:
+        type: string
+      appInstalled:
+        type: integer
+      appName:
+        type: string
+      appNum:
+        type: integer
+      created_at:
+        type: string
+    required:
+    - appCategory
+    - appName
+    type: object
+host: g-api-test.innogrid.tech
+info:
+  contact:
+    email: consine2c@innogrid.com
+    name: consine2c
+    url: https://gedge-platform.github.io/gm-center/
+  description: This is a Gedge GM-Center Swagger API.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Gedge GM-Center Swagger API
+  version: "1.0"
+paths:
+  /accounts/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      operationId: get-string-by-int
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Token:
+              description: qwerty
+              type: string
+          schema:
+            $ref: '#/definitions/model.App'
+      summary: Show a account
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

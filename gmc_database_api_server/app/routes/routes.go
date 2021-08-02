@@ -5,11 +5,15 @@ import (
 	// "os"
 
 	"gmc_api_gateway/app/api"
+	portal "gmc_api_gateway/app/api"
 
 	// "github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo"
-	// "github.com/labstack/echo/middleware"
 	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
+
+	// "github.com/labstack/echo/middleware"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type DataValidator struct {
@@ -26,47 +30,52 @@ func (dv *DataValidator) Validate(i interface{}) error {
 	return dv.validator.Struct(i)
 }
 
-
 func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
-	r := e.Group("/api/v1/members")
-	r.GET("", api.GetAllMembers)
-	r.POST("", api.CreateMember)
-	r.GET("/:id", api.GetMember)
-	r.PUT("/:id", api.UpdateMember)
-	r.DELETE("/:id", api.DeleteMember)
 
-	r2 := e.Group("/api/v1/apps")
-	r2.GET("", api.GetAllApps)
-	r2.POST("", api.CreateApp)
-	r2.GET("/:name", api.GetApp)
-	r2.PUT("/:name", api.UpdateApp)
-	r2.DELETE("/:name", api.DeleteApp)
+	r0 := e.Group("/test/v1")
+	r0.GET("/cluster", portal.Cluster)
 
-	r3 := e.Group("/api/v1/clusters")
-	r3.GET("", api.GetAllClusters)
-	r3.POST("", api.CreateCluster)
-	r3.GET("/:name", api.GetCluster)
-	r3.PUT("/:name", api.UpdateCluster)
-	r3.DELETE("/:name", api.DeleteCluster)
+	// /gmcapi/v1
+	r := e.Group("/gmcapi/v1")
+	r.GET("/members", api.GetAllMembers)
+	r.POST("/members", api.CreateMember)
+	r.GET("/members/:id", api.GetMember)
+	r.PUT("/members/:id", api.UpdateMember)
+	r.DELETE("/members/:id", api.DeleteMember)
 
-	r4 := e.Group("/api/v1/projects")
-	r4.GET("", api.GetAllProjects)
-	r4.POST("", api.CreateProject)
-	r4.GET("/:name", api.GetProject)
-	r4.PUT("/:name", api.UpdateProject)
-	r4.DELETE("/:name", api.DeleteProject)
+	r.GET("/apps", api.GetAllApps)
+	r.POST("/apps", api.CreateApp)
+	r.GET("/apps/:name", api.GetApp)
+	r.PUT("/apps/:name", api.UpdateApp)
+	r.DELETE("/apps/:name", api.DeleteApp)
 
-	r5 := e.Group("/api/v1/workspaces")
-	r5.GET("", api.GetAllWorkspaces)
-	r5.POST("", api.CreateWorkspace)
-	r5.GET("/:name", api.GetWorkspace)
-	r5.PUT("/:name", api.UpdateWorkspace)
-	r5.DELETE("/:name", api.DeleteWorkspace)
-	
-	r6 := e.Group("/api/v2")
-	r6.Any("/:cluster_name", api.Kubernetes)
-	r6.Any("/:cluster_name/:namespace_name", api.Kubernetes)
-	r6.Any("/:cluster_name/:namespace_name/:kind_name", api.Kubernetes)
-	r6.Any("/:cluster_name/:namespace_name/:kind_name/*", api.Kubernetes)
+	r.GET("/clusters", api.GetAllClusters)
+	r.POST("/clusters", api.CreateCluster)
+	r.GET("/clusters/:name", api.GetCluster)
+	r.PUT("/clusters/:name", api.UpdateCluster)
+	r.DELETE("/clusters/:name", api.DeleteCluster)
+
+	r.GET("/projects", api.GetAllProjects)
+	r.POST("/projects", api.CreateProject)
+	r.GET("/projects/:name", api.GetProject)
+	r.PUT("/projects/:name", api.UpdateProject)
+	r.DELETE("/projects/:name", api.DeleteProject)
+
+	r.GET("/workspaces", api.GetAllWorkspaces)
+	r.POST("/workspaces", api.CreateWorkspace)
+	r.GET("/workspaces/:name", api.GetWorkspace)
+	r.PUT("/workspaces/:name", api.UpdateWorkspace)
+	r.DELETE("/workspaces/:name", api.DeleteWorkspace)
+
+	r2 := e.Group("/kube/v1")
+	r2.Any("/:cluster_name", api.Kubernetes)
+	r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)
+	r2.Any("/:cluster_name/:namespace_name/:kind_name", api.Kubernetes)
+	r2.Any("/:cluster_name/:namespace_name/:kind_name/*", api.Kubernetes)
+
+	r2.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
+	r2.GET("/monitoring", echo.WrapHandler(promhttp.Handler()))
+	r2.Any("/monitoring/:kind", api.Metrics)
+	r2.Any("/monitoring/:kind/:name", api.Metrics)
 }

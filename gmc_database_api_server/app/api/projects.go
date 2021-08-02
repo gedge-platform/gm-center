@@ -4,24 +4,22 @@ import (
 	"net/http"
 	"strings"
 
+	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/db"
 	"gmc_api_gateway/app/model"
-	
+
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func GetAllProjects(c echo.Context) (err error) {
-	var msgError messageFormat
 	db := db.DbManager()
 	models := []model.Project{}
 	db.Find(&models)
 
 	if db.Find(&models).RowsAffected == 0 {
-		msgError.StatusCode = http.StatusOK
-		msgError.Message = "No Data"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+		return
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
@@ -33,11 +31,8 @@ func GetProject(c echo.Context) (err error) {
 	models := FindProjectDB(db, "Name", search_val)
 
 	if models == nil {
-		var msgError messageFormat
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
@@ -46,21 +41,14 @@ func GetProject(c echo.Context) (err error) {
 func CreateProject(c echo.Context) (err error) {
 	db := db.DbManager()
 	models := new(model.Project)
-	var msgError messageFormat
 
 	if err = c.Bind(models); err != nil {
-		msgError.StatusCode = http.StatusBadRequest
-		msgError.Message = "Bad Request"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return nil
 	}
 	if err = c.Validate(models); err != nil {
-		msgError.StatusCode = http.StatusUnprocessableEntity
-		msgError.Message = "The given data was invalid."
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return nil
 	}
 
 	if err != nil {
@@ -68,11 +56,8 @@ func CreateProject(c echo.Context) (err error) {
 	}
 
 	if err := db.Create(&models).Error; err != nil {
-		msgError.StatusCode = http.StatusExpectationFailed
-		msgError.Message = "Expectation Failed"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+		return nil
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{"data": models})
@@ -82,65 +67,61 @@ func UpdateProject(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")
 	models := model.Project{}
-	var msgError messageFormat
 
 	if err := c.Bind(&models); err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
 	if err := FindProjectDB(db, "Name", search_val); err == nil {
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
-	}  else {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
+	} else {
 		models.Name = search_val
 	}
 
-
 	models2 := FindProjectDB(db, "Name", search_val)
 
-	if models.Postfix != "" { models2.Postfix = models.Postfix }
-	if models.Description != "" { models2.Description = models.Description	} 
-	if models.Type != "" { models2.Type = models.Type	} 
-	if models.Owner != "" { models2.Owner = models.Owner } 
-	if models.Creator != "" { models2.Creator = models.Creator } 
-	if models.WorkspaceName != "" { models2.WorkspaceName = models.WorkspaceName }
-
+	if models.Postfix != "" {
+		models2.Postfix = models.Postfix
+	}
+	if models.Description != "" {
+		models2.Description = models.Description
+	}
+	if models.Type != "" {
+		models2.Type = models.Type
+	}
+	if models.Owner != "" {
+		models2.Owner = models.Owner
+	}
+	if models.Creator != "" {
+		models2.Creator = models.Creator
+	}
+	if models.WorkspaceName != "" {
+		models2.WorkspaceName = models.WorkspaceName
+	}
 
 	if err := db.Save(&models2).Error; err != nil {
-		msgError.StatusCode = http.StatusExpectationFailed
-		msgError.Message = "Expectation Failed"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(http.StatusExpectationFailed, messageError)
+		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+		return nil
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models2})
 }
 
-
 func DeleteProject(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")
-	// models := model.Project{}
-	var msgError messageFormat
 
 	if err := FindProjectDB(db, "Name", search_val); err == nil {
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
 	}
-	
+
 	models := FindProjectDB(db, "Name", search_val)
 
 	if err := db.Delete(&models).Error; err != nil {
-		msgError.StatusCode = http.StatusInternalServerError
-		msgError.Message = "Internal Server Error"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(http.StatusInternalServerError, messageError)
+		common.ErrorMsg(c, http.StatusInternalServerError, err)
+		return nil
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})

@@ -1,7 +1,7 @@
 {
     "port": 8080,
     "default_hosts": [
-        "https://gapi.innogrid.cf"
+        "https://gapi.innogrid.tech"
     ],
     "extra_config": {
       "github_com/devopsfaith/krakend-cors": {

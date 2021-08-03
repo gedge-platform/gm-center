@@ -1,14 +1,14 @@
 package config
 
 import (
-	"os"
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	DB *DBConfig
+	DB     *DBConfig
 	COMMON *CommonConfig
 }
 
@@ -23,8 +23,8 @@ type DBConfig struct {
 }
 
 type CommonConfig struct {
-	Port	string
-	CorsOrigin	string
+	Port       string
+	CorsOrigin string
 }
 
 func GetConfig() *Config {
@@ -39,7 +39,7 @@ func GetConfig() *Config {
 			Charset:  os.Getenv("DB_CHARSET"),
 		},
 		COMMON: &CommonConfig{
-			Port: os.Getenv("PORT"),
+			Port:       os.Getenv("PORT"),
 			CorsOrigin: os.Getenv("CORS"),
 		},
 	}

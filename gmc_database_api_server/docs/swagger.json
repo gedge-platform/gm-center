@@ -1,0 +1,97 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a Gedge GM-Center Swagger API.",
+        "title": "Gedge GM-Center Swagger API",
+        "contact": {
+            "name": "consine2c",
+            "url": "https://gedge-platform.github.io/gm-center/",
+            "email": "consine2c@innogrid.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "g-api-test.innogrid.tech",
+    "basePath": "/api/v1",
+    "paths": {
+        "/accounts/{id}": {
+            "get": {
+                "description": "get string by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show a account",
+                "operationId": "get-string-by-int",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.App"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.App": {
+            "type": "object",
+            "required": [
+                "appCategory",
+                "appName"
+            ],
+            "properties": {
+                "appCategory": {
+                    "type": "string"
+                },
+                "appDescription": {
+                    "type": "string"
+                },
+                "appInstalled": {
+                    "type": "integer"
+                },
+                "appName": {
+                    "type": "string"
+                },
+                "appNum": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

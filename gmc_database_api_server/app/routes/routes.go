@@ -4,15 +4,13 @@ import (
 	// "fmt"
 	// "os"
 
-	"gmc_api_gateway/app/api"
-	portal "gmc_api_gateway/app/api"
+	"gmc_database_api_server/app/api"
 
 	// "github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 
 	// "github.com/labstack/echo/middleware"
-
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -34,7 +32,7 @@ func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
 	r0 := e.Group("/test/v1")
-	r0.GET("/cluster", portal.Cluster)
+	r0.GET("/cluster", api.Cluster)
 
 	// /gmcapi/v1
 	r := e.Group("/gmcapi/v1")

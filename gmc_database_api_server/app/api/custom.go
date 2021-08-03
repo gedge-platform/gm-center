@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"gmc_api_gateway/app/common"
-	"gmc_api_gateway/app/db"
-	"gmc_api_gateway/app/model"
+	"gmc_database_api_server/app/common"
+	"gmc_database_api_server/app/db"
+	"gmc_database_api_server/app/model"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/labstack/echo/v4"

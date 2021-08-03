@@ -5,11 +5,11 @@ import (
 	"os"
 	"strconv"
 
-	"gmc_api_gateway/app/db"
-	"gmc_api_gateway/app/routes"
-	"gmc_api_gateway/config"
+	"gmc_database_api_server/app/db"
+	"gmc_database_api_server/app/routes"
+	"gmc_database_api_server/config"
 
-	_ "gmc_api_gateway/docs"
+	_ "gmc_database_api_server/docs"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

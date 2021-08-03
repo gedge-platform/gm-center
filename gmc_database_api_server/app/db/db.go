@@ -6,7 +6,7 @@ import (
 
 	// "net/http"
 
-	"gmc_api_gateway/config"
+	"gmc_database_api_server/config"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"

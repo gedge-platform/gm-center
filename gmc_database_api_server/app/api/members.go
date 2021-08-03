@@ -2,12 +2,13 @@ package api
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 
-	"gmc_api_gateway/app/common"
-	"gmc_api_gateway/app/db"
-	"gmc_api_gateway/app/model"
+	"gmc_database_api_server/app/common"
+	"gmc_database_api_server/app/db"
+	"gmc_database_api_server/app/model"
 
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo/v4"
@@ -17,6 +18,7 @@ func GetAllMembers(c echo.Context) (err error) {
 	db := db.DbManager()
 	models := []model.Member{}
 	db.Find(&models)
+	log.Println("Hello")
 
 	if db.Find(&models).RowsAffected == 0 {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found"))

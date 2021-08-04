@@ -1,14 +1,10 @@
 package api
 
 import (
-<<<<<<< HEAD
 	"encoding/json"
 	"fmt"
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
-=======
-	"gmc_database_api_server/app/common"
->>>>>>> c1911331f8f8a67d6ad15b342507dcbc521b0f78
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -16,7 +12,6 @@ import (
 )
 
 func Cluster(c echo.Context) (err error) {
-<<<<<<< HEAD
 	// model := new(model.JOB)
 
 	// return c.JSON(200, echo.Map{"items": model})
@@ -86,14 +81,11 @@ func Get_Cluster(c echo.Context) (err error) {
 }
 func Get_UserProject(c echo.Context) (err error) {
 
-=======
->>>>>>> c1911331f8f8a67d6ad15b342507dcbc521b0f78
 	data, err := common.GetModel(c, "pods")
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-<<<<<<< HEAD
 	return c.JSON(http.StatusOK, echo.Map{"data": data})
 
 	// KubernetesNS, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/test1/namespaces", false)
@@ -129,15 +121,4 @@ func Get_UserProject(c echo.Context) (err error) {
 	// }
 	return
 	// return c.JSON(http.StatusOK, echo.Map{"data": projectModel})
-=======
-
-	// log.Println("[34] data is ", data)
-
-	// model.Cluster{Monitoring: new(model.Monitoring2)}
-
-	// log.Println("data is ", data)
-	return c.JSON(200, echo.Map{
-		"items": data,
-	})
->>>>>>> c1911331f8f8a67d6ad15b342507dcbc521b0f78
 }

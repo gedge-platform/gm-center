@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 	"fmt"
-	"gmc_api_gateway/app/common"
-	"gmc_api_gateway/app/db"
+	"gmc_database_api_server/app/common"
+	"gmc_database_api_server/app/db"
 	"log"
 	"net/http"
 	"os"
@@ -365,4 +365,3 @@ func metricExpr(val string, filter map[string]string) string {
 
 	return strings.Replace(val, "$1", returnVal, -1)
 }
-

@@ -155,6 +155,7 @@ func DeleteCluster(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
 
+
 func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Cluster {
 	models := model.Cluster{}
 	if check := strings.Compare(search_val, "") == 0; check {

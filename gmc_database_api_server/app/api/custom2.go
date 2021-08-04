@@ -229,6 +229,7 @@ func getMonitoring(cluster string, name string, c echo.Context) error {
 
 	log.Println("Select Cluster")
 	log.Printf("cluster : %s, name : %s", cluster, name)
+	
 	switch name {
 	case "cpu":
 		cpu_util := QueryRange(addr, clusterExpr(Mtemplates["cluster_cpu_util"], cluster), c)

@@ -11,12 +11,14 @@ type Cluster struct {
 	Name       string    `gorm:"column:clusterName; not null; default:null" json:"clusterName"`
 	Role       string    `gorm:"column:clusterRole; not null; default:null" json:"clusterRole"`
 	Type       string    `gorm:"column:clusterType; not null; default:null" json:"clusterType"`
+	Gpu        string    `json:"gpu"`
 	Endpoint   string    `gorm:"column:clusterEndpoint; not null; default:null" json:"clusterEndpoint"`
 	Creator    string    `gorm:"column:clusterCreator; not null; default:null" json:"clusterCreator"`
 	State      string    `gorm:"column:clusterState; not null; default:null; DEFAULT:'pending'" json:"clusterState"`
 	Version    string    `gorm:"column:kubeVersion" json:"kubeVersion"`
 	Created_at time.Time `gorm:"column:created_at" json:"created_at"`
 	Token      string    `gorm:"column:token; not null; default:null" json:"token"`
+	// Monitoring []MONITOR `json:"monitoring"`
 }
 
 // Set Cluster table name to be `CLUSTER_INFO`

@@ -350,7 +350,6 @@ func GetDuration(c echo.Context) int64 {
 	return returnVal
 }
 
-//치환 함수
 func metricExpr(val string, filter map[string]string) string {
 	var returnVal string
 

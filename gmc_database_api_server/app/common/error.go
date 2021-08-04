@@ -8,12 +8,10 @@ import (
 
 var (
 	// common
-	ErrNoData   = errors.New("No Data")
-	ErrNotFound = errors.New("Not Found")
-
+	ErrNoData            = errors.New("No Data")
+	ErrNotFound          = errors.New("Not Found")
 	ErrNamespaceInvalid  = errors.New("Namespace Empty")
 	ErrDetailNameInvalid = errors.New("Detail Name Empty")
-
 	// Account
 	ErrIdInvalid = errors.New("id is empty")
 )

@@ -33,8 +33,6 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r0 := e.Group("/test/v1")
 	r0.GET("/cluster", api.Cluster)
-	r0.GET("/getCluster", api.Get_Cluster)
-	r0.GET("/getUserProject", api.Get_UserProject)
 
 	// /gmcapi/v1
 	r := e.Group("/gmcapi/v1")
@@ -68,12 +66,13 @@ func GEdgeRoute(e *echo.Echo) {
 	r.PUT("/workspaces/:name", api.UpdateWorkspace)
 	r.DELETE("/workspaces/:name", api.DeleteWorkspace)
 
-	r.GET("/deployments", api.GetAllWorkspaces)
-	r.POST("/deployments", api.CreateWorkspace)
-	r.GET("/deployments/:name", api.GetWorkspace)
-	r.PUT("/deployments/:name", api.UpdateWorkspace)
-	r.DELETE("/deployments/:name", api.DeleteWorkspace)
-
+	// r.GET("/jobs", api.GetAllJobs)
+	// r.POST("/jobs", api.CreateJobs)
+	r.GET("/jobs/:name", api.GetJobs)
+	// r.PUT("/jobs/:name", api.UpdateJobs)
+	// r.DELETE("/jobs/:name", api.DeleteJobs)
+	// r.GET("/cronjobs", api.GetAllCronJobs)
+	r.GET("/cronjobs/:name", api.GetCronJobs)
 	r2 := e.Group("/kube/v1")
 	r2.Any("/:cluster_name", api.Kubernetes)
 	r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)

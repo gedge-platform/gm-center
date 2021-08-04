@@ -38,6 +38,33 @@ func GetCluster(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
 
+func GetCluster2(c echo.Context) *model.Cluster {
+	search_val := c.QueryParam("cluster")
+	db := db.DbManager()
+	// search_val := c.Param("name")
+	models := FindClusterDB(db, "Name", search_val)
+
+	if models == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+
+	}
+
+	return models
+	// db := db.DbManager()
+	// // search_val := c.Param("name")
+	// models := FindClusterDB(db, "Name", search_val)
+
+	// if models == nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+	// 	// return
+	// }
+	// fmt.Printf("models is %s", &models)
+	// // data := models
+	// // return models
+	// c.JSON(http.StatusOK, echo.Map{"dat234324a": models})
+	// return nil
+}
+
 func CreateCluster(c echo.Context) (err error) {
 	db := db.DbManager()
 	models := new(model.Cluster)
@@ -85,9 +112,9 @@ func UpdateCluster(c echo.Context) (err error) {
 		models2.Ip = models.Ip
 	}
 	// if models.extIp != "" { models2.extIp = models.extIp }
-	if models.Role != "" {
-		models2.Role = models.Role
-	}
+	// if models.Role != "" {
+	// 	models2.Role = models.Role
+	// }
 	if models.Type != "" {
 		models2.Type = models.Type
 	}
@@ -97,12 +124,9 @@ func UpdateCluster(c echo.Context) (err error) {
 	if models.Creator != "" {
 		models2.Creator = models.Creator
 	}
-	if models.State != "" {
-		models2.State = models.State
-	}
-	if models.Version != "" {
-		models2.Version = models.Version
-	}
+	// if models.Version != "" {
+	// 	models2.Version = models.Version
+	// }
 
 	if err := db.Save(&models2).Error; err != nil {
 		common.ErrorMsg(c, http.StatusExpectationFailed, err)
@@ -133,7 +157,14 @@ func DeleteCluster(c echo.Context) (err error) {
 
 func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Cluster {
 	models := model.Cluster{}
+	if check := strings.Compare(search_val, "") == 0; check {
+		return nil
+	}
+
 	if strings.Compare(select_val, "Name") == 0 {
+		if err := db.First(&models, model.Cluster{Name: search_val}).Error; err != nil {
+			return nil
+		}
 	}
 	return &models
 }

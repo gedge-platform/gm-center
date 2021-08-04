@@ -24,6 +24,18 @@ func GetAllProjects(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
+func GetUserProjects(c echo.Context) (err error) {
+	db := db.DbManager()
+	models := []model.Project{}
+	db.Find(&models)
+
+	if db.Find(&models).RowsAffected == 0 {
+		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"data": models})
+}
 
 func GetProject(c echo.Context) (err error) {
 	db := db.DbManager()

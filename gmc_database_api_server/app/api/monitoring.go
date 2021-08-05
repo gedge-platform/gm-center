@@ -212,6 +212,7 @@ func mericResult(c echo.Context, kind string, a []string) error {
 	})
 
 	// return nil
+	//t
 }
 
 func metricParsing(m string) []string {

@@ -109,6 +109,8 @@ func GetModel(c echo.Context, kind string) (data string, err error) {
 	// models := ReturnModel(c.Param("name"), kind)
 	url := UrlExpr(endPoint, namespace_name, item_name, kind)
 
+	log.Println("url is", url)
+
 	switch url {
 	case "noname":
 		return "nf", ErrNamespaceInvalid

@@ -38,8 +38,9 @@ type CONTAINERS struct {
 	Image string `json:"image"`
 }
 type CONDITIONS struct {
-	Status string `json:"status"`
-	Type   string `json:"type"`
+	Status        string    `json:"status"`
+	Type          string    `json:"type"`
+	LastProbeTime time.Time `json:"lastProbeTime"`
 }
 type Evnet struct {
 	Reason  string `json:"reson"`

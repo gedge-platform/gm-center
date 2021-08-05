@@ -1,32 +1,46 @@
 package api
 
-// func Cluster(c echo.Context) (err error) {
-// model := new(model.JOB)
+import (
+	"fmt"
+	"gmc_database_api_server/app/common"
+	"log"
+	"net/http"
 
-// return c.JSON(200, echo.Map{"items": model})
+	"github.com/labstack/echo/v4"
+)
 
-// url := "http://192.168.150.197:5555/kube/v1/cluster1/jobs"
-// if data := getData(c, url, false); data != "nf" {
-// 	n := gjson.Parse(data)
-// 	k := n.Get("items.#.metadata").Array()
-// 	log.Println("k is ", k)
-// }
+func GetTest(c echo.Context) (err error) {
 
-// var jobModel model.JOB
-// jobModel.Workspace = "test"
-// // jobModel.Image = "dddfgfgg"
+	data, err := common.GetModel(c, "pods")
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 
-// return c.JSON(http.StatusOK, echo.Map{
-// 	"items": echo.Map{
-// 		"items":  jobModel,
-// 		"items2": new(model.POD),
-// 		// "OwnerReference": new(model.OwnerReference),
-// 		// "Jobdetails":     new(model.JOBDETAIL),
-// 	},
-// 	"test": echo.Map{
-// 		"items": new(model.CRONJOBDETAIL),
-// 		// "Jobdetails": new(model.JOBDETAIL),
-// 	},
-// })
+	fmt.Printf("data type is %s\n", common.Typeof(data))
 
-// }
+	data1, _ := common.FilterStr(data, "metadata.ownerReferences")
+	fmt.Printf("data1 type is %s\n", common.Typeof(data1))
+
+	data2, _ := common.Filter(data, "metadata.ownerReferences")
+	fmt.Printf("data2 type is %s\n", common.Typeof(data2))
+
+	log.Println("[#2] data is", data2)
+	log.Println("[#2-1] data is", data2["name"])
+	data3, _ := common.Finding(data, "metadata.ownerReferences", "blockOwnerDeletion")
+	fmt.Printf("data3 type is %s\n", common.Typeof(data3))
+
+	log.Println("[#3] data is", data3)
+	data4, _ := common.Finding(data, "spec.volumes", "name")
+	fmt.Printf("data4 type is %s\n", common.Typeof(data4))
+
+	log.Println("[#4] data is", data4)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"testData":  data,
+		"testData1": data1,
+		"testData2": data2,
+		"testData3": data3,
+		"testData4": data4,
+	})
+}

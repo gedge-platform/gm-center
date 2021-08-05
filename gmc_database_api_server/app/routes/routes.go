@@ -31,8 +31,9 @@ func (dv *DataValidator) Validate(i interface{}) error {
 func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
-	r0 := e.Group("/test/v1")
-	r0.GET("/cluster", api.Cluster)
+	r0 := e.Group("/testing/v1")
+	r0.GET("/cluster", api.GetTest)
+	r0.GET("/cluster/:name", api.GetTest)
 
 	// /gmcapi/v1
 	r := e.Group("/gmcapi/v1")

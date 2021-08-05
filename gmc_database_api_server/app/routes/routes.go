@@ -32,10 +32,11 @@ func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
 	r0 := e.Group("/test/v1")
-	r0.GET("/cluster", api.Cluster)
+	// r0.GET("/cluster", api.Cluster)
 	r0.GET("/getCluster", api.Get_Cluster)
 	r0.GET("/getProject", api.Get_Project)
-
+	r0.GET("/getDeployment", api.Get_Deployment)
+	r0.GET("/gethttp", api.Get_http)
 	// /gmcapi/v1
 	r := e.Group("/gmcapi/v1")
 	r.GET("/members", api.GetAllMembers)

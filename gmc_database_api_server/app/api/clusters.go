@@ -50,19 +50,6 @@ func GetCluster2(c echo.Context) *model.Cluster {
 	}
 
 	return models
-	// db := db.DbManager()
-	// // search_val := c.Param("name")
-	// models := FindClusterDB(db, "Name", search_val)
-
-	// if models == nil {
-	// 	common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-	// 	// return
-	// }
-	// fmt.Printf("models is %s", &models)
-	// // data := models
-	// // return models
-	// c.JSON(http.StatusOK, echo.Map{"dat234324a": models})
-	// return nil
 }
 
 func CreateCluster(c echo.Context) (err error) {
@@ -154,7 +141,6 @@ func DeleteCluster(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-
 
 func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Cluster {
 	models := model.Cluster{}

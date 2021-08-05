@@ -3,12 +3,11 @@ package common
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
-	"fmt"
 	"gmc_database_api_server/app/db"
 	"gmc_database_api_server/app/model"
 	"io"
 	"io/ioutil"
+	"log"
 	"strings"
 	"time"
 
@@ -90,16 +89,15 @@ var (
 	SetEvents              = new(model.EventList)
 )
 
-func GetModel(c echo.Context, kind string) (data interface{}, err error) {
+func GetModel(c echo.Context, kind string) (data string, err error) {
 
 	var endPoint, namespace_name, item_name string
 
 	if data := FindClusterDB(c.QueryParam("cluster")); data == nil {
-		return nil, ErrNotFound
+		return "nf", ErrNotFound
 	} else {
 		endPoint = data.Endpoint
 	}
-
 	if strings.Compare(c.QueryParam("namespace"), "") != 0 {
 		namespace_name = c.QueryParam("namespace")
 	}
@@ -108,16 +106,19 @@ func GetModel(c echo.Context, kind string) (data interface{}, err error) {
 		item_name = c.Param("name")
 	}
 
-	models := ReturnModel(c.Param("name"), kind)
+	// models := ReturnModel(c.Param("name"), kind)
 	url := UrlExpr(endPoint, namespace_name, item_name, kind)
+
+	log.Println("url is", url)
 
 	switch url {
 	case "noname":
-		return nil, ErrNamespaceInvalid
+		return "nf", ErrNamespaceInvalid
 	case "nodetail":
-		return nil, ErrDetailNameInvalid
+		return "nf", ErrDetailNameInvalid
 	}
 
+	log.Printf("[#31] url is %s", url)
 	var responseString, token string
 	reqMethod := c.Request().Method
 	passBody := responseBody(c.Request().Body)
@@ -170,17 +171,19 @@ func GetModel(c echo.Context, kind string) (data interface{}, err error) {
 		}
 	}
 
-	if err := json.Unmarshal([]byte(responseString), &models); err != nil {
-		fmt.Println("옷이 맞지 않음")
-	} else {
-		return models, nil
-	}
+	// if err := json.Unmarshal([]byte(responseString), &models); err != nil {
+	// 	fmt.Println("옷이 맞지 않음")
+	// } else {
+	// 	return models, nil
+	// }
 
-	x := make(map[string]string)
-	if err := json.Unmarshal([]byte(responseString), &x); err != nil {
-		fmt.Printf("Error : %s\n", err)
-	}
-	return x, nil
+	// x := make(map[string]interface{})
+	// if err := json.Unmarshal([]byte(responseString), &x); err != nil {
+	// 	fmt.Printf("Error : %s\n", err)
+	// }
+	// return x, nil
+
+	return responseString, nil
 }
 
 func responseBody(req io.ReadCloser) string {

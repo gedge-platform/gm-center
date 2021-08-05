@@ -24,17 +24,19 @@ func GetAllProjects(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-func GetUserProjects(c echo.Context) (err error) {
+func GetProject2(c echo.Context) *model.Project {
 	db := db.DbManager()
-	models := []model.Project{}
-	db.Find(&models)
+	search_val := c.QueryParam("name")
+	models := FindProjectDB(db, "Name", search_val)
 
-	if db.Find(&models).RowsAffected == 0 {
-		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
-
+	if models == nil {
+		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		var model model.Project
+		model.Type = "system"
+		return &model
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{"data": models})
+	return models
 }
 
 func GetProject(c echo.Context) (err error) {

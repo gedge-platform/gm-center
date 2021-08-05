@@ -32,9 +32,14 @@ func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
 	r0 := e.Group("/test/v1")
-	r0.GET("/cluster", api.Cluster)
+	// r0.GET("/cluster", api.Cluster)
 	r0.GET("/getCluster", api.Get_Cluster)
-	r0.GET("/getUserProject", api.Get_UserProject)
+	r0.GET("/getProject", api.Get_Project)
+	r0.GET("/getDeployment", api.Get_Deployment)
+	r0.GET("/gethttp", api.Get_http)
+	r0 := e.Group("/testing/v1")
+	r0.GET("/cluster", api.GetTest)
+	r0.GET("/cluster/:name", api.GetTest)
 
 	// /gmcapi/v1
 	r := e.Group("/gmcapi/v1")
@@ -68,12 +73,16 @@ func GEdgeRoute(e *echo.Echo) {
 	r.PUT("/workspaces/:name", api.UpdateWorkspace)
 	r.DELETE("/workspaces/:name", api.DeleteWorkspace)
 
-	r.GET("/deployments", api.GetAllWorkspaces)
-	r.POST("/deployments", api.CreateWorkspace)
-	r.GET("/deployments/:name", api.GetWorkspace)
-	r.PUT("/deployments/:name", api.UpdateWorkspace)
-	r.DELETE("/deployments/:name", api.DeleteWorkspace)
+	// r.GET("/jobs", api.GetAllJobs)
+	// r.POST("/jobs", api.CreateJobs)
+	r.GET("/jobs/:name", api.GetJobs)
+	// r.PUT("/jobs/:name", api.UpdateJobs)
+	// r.DELETE("/jobs/:name", api.DeleteJobs)
+	// r.GET("/cronjobs", api.GetAllCronJobs)
 
+	r.GET("/cronjobs/:name", api.GetCronJobs)
+
+	r.GET("/pods/:name", api.GetPods)
 	r2 := e.Group("/kube/v1")
 	r2.Any("/:cluster_name", api.Kubernetes)
 	r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)

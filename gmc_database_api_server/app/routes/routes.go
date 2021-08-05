@@ -72,7 +72,10 @@ func GEdgeRoute(e *echo.Echo) {
 	// r.PUT("/jobs/:name", api.UpdateJobs)
 	// r.DELETE("/jobs/:name", api.DeleteJobs)
 	// r.GET("/cronjobs", api.GetAllCronJobs)
+
 	r.GET("/cronjobs/:name", api.GetCronJobs)
+
+	r.GET("/pods/:name", api.GetPods)
 	r2 := e.Group("/kube/v1")
 	r2.Any("/:cluster_name", api.Kubernetes)
 	r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)

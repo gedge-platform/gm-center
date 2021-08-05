@@ -9,6 +9,7 @@ import (
 	"gmc_database_api_server/app/model"
 	"io"
 	"io/ioutil"
+	"log"
 	"strings"
 	"time"
 
@@ -110,6 +111,8 @@ func GetModel(c echo.Context, kind string) (data interface{}, err error) {
 
 	models := ReturnModel(c.Param("name"), kind)
 	url := UrlExpr(endPoint, namespace_name, item_name, kind)
+
+	log.Println("url is", url)
 
 	switch url {
 	case "noname":

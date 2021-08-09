@@ -1,42 +1,34 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"k8s.io/apimachinery/pkg/util/intstr"
+)
 
 type SERVICE struct {
-	Workspace []Workspace `json:"workspace"`
-	Cluster   []Cluster   `json:"cluster"`
-	Project   []Project   `json:"project"`
-	Name      string      `json:"name"`
-	Type      string      `json:"type"`
-	Ports     []PORT      `json:"port"`
-	ClusterIp string      `json:"clusterIp"`
-	CreateAt  time.Time   `json:"createAt"`
-
-	// jwt.StandardClaim
-}
-
-type SERVICE_DETAIL struct {
-	Name           string       `json:"Name"`
-	Clusters       []Cluster    `json:"cluster"`
-	Project        []Project    `json:"project"`
-	DeploymentInfo []DEPLOYMENT `json:"deploymentInfo"`
+	Name       string       `json:"name"`
+	Workspace  string       `json:"workspace"`
+	Cluster    string       `json:"cluster"`
+	Project    string       `json:"project"`
+	Deployment []DEPLOYMENT `json:"deploymentInfo"`
 	// PodInfo         []POD                  `json:"podInfo"`
+	Type            string                 `json:"type"`
+	Ports           []PORT                 `json:"port"`
+	ClusterIp       string                 `json:"clusterIp"`
 	ExternalIp      string                 `json:"externalIp"`
 	Selector        map[string]interface{} `json:"selector"`
 	Label           map[string]interface{} `json:"label"`
 	Annotation      map[string]interface{} `json:"annotation"`
 	SessionAffinity string                 `json:"sessionAffinity"`
-	Ports           []PORT                 `json:"port"`
 	Events          []EVENT                `json:"events"`
 	CreateAt        time.Time              `json:"createAt"`
 	UpdateAt        time.Time              `json:"updateAt"`
-
-	// jwt.StandardClaim
 }
+
 type PORT struct {
-	name       string `json:"name"`
-	port       string `json:"port"`
-	protocol   string `json:"protocol"`
-	targetPort string `json:"targetPort"`
-	// jwt.StandardClaim
+	name       string             `json:"name"`
+	port       int32              `json:"port"`
+	protocol   Protocol           `json:"protocol"`
+	targetPort intstr.IntOrString `json:"targetPort"`
 }

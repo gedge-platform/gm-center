@@ -52,7 +52,7 @@ func ArrStringtoBytes(i []string) []byte {
 	return bs
 }
 
-func Filter(i string, path string) (map[string]string, error) {
+func Filter(i string, path string) map[string]string {
 	x := make(map[string]string)
 	parse := gjson.Parse(i)
 	Dat := parse.Get(path)
@@ -78,10 +78,10 @@ func Filter(i string, path string) (map[string]string, error) {
 
 	}
 
-	return x, nil
+	return x
 }
 
-func FilterStr(i string, path string) (string, error) {
+func FilterStr(i string, path string) string {
 	parse := gjson.Parse(i)
 	Dat := parse.Get(path)
 	// Arr := parse.Get(path).Array()
@@ -95,13 +95,13 @@ func FilterStr(i string, path string) (string, error) {
 		// 	fmt.Printf("Error : %s\n", err3)
 		// }
 		// fmt.Println("[#35] is ", x)
-		return Dat.String(), nil
+		return Dat.String()
 	} else {
-		return Dat.String(), nil
+		return Dat.String()
 	}
 }
 
-func Finding(i string, path string, find string) (string, error) {
+func Finding(i string, path string, find string) string {
 	parse := gjson.Parse(i)
 	Dat := parse.Get(path)
 	Arr := parse.Get(path).Array()
@@ -118,7 +118,7 @@ func Finding(i string, path string, find string) (string, error) {
 		ReturnVal = Dat.Get(find).String()
 	}
 
-	return ReturnVal, nil
+	return ReturnVal
 }
 
 func Typeof(v interface{}) string {

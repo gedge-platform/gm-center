@@ -90,11 +90,14 @@ var (
 )
 
 func GetModel(c echo.Context, kind string) (data string, err error) {
-
 	var endPoint, namespace_name, item_name string
 
-	if data := FindClusterDB(c.QueryParam("cluster")); data == nil {
-		return "nf", ErrNotFound
+	if err := validate(c); err != nil {
+		return "", err
+	}
+
+	if data, err := FindClusterDB(c.QueryParam("cluster")); err != nil {
+		return "", err
 	} else {
 		endPoint = data.Endpoint
 	}
@@ -113,9 +116,9 @@ func GetModel(c echo.Context, kind string) (data string, err error) {
 
 	switch url {
 	case "noname":
-		return "nf", ErrNamespaceInvalid
+		return "", ErrNamespaceInvalid
 	case "nodetail":
-		return "nf", ErrDetailNameInvalid
+		return "", ErrDetailNameInvalid
 	}
 
 	log.Printf("[#31] url is %s", url)
@@ -201,14 +204,15 @@ func responseBody(req io.ReadCloser) string {
 	return newStr
 }
 
-func FindClusterDB(name string) *model.Cluster {
+func FindClusterDB(name string) (*model.Cluster, error) {
+	log.Println("in FindClusterDB")
 	db := db.DbManager()
 	var models model.Cluster
 
 	if err := db.First(&models, model.Cluster{Name: name}).Error; err != nil {
-		return nil
+		return &models, err
 	}
-	return &models
+	return &models, nil
 }
 
 func ReturnModel(detail_name string, kind string) interface{} {
@@ -370,4 +374,12 @@ func errCheck(namespace, item, kind string) string {
 	}
 
 	return ""
+}
+
+func validate(c echo.Context) error {
+	cluster_name := c.QueryParam("cluster")
+	if strings.Compare(cluster_name, "") == 0 {
+		return ErrClusterInvalid
+	}
+	return nil
 }

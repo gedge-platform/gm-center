@@ -35,7 +35,7 @@ func GEdgeRoute(e *echo.Echo) {
 	// r0.GET("/cluster", api.Cluster)
 	r0.GET("/getCluster", api.Get_Cluster)
 	r0.GET("/getProject", api.Get_Project)
-	r0.GET("/getDeployment", api.Get_Deployment)
+	r0.GET("/getDeployment/:name", api.Get_Deployment)
 	r0.GET("/gethttp", api.Get_http)
 
 	r5 := e.Group("/testing/v1")

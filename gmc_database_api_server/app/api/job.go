@@ -18,14 +18,13 @@ func GetJobs(c echo.Context) (err error) {
 	project_name := c.QueryParam("project")
 	cluster_name := c.QueryParam("cluster")
 
-	// fmt.Printf("job_name is %s\n, workspace name is %s\n, project name is %s", job_name, workspace_name, project_name)
+	fmt.Printf("job_name is %s\n, workspace name is %s\n, project name is %s", job_name, workspace_name, project_name)
 
 	// KubernetesJOB := get(job_name)
 	//
 	KubernetesJOB, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/cluster3/default/jobs/hello-job", false)
 	// https: //g-api-test.innogrid.tech/kube/v1/test1/default/jobs/hello-27133072
-	fmt.Printf("[56] KubernetesJOB is %s", KubernetesJOB)
-	data, err := common.GetModel(c, "cronjobs")
+	data, err := common.GetModel(c, "jobs")
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil

@@ -1,4 +1,4 @@
-basePath: /api/v1
+basePath: /gmcapi/v1
 definitions:
   model.App:
     properties:
@@ -14,15 +14,11 @@ definitions:
         type: integer
       created_at:
         type: string
-    required:
-    - appCategory
-    - appName
     type: object
-host: g-api-test.innogrid.tech
+host: 192.168.150.197:8009
 info:
   contact:
-    email: consine2c@innogrid.com
-    name: consine2c
+    name: GM-Center
     url: https://gedge-platform.github.io/gm-center/
   description: This is a Gedge GM-Center Swagger API.
   license:
@@ -31,18 +27,11 @@ info:
   title: Gedge GM-Center Swagger API
   version: "1.0"
 paths:
-  /accounts/{id}:
+  /apps:
     get:
       consumes:
       - application/json
-      description: get string by ID
-      operationId: get-string-by-int
-      parameters:
-      - description: Account ID
-        in: path
-        name: id
-        required: true
-        type: integer
+      description: get App Lists
       produces:
       - application/json
       responses:
@@ -54,10 +43,64 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/model.App'
-      summary: Show a account
+      summary: Show all apps
+    post:
+      consumes:
+      - application/json
+      description: create App
+      parameters:
+      - description: App Name
+        in: path
+        name: appName
+        required: true
+        type: string
+      - description: App Category
+        in: path
+        name: appCategory
+        required: true
+        type: string
+      - description: App Description
+        in: path
+        name: appDescription
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Token:
+              description: qwerty
+              type: string
+          schema:
+            $ref: '#/definitions/model.App'
+      summary: Create App
+  /apps/{name}:
+    get:
+      consumes:
+      - application/json
+      description: get App
+      parameters:
+      - description: App Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Token:
+              description: qwerty
+              type: string
+          schema:
+            $ref: '#/definitions/model.App'
+      summary: Show App
 schemes:
 - http
-- https
 securityDefinitions:
   ApiKeyAuth:
     in: header

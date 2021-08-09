@@ -12,7 +12,7 @@ type Project struct {
 	Type          string            `gorm:"column:projectType; not null; default:null" json:"projectType"`
 	Owner         string            `gorm:"column:projectOwner; not null; default:null" json:"projectOwner"`
 	Creator       string            `gorm:"column:projectCreator; not null; default:null" json:"projectCreator"`
-	Created_at    time.Time         `gorm:"column:created_at" json:"created_at"`
+	CreateAt      time.Time         `gorm:"column:created_at" json:"created_at"`
 	WorkspaceName string            `gorm:"column:workspaceName; not null; default:null" json:"workspaceName"`
 	Status        string            `json:"status"`
 	ClusterName   string            `json:"clusterName"`

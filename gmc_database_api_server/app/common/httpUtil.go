@@ -342,6 +342,7 @@ func UrlExpr(endpoint, namespace, item, kind string) string {
 }
 
 func NamespaceExpr(url, namespace, item string) string {
+	log.Println("items is ", item)
 	check_namespace := strings.Compare(namespace, "") != 0
 	check_item := strings.Compare(item, "") != 0
 	returnVal := url
@@ -352,6 +353,8 @@ func NamespaceExpr(url, namespace, item string) string {
 	} else if check_namespace {
 		returnVal = strings.Replace(returnVal, "$1", namespace, -1)
 		returnVal = strings.Replace(returnVal, "$2", "", -1)
+	} else if check_item {
+		returnVal = strings.Replace(returnVal, "$2", item, -1)
 	}
 
 	return returnVal

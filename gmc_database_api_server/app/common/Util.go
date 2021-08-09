@@ -52,7 +52,7 @@ func ArrStringtoBytes(i []string) []byte {
 	return bs
 }
 
-func Filter(i string, path string) (map[string]string, error) {
+func Filter(i string, path string) map[string]string {
 	x := make(map[string]string)
 	parse := gjson.Parse(i)
 	Dat := parse.Get(path)
@@ -78,7 +78,7 @@ func Filter(i string, path string) (map[string]string, error) {
 
 	}
 
-	return x, nil
+	return x
 }
 
 func FilterStr(i string, path string) (string, error) {

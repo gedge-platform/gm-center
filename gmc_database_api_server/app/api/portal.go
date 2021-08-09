@@ -22,8 +22,8 @@ func GetTest(c echo.Context) (err error) {
 	data1, _ := common.FilterStr(data, "metadata.ownerReferences")
 	fmt.Printf("data1 type is %s\n", common.Typeof(data1))
 
-	data2, _ := common.Filter(data, "metadata.ownerReferences")
-	fmt.Printf("data2 type is %s\n", common.Typeof(data2))
+	data2 := common.Filter(data, "metadata.ownerReferences")
+	// fmt.Printf("data2 type is %s\n", common.Typeof(data2))
 
 	log.Println("[#2] data is", data2)
 	log.Println("[#2-1] data is", data2["name"])

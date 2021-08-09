@@ -1,16 +1,14 @@
 {
     "schemes": [
-        "http",
-        "https"
+        "http"
     ],
     "swagger": "2.0",
     "info": {
         "description": "This is a Gedge GM-Center Swagger API.",
         "title": "Gedge GM-Center Swagger API",
         "contact": {
-            "name": "consine2c",
-            "url": "https://gedge-platform.github.io/gm-center/",
-            "email": "consine2c@innogrid.com"
+            "name": "GM-Center",
+            "url": "https://gedge-platform.github.io/gm-center/"
         },
         "license": {
             "name": "Apache 2.0",
@@ -18,25 +16,97 @@
         },
         "version": "1.0"
     },
-    "host": "g-api-test.innogrid.tech",
-    "basePath": "/api/v1",
+    "host": "192.168.150.197:8009",
+    "basePath": "/gmcapi/v1",
     "paths": {
-        "/accounts/{id}": {
+        "/apps": {
             "get": {
-                "description": "get string by ID",
+                "description": "get App Lists",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Show a account",
-                "operationId": "get-string-by-int",
+                "summary": "Show all apps",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.App"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create App",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create App",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Account ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "App Name",
+                        "name": "appName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "App Category",
+                        "name": "appCategory",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "App Description",
+                        "name": "appDescription",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.App"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{name}": {
+            "get": {
+                "description": "get App",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show App",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "App Name",
+                        "name": "name",
                         "in": "path",
                         "required": true
                     }
@@ -61,10 +131,6 @@
     "definitions": {
         "model.App": {
             "type": "object",
-            "required": [
-                "appCategory",
-                "appName"
-            ],
             "properties": {
                 "appCategory": {
                     "type": "string"

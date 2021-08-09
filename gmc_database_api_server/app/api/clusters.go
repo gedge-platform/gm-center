@@ -144,6 +144,7 @@ func DeleteCluster(c echo.Context) (err error) {
 
 func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Cluster {
 	models := model.Cluster{}
+
 	if check := strings.Compare(search_val, "") == 0; check {
 		return nil
 	}

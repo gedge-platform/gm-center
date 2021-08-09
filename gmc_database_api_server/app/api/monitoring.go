@@ -18,11 +18,6 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-type Test struct {
-	Name  string
-	Email model.Value
-}
-
 var clusterMetric = map[string]string{
 	"cpu_util":     "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster)*100),0.1)",
 	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[2m]))by(cluster),0.01)",
@@ -37,13 +32,14 @@ var clusterMetric = map[string]string{
 	"pod_quota":    "sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)",
 	"pod_util":     "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
 
-	"apiserver_request_rate":            "round(sum(irate(apiserver_request_total{$1}[5m]))by(cluster),0.001)",
+	"apiserver_request_rate": "round(sum(irate(apiserver_request_total{$1}[5m]))by(cluster),0.001)",
+	//
 	"scheduler_schedule_attempts_total": "scheduler_pod_scheduling_attempts_count{$1}",
 	"scheduler_schedule_fail":           "sum(rate(scheduler_pending_pods{$1}[5m]))by(cluster)",
 	"scheduler_schedule_fail_total":     "sum(scheduler_pending_pods{$1})by(cluster)",
 }
 
-var namespaceMetric = map[string]string{
+var namespaceMetric = map[string]string{ //쿼리문 확인 필요
 	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
 	"namespace_memory":    "sum(sum(container_memory_usage_bytes{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)",
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
@@ -56,7 +52,7 @@ var podMetric = map[string]string{
 	"pod_net_bytes_received":    "round(sum(irate(container_network_receive_bytes_total{pod!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster)/125,0.01)",
 }
 
-var nodeMetric = map[string]string{
+var nodeMetric = map[string]string{ //쿼리 수정 필요
 	"node_cpu_util":           "100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(instance)*100)",
 	"node_cpu_usage":          "sum(rate(container_cpu_usage_seconds_total{id='/'}[5m]))by(node)",
 	"node_cpu_total":          "sum(machine_cpu_cores)by(node)",
@@ -82,11 +78,23 @@ var nodeMetric = map[string]string{
 
 var appMetric = map[string]string{}
 
+var gpuMetric = map[string]string{
+	"gpu_temperature":  "nvidia_smi_temperature_gpu{$1}",
+	"gpu_power":        "nvidia_smi_power_draw_watts{$1}",
+	"gpu_power_limit":  "nvidia_smi_power_limit_watts{$1}",
+	"gpu_memory_total": "nvidia_smi_memory_total_bytes{$1}",
+	"gpu_memory_used":  "nvidia_smi_memory_used_bytes{$1}",
+	"gpu_memory_free":  "nvidia_smi_memory_free_bytes{$1}",
+	"gpu_ratio":        "nvidia_smi_utilization_gpu_ratio{$1}",
+	"gpu_memory_ratio": "nvidia_smi_utilization_memory_ratio{$1}",
+	"gpu_fan_speed":    "nvidia_smi_fan_speed_ratio{$1}",
+}
+
 func Metrics(c echo.Context) (err error) {
 
 	kind := c.Param("kind")
 
-	//0. 예외처리 함수 parameter 입력값이 올바른지 검증한다.
+	//0. parameter 입력값이 올바른지 검증한다.
 	if !validateParam(c) {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"Error": "Bad Parameter",
@@ -96,12 +104,20 @@ func Metrics(c echo.Context) (err error) {
 	// 1. metric_filte를 parsing 한다
 	metric_filter := c.QueryParam("metric_filter")
 	metrics := metricParsing(metric_filter)
-	//2. 예외처리 함수 metric_filter가 clusterMetric, podMetric에 다 속해 있는지 검증해야한다.
+	//2. metric_filter가 clusterMetric, podMetric에 다 속해 있는지 검증한다.
 	if !validateMetric(kind, metrics, c) {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"Error": "Not found metric",
 		})
 	}
+
+	//2/ 필터 입력값에 대해 검증한다.
+	if !validateFilter(kind, c) {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"Error": "Bad Filter",
+		})
+	}
+
 	// 3. 처리 함수를 만든다 파라미터는 c,kind,metrics 를 입력.
 	mericResult(c, kind, metrics)
 
@@ -111,17 +127,22 @@ func Metrics(c echo.Context) (err error) {
 func mericResult(c echo.Context, kind string, a []string) error {
 	// fmt.Println("metricResult")
 	db := db.DbManager()
-	addr := "http://192.168.150.197:31340"
+	addr := "http://192.168.150.115:31298/"
 
 	cluster := c.QueryParam("cluster_filter")
 	//cluster DB 유무 체크
-	models := FindClusterDB(db, "Name", cluster)
 
-	if models == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return nil
-	} else {
-		log.Println("models find it !")
+	switch cluster {
+	case "all":
+	default:
+		models := FindClusterDB(db, "Name", cluster)
+
+		if models == nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return nil
+		} else {
+			log.Println("models find it !")
+		}
 	}
 
 	//결과를 담기 위한
@@ -141,33 +162,39 @@ func mericResult(c echo.Context, kind string, a []string) error {
 			}
 			data = QueryRange(addr, metricExpr(clusterMetric[a[k]], temp_filter), c)
 		case "node":
-			fmt.Println("kind:node")
-			//구현 예정
-
+			temp_filter := map[string]string{
+				"cluster": cluster,
+			}
+			data = QueryRange(addr, metricExpr(nodeMetric[a[k]], temp_filter), c)
 		case "pod":
 			namespace := c.QueryParam("namespace_filter")
-
+			pod := c.QueryParam("pod_filter")
 			temp_filter := map[string]string{
 				"cluster":   cluster,
 				"namespace": namespace,
+				"pod":       pod,
 			}
 
 			data = QueryRange(addr, metricExpr(podMetric[a[k]], temp_filter), c)
 
 		case "app":
-			fmt.Println("kind:app")
-			//구현 예정
-
+			temp_filter := map[string]string{
+				"cluster": cluster,
+			}
+			data = QueryRange(addr, metricExpr(appMetric[a[k]], temp_filter), c)
 		case "namespace":
 			namespace := c.QueryParam("namespace_filter")
-
 			temp_filter := map[string]string{
 				"cluster":   cluster,
 				"namespace": namespace,
 			}
 
 			data = QueryRange(addr, metricExpr(namespaceMetric[a[k]], temp_filter), c)
-
+		case "gpu":
+			temp_filter := map[string]string{
+				"cluster": cluster,
+			}
+			data = QueryRange(addr, metricExpr(gpuMetric[a[k]], temp_filter), c)
 		default:
 			return c.JSON(http.StatusNotFound, echo.Map{
 				"errors": echo.Map{
@@ -185,6 +212,7 @@ func mericResult(c echo.Context, kind string, a []string) error {
 	})
 
 	// return nil
+	//t
 }
 
 func metricParsing(m string) []string {
@@ -233,8 +261,55 @@ func validateMetric(k string, m []string, c echo.Context) bool {
 				return false
 			}
 		}
+	case "gpu":
+		for _, v := range m {
+			if gpuMetric[v] == "" {
+				return false
+			}
+		}
 	default:
-		fmt.Println("default")
+	}
+
+	return true
+}
+
+func validateFilter(k string, c echo.Context) bool {
+
+	switch k {
+	case "cluster":
+		cluster := c.QueryParam("cluster_filter")
+		if check := strings.Compare(cluster, "") == 0; check {
+			return false
+		}
+	case "node":
+		cluster := c.QueryParam("cluster_filter")
+		if check := strings.Compare(cluster, "") == 0; check {
+			return false
+		}
+	case "pod":
+		cluster := c.QueryParam("cluster_filter")
+		pod := c.QueryParam("pod_filter")
+		namespace := c.QueryParam("namespace_filter")
+		if check := strings.Compare(cluster, "")*strings.Compare(pod, "")*strings.Compare(namespace, "") == 0; check {
+			return false
+		}
+	case "app":
+		cluster := c.QueryParam("cluster_filter")
+		if check := strings.Compare(cluster, "") == 0; check {
+			return false
+		}
+	case "namespace":
+		cluster := c.QueryParam("cluster_filter")
+		namespace := c.QueryParam("namespace_filter")
+		if check := strings.Compare(cluster, "")*strings.Compare(namespace, "") == 0; check {
+			return false
+		}
+	case "gpu":
+		cluster := c.QueryParam("cluster_filter")
+		if check := strings.Compare(cluster, "") == 0; check {
+			return false
+		}
+	default:
 	}
 
 	return true
@@ -333,6 +408,7 @@ func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
 	if err != nil {
 		log.Printf("Error querying Prometheus: %v\n", err)
 		os.Exit(1)
+		//실행 폭파 f
 	}
 
 	if len(warnings) > 0 {
@@ -350,17 +426,18 @@ func GetDuration(c echo.Context) int64 {
 	return returnVal
 }
 
-//치환 함수
 func metricExpr(val string, filter map[string]string) string {
 	var returnVal string
 
 	for k, v := range filter {
 
-		if k != "" {
+		switch v {
+		case "all":
+			returnVal += fmt.Sprintf(`%s!="",`, k)
+		default:
 			returnVal += fmt.Sprintf(`%s="%s",`, k, v)
-		} else {
-			returnVal += fmt.Sprintf(`%s!=""`, k)
 		}
+
 	}
 
 	return strings.Replace(val, "$1", returnVal, -1)

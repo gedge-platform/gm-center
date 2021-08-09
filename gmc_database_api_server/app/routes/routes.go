@@ -9,8 +9,7 @@ import (
 	// "github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-
-	// "github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -31,14 +30,18 @@ func (dv *DataValidator) Validate(i interface{}) error {
 func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
-	r0 := e.Group("/test/v1")
+	r0 := e.Group("/test/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
+		return api.AuthenticateUser(id, password), nil
+	}))
 	// r0.GET("/cluster", api.Cluster)
 	r0.GET("/getCluster", api.Get_Cluster)
 	r0.GET("/getProject", api.Get_Project)
 	r0.GET("/getDeployment/:name", api.Get_Deployment)
 	r0.GET("/gethttp", api.Get_http)
 
-	r5 := e.Group("/testing/v1")
+	r5 := e.Group("/testing/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
+		return api.AuthenticateUser(id, password), nil
+	}))
 	r5.GET("/services", api.GetService)
 	r5.GET("/services/:name", api.GetService)
 
@@ -84,7 +87,10 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/cronjobs/:name", api.GetCronJobs)
 
 	r.GET("/pods/:name", api.GetPods)
-	r2 := e.Group("/kube/v1")
+
+	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
+		return api.AuthenticateUser(id, password), nil
+	}))
 	r2.Any("/:cluster_name", api.Kubernetes)
 	r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)
 	r2.Any("/:cluster_name/:namespace_name/:kind_name", api.Kubernetes)

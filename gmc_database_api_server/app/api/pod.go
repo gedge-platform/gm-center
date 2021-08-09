@@ -31,7 +31,7 @@ func GetPods(c echo.Context) (err error) {
 	// 	return nil
 	// }
 	// fmt.Printf("[#456789]eventdata is info %s", eventdata)
-	pod_uid, _ := common.FilterStr(data, "metadata.uid")
+	pod_uid := common.FilterStr(data, "metadata.uid")
 	fmt.Printf("[#666]pod_uid type is %s\n", pod_uid)
 	getCallEvent(c)
 	// GetClusterEP(C, getURL(c, "pods"))
@@ -42,30 +42,30 @@ func GetPods(c echo.Context) (err error) {
 	// getCallEvent(c, "pods")
 	// fmt.Printf("[#1eventdata]data is info %s", eventdata)
 	// fmt.Printf("[#함수]data is info %s", getCallEvent())
-	name, _ := common.Finding(data, "metadata", "name")
-	kind, _ := common.Finding(data, "metadata", "kind")
+	name := common.Finding(data, "metadata", "name")
+	kind := common.Finding(data, "metadata", "kind")
 	fmt.Printf("kind is info %s", kind)
 
-	namespace, _ := common.Finding(data, "metadata", "namespace")
-	startTime, _ := common.FilterStr(data, "metadata.creationTimestamp")
-	status, _ := common.Finding(data, "status", "phase")
+	namespace := common.Finding(data, "metadata", "namespace")
+	startTime := common.FilterStr(data, "metadata.creationTimestamp")
+	status := common.Finding(data, "status", "phase")
 
 	timeformat, _ := time.Parse("2006-01-02 15:04:05\n", startTime)
 	fmt.Println(timeformat.Format(time.RFC3339))
 	log.Println("[#48888] data is\n", startTime)
 	log.Println("[#48888] data is\n", timeformat)
 
-	qosClass, _ := common.Finding(data, "status", "qosClass")
+	qosClass := common.Finding(data, "status", "qosClass")
 
-	podIP, _ := common.Finding(data, "status", "podIP")
-	nodeName, _ := common.Finding(data, "spec", "nodeName")
+	podIP := common.Finding(data, "status", "podIP")
+	nodeName := common.Finding(data, "spec", "nodeName")
 
 	log.Println("[#4] data is", name)
 	// ownerReferencesInfo := []model.CONTAINERS{}
 	// ownerReference := model.CONTAINERS{}
 	ownerReferencesInfo := []model.OwnerReference{}
 
-	ownerReferences, _ := common.FilterStr(data, "metadata.ownerReferences")
+	ownerReferences := common.FilterStr(data, "metadata.ownerReferences")
 	fmt.Printf("data1 type is %s\n", common.Typeof(ownerReferences))
 	log.Printf("[#523] t is %s\n", ownerReferences)
 	ownerReferences_err := json.Unmarshal([]byte(ownerReferences), &ownerReferencesInfo)
@@ -75,7 +75,7 @@ func GetPods(c echo.Context) (err error) {
 
 	log.Printf("[#53] t is %s\n", ownerReferencesInfo)
 	containerspec := []model.PODCONTAINERS{}
-	containers, _ := common.FilterStr(data, "spec.containers")
+	containers := common.FilterStr(data, "spec.containers")
 	fmt.Printf("data1 type is %s\n", common.Typeof(containers))
 	log.Printf("[#523] t is %s\n", containers)
 
@@ -85,7 +85,7 @@ func GetPods(c echo.Context) (err error) {
 	}
 	log.Printf("[#53] t is %s\n", containerspec)
 
-	data3, _ := common.Finding(data, "spec.containers.volumeMounts", "name")
+	data3 := common.Finding(data, "spec.containers.volumeMounts", "name")
 	fmt.Printf("readonly type is %s\n", data3)
 	log.Printf("[#789789798] data3 is %s\n", data3)
 	// StringToInt(data3)
@@ -96,7 +96,7 @@ func GetPods(c echo.Context) (err error) {
 	// 	data3 = 0
 	// }
 	containerStatuses := []model.ContainerStatuses{}
-	ContainerStatuses_info, _ := common.FilterStr(data, "status.containerStatuses")
+	ContainerStatuses_info := common.FilterStr(data, "status.containerStatuses")
 	fmt.Printf("###888 envs type is %s\n", ContainerStatuses_info)
 	fmt.Printf("###555 envs type is %s\n", common.Typeof(ContainerStatuses_info))
 	log.Printf("[#798] t is %s\n", ContainerStatuses_info)
@@ -107,7 +107,7 @@ func GetPods(c echo.Context) (err error) {
 	}
 
 	label := make(map[string]string)
-	labels, _ := common.FilterStr(data, "metadata.labels")
+	labels := common.FilterStr(data, "metadata.labels")
 	fmt.Printf("[labels] is %s\n", labels)
 	err_labels := json.Unmarshal([]byte(labels), &label)
 
@@ -115,7 +115,7 @@ func GetPods(c echo.Context) (err error) {
 		fmt.Printf("Error : %s\n", err_labels)
 	}
 	annotation := make(map[string]string)
-	annotations, _ := common.FilterStr(data, "metadata.annotations")
+	annotations := common.FilterStr(data, "metadata.annotations")
 	err_annotation := json.Unmarshal([]byte(annotations), &annotation)
 	if err_annotation != nil {
 		fmt.Printf("Error : %s\n", err_annotation)

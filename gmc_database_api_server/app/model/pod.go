@@ -1,35 +1,26 @@
 package model
 
-import "time"
-
 type POD struct {
-	Workspace string    `json:"workspace"`
-	Cluster   string    `json:"cluster"`
-	Project   string    `json:"project"`
-	Name      string    `json:"name"`
-	Namespace string    `json:"namespace"`
-	Ready     string    `json:"ready"`
-	Status    string    `json:"status"`
-	PodIP     string    `json:"podIP"`
-	Restart   string    `json:"restart"`
-	CreatedAt time.Time `json:"creationTimestamp"`
-	NodeName  string    `json:"node_name"`
-	// Cronjob   CRONJOB        `json:"cronjob"`
+	Workspace string `json:"workspace"`
+	Cluster   string `json:"cluster"`
+	Project   string `json:"project"`
+	Name      string `json:"name"`
+	// Ready     int    `json:"Ready"`
+	Namespace string `json:"namespace"`
+	Status    string `json:"status"`
+	PodIP     string `json:"podIP"`
+	CreatedAt string `json:"creationTimestamp"`
+	NodeName  string `json:"node_name"`
 }
 
 type PODDETAIL struct {
 	POD
-	Lable             map[string]interface{} `json:"label"`
-	OwnerReference    []OwnerReference       `json:"ownerReferences"`
-	ContainerStatuses []CONTAINERSTATUSES    `json:"containerStatuses"`
-	VolumeMounts      []VOLUMEMOUNTS         `json:"volumemounts"`
-
-	// Env          []ENV   `json:"env"`
-	Ports        []PORTS `json:"port"`
-	BackoffLimit int     `json:"backoffLimit"`
-	Completions  int     `json:"completions"`
-	Parallelism  int     `json:"parallelism"`
-	Test         string  `json:"test"`
+	Lable             map[string]string   `json:"label"`
+	Annotations       map[string]string   `json:"annotations"`
+	OwnerReference    []OwnerReference    `json:"ownerReferences"`
+	Podcontainers     []PODCONTAINERS     `json:"Podcontainers"`
+	QosClass          string              `json:"qosClass"`
+	ContainerStatuses []ContainerStatuses `json:"containerStatuses"`
 }
 
 type VOLUMEMOUNTS struct {
@@ -38,38 +29,65 @@ type VOLUMEMOUNTS struct {
 	ReadOnly  bool   `json:"readonly"`
 }
 
-type CONTAINERSTATUSES struct {
-	Name string `json:"name"`
-	// Image string `json:"image"`
-	// Ready bool   `json:"ready"`
-	ENV struct {
-		Name      string `json:"name"`
-		valueFrom string `json:"value"`
-	}
-	// RestartCount int    `json:"restartcount"`
-	// State        string `json:"state"`
+type PODCONTAINERS struct {
+	Name           string         `json:"name"`
+	Image          string         `json:"image"`
+	ReadinessProbe ReadinessProbe `json:"readinessProbe"`
+	LivenessProbe  LivenessProbe  `json:"livenessProbe"`
+	PortsPOD       []PORTPOD      `json:"ports"`
+	Env            []ENV          `json:"env"`
+	VolumeMounts   []VOLUMEMOUNTS `json:"volumemounts"`
 }
 
-// type ENV struct {
-// 	Name      string `json:"name"`
-// 	valueFrom string `json:"value"`
-// }
+type ENV struct {
+	Name      string    `json:"name"`
+	ValueFrom ValueFrom `json:"valueFrom"`
+}
 
 type ReadinessProbe struct {
-	FailureThreshold int `json:"failureThreshold"`
-	httpGet          struct {
-		Path   string
-		Port   int
-		Scheme string
-	}
-	InitialDelaySeconds int `json:"initialDelaySeconds"`
-	PeriodSeconds       int `json:"periodSeconds"`
-	SuccessThreshold    int `json:"successThreshold"`
-	TimeoutSeconds      int `json:"timeoutSeconds"`
+	FailureThreshold    int     `json:"failureThreshold"`
+	HTTPGET             HTTPGET `json:"httpGET"`
+	InitialDelaySeconds int     `json:"initialDelaySeconds"`
+	PeriodSeconds       int     `json:"periodSeconds"`
+	SuccessThreshold    int     `json:"successThreshold"`
+	TimeoutSeconds      int     `json:"timeoutSeconds"`
+}
+type LivenessProbe struct {
+	FailureThreshold    int     `json:"failureThreshold"`
+	HTTPGET             HTTPGET `json:"httpGET"`
+	InitialDelaySeconds int     `json:"initialDelaySeconds"`
+	PeriodSeconds       int     `json:"periodSeconds"`
+	SuccessThreshold    int     `json:"successThreshold"`
+	TimeoutSeconds      int     `json:"timeoutSeconds"`
+}
+type PORTPOD struct {
+	Name          string `json:"name"`
+	ContainerPort int    `json:"containerPort"`
+	Protocol      string `json:"protocol"`
 }
 
-type PORTS struct {
-	ContainerPort string `json:"containerPort"`
-	Name          string `json:"name"`
-	Protocol      string `json:"protocol"`
+type HTTPGET struct {
+	Path   string `json:"path"`
+	Port   int    `json:"port"`
+	Scheme string `json:"scheme"`
+}
+type ContainerStatuses struct {
+	Name         string `json:"name"`
+	Ready        bool   `json:"ready"`
+	RestartCount int    `json:"restartCount"`
+	Image        string `json:"image"`
+	ContainerID  string `json:"containerID"`
+	Started      bool   `json:"started"`
+}
+type ValueFrom struct {
+	FieldRef        FieldRef        `json:"fieldRef"`
+	ConfigMapKeyRef ConfigMapKeyRef `json:"configMapKeyRef"`
+}
+type FieldRef struct {
+	ApiVersion string `json:"apiVersion"`
+	FieldPath  string `json:"fieldPath"`
+}
+type ConfigMapKeyRef struct {
+	Name string `json:"name"`
+	Key  int    `json:"key"`
 }

@@ -42,7 +42,7 @@ func getCallEvent(c echo.Context) []model.Event {
 	// }
 	// }
 	log.Println("[#77777 eventdata] data is", eventdata)
-	podUid, _ := common.Finding(poddata, "metadata", "uid")
+	podUid := common.Finding(poddata, "metadata", "uid")
 	log.Println("[#88888getcallevent] data is", podUid)
 
 	return List

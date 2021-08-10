@@ -1,16 +1,19 @@
 package model
 
+import "time"
+
 type POD struct {
 	Workspace string `json:"workspace"`
 	Cluster   string `json:"cluster"`
 	Project   string `json:"project"`
 	Name      string `json:"name"`
+	Kind      string `json:"kind"`
 	// Ready     int    `json:"Ready"`
-	Namespace string `json:"namespace"`
-	Status    string `json:"status"`
-	PodIP     string `json:"podIP"`
-	CreatedAt string `json:"creationTimestamp"`
-	NodeName  string `json:"node_name"`
+	Namespace string    `json:"namespace"`
+	Status    string    `json:"status"`
+	PodIP     string    `json:"podIP"`
+	CreatedAt time.Time `json:"created_at"`
+	NodeName  string    `json:"node_name"`
 }
 
 type PODDETAIL struct {
@@ -21,6 +24,7 @@ type PODDETAIL struct {
 	Podcontainers     []PODCONTAINERS     `json:"Podcontainers"`
 	QosClass          string              `json:"qosClass"`
 	ContainerStatuses []ContainerStatuses `json:"containerStatuses"`
+	EVENT             []EVENT             `json:"event"`
 }
 
 type VOLUMEMOUNTS struct {
@@ -72,11 +76,11 @@ type HTTPGET struct {
 	Scheme string `json:"scheme"`
 }
 type ContainerStatuses struct {
+	ContainerID  string `json:"containerID"`
 	Name         string `json:"name"`
 	Ready        bool   `json:"ready"`
 	RestartCount int    `json:"restartCount"`
 	Image        string `json:"image"`
-	ContainerID  string `json:"containerID"`
 	Started      bool   `json:"started"`
 }
 type ValueFrom struct {
@@ -90,4 +94,13 @@ type FieldRef struct {
 type ConfigMapKeyRef struct {
 	Name string `json:"name"`
 	Key  int    `json:"key"`
+}
+type PodReferDeploy struct {
+	Name       string     `json:"name"`
+	Namespace  string     `json:"namespace"`
+	Conditions Conditions `json:"status"`
+}
+type Conditions struct {
+	Reason string `json:"reason"`
+	Type   string `json:"type"`
 }

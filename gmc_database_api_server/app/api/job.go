@@ -1,142 +1,186 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/tidwall/gjson"
 )
 
 func GetJobs(c echo.Context) (err error) {
-	// db := db.DbManager()
 	job_name := c.Param("name")
 	workspace_name := c.QueryParam("workspace")
 	project_name := c.QueryParam("project")
 	cluster_name := c.QueryParam("cluster")
-
-	fmt.Printf("job_name is %s\n, workspace name is %s\n, project name is %s", job_name, workspace_name, project_name)
-
-	// KubernetesJOB := get(job_name)
-	//
-	KubernetesJOB, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/cluster3/default/jobs/hello-job", false)
-	// https: //g-api-test.innogrid.tech/kube/v1/test1/default/jobs/hello-27133072
+	var jobDetail model.JOBDETAIL
 	data, err := common.GetModel(c, "jobs")
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	fmt.Printf("[34] data is %s", data)
+	fmt.Printf("[#55]job data is info %s", data)
 
-	var jobModel model.JOB
+	fmt.Printf("job_name is %s\n, workspace name is %s\n, project name is %s", job_name, workspace_name, project_name, cluster_name)
 
-	containerInfo := []model.CONTAINERS{}
-	container := model.CONTAINERS{}
-	conditionInfo := []model.CONDITIONS{}
-	condition := model.CONDITIONS{}
-	i := gjson.Get(KubernetesJOB, `status.succeeded`).String()
+	// conditionInfo := []model.CONDITIONS{}
+	// condition := model.CONDITIONS{}
+	status := common.FilterStr(data, `status.succeeded`)
 	//labels
-	t := make(map[string]string)
-	labels := gjson.Get(KubernetesJOB, `metadata.labels`)
+	label := make(map[string]string)
+	labels := common.FilterStr(data, "metadata.labels")
 	fmt.Printf("[labels] is %s\n", labels)
-	err_labels := json.Unmarshal([]byte(labels.String()), &t)
+	err_labels := json.Unmarshal([]byte(labels), &label)
+
 	if err_labels != nil {
 		fmt.Printf("Error : %s\n", err_labels)
 	}
-	//annotations
-	x := make(map[string]string)
-	annotations := gjson.Get(KubernetesJOB, `metadata.annotations`)
-	fmt.Printf("[annotations] is %s\n", annotations)
-	err_annotation := json.Unmarshal([]byte(annotations.String()), &x)
+	annotation := make(map[string]string)
+	annotations := common.FilterStr(data, "metadata.annotations")
+	err_annotation := json.Unmarshal([]byte(annotations), &annotation)
 	if err_annotation != nil {
 		fmt.Printf("Error : %s\n", err_annotation)
 	}
-	kind := gjson.Get(KubernetesJOB, `kind`).String()
-	backoffLimit := gjson.Get(KubernetesJOB, `spec.backoffLimit`).String()
-	completions := gjson.Get(KubernetesJOB, `spec.completions`).String()
-	parallelism := gjson.Get(KubernetesJOB, `spec.parallelism`).String()
-	creationTimestamp := gjson.Get(KubernetesJOB, `metadata.creationTimestamp`).Time()
-	startTime := gjson.Get(KubernetesJOB, `status.startTime`).Time()
-	fmt.Printf("[startTimep] is %s\n", startTime)
-	completionTime := gjson.Get(KubernetesJOB, `status.completionTime`).Time()
-	fmt.Printf("[completionTime] is %s\n", completionTime)
-	// time := gjson.Get(KubernetesJOB, `metadata.managedFields`).String()
-	// fmt.Printf("[time] is %s\n", time)
-	fmt.Printf("[creationTimestamp] is %s\n", creationTimestamp)
+	kind := common.FilterStr(data, `kind`)
+	backoffLimit := common.FilterStr(data, `spec.backoffLimit`)
+	completions := common.FilterStr(data, `spec.completions`)
+	parallelism := common.FilterStr(data, `spec.parallelism`)
+	creationTimestamp := common.FilterStr(data, `metadata.creationTimestamp`)
+	create_at, err := time.Parse(time.RFC3339, creationTimestamp)
+
 	//ownerReferences
-	l := []model.OwnerReference{}
-	o := model.OwnerReference{}
-	k := gjson.Get(KubernetesJOB, `metadata.ownerReferences`).Array()
-	fmt.Printf("k is %s\n", k)
-	for n, _ := range k {
-		fmt.Printf("data is %s\n", k[n])
-		err := json.Unmarshal([]byte(k[n].String()), &o)
-		if err != nil {
-			panic(err)
-		}
-		l = append(l, o)
+	ownerReferencesInfo := []model.OwnerReference{}
+
+	ownerReferences := common.FilterStr(data, "metadata.ownerReferences")
+	fmt.Printf("data1 type is %s\n", common.Typeof(ownerReferences))
+	log.Printf("[#523] t is %s\n", ownerReferences)
+	ownerReferences_err := json.Unmarshal([]byte(ownerReferences), &ownerReferencesInfo)
+	if err != nil {
+		panic(ownerReferences_err)
 	}
-	containers := gjson.Get(KubernetesJOB, `spec.template.spec.containers`).Array()
-	fmt.Printf("[#contaienr ] is %s\n", containers)
-	for n, _ := range containers {
-		fmt.Printf("containerdata is %s\n", containers[n])
-		err := json.Unmarshal([]byte(containers[n].String()), &container)
-		if err != nil {
-			panic(err)
-		}
-		containerInfo = append(containerInfo, container)
+
+	log.Printf("[#53] t is %s\n", ownerReferencesInfo)
+	containerspec := []model.CONTAINERS{}
+	containers := common.FilterStr(data, "spec.template.spec.containers")
+	fmt.Printf("data1 type is %s\n", common.Typeof(containers))
+	log.Printf("[#523] t is %s\n", containers)
+
+	sepcContainer := json.Unmarshal([]byte(containers), &containerspec)
+	if err != nil {
+		panic(sepcContainer)
 	}
-	conditions := gjson.Get(KubernetesJOB, `status.conditions`).Array()
+	log.Printf("[#53] t is %s\n", containerspec)
+	startTime := common.FilterStr(data, "status.startTime")
+	completionTime := common.FilterStr(data, "status.completionTime")
+	start_timeformat, err := time.Parse(time.RFC3339, startTime)
+	completion_timeformat, err := time.Parse(time.RFC3339, completionTime)
+	// containers := gjson.Get(KubernetesJOB, `spec.template.spec.containers`).Array()
+	// fmt.Printf("[#contaienr ] is %s\n", containers)
+	// for n, _ := range containers {
+	// 	fmt.Printf("containerdata is %s\n", containers[n])
+	// 	err := json.Unmarshal([]byte(containers[n].String()), &container)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	containerInfo = append(containerInfo, container)
+	// }
+	conditions := common.FilterStr(data, `status.conditions`)
 	fmt.Printf("[#conditions ] is %s\n", conditions)
-	for n, _ := range conditions {
-		fmt.Printf("containerdata is %s\n", conditions[n])
-		err := json.Unmarshal([]byte(conditions[n].String()), &condition)
-		if err != nil {
-			panic(err)
-		}
-		conditionInfo = append(conditionInfo, condition)
-	}
+	// for n, _ := range conditions {
+	// 	fmt.Printf("containerdata is %s\n", conditions[n])
+	// 	err := json.Unmarshal([]byte(conditions[n].String()), &condition)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	conditionInfo = append(conditionInfo, condition)
+	// }
 	var Str string
-	if i == "1" {
+	if status == "1" {
 		Str = "Running"
 	} else {
 		Str = "Pending"
 	}
 
-	jobModel.Workspace = workspace_name
-	jobModel.Project = project_name
-	jobModel.Cluster = cluster_name
-	jobModel.Name = job_name
-
-	jobModel.UpdateAt = creationTimestamp
-	jobModel.Status = Str
-	//detail
-	var jobDetail model.JOBDETAIL
-	jobDetail.Kind = kind
 	jobDetail.Workspace = workspace_name
 	jobDetail.Project = project_name
 	jobDetail.Cluster = cluster_name
 	jobDetail.Name = job_name
-	jobDetail.Lable = t
-	jobDetail.Annotations = x
-	jobDetail.Parent = l
+	jobDetail.Kind = kind
+	jobDetail.OwnerReference = ownerReferencesInfo
+	jobDetail.Lable = label
+	jobDetail.Annotations = annotation
 	jobDetail.Status = Str
-	jobDetail.UpdateAt = creationTimestamp
-	jobDetail.CONTAINERS = containerInfo
-	jobDetail.StartTime = startTime
-	jobDetail.CompletionTime = completionTime
+	jobDetail.CreationTime = create_at
+	jobDetail.CONTAINERS = containerspec
+	jobDetail.StartTime = start_timeformat
+	jobDetail.CompletionTime = completion_timeformat
 	jobDetail.BackoffLimit = StringToInt(backoffLimit)
 	jobDetail.Completions = StringToInt(completions)
 	jobDetail.Parallelism = StringToInt(parallelism)
-	jobDetail.CONDITIONS = conditionInfo
 
-	// return c.JSON(http.StatusOK, echo.Map{"job": jobModel, "jobDetails": jobDetail})
-	return c.JSON(http.StatusOK, echo.Map{"jobDetails": jobDetail})
+	namespace_name := c.QueryParam("namespace")
+	jobReferPod, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+namespace_name+"/jobs/"+job_name+"/list", false)
+	fmt.Printf("[#7897979]jobReferPod : %+v\n", jobReferPod)
+	var jobReferPodDetail model.PODDETAIL
+	fmt.Printf("[#]podDeploy : %+v\n", jobReferPodDetail)
+	gjson.Get(jobReferPod, "kind").String()
+	refer_name := gjson.Get(jobReferPod, `metadata.name`).String()
+	refer_node := gjson.Get(jobReferPod, `spec.nodeName`).String()
+	refer_podIP := gjson.Get(jobReferPod, `status.podIP`).String()
+	refer_creationTimestamp := gjson.Get(jobReferPod, `metadata.creationTimestamp`).Time()
+
+	containerStatuses := []model.ContainerStatuses{}
+	ContainerStatuses_info := common.FilterStr(jobReferPod, "status.containerStatuses")
+	fmt.Printf("###888 envs type is %s\n", ContainerStatuses_info)
+	fmt.Printf("###555 envs type is %s\n", common.Typeof(ContainerStatuses_info))
+	log.Printf("[#798] t is %s\n", ContainerStatuses_info)
+
+	ContainerStatuses_pod := json.Unmarshal([]byte(ContainerStatuses_info), &containerStatuses)
+	if err != nil {
+		panic(ContainerStatuses_pod)
+	}
+
+	jobReferPodDetail.Name = refer_name
+	jobReferPodDetail.NodeName = refer_node
+	jobReferPodDetail.PodIP = refer_podIP
+	jobReferPodDetail.CreatedAt = refer_creationTimestamp
+	jobReferPodDetail.ContainerStatuses = containerStatuses
+	jobEvent, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+namespace_name+"/jobs/"+job_name+"/events", false)
+	fmt.Printf("[123456]event : %+v\n", jobEvent)
+	itemsmap := gjson.Get(jobEvent, "items").Array()
+	fmt.Printf("[33333#]event items : %+v\n", itemsmap)
+	var event model.EVENT
+	for t, _ := range itemsmap {
+		action := itemsmap[t].Get(`metadata.name`).String()
+		fmt.Printf("[33333#]event items : %+v\n", action)
+		reason := itemsmap[t].Get(`reason`).String()
+		namespace := itemsmap[t].Get(`metadata.namespace`).String()
+		fmt.Printf("[555#]event note : %+v\n", reason)
+		note := itemsmap[t].Get(`note`).String()
+		fmt.Printf("[9999#]event note : %+v\n", note)
+		kind := itemsmap[t].Get(`regarding.kind`).String()
+		event.Name = action
+		event.Reason = reason
+		event.Message = note
+		event.Namespace = namespace
+		event.Kind = kind
+
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"jobDetails":  jobDetail,
+		"jobReferPod": jobReferPodDetail,
+		"events":      event,
+	})
 }
 
-// func ReturnBool(i int) string {
-
-// }
+func Transcode(in, out interface{}) {
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(in)
+	json.NewDecoder(buf).Decode(out)
+}

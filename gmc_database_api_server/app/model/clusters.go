@@ -31,7 +31,7 @@ type Cluster struct {
 	Endpoint string `gorm:"column:clusterEndpoint; not null" json:"clusterEndpoint"`
 	Creator  string `gorm:"column:clusterCreator; not null" json:"clusterCreator"`
 	Version  string `json:"kubeVersion"`
-	// Token    string `gorm:"column:token; not null" json:"token"`
+	Token    string `gorm:"column:token; not null" json:"token"`
 	// Name       string            `json:"name"`
 	Status string `json:"status"`
 	// IP         string            `json:"ip"`

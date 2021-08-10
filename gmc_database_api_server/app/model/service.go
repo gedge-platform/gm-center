@@ -7,11 +7,11 @@ import (
 )
 
 type SERVICE struct {
-	Name       string       `json:"name"`
-	Workspace  string       `json:"workspace"`
-	Cluster    string       `json:"cluster"`
-	Project    string       `json:"project"`
-	Deployment []DEPLOYMENT `json:"deploymentInfo"`
+	Name       string     `json:"name"`
+	Workspace  string     `json:"workspace"`
+	Cluster    string     `json:"cluster"`
+	Project    string     `json:"project"`
+	Deployment DEPLOYMENT `json:"deploymentInfo"`
 	// PodInfo         []POD                  `json:"podInfo"`
 	Type            string                 `json:"type"`
 	Ports           []PORT                 `json:"port"`

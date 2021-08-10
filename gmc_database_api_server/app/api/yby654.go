@@ -80,8 +80,9 @@ func Get_Project(c echo.Context) (err error) {
 	projectModel.Annotation = common.Filter(KubernetesNS, "metadata.annotations")
 	projectModel.ClusterName = clusterName
 	// KubernetesNS, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/"+clusterName+"/namespaces/"+search_val, false)
-	ResourceCount, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/"+clusterName+"/"+search_val+"/application_resource", false)
+	ResourceCount, _ := HttpRequest2(c, "https://g-api-test.innogrid.tech/kube/v1/"+clusterName+"/"+search_val+"/application_resource", false)
 	var ResourceModel model.PROJECT_RESOURCE
+	fmt.Printf("[#####] ResourceCount : %+v\n", ResourceCount)
 	ResourceModel.PodCount = StringToInt(gjson.Get(ResourceCount, "count.pod_count").String())
 	ResourceModel.DeploymentCount = StringToInt(gjson.Get(ResourceCount, "count.deployment_count").String())
 	ResourceModel.JobCount = StringToInt(gjson.Get(ResourceCount, "count.job_count").String())

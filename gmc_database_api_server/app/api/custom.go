@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -334,17 +335,106 @@ func getDetailURL(c echo.Context) (value string) {
 	}
 	return "nf"
 }
+func HttpRequest2(c echo.Context, url string, check bool) (data string, err error) {
+	var responseString, token, token_value string
 
-func HttpRequest(c echo.Context, url string, check bool) (data string, err error) {
-	var responseString, token string
+	db := db.DbManager()
+	if models := FindClusterDB(db, "Name", c.QueryParam("cluster")); models == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return
+	} else {
+		token_value = models.Token
+	}
+
 	reqMethod := c.Request().Method
 	passBody := responseBody(c.Request().Body)
-
+	// auth := strings.SplitN(c.Request().Header["Authorization"], " ", 2)
 	tokens, ok := c.Request().Header["Authorization"]
-	if ok && len(tokens) >= 1 {
-		token = tokens[0]
-		token = strings.TrimPrefix(token, "Bearer ")
+	fmt.Printf("tokens : %s\n", tokens)
+	// tokens, ok := c.Request().Header["Authorization"]
+	// if ok && len(tokens) >= 1 {
+	// 	token = tokens[0]
+	// 	token = strings.TrimPrefix(token, "Bearer ")
+	// }
+
+	token = token_value
+
+	client := resty.New()
+	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	client.SetTimeout(1 * time.Minute)
+	client.SetHeaders(map[string]string{
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type":                "application/json; charset=utf-8",
+		"Accept":                      "application/json; charset=utf-8",
+	})
+
+	switch reqMethod {
+	case "GET":
+		if resp, err := client.R().SetAuthToken(token).Get(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "POST":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Post(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "PATCH":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "PUT":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "DELETE":
+		if resp, err := client.R().SetAuthToken(token).Delete(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
 	}
+
+	content, ok := gjson.Parse(responseString).Value().(map[string]interface{})
+	if !ok {
+		panic("err")
+	}
+
+	if check == true {
+		return responseString, c.JSON(http.StatusOK, content)
+	} else {
+		return responseString, nil
+	}
+}
+func HttpRequest(c echo.Context, url string, check bool) (data string, err error) {
+	var responseString, token, token_value string
+
+	db := db.DbManager()
+	if models := FindClusterDB(db, "Name", c.Param("cluster_name")); models == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return
+	} else {
+		token_value = models.Token
+	}
+
+	reqMethod := c.Request().Method
+	passBody := responseBody(c.Request().Body)
+	// auth := strings.SplitN(c.Request().Header["Authorization"], " ", 2)
+	tokens, ok := c.Request().Header["Authorization"]
+	fmt.Printf("tokens : %s\n", tokens)
+	// tokens, ok := c.Request().Header["Authorization"]
+	// if ok && len(tokens) >= 1 {
+	// 	token = tokens[0]
+	// 	token = strings.TrimPrefix(token, "Bearer ")
+	// }
+
+	token = token_value
 
 	client := resty.New()
 	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -570,29 +660,6 @@ func getDetailList(c echo.Context, kind string, url string, uniq string) (urls s
 	}
 
 	return "nf", nil
-}
-
-func SearchNested(obj interface{}, key string) (interface{}, bool) {
-	switch t := obj.(type) {
-	case map[string]interface{}:
-		if v, ok := t[key]; ok {
-			return v, ok
-		}
-		for _, v := range t {
-			if result, ok := SearchNested(v, key); ok {
-				return result, ok
-			}
-		}
-	case []interface{}:
-		for _, v := range t {
-			if result, ok := SearchNested(v, key); ok {
-				return result, ok
-			}
-		}
-	}
-
-	// key not found
-	return nil, false
 }
 
 func getData(c echo.Context, url string, check bool) string {

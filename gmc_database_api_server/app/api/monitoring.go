@@ -76,7 +76,16 @@ var nodeMetric = map[string]string{ //쿼리 수정 필요
 	"node_net_bytes_received":    "irate(node_network_receive_bytes_total{device='ens3'}[5m])",
 }
 
-var appMetric = map[string]string{}
+var appMetric = map[string]string{
+	"pod_count":        "count(count by (pod,cluster)(container_spec_memory_reservation_limit_bytes{pod!='',$1}))by(cluster)",
+	"service_count":    "count(kube_service_created{$1})by(cluster)",
+	"deployment_count": "count(kube_deployment_created{$1})by(cluster)",
+	"cronjob_count":    "count(kube_cronjob_created{$1})by(cluster)",
+	"job_count":        "count(kube_job_created{$1})by(cluster)",
+	"pv_count":         "count(kube_persistentvolume_info{$1})by(cluster)",
+	"pvc_count":        "count(kube_persistentvolumeclaim_info{$1})by(cluster)",
+	"namespace_count":  "count(kube_namespace_created{$1})by(cluster)",
+}
 
 var gpuMetric = map[string]string{
 	"gpu_temperature":  "nvidia_smi_temperature_gpu{$1}",
@@ -138,6 +147,7 @@ func mericResult(c echo.Context, kind string, a []string) error {
 		models := FindClusterDB(db, "Name", cluster)
 
 		if models == nil {
+			log.Println(cluster, "models Not find !")
 			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 			return nil
 		} else {
@@ -267,6 +277,7 @@ func validateMetric(k string, m []string, c echo.Context) bool {
 			}
 		}
 	default:
+		return false
 	}
 
 	return true
@@ -309,6 +320,7 @@ func validateFilter(k string, c echo.Context) bool {
 			return false
 		}
 	default:
+		return false
 	}
 
 	return true

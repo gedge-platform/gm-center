@@ -3,19 +3,17 @@ package common
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"gmc_database_api_server/app/db"
 	"gmc_database_api_server/app/model"
 	"io"
 	"io/ioutil"
 	"log"
-	"reflect"
 	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/labstack/echo/v4"
 )
 
 var listTemplates = map[string]string{
@@ -92,29 +90,41 @@ var (
 	SetEvents              = new(model.EventList)
 )
 
-func GetModel(c echo.Context, kind string) (data string, err error) {
-	var endPoint, project_name, item_name, token_value string
+func GetModel(params model.PARAMS, arg ...string) (data string, err error) {
+	var endPoint, token_value string
 
-	if err := validate(c); err != nil {
+	fmt.Printf("argCheck is %b\n", len(arg))
+	if len(arg) > 0 {
+		// argument 가 0개 이상일 때
+		argCheck := strings.Compare(arg[0], "") != 0
+		if argCheck {
+			arg[0] = strings.ToLower(arg[0])
+			switch arg[0] {
+			case "deployments":
+				// d, err := GetModelByUID(params, arg[0])
+				d, err := GetModelByName(params, arg[0])
+				return d, err
+				// getData, _ := common.GetModel(params)
+				// getData1 := common.FindData(getData, "metadata", "name")
+				// params2.Kind = arg[0]
+				// log.Println("params2 is ", params2)
+				// return GetModel(params2)
+			}
+		}
+	}
+
+	if err := validate(params); err != nil {
 		return "", err
 	}
 
-	if data, err := FindClusterDB(c.QueryParam("cluster")); err != nil {
+	if data, err := FindClusterDB(params.Cluster); err != nil {
 		return "", err
 	} else {
 		endPoint = data.Endpoint
 		token_value = data.Token
 	}
-	if strings.Compare(c.QueryParam("project"), "") != 0 {
-		project_name = c.QueryParam("project")
-	}
 
-	if strings.Compare(c.Param("name"), "") != 0 {
-		item_name = c.Param("name")
-	}
-
-	// models := ReturnModel(c.Param("name"), kind)
-	url := UrlExpr(endPoint, project_name, item_name, kind)
+	url := UrlExpr(endPoint, params.Project, params.Name, params.Kind)
 
 	log.Println("url is", url)
 
@@ -127,17 +137,8 @@ func GetModel(c echo.Context, kind string) (data string, err error) {
 
 	log.Printf("[#31] url is %s", url)
 	var responseString, token string
-	reqMethod := c.Request().Method
-	passBody := responseBody(c.Request().Body)
-
-	// log.Println("Authorization is ", c.Request().Header["Authorization"])
-
-	// tokens, ok := c.Request().Header["Authorization"]
-	// if ok && len(tokens) >= 1 {
-	// 	token = tokens[0]
-	// 	token = strings.TrimPrefix(token, "Bearer ")
-	// }
-
+	reqMethod := params.Method
+	passBody := responseBody(params.Body)
 	token = token_value
 
 	client := resty.New()
@@ -182,18 +183,6 @@ func GetModel(c echo.Context, kind string) (data string, err error) {
 		}
 	}
 
-	// if err := json.Unmarshal([]byte(responseString), &models); err != nil {
-	// 	fmt.Println("옷이 맞지 않음")
-	// } else {
-	// 	return models, nil
-	// }
-
-	// x := make(map[string]interface{})
-	// if err := json.Unmarshal([]byte(responseString), &x); err != nil {
-	// 	fmt.Printf("Error : %s\n", err)
-	// }
-	// return x, nil
-
 	return responseString, nil
 }
 
@@ -221,112 +210,6 @@ func FindClusterDB(name string) (*model.Cluster, error) {
 		return &models, err
 	}
 	return &models, nil
-}
-
-func ReturnModel(detail_name string, kind string) interface{} {
-	var models interface{}
-	check := strings.Compare(detail_name, "") != 0
-
-	switch kind {
-	case "pods":
-		if check {
-			models = SetPod
-		} else {
-			models = SetPods
-		}
-	case "services":
-		if check {
-			models = SetService
-		} else {
-			models = SetServices
-		}
-	case "endpoints":
-		if check {
-			models = SetEndpoint
-		} else {
-			models = SetEndpoints
-		}
-	case "configmaps":
-		if check {
-			models = SetConfigmap
-		} else {
-			models = SetConfigmaps
-		}
-	case "serviceaccounts":
-		if check {
-			models = SetServiceaccount
-		} else {
-			models = SetServiceaccounts
-		}
-	case "resourcequota":
-		if check {
-			models = SetResourcequota
-		} else {
-			models = SetResourcequotas
-		}
-	case "deployments":
-		if check {
-			models = SetDeployment
-		} else {
-			models = SetDeployments
-		}
-	case "replicasets":
-		if check {
-			models = SetReplicaset
-		} else {
-			models = SetReplicasets
-		}
-	case "jobs":
-		if check {
-			models = SetJob
-		} else {
-			models = SetJobs
-		}
-	case "cronjobs":
-		if check {
-			models = SetCronjob
-		} else {
-			models = SetCronjobs
-		}
-	case "clusterroles":
-		if check {
-			models = SetClusterrole
-		} else {
-			models = SetClusterroles
-		}
-	case "roles":
-		if check {
-			models = SetRole
-		} else {
-			models = SetRoles
-		}
-	case "clusterrolebindings":
-		if check {
-			models = SetClusterrolebinding
-		} else {
-			models = SetClusterrolebindings
-		}
-	case "namespaces":
-		if check {
-			models = SetNamespace
-		} else {
-			models = SetNamespaces
-		}
-	case "nodes":
-		if check {
-			models = SetNode
-		} else {
-			models = SetNodes
-		}
-	case "events":
-		if check {
-			models = SetEvent
-		} else {
-			models = SetEvents
-		}
-	}
-
-	return models
 }
 
 func UrlExpr(endpoint, project, item, kind string) string {
@@ -360,6 +243,8 @@ func ProjectExpr(url, project, item string) string {
 	} else if check_project {
 		returnVal = strings.Replace(returnVal, "$1", project, -1)
 		returnVal = strings.Replace(returnVal, "$2", "", -1)
+	} else if check_item {
+		returnVal = strings.Replace(returnVal, "$2", item, -1)
 	}
 
 	return returnVal
@@ -384,138 +269,7 @@ func errCheck(project, item, kind string) string {
 	return ""
 }
 
-func validate(c echo.Context) error {
-	cluster_name := c.QueryParam("cluster")
-	if strings.Compare(cluster_name, "") == 0 {
-		return ErrClusterInvalid
-	}
-	return nil
-}
-
-func GetModel2(params model.PARAMS, findPath string, findValue string, arg ...string) (data interface{}, err error) {
-	var endPoint, token_value string
-
-	if err := validate2(params); err != nil {
-		return nil, err
-	}
-
-	if data, err := FindClusterDB(params.Cluster); err != nil {
-		return nil, err
-	} else {
-		endPoint = data.Endpoint
-		token_value = data.Token
-	}
-
-	// models := ReturnModel(params.Name, params.Kind)
-	url := UrlExpr(endPoint, params.Project, params.Name, params.Kind)
-
-	log.Println("url is", url)
-
-	switch url {
-	case "noname":
-		return nil, ErrWorkspaceInvalid
-	case "nodetail":
-		return nil, ErrDetailNameInvalid
-	}
-
-	log.Printf("[#31] url is %s", url)
-	var responseString, token string
-	reqMethod := params.Method
-	passBody := responseBody(params.Body)
-
-	// log.Println("Authorization is ", c.Request().Header["Authorization"])
-
-	// tokens, ok := c.Request().Header["Authorization"]
-	// if ok && len(tokens) >= 1 {
-	// 	token = tokens[0]
-	// 	token = strings.TrimPrefix(token, "Bearer ")
-	// }
-
-	token = token_value
-
-	client := resty.New()
-	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	client.SetTimeout(1 * time.Minute)
-	client.SetHeaders(map[string]string{
-		"Access-Control-Allow-Origin": "*",
-		"Content-Type":                "application/json; charset=utf-8",
-		"Accept":                      "application/json; charset=utf-8",
-	})
-
-	switch reqMethod {
-	case "GET":
-		if resp, err := client.R().SetAuthToken(token).Get(url); err != nil {
-			panic(err)
-		} else {
-			responseString = string(resp.Body())
-		}
-	case "POST":
-		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Post(url); err != nil {
-			panic(err)
-		} else {
-			responseString = string(resp.Body())
-		}
-	case "PATCH":
-		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
-			panic(err)
-		} else {
-			responseString = string(resp.Body())
-		}
-	case "PUT":
-		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
-			panic(err)
-		} else {
-			responseString = string(resp.Body())
-		}
-	case "DELETE":
-		if resp, err := client.R().SetAuthToken(token).Delete(url); err != nil {
-			panic(err)
-		} else {
-			responseString = string(resp.Body())
-		}
-	}
-
-	// if err := json.Unmarshal([]byte(responseString), &models); err != nil {
-	// 	fmt.Println("옷이 맞지 않음")
-	// } else {
-	// 	return models, nil
-	// }
-
-	log.Println("FindPath is ", findPath)
-	findPathCheck := strings.Compare(findPath, "") != 0
-	if findPathCheck {
-		// findkey 입력이 있을 경우
-		responseString = FilterStr(responseString, findPath)
-	} else {
-		// findkey 가 "" 일 경우
-	}
-
-	log.Println("findValue is ", findValue)
-	findValueCheck := strings.Compare(findValue, "") != 0
-	if findValueCheck {
-		// findValue 입력이 있을 경우
-		responseString = Finding2(responseString, findValue)
-
-	} else {
-		// findValue 가 "" 일 경우
-	}
-
-	log.Println("최종 responseString is : ", responseString)
-	fmt.Println("type:", reflect.ValueOf(responseString).Type())
-
-	// x := make(map[string]interface{})
-	var x interface{}
-	if err := json.Unmarshal([]byte(responseString), &x); err != nil {
-		fmt.Printf("Error : %s\n", err)
-		x = responseString
-		return x, nil
-	}
-	return x, nil
-
-	// return responseString, nil
-}
-
-func validate2(params model.PARAMS) error {
+func validate(params model.PARAMS) error {
 	workspaceCheck := strings.Compare(params.Workspace, "") != 0
 	clusterCheck := strings.Compare(params.Cluster, "") != 0
 	projectCheck := strings.Compare(params.Project, "") != 0
@@ -530,4 +284,78 @@ func validate2(params model.PARAMS) error {
 		return ErrWorkspaceInvalid
 	}
 	return nil
+}
+
+func GetModelByUID(params model.PARAMS, wantKind string) (string, error) {
+
+	data01, err := GetModel(params)
+	if err != nil {
+		return "", err
+	}
+	log.Println("data01(oldData) is :", data01)
+
+	uid := InterfaceToString(FindData(data01, "metadata", "uid"))
+	log.Println("uid is :", uid)
+
+	params2 := params
+	params2.Kind = wantKind
+	params2.Name = ""
+	log.Println("Params2 is :", params2)
+
+	data02, err := GetModel(params2)
+	if err != nil {
+		return "", err
+	}
+	log.Println("data02(newData) is :", data02)
+
+	data03 := FilterbyUID(data02, wantKind, uid)
+	log.Println("data03(FilterbyUUIDData) is :", data03)
+
+	return "", errors.New("")
+}
+
+func GetModelByName(params model.PARAMS, kind string) (string, error) {
+
+	data, err := GetModel(params)
+	if err != nil {
+		return "", err
+	}
+
+	log.Println("data(oldData) is :", data)
+	name := InterfaceToString(FindData(data, "metadata", "name"))
+
+	switch strings.ToLower(params.Kind) {
+	case "services":
+
+		params2 := params
+		params2.Kind = "pods"
+		params2.Name = ""
+
+		PodData, err := GetModel(params2)
+		if err != nil {
+			return "", err
+		}
+		log.Println("PodData is :", PodData)
+
+		fd := FilterbyName(PodData, "Pod", name)
+		log.Println("Filter Data is :", fd)
+
+	}
+
+	//
+	params2 := params
+	params2.Kind = kind
+	params2.Name = ""
+	log.Println("Params2 is :", params2)
+
+	data02, err := GetModel(params2)
+	if err != nil {
+		return "", err
+	}
+	log.Println("data02(newData) is :", data02)
+
+	data03 := FilterbyName(data02, kind, name)
+	log.Println("data03(FilterbyUidName) is :", data03)
+
+	return "", errors.New("")
 }

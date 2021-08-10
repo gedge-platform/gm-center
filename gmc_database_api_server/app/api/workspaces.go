@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -121,47 +120,4 @@ func FindWorkspaceDB(db *gorm.DB, select_val string, search_val string) *model.W
 		}
 	}
 	return &models
-}
-
-func WorkspaceData(c echo.Context, kind string) (string, string) {
-	workspaceName := c.QueryParam("workspace")
-
-	if err := WorkspaceValidate(workspaceName); err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return "", ""
-	}
-
-	Workspace, err := GetWorkspaceModel(c)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return "", ""
-	}
-
-	data, err := common.GetModel(c, kind)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return "", ""
-	}
-
-	return data, Workspace.SelectCluster
-}
-
-func WorkspaceValidate(name string) error {
-	log.Println("name is ", name)
-	if strings.Compare(name, "") == 0 {
-		return common.ErrWorkspaceNotFound
-	}
-	return nil
-}
-
-func GetWorkspaceModel(c echo.Context) (*model.Workspace, error) {
-	db := db.DbManager()
-	workspaceName := c.QueryParam("workspace")
-	models := FindWorkspaceDB(db, "Name", workspaceName)
-
-	if models == nil {
-		return models, common.ErrWorkspaceNotFound
-	}
-
-	return models, nil
 }

@@ -26,7 +26,10 @@ var realMetricTemplate = map[string]string{
   |> range(start: -$1)
   |> filter(fn: (r) => r["_measurement"] == "disk")
   |> filter(fn: (r) => r["_field"] == "$2")
-  |> filter(fn: (r) => r["cluter"] == "$3")`,
+  |> filter(fn: (r) => r["cluter"] == "$3")
+  |> filter(fn: (r) => r["device"] == "vda1")
+  |> filter(fn: (r) => r["fstype"] == "ext4")
+  |> filter(fn: (r) => r["mode"] == "ro")`,
 }
 
 var realCpuMetric = map[string]string{
@@ -255,38 +258,42 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 	client := influxdb2.NewClient("http://192.168.150.115:30650", "NTDNyye9GrClYL3cbCyA3btQs3vyRBci")
 	queryAPI := client.QueryAPI("influxdata")
 
-	result, err := queryAPI.Query(context.Background(), q)
-
-	fmt.Println(result)
-
 	var valueResult []InfluxDBModel
-	if err == nil {
-		// Use Next() to iterate over query result lines
-		var tempMetric map[string]string
-		var tempValues [][]string
-		prevString := ""
-		var t InfluxDBModel
+	switch k {
+	case "disk":
+		result, err := queryAPI.Query(context.Background(), q)
 
-		switch k {
-		case "disk":
+		if err == nil {
+			// Use Next() to iterate over query result lines
+			var tempMetric map[string]string
+			var tempValues [][]string
+			var t InfluxDBModel
+			var init [][]string
+
+			prevHost := ""
+			var prevMetric map[string]string
+			var prevValues [][]string
+
 			for result.Next() {
 				// Observe when there is new grouping key producing new table
 				if result.TableChanged() {
 					fmt.Printf("table")
 				}
-				fmt.Println(result.Record().String())
 				var value []string
 				tempMetric, value = rowModel(result.Record().String())
-				if prevString != tempMetric["host"] {
-					if prevString != "" {
-						t.Metric = tempMetric
-						t.Values = tempValues
-						valueResult = append(valueResult, t)
-					}
-					prevString = tempMetric["host"]
-				}
-
 				tempValues = append(tempValues, value)
+				if prevHost != tempMetric["host"] {
+					if prevHost != "" {
+						t.Metric = prevMetric
+						t.Values = prevValues
+						valueResult = append(valueResult, t)
+						// 초기화 필요
+						tempValues = init
+					}
+				}
+				prevHost = tempMetric["host"]
+				prevMetric = tempMetric
+				prevValues = tempValues
 			}
 			t.Metric = tempMetric
 			t.Values = tempValues
@@ -296,38 +303,59 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 			if result.Err() != nil {
 				fmt.Printf("Query error: %s\n", result.Err().Error())
 			}
-		default:
-			for result.Next() {
-				// Observe when there is new grouping key producing new table
-				if result.TableChanged() {
-					fmt.Printf("table")
-				}
-				var value []string
-				tempMetric, value = rowModel(result.Record().String())
-				if prevString != tempMetric["host"] {
-					if prevString != "" {
-						t.Metric = tempMetric
-						t.Values = tempValues
-						valueResult = append(valueResult, t)
-					}
-					prevString = tempMetric["host"]
-				}
 
-				tempValues = append(tempValues, value)
-			}
-			t.Metric = tempMetric
-			t.Values = tempValues
-			valueResult = append(valueResult, t)
-
-			// fmt.Println(valueResult)
-			if result.Err() != nil {
-				fmt.Printf("Query error: %s\n", result.Err().Error())
-			}
 		}
+		// Ensures background processes finishes
+		client.Close()
+	default:
+		result, err := queryAPI.Query(context.Background(), q)
+
+		if err == nil {
+			// Use Next() to iterate over query result lines
+			var tempMetric map[string]string
+			var tempValues [][]string
+			var t InfluxDBModel
+			var init [][]string
+
+			prevHost := ""
+			var prevMetric map[string]string
+			var prevValues [][]string
+
+			for result.Next() {
+				// Observe when there is new grouping key producing new table
+				if result.TableChanged() {
+					fmt.Printf("table")
+				}
+				var value []string
+				tempMetric, value = rowModel(result.Record().String())
+				tempValues = append(tempValues, value)
+				if prevHost != tempMetric["host"] {
+					if prevHost != "" {
+						t.Metric = prevMetric
+						t.Values = prevValues
+						valueResult = append(valueResult, t)
+						// 초기화 필요
+						tempValues = init
+					}
+				}
+				prevHost = tempMetric["host"]
+				prevMetric = tempMetric
+				prevValues = tempValues
+			}
+			t.Metric = tempMetric
+			t.Values = tempValues
+			valueResult = append(valueResult, t)
+
+			// fmt.Println(valueResult)
+			if result.Err() != nil {
+				fmt.Printf("Query error: %s\n", result.Err().Error())
+			}
+
+		}
+		// Ensures background processes finishes
+		client.Close()
 
 	}
-	// Ensures background processes finishes
-	client.Close()
 
 	r := map[string]interface{}{}
 	r[m] = valueResult

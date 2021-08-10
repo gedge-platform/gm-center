@@ -287,7 +287,6 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 						t.Metric = prevMetric
 						t.Values = prevValues
 						valueResult = append(valueResult, t)
-						// 초기화 필요
 						tempValues = init
 					}
 				}
@@ -299,7 +298,6 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 			t.Values = tempValues
 			valueResult = append(valueResult, t)
 
-			// fmt.Println(valueResult)
 			if result.Err() != nil {
 				fmt.Printf("Query error: %s\n", result.Err().Error())
 			}
@@ -334,7 +332,6 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 						t.Metric = prevMetric
 						t.Values = prevValues
 						valueResult = append(valueResult, t)
-						// 초기화 필요
 						tempValues = init
 					}
 				}
@@ -346,7 +343,6 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 			t.Values = tempValues
 			valueResult = append(valueResult, t)
 
-			// fmt.Println(valueResult)
 			if result.Err() != nil {
 				fmt.Printf("Query error: %s\n", result.Err().Error())
 			}
@@ -363,17 +359,10 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 }
 
 func realMetricExpr(m string, val string, filter map[string]string) string {
-	// var returnVal string
-	//m: metric (cpu_idle etc...)
-	//val: querytemplate
-	//filter: filter value (time, cluster)
 
-	// fmt.Println(val)
-
-	//realCpuMetric
 	queryString := strings.Replace(val, "$1", filter["time"], -1)
 	queryString = strings.Replace(queryString, "$2", m, -1)
 	queryString = strings.Replace(queryString, "$3", filter["cluster"], -1)
-	// fmt.Println(queryString)
+
 	return queryString
 }

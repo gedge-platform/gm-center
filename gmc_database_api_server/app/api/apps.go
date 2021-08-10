@@ -1,6 +1,8 @@
 package api
 
 import (
+	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -12,16 +14,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// ShowAccount godoc
-// @Summary Show a account
-// @Description get string by ID
-// @ID get-string-by-int
+// GetAllApps godoc
+// @Summary Show all apps
+// @Description get App Lists
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Account ID"
 // @Success 200 {object} model.App
 // @Header 200 {string} Token "qwerty"
-// @Router /accounts/{id} [get]
+// @Router /apps [get]
 func GetAllApps(c echo.Context) (err error) {
 	db := db.DbManager()
 	models := []model.App{}
@@ -35,6 +35,15 @@ func GetAllApps(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
 
+// GetApp godoc
+// @Summary Show App
+// @Description get App
+// @Accept  json
+// @Produce  json
+// @Param name path string true "App Name"
+// @Success 200 {object} model.App
+// @Header 200 {string} Token "qwerty"
+// @Router /apps/{name} [get]
 func GetApp(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")
@@ -48,6 +57,17 @@ func GetApp(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
 
+// CreateApp godoc
+// @Summary Create App
+// @Description create App
+// @Accept  json
+// @Produce  json
+// @Param appName path string true "App Name"
+// @Param appCategory path string true "App Category"
+// @Param appDescription path string true "App Description"
+// @Success 200 {object} model.App
+// @Header 200 {string} Token "qwerty"
+// @Router /apps [POST]
 func CreateApp(c echo.Context) (err error) {
 	db := db.DbManager()
 	models := new(model.App)
@@ -56,7 +76,8 @@ func CreateApp(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-	if err = c.Validate(models); err != nil {
+
+	if err = AppValidate(models, ""); err != nil {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return nil
 	}
@@ -138,4 +159,24 @@ func FindAppDB(db *gorm.DB, select_val string, search_val string) *model.App {
 		}
 	}
 	return &models
+}
+
+func AppValidate(m *model.App, action string) error {
+	log.Println("m is", m)
+	switch strings.ToLower(action) {
+	default:
+		if m.Name == "" {
+			return errors.New("Required Name")
+		}
+		if m.Category == "" {
+			return errors.New("Required Category")
+		}
+		if m.Description == "" {
+			return errors.New("Required Description")
+		}
+		if m.Installed == 0 {
+			return errors.New("Required Installed")
+		}
+	}
+	return nil
 }

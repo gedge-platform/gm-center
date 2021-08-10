@@ -23,15 +23,15 @@ import (
 
 type Cluster struct {
 	Num      int    `gorm:"column:clusterNum; primary_key" json:"clusterNum"`
-	Name     string `gorm:"column:clusterName; not null; default:null" json:"clusterName"`
-	Ip       string `gorm:"column:ipAddr; not null; default:null" json:"ipAddr"`
+	Name     string `gorm:"column:clusterName; not null" json:"clusterName"`
+	Ip       string `gorm:"column:ipAddr; not null" json:"ipAddr"`
 	Role     string `json:"clusterRole"`
-	Type     string `gorm:"column:clusterType; not null; default:null" json:"clusterType"`
+	Type     string `gorm:"column:clusterType; not null" json:"clusterType"`
 	Gpu      string `json:"gpu"`
-	Endpoint string `gorm:"column:clusterEndpoint; not null; default:null" json:"clusterEndpoint"`
-	Creator  string `gorm:"column:clusterCreator; not null; default:null" json:"clusterCreator"`
+	Endpoint string `gorm:"column:clusterEndpoint; not null" json:"clusterEndpoint"`
+	Creator  string `gorm:"column:clusterCreator; not null" json:"clusterCreator"`
 	Version  string `json:"kubeVersion"`
-	// Token    string `gorm:"column:token; not null; default:null" json:"token"`
+	Token    string `gorm:"column:token; not null" json:"token"`
 	// Name       string            `json:"name"`
 	Status string `json:"status"`
 	// IP         string            `json:"ip"`

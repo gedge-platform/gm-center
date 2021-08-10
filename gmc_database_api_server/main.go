@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"gmc_database_api_server/app/db"
 	"gmc_database_api_server/app/routes"
@@ -20,16 +21,15 @@ import (
 // @version 1.0
 // @description This is a Gedge GM-Center Swagger API.
 
-// @contact.name consine2c
+// @contact.name GM-Center
 // @contact.url https://gedge-platform.github.io/gm-center/
-// @contact.email consine2c@innogrid.com
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host g-api-test.innogrid.tech
-// @BasePath /api/v1
-// @schemes http https
+// @host 192.168.150.197:8009
+// @BasePath /gmcapi/v1
+// @schemes http
 // @query.collection.format multi
 
 // @securityDefinitions.apikey ApiKeyAuth
@@ -46,7 +46,24 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
-	// e.Use(middleware.Gzip())
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Skipper: func(c echo.Context) bool {
+			if strings.Contains(c.Path(), "swagger") { // Change "swagger" for your own path
+				return true
+			}
+			return false
+		},
+	}))
+
+	// e.Use(middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
+	// 	// Be careful to use constant time comparison to prevent timing attacks
+	// 	if subtle.ConstantTimeCompare([]byte(username), []byte("joe")) == 1 &&
+	// 		subtle.ConstantTimeCompare([]byte(password), []byte("secret")) == 1 {
+	// 		return true, nil
+	// 	}
+	// 	return false, nil
+	// }))
+
 	// e.Use(middleware.Secure())
 
 	// e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

@@ -19,9 +19,8 @@ var doc = `{
         "description": "{{.Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "consine2c",
-            "url": "https://gedge-platform.github.io/gm-center/",
-            "email": "consine2c@innogrid.com"
+            "name": "GM-Center",
+            "url": "https://gedge-platform.github.io/gm-center/"
         },
         "license": {
             "name": "Apache 2.0",
@@ -32,22 +31,94 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/accounts/{id}": {
+        "/apps": {
             "get": {
-                "description": "get string by ID",
+                "description": "get App Lists",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Show a account",
-                "operationId": "get-string-by-int",
+                "summary": "Show all apps",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.App"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "create App",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create App",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Account ID",
-                        "name": "id",
+                        "type": "string",
+                        "description": "App Name",
+                        "name": "appName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "App Category",
+                        "name": "appCategory",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "App Description",
+                        "name": "appDescription",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.App"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/apps/{name}": {
+            "get": {
+                "description": "get App",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show App",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "App Name",
+                        "name": "name",
                         "in": "path",
                         "required": true
                     }
@@ -72,10 +143,6 @@ var doc = `{
     "definitions": {
         "model.App": {
             "type": "object",
-            "required": [
-                "appCategory",
-                "appName"
-            ],
             "properties": {
                 "appCategory": {
                     "type": "string"
@@ -119,9 +186,9 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "g-api-test.innogrid.tech",
-	BasePath:    "/api/v1",
-	Schemes:     []string{"http", "https"},
+	Host:        "192.168.150.197:8009",
+	BasePath:    "/gmcapi/v1",
+	Schemes:     []string{"http"},
 	Title:       "Gedge GM-Center Swagger API",
 	Description: "This is a Gedge GM-Center Swagger API.",
 }

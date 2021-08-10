@@ -3,11 +3,14 @@ package common
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
+	"fmt"
 	"gmc_database_api_server/app/db"
 	"gmc_database_api_server/app/model"
 	"io"
 	"io/ioutil"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -387,6 +390,146 @@ func validate(c echo.Context) error {
 	cluster_name := c.QueryParam("cluster")
 	if strings.Compare(cluster_name, "") == 0 {
 		return ErrClusterInvalid
+	}
+	return nil
+}
+
+func GetModel2(params model.PARAMS, findPath string, findValue string, arg ...string) (data interface{}, err error) {
+	var endPoint, token_value string
+
+	if err := validate2(params); err != nil {
+		return nil, err
+	}
+
+	if data, err := FindClusterDB(params.Cluster); err != nil {
+		return nil, err
+	} else {
+		endPoint = data.Endpoint
+		token_value = data.Token
+	}
+
+	// models := ReturnModel(params.Name, params.Kind)
+	url := UrlExpr(endPoint, params.Project, params.Name, params.Kind)
+
+	log.Println("url is", url)
+
+	switch url {
+	case "noname":
+		return nil, ErrWorkspaceInvalid
+	case "nodetail":
+		return nil, ErrDetailNameInvalid
+	}
+
+	log.Printf("[#31] url is %s", url)
+	var responseString, token string
+	reqMethod := params.Method
+	passBody := responseBody(params.Body)
+
+	// log.Println("Authorization is ", c.Request().Header["Authorization"])
+
+	// tokens, ok := c.Request().Header["Authorization"]
+	// if ok && len(tokens) >= 1 {
+	// 	token = tokens[0]
+	// 	token = strings.TrimPrefix(token, "Bearer ")
+	// }
+
+	token = token_value
+
+	client := resty.New()
+	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	client.SetTimeout(1 * time.Minute)
+	client.SetHeaders(map[string]string{
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type":                "application/json; charset=utf-8",
+		"Accept":                      "application/json; charset=utf-8",
+	})
+
+	switch reqMethod {
+	case "GET":
+		if resp, err := client.R().SetAuthToken(token).Get(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "POST":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Post(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "PATCH":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "PUT":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "DELETE":
+		if resp, err := client.R().SetAuthToken(token).Delete(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	}
+
+	// if err := json.Unmarshal([]byte(responseString), &models); err != nil {
+	// 	fmt.Println("옷이 맞지 않음")
+	// } else {
+	// 	return models, nil
+	// }
+
+	log.Println("FindPath is ", findPath)
+	findPathCheck := strings.Compare(findPath, "") != 0
+	if findPathCheck {
+		// findkey 입력이 있을 경우
+		responseString = FilterStr(responseString, findPath)
+	} else {
+		// findkey 가 "" 일 경우
+	}
+
+	log.Println("findValue is ", findValue)
+	findValueCheck := strings.Compare(findValue, "") != 0
+	if findValueCheck {
+		// findValue 입력이 있을 경우
+		responseString = Finding2(responseString, findValue)
+
+	} else {
+		// findValue 가 "" 일 경우
+	}
+
+	log.Println("최종 responseString is : ", responseString)
+	fmt.Println("type:", reflect.ValueOf(responseString).Type())
+
+	// x := make(map[string]interface{})
+	var x interface{}
+	if err := json.Unmarshal([]byte(responseString), &x); err != nil {
+		fmt.Printf("Error : %s\n", err)
+		x = responseString
+		return x, nil
+	}
+	return x, nil
+
+	// return responseString, nil
+}
+
+func validate2(params model.PARAMS) error {
+	workspaceCheck := strings.Compare(params.Workspace, "") != 0
+	clusterCheck := strings.Compare(params.Cluster, "") != 0
+	projectCheck := strings.Compare(params.Project, "") != 0
+
+	if !clusterCheck {
+		return ErrClusterInvalid
+	}
+	if !projectCheck {
+		return ErrProjectInvalid
+	}
+	if !workspaceCheck {
+		return ErrWorkspaceInvalid
 	}
 	return nil
 }

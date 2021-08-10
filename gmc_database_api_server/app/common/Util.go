@@ -121,6 +121,37 @@ func Finding(i string, path string, find string) string {
 	return ReturnVal
 }
 
+func Finding2(i string, find string) string {
+	parse := gjson.Parse(i)
+	Dat := parse
+	Arr := parse.Array()
+	len := len(parse.Array())
+	ReturnVal := ""
+
+	if len > 0 {
+		// list
+		for n, _ := range Arr {
+			ReturnVal = Arr[n].Get(find).String()
+		}
+	} else {
+		// not list
+		ReturnVal = Dat.Get(find).String()
+	}
+
+	return ReturnVal
+}
+
 func Typeof(v interface{}) string {
 	return reflect.TypeOf(v).String()
+}
+
+func Transcode(in, out interface{}) {
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(in)
+	json.NewDecoder(buf).Decode(out)
+}
+
+func InterfaceToString(i interface{}) string {
+	str := fmt.Sprintf("%v", i)
+	return str
 }

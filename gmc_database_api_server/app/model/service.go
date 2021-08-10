@@ -11,7 +11,7 @@ type SERVICE struct {
 	Workspace  string     `json:"workspace"`
 	Cluster    string     `json:"cluster"`
 	Project    string     `json:"project"`
-	Deployment DEPLOYMENT `json:"deploymentInfo"`
+	Deployment Deployment `json:"deploymentInfo"`
 	// PodInfo         []POD                  `json:"podInfo"`
 	Type            string                 `json:"type"`
 	Ports           []PORT                 `json:"port"`

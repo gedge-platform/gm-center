@@ -276,9 +276,9 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 
 			for result.Next() {
 				// Observe when there is new grouping key producing new table
-				if result.TableChanged() {
-					fmt.Printf("table")
-				}
+				// if result.TableChanged() {
+				// 	fmt.Printf("table")
+				// }
 				var value []string
 				tempMetric, value = rowModel(result.Record().String())
 				tempValues = append(tempValues, value)
@@ -323,9 +323,9 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 
 			for result.Next() {
 				// Observe when there is new grouping key producing new table
-				if result.TableChanged() {
-					fmt.Printf("table")
-				}
+				// if result.TableChanged() {
+				// 	fmt.Printf("table")
+				// }
 				var value []string
 				tempMetric, value = rowModel(result.Record().String())
 				tempValues = append(tempValues, value)

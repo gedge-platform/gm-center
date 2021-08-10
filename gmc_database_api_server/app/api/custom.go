@@ -336,15 +336,26 @@ func getDetailURL(c echo.Context) (value string) {
 }
 
 func HttpRequest(c echo.Context, url string, check bool) (data string, err error) {
-	var responseString, token string
+	var responseString, token, token_value string
+
+	db := db.DbManager()
+	if models := FindClusterDB(db, "Name", c.Param("cluster_name")); models == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return
+	} else {
+		token_value = models.Token
+	}
+
 	reqMethod := c.Request().Method
 	passBody := responseBody(c.Request().Body)
 
-	tokens, ok := c.Request().Header["Authorization"]
-	if ok && len(tokens) >= 1 {
-		token = tokens[0]
-		token = strings.TrimPrefix(token, "Bearer ")
-	}
+	// tokens, ok := c.Request().Header["Authorization"]
+	// if ok && len(tokens) >= 1 {
+	// 	token = tokens[0]
+	// 	token = strings.TrimPrefix(token, "Bearer ")
+	// }
+
+	token = token_value
 
 	client := resty.New()
 	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
@@ -570,29 +581,6 @@ func getDetailList(c echo.Context, kind string, url string, uniq string) (urls s
 	}
 
 	return "nf", nil
-}
-
-func SearchNested(obj interface{}, key string) (interface{}, bool) {
-	switch t := obj.(type) {
-	case map[string]interface{}:
-		if v, ok := t[key]; ok {
-			return v, ok
-		}
-		for _, v := range t {
-			if result, ok := SearchNested(v, key); ok {
-				return result, ok
-			}
-		}
-	case []interface{}:
-		for _, v := range t {
-			if result, ok := SearchNested(v, key); ok {
-				return result, ok
-			}
-		}
-	}
-
-	// key not found
-	return nil, false
 }
 
 func getData(c echo.Context, url string, check bool) string {

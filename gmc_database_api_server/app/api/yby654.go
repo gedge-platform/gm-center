@@ -99,6 +99,7 @@ func Get_Project(c echo.Context) (err error) {
 	// return c.JSON(http.StatusOK, echo.Map{"data": projectModel})
 	return nil
 }
+
 func Get_Deployment(c echo.Context) (err error) {
 	// namespaceName := c.QueryParam("namespace")
 	// clusterName := c.QueryParam("cluster")
@@ -157,5 +158,8 @@ func Get_Deployment(c echo.Context) (err error) {
 	// fmt.Printf("[#]updateTime : %+v\n", updateTime)
 
 	// return c.JSON(http.StatusOK, echo.Map{"data": DeploymentModel})
+	return nil
+}
+func Get_Clusters(c echo.Context) (err error) {
 	return nil
 }

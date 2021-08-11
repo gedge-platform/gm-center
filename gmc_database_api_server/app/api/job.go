@@ -29,8 +29,6 @@ func GetJobs(c echo.Context) (err error) {
 
 	fmt.Printf("job_name is %s\n, workspace name is %s\n, project name is %s", job_name, workspace_name, project_name, cluster_name)
 
-	// conditionInfo := []model.CONDITIONS{}
-	// condition := model.CONDITIONS{}
 	status := common.FilterStr(data, `status.succeeded`)
 	//labels
 	label := make(map[string]string)
@@ -90,16 +88,17 @@ func GetJobs(c echo.Context) (err error) {
 	// 	}
 	// 	containerInfo = append(containerInfo, container)
 	// }
-	conditions := common.FilterStr(data, `status.conditions`)
+	conditionInfo := []model.CONDITIONS{}
+	conditions := common.FilterStr(data, "status.conditions")
 	fmt.Printf("[#conditions ] is %s\n", conditions)
-	// for n, _ := range conditions {
-	// 	fmt.Printf("containerdata is %s\n", conditions[n])
-	// 	err := json.Unmarshal([]byte(conditions[n].String()), &condition)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	conditionInfo = append(conditionInfo, condition)
-	// }
+	fmt.Printf("data1 type is %s\n", common.Typeof(conditionInfo))
+	log.Printf("[#523] t is %s\n", conditionInfo)
+
+	infoContainer := json.Unmarshal([]byte(conditions), &conditionInfo)
+	if err != nil {
+		panic(infoContainer)
+	}
+	log.Printf("[#53] t is %s\n", infoContainer)
 	var Str string
 	if status == "1" {
 		Str = "Running"
@@ -119,15 +118,19 @@ func GetJobs(c echo.Context) (err error) {
 	jobDetail.CreationTime = create_at
 	jobDetail.CONTAINERS = containerspec
 	jobDetail.StartTime = start_timeformat
+	jobDetail.CONDITIONS = conditionInfo
 	jobDetail.CompletionTime = completion_timeformat
 	jobDetail.BackoffLimit = StringToInt(backoffLimit)
 	jobDetail.Completions = StringToInt(completions)
 	jobDetail.Parallelism = StringToInt(parallelism)
+	test33 := "https://g-api-test.innogrid.tech/kube/v1/" + cluster_name + "/" + project_name + "/jobs/" + job_name + "/list"
+	fmt.Println("test33 : ", test33)
 
-	namespace_name := c.QueryParam("namespace")
-	jobReferPod, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+namespace_name+"/jobs/"+job_name+"/list", false)
+	jobReferPod, _ := HttpRequest3(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+project_name+"/jobs/"+job_name+"/list", false)
+
 	fmt.Printf("[#7897979]jobReferPod : %+v\n", jobReferPod)
-	var jobReferPodDetail model.PODDETAIL
+	var jobReferPodDetail model.POD
+	// jobmodel := []model.POD{}
 	fmt.Printf("[#]podDeploy : %+v\n", jobReferPodDetail)
 	gjson.Get(jobReferPod, "kind").String()
 	refer_name := gjson.Get(jobReferPod, `metadata.name`).String()
@@ -145,37 +148,39 @@ func GetJobs(c echo.Context) (err error) {
 	if err != nil {
 		panic(ContainerStatuses_pod)
 	}
-
+	jobDetail.POD = jobReferPodDetail
 	jobReferPodDetail.Name = refer_name
 	jobReferPodDetail.NodeName = refer_node
 	jobReferPodDetail.PodIP = refer_podIP
 	jobReferPodDetail.CreatedAt = refer_creationTimestamp
-	jobReferPodDetail.ContainerStatuses = containerStatuses
-	jobEvent, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+namespace_name+"/jobs/"+job_name+"/events", false)
+	// jobReferPodDetail.ContainerStatuses = containerStatuses
+	jobEvent, _ := HttpRequest3(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+project_name+"/jobs/"+job_name+"/events", false)
 	fmt.Printf("[123456]event : %+v\n", jobEvent)
 	itemsmap := gjson.Get(jobEvent, "items").Array()
 	fmt.Printf("[33333#]event items : %+v\n", itemsmap)
-	var event model.EVENT
-	for t, _ := range itemsmap {
-		action := itemsmap[t].Get(`metadata.name`).String()
-		fmt.Printf("[33333#]event items : %+v\n", action)
-		reason := itemsmap[t].Get(`reason`).String()
-		namespace := itemsmap[t].Get(`metadata.namespace`).String()
-		fmt.Printf("[555#]event note : %+v\n", reason)
-		note := itemsmap[t].Get(`note`).String()
-		fmt.Printf("[9999#]event note : %+v\n", note)
-		kind := itemsmap[t].Get(`regarding.kind`).String()
-		event.Name = action
-		event.Reason = reason
-		event.Message = note
-		event.Namespace = namespace
-		event.Kind = kind
+	// var event model.EVENT
+	eventINFO := []model.EVENT{}
+	// for t, _ := range itemsmap {
+	// 	action := itemsmap[t].Get(`metadata.name`).String()
+	// 	fmt.Printf("[33333#]event items : %+v\n", action)
+	// 	reason := itemsmap[t].Get(`reason`).String()
+	// 	namespace := itemsmap[t].Get(`metadata.namespace`).String()
+	// 	fmt.Printf("[555#]event note : %+v\n", reason)
+	// 	note := itemsmap[t].Get(`note`).String()
+	// 	fmt.Printf("[9999#]event note : %+v\n", note)
+	// 	kind := itemsmap[t].Get(`regarding.kind`).String()
+	// 	event.Name = action
+	// 	event.Reason = reason
+	// 	event.Message = note
+	// 	event.Namespace = namespace
+	// 	event.Kind = kind
 
-	}
+	// }
+	jobDetail.EVENT = eventINFO
 	return c.JSON(http.StatusOK, echo.Map{
 		"jobDetails":  jobDetail,
 		"jobReferPod": jobReferPodDetail,
-		"events":      event,
+		"events":      eventINFO,
 	})
 }
 

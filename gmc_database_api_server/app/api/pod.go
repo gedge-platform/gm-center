@@ -111,11 +111,22 @@ func GetPods(c echo.Context) (err error) {
 	podDetail.Annotations = annotation
 	podDetail.Kind = kind
 
-	namespace_name := c.QueryParam("namespace")
+	// namespace_name := c.QueryParam("namespace")
 
-	podDeploy, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+namespace_name+"/pods/"+pod_name+"/list", false)
+	test33 := "https://g-api-test.innogrid.tech/kube/v1/" + cluster_name + "/" + project_name + "/pods/" + pod_name + "/list"
+	fmt.Println("test33 : ", test33)
+
+	podDeploy, _ := HttpRequest3(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+project_name+"/pods/"+pod_name+"/list", false)
 
 	var referDeploy model.DEPLOYMENT
+	referDeploInfo := []model.DEPLOYMENT{}
+	referDeployStatus := json.Unmarshal([]byte(podDeploy), &referDeploInfo)
+	fmt.Println("[#12]referDeployStatus : ", referDeployStatus)
+
+	if err != nil {
+		panic(referDeployStatus)
+	}
+	podDetail.DEPLOYMENT = referDeploInfo
 	fmt.Printf("[#]podDeploy : %+v\n", podDeploy)
 	gjson.Get(podDeploy, "kind").String()
 	fmt.Printf("[#033333 pod refer", podDeploy)
@@ -130,31 +141,124 @@ func GetPods(c echo.Context) (err error) {
 	referDeploy.ClusterName = cluster_name
 	referDeploy.WorkspaceName = workspace_name
 
-	podEvent, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+namespace_name+"/pods/"+pod_name+"/events", false)
+	podEvent, _ := HttpRequest3(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+project_name+"/pods/"+pod_name+"/events", false)
 	fmt.Printf("[44444444888#]event : %+v\n", podEvent)
-	itemsmap := gjson.Get(podEvent, "items").Array()
-	fmt.Printf("[33333#]event items : %+v\n", itemsmap)
-	var event model.EVENT
-	for t, _ := range itemsmap {
-		action := itemsmap[t].Get(`metadata.name`).String()
-		fmt.Printf("[33333#]event items : %+v\n", action)
-		reason := itemsmap[t].Get(`reason`).String()
-		namespace := itemsmap[t].Get(`metadata.namespace`).String()
-		fmt.Printf("[555#]event note : %+v\n", reason)
-		note := itemsmap[t].Get(`note`).String()
-		fmt.Printf("[9999#]event note : %+v\n", note)
-		kind := itemsmap[t].Get(`regarding.kind`).String()
-		event.Name = action
-		event.Reason = reason
-		event.Message = note
-		event.Namespace = namespace
-		event.Kind = kind
 
+	itemsmap := common.FilterStr(podEvent, "items")
+	fmt.Printf("[33333#]event items : %+v\n", itemsmap)
+	// var event model.EVENT
+	eventinfo := []model.EVENT{}
+	fmt.Printf("[6433333#]eventinfo items : %+v\n", eventinfo)
+	eventstatus := json.Unmarshal([]byte(itemsmap), &eventinfo)
+	if err != nil {
+		panic(eventstatus)
 	}
+	podDetail.EVENT = eventinfo
+	// for t, _ := range itemsmap {
+	// 	action := itemsmap[t].Get(`metadata.name`).String()
+	// 	fmt.Printf("[33333#]event items : %+v\n", action)
+	// 	reason := itemsmap[t].Get(`reason`).String()
+	// 	namespace := itemsmap[t].Get(`metadata.namespace`).String()
+	// 	fmt.Printf("[555#]event note : %+v\n", reason)
+	// 	note := itemsmap[t].Get(`note`).String()
+	// 	fmt.Printf("[9999#]event note : %+v\n", note)
+	// 	kind := itemsmap[t].Get(`regarding.kind`).String()
+	// 	event.Name = action
+	// 	event.Reason = reason
+	// 	event.Message = note
+	// 	event.Namespace = namespace
+	// 	event.Kind = kind
+
+	// }
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"items":           podDetail,
 		"referdeployment": referDeploy,
-		"events":          event,
+		// "events":          event,
 	})
 }
+
+func GetAllPods(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:      "pods",
+		Name:      "",
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+
+	getData, err := common.GetModel(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	log.Println("getData is", getData)
+
+	pods := model.POD{
+
+		// Name:      common.GetModel2(params, "metadata", "name"),
+		Workspace: params.Workspace,
+		Cluster:   params.Cluster,
+		Project:   params.Project,
+		// Kind:      params.Kind,
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"pods": pods,
+		// "getData":  pods,
+	})
+}
+
+// data, err := common.GetModel(c, "pods")
+// if err != nil {
+// 	common.ErrorMsg(c, http.StatusNotFound, err)
+// 	return nil
+// }
+
+// fmt.Printf("data type is %s\n", common.Typeof(data))
+// // var podModel model.PODALL
+// List := []model.PODALL{}
+// podall := model.PODALL{}
+
+// params := model.PARAMS{
+// 	Kind:      "pods",
+// 	Name:      "",
+// 	Cluster:   c.QueryParam("cluster"),
+// 	Workspace: c.QueryParam("workspace"),
+// 	Project:   c.QueryParam("project"),
+// 	Method:    c.Request().Method,
+// 	Body:      c.Request().Body,
+// }
+
+// getData, err := common.GetModel(params)
+// if err != nil {
+// 	common.ErrorMsg(c, http.StatusNotFound, err)
+// 	return nil
+// }
+// // cluster_name := c.QueryParam("cluster")
+// // name := common.Finding(data, "metadata", "name")
+// // data2 := common.Filter(data, "metadata.ownerReferences")
+// // fmt.Printf("data2 type is %s\n", common.Typeof(data2))
+// // podModel.Name = name
+// // podModel.Cluster = cluster_name
+// n := gjson.Parse(data)
+// k := gjson.Get(data, "items").Array()
+// log.Printf("[#44] %s", n)
+// // itemsmap := common.FilterStr(data, "items")
+// fmt.Printf("itemsmap data is %s\n", k)
+// for t, _ := range k {
+// 	test := json.Unmarshal([]byte(k[t].String()), &podall)
+// 	fmt.Printf("#11111teststet", test)
+// 	// data2 := gjson.Get(data, "metadata.name").String()
+// 	// fmt.Printf("#11111teststet", data2)
+// 	List = append(List, podall)
+// }
+
+// 	return c.JSON(http.StatusOK, echo.Map{
+// 		// "testData": podall,
+// 		// "items": List,
+// 		"tset": getData,
+// 	})
+// }

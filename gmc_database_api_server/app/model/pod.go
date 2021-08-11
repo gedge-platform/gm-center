@@ -15,7 +15,19 @@ type POD struct {
 	CreatedAt time.Time `json:"created_at"`
 	NodeName  string    `json:"node_name"`
 }
-
+type PODALL struct {
+	Workspace string `json:"workspace"`
+	Cluster   string `json:"cluster"`
+	Project   string `json:"project"`
+	Name      string `json:"name"`
+	// Kind      string `json:"kind"`
+	// // Ready     int    `json:"Ready"`
+	// Namespace string `json:"namespace"`
+	// // Status    string    `json:"status"`
+	// PodIP     string    `json:"podIP"`
+	// CreatedAt time.Time `json:"created_at"`
+	// NodeName  string    `json:"node_name"`
+}
 type PODDETAIL struct {
 	POD
 	Lable             map[string]string   `json:"label"`
@@ -24,6 +36,7 @@ type PODDETAIL struct {
 	Podcontainers     []PODCONTAINERS     `json:"Podcontainers"`
 	QosClass          string              `json:"qosClass"`
 	ContainerStatuses []ContainerStatuses `json:"containerStatuses"`
+	DEPLOYMENT        []DEPLOYMENT        `json:"referdeployment"`
 	EVENT             []EVENT             `json:"event"`
 }
 
@@ -36,10 +49,10 @@ type VOLUMEMOUNTS struct {
 type PODCONTAINERS struct {
 	Name           string         `json:"name"`
 	Image          string         `json:"image"`
-	ReadinessProbe ReadinessProbe `json:"readinessProbe"`
-	LivenessProbe  LivenessProbe  `json:"livenessProbe"`
+	ReadinessProbe ReadinessProbe `json:"readinessProbe",omitempty`
+	LivenessProbe  LivenessProbe  `json:"livenessProbe",omitempty`
 	PortsPOD       []PORTPOD      `json:"ports"`
-	Env            []ENV          `json:"env"`
+	Env            []ENV          `json:"env",omitempty`
 	VolumeMounts   []VOLUMEMOUNTS `json:"volumemounts"`
 }
 
@@ -84,8 +97,8 @@ type ContainerStatuses struct {
 	Started      bool   `json:"started"`
 }
 type ValueFrom struct {
-	FieldRef        FieldRef        `json:"fieldRef"`
-	ConfigMapKeyRef ConfigMapKeyRef `json:"configMapKeyRef"`
+	FieldRef        FieldRef        `json:"fieldRef" `
+	ConfigMapKeyRef ConfigMapKeyRef `json:"configMapKeyRef" `
 }
 type FieldRef struct {
 	ApiVersion string `json:"apiVersion"`
@@ -93,7 +106,7 @@ type FieldRef struct {
 }
 type ConfigMapKeyRef struct {
 	Name string `json:"name"`
-	Key  int    `json:"key"`
+	Key  string `json:"key"`
 }
 type PodReferDeploy struct {
 	Name       string     `json:"name"`

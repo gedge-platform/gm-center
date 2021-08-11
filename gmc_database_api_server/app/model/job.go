@@ -22,10 +22,11 @@ type JOBDETAIL struct {
 	Completions    int               `json:"completions"`
 	Parallelism    int               `json:"parallelism"`
 	OwnerReference []OwnerReference  `json:"ownerReferences"`
-	// Time              string            `json:"time"`
-	CONDITIONS     []CONDITIONS `json:"conditions"`
-	StartTime      time.Time    `json:"startTime"`
-	CompletionTime time.Time    `json:"completionTime"`
+	POD            POD               `json:"referpod"`
+	CONDITIONS     []CONDITIONS      `json:"conditions"`
+	StartTime      time.Time         `json:"startTime"`
+	CompletionTime time.Time         `json:"completionTime"`
+	EVENT          []EVENT           `json:"events"`
 }
 
 // type JOBSTATUS struct {

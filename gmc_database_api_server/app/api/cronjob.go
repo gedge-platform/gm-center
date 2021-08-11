@@ -1,115 +1,151 @@
 package api
 
 import (
-	"encoding/json"
-	"fmt"
+	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
+	"log"
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tidwall/gjson"
 )
 
+// func GetCronJobs(c echo.Context) (err error) {
+
+// 	cronjob_name := c.Param("name")
+// 	workspace_name := c.QueryParam("workspace")
+// 	project_name := c.QueryParam("project")
+// 	cluster_name := c.QueryParam("cluster")
+// 	var cronjobDetail model.CRONJOBDETAIL
+// 	data, err := common.GetModel(c, "cronjobs")
+// 	if err != nil {
+// 		common.ErrorMsg(c, http.StatusNotFound, err)
+// 		return nil
+// 	}
+// 	fmt.Printf("[#55]cronjob data is info %s", data)
+
+// 	fmt.Printf("cronjob_name is %s\n, workspace name is %s\n, project name is %s", cronjob_name, workspace_name, project_name, cluster_name)
+// 	schedule := common.FilterStr(data, `spec.schedule`)
+// 	successfulJobsHistoryLimit := common.FilterStr(data, `spec.successfulJobsHistoryLimit`)
+// 	creationTimestamp := common.FilterStr(data, `metadata.creationTimestamp`)
+// 	creationTimestamp_format, err := time.Parse(time.RFC3339, creationTimestamp)
+// 	fmt.Printf("[#creationTimestamp ] is %s\n", creationTimestamp)
+// 	concurrencyPolicy := common.FilterStr(data, `spec.concurrencyPolicy`)
+// 	failedJobsHistoryLimit := common.FilterStr(data, `spec.failedJobsHistoryLimit`)
+// 	status := common.FilterStr(data, `spec.suspend`)
+// 	fmt.Printf("[#1234777status] is %s\n", status)
+// 	jobstatus := common.FilterStr(data, `status.lastScheduleTime`)
+// 	fmt.Printf("[#74111] is %s\n", jobstatus)
+// 	now := time.Now()
+// 	fmt.Printf("[#9999] is %s\n", now)
+// 	//labels
+// 	label := make(map[string]string)
+// 	labels := common.FilterStr(data, "metadata.labels")
+// 	fmt.Printf("[labels] is %s\n", labels)
+// 	err_labels := json.Unmarshal([]byte(labels), &label)
+
+// 	if err_labels != nil {
+// 		fmt.Printf("Error : %s\n", err_labels)
+// 	}
+// 	annotation := make(map[string]string)
+// 	annotations := common.FilterStr(data, "metadata.annotations")
+// 	err_annotation := json.Unmarshal([]byte(annotations), &annotation)
+// 	if err_annotation != nil {
+// 		fmt.Printf("Error : %s\n", err_annotation)
+// 	}
+// 	//active
+// 	activejob := []model.ACTIVE{}
+// 	log.Printf("[#523] t is %s\n", activejob)
+// 	activejobs := common.FilterStr(data, `status.active`)
+// 	fmt.Printf("[#5231321313131] t is %s\n", activejobs)
+// 	infoActive := json.Unmarshal([]byte(activejobs), &activejob)
+// 	if err != nil {
+// 		panic(infoActive)
+// 	}
+// 	log.Printf("[#53] t is %s\n", activejob)
+
+// 	var stausCondtion string
+// 	if status == "false" {
+// 		stausCondtion = "Running"
+// 	} else {
+// 		stausCondtion = "Pending"
+// 	}
+// 	fmt.Printf("[#1234777status] is %s\n", status)
+
+// 	containerspec := []model.CONTAINERS{}
+// 	containers := common.FilterStr(data, `spec.jobTemplate.spec.template.spec.containers`)
+// 	fmt.Printf("data1 type is %s\n", common.Typeof(containers))
+// 	log.Printf("[#523] t is %s\n", containers)
+
+// 	sepcContainer := json.Unmarshal([]byte(containers), &containerspec)
+// 	if err != nil {
+// 		panic(sepcContainer)
+// 	}
+// 	log.Printf("[#53] t is %s\n", containerspec)
+
+// 	lastScheduleTime := common.FilterStr(data, `status.lastScheduleTime`)
+// 	lastScheduleTime_format, err := time.Parse(time.RFC3339, lastScheduleTime)
+
+// 	cronjobDetail.Workspace = workspace_name
+// 	cronjobDetail.Project = project_name
+// 	cronjobDetail.Cluster = cluster_name
+// 	cronjobDetail.Name = cronjob_name
+// 	cronjobDetail.Schedule = schedule
+// 	cronjobDetail.SuccessfulJobsHistoryLimit = StringToInt(successfulJobsHistoryLimit)
+// 	cronjobDetail.ConcurrencyPolicy = concurrencyPolicy
+// 	cronjobDetail.FailedJobsHistoryLimit = StringToInt(failedJobsHistoryLimit)
+// 	cronjobDetail.ACTIVE = activejob
+// 	cronjobDetail.Lable = label
+// 	cronjobDetail.CONTAINERS = containerspec
+// 	cronjobDetail.Annotations = annotation
+// 	cronjobDetail.Status = stausCondtion
+// 	cronjobDetail.CreationTimestamp = creationTimestamp_format
+// 	cronjobDetail.LastScheduleTime = lastScheduleTime_format
+
+// 	cronjobReferJob, _ := HttpRequest3(c, "https://g-api-test.innogrid.tech/kube/v1/"+cluster_name+"/"+project_name+"/cronjobs/"+cronjob_name+"/list", false)
+
+// 	fmt.Printf("[#7897979]jobReferPod : %+v\n", cronjobReferJob)
+// 	itemsmap := common.FilterStr(cronjobReferJob, "items")
+// 	fmt.Printf("[33333#]event items : %+v\n", itemsmap)
+// 	// var job model.REFERJOB
+// 	JobInfo := model.JOB{}
+// 	eventstatus := json.Unmarshal([]byte(itemsmap), &JobInfo)
+// 	if err != nil {
+// 		panic(eventstatus)
+// 	}
+// 	cronjobDetail.JOB = JobInfo
+// 	// fmt.Printf("[#7897979]jobReferPod : %+v\n", job)
+// 	return c.JSON(http.StatusOK, echo.Map{
+// 		"items": cronjobDetail,
+// 	})
+// }
 func GetCronJobs(c echo.Context) (err error) {
-	cronjob_name := c.Param("name")
-	workspace_name := c.QueryParam("workspace")
-	project_name := c.QueryParam("project")
-	cluster_name := c.QueryParam("cluster")
-	containerInfo := []model.CONTAINERS{}
-	container := model.CONTAINERS{}
 
-	jobrecord := []model.ACTIVE{}
-	jobinfo := model.ACTIVE{}
-	label := make(map[string]string)
-	annotation := make(map[string]string)
-	fmt.Printf("cronjob_name is %s\n, workspace name is %s\n, project name is %s", cronjob_name, workspace_name, project_name)
-
-	// KubernetesJOB := get(job_name)
-	//
-	KubernetesCronJOB, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/cluster2/cronjobs", false)
-
-	// fmt.Printf("[56] data is %s", KubernetesCronJOB)
-	itemsmap := gjson.Get(KubernetesCronJOB, "items").Array()
-	// fmt.Printf("[55555] data is %s", itemsmap)
-	var crondjobDetail model.CRONJOBDETAIL
-	for t, _ := range itemsmap {
-		containers := itemsmap[t].Get(`spec.jobTemplate.spec.template.spec.containers`).Array()
-		fmt.Printf("[#contaienr ] is %s\n", containers)
-		for n, _ := range containers {
-			fmt.Printf("containerdata is %s\n", containers[n])
-			err := json.Unmarshal([]byte(containers[n].String()), &container)
-			if err != nil {
-				panic(err)
-			}
-			containerInfo = append(containerInfo, container)
-		}
-		labels := itemsmap[t].Get("metadata.labels")
-		err_label := json.Unmarshal([]byte(labels.String()), &label)
-		if err_label != nil {
-			fmt.Printf("Error : %s\n", err_label)
-		}
-
-		annotations := itemsmap[t].Get("metadata.annotations")
-		err_annotation := json.Unmarshal([]byte(annotations.String()), &annotation)
-		if err_annotation != nil {
-			fmt.Printf("Error : %s\n", err_annotation)
-		}
-		schedule := itemsmap[t].Get(`spec.schedule`).String()
-		successfulJobsHistoryLimit := itemsmap[t].Get(`spec.successfulJobsHistoryLimit`).String()
-		creationTimestamp := itemsmap[t].Get(`metadata.creationTimestamp`).Time()
-		fmt.Printf("[#creationTimestamp ] is %s\n", creationTimestamp)
-		concurrencyPolicy := itemsmap[t].Get(`spec.concurrencyPolicy`).String()
-		failedJobsHistoryLimit := itemsmap[t].Get(`spec.failedJobsHistoryLimit`).String()
-		status := itemsmap[t].Get(`spec.suspend`).String()
-		fmt.Printf("[#1234777status] is %s\n", status)
-		jobstatus := itemsmap[t].Get(`status.lastScheduleTime`).Time()
-		fmt.Printf("[#74111] is %s\n", jobstatus)
-		now := time.Now()
-		fmt.Printf("[#9999] is %s\n", now)
-		jobinfos := itemsmap[t].Get(`status.active`).Array()
-		// fmt.Printf("[#123456jobinfo ] is %s\n", jobinfos)
-		for n, _ := range jobinfos {
-			fmt.Printf("jobinfo is %s\n", jobinfos[n])
-			err := json.Unmarshal([]byte(jobinfos[n].String()), &jobinfo)
-			if err != nil {
-				panic(err)
-			}
-			jobrecord = append(jobrecord, jobinfo)
-		}
-		sepcAll := itemsmap[t].Get(`spec`).String()
-		fmt.Printf("[#1sepcAll ] is %s\n", sepcAll)
-		var statusJob string
-		if jobstatus != now {
-			statusJob = "Completed"
-		} else {
-			statusJob = "Running"
-		}
-		var stausCondtion string
-		if status == "false" {
-			stausCondtion = "Running"
-		} else {
-			stausCondtion = "Pending"
-		}
-
-		crondjobDetail.Name = cronjob_name
-		crondjobDetail.Workspace = workspace_name
-		crondjobDetail.Project = project_name
-		crondjobDetail.Cluster = cluster_name
-		crondjobDetail.Lable = label
-		crondjobDetail.Annotations = annotation
-		crondjobDetail.ConcurrencyPolicy = concurrencyPolicy
-		crondjobDetail.FailedJobsHistoryLimit = StringToInt(failedJobsHistoryLimit)
-		crondjobDetail.Schedule = schedule
-		crondjobDetail.SuccessfulJobsHistoryLimit = StringToInt(successfulJobsHistoryLimit)
-		crondjobDetail.Status = stausCondtion
-		crondjobDetail.JOBSTATUS = statusJob
-		crondjobDetail.ACTIVE = jobrecord
-		// crondjobDetail.SPEC = sepcAll
-		crondjobDetail.CONTAINERS = containerInfo
-		crondjobDetail.CreationTimestamp = creationTimestamp
-
-		// crondjobDetail.LastScheduleTime = successfulJobsHistoryLimit
+	params := model.PARAMS{
+		Kind:      "cronjobs",
+		Name:      "",
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
 	}
-	return c.JSON(http.StatusOK, echo.Map{"items": crondjobDetail})
+
+	getData, _ := common.GetModel2(params, "metadata", "name")
+	if getData == nil {
+		return nil
+	}
+	log.Println("getData is", getData)
+
+	cronjobs := model.CRONJOB{
+
+		// Name:      common.GetModel2(params, "metadata", "name"),
+		Workspace: params.Workspace,
+		Cluster:   params.Cluster,
+		Project:   params.Project,
+		// Kind:      params.Kind,
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"services": cronjobs,
+		"getData":  getData,
+	})
 }

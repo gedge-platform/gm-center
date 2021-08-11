@@ -45,7 +45,7 @@ var namespaceMetric = map[string]string{ //쿼리문 확인 필요
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 
-var podMetric = map[string]string{
+var podMetric = map[string]string{ //테스트 중
 	"pod_cpu":                   "round(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster)*1000,0.001)",
 	"pod_memory":                "sum(container_memory_usage_bytes{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster)", //쿼리문 확인 필요
 	"pod_net_bytes_transmitted": "round(sum(irate(container_network_transmit_bytes_total{pod!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster)/125,0.01)",

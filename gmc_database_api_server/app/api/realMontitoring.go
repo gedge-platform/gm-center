@@ -15,13 +15,19 @@ import (
 )
 
 var realMetricTemplate = map[string]string{
-	"cpu": `from(bucket:"monitoring")|> range(start: -$1)  |> filter(fn: (r) => r["_measurement"] == "cpu") |> filter(fn: (r) => r["_field"] == "$2") |> filter(fn: (r) => r["cluter"] == "$3") |> filter(fn: (r) => r["cpu"] == "cpu-total")`,
-	// "cpu":  `from(bucket:"monitoring")|> range(start: -1h)  |> filter(fn: (r) => r["_measurement"] == "cpu") |> filter(fn: (r) => r["_field"] == "usage_idle") |> filter(fn: (r) => r["cluter"] == "cluster2") |> filter(fn: (r) => r["cpu"] == "cpu-total")`,
+	"cpu": `from(bucket:"monitoring")
+	|> range(start: -$1)
+	|> filter(fn: (r) => r["_measurement"] == "cpu")
+	|> filter(fn: (r) => r["_field"] == "$2") 
+	|> filter(fn: (r) => r["cluter"] == "$3") 
+	|> filter(fn: (r) => r["cpu"] == "cpu-total")
+	|> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
 	"memory": `from(bucket: "monitoring")
   |> range(start: -$1)
   |> filter(fn: (r) => r["_measurement"] == "mem")
   |> filter(fn: (r) => r["_field"] == "$2")
-  |> filter(fn: (r) => r["cluter"] == "$3")`,
+  |> filter(fn: (r) => r["cluter"] == "$3")
+  |> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
 	"disk": `from(bucket: "monitoring")
   |> range(start: -$1)
   |> filter(fn: (r) => r["_measurement"] == "disk")
@@ -29,7 +35,8 @@ var realMetricTemplate = map[string]string{
   |> filter(fn: (r) => r["cluter"] == "$3")
   |> filter(fn: (r) => r["device"] == "vda1")
   |> filter(fn: (r) => r["fstype"] == "ext4")
-  |> filter(fn: (r) => r["mode"] == "ro")`,
+  |> filter(fn: (r) => r["mode"] == "ro")
+  |> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
 }
 
 var realCpuMetric = map[string]string{

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -21,10 +22,9 @@ func GetAllClusters(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
 		return
 	}
-
+	fmt.Printf("[3##]models : %+v\n", models)
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-
 func GetCluster(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")

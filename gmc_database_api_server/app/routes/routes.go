@@ -35,6 +35,7 @@ func GEdgeRoute(e *echo.Echo) {
 	}))
 	// r0.GET("/cluster", api.Cluster)
 	r0.GET("/getCluster/:name", api.Get_Cluster)
+	r0.GET("/getClusters", api.Get_Clusters)
 	r0.GET("/getProject/:name", api.Get_Project)
 	r0.GET("/getDeployment/:name", api.Get_Deployment)
 	r0.GET("/gethttp", api.Get_http)

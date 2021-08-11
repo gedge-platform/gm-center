@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"gmc_database_api_server/app/common"
+	"gmc_database_api_server/app/db"
 	"gmc_database_api_server/app/model"
+	"log"
+
 	"net/http"
 	"reflect"
 	"time"
@@ -93,4 +96,61 @@ func Get_Project(c echo.Context) (err error) {
 	timer, err := time.Parse(time.RFC3339, createTime)
 	projectModel.CreateAt = timer
 	return c.JSON(http.StatusOK, echo.Map{"data": projectModel})
+}
+
+func Get_Clusters(c echo.Context) error {
+	params := model.PARAMS{
+		Kind:      "nodes",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	params.Name = "cluster3"
+	// getData, _ := common.GetModel2(params, "metadata", "resourceVersion")
+	// if getData == nil {
+	// 	return nil
+	// }
+	// log.Println("getData is", getData)
+	// fmt.Println("[#32] type:", reflect.ValueOf(getData).Type())
+
+	// var testServices model.Service
+	// common.Transcode(getData, &testServices)
+
+	// log.Println("Service Model is", testServices)
+	// fmt.Println("[#32] type:", reflect.ValueOf(testServices).Type())
+
+	db := db.DbManager()
+	models := []model.Cluster{}
+	db.Find(&models)
+
+	if db.Find(&models).RowsAffected == 0 {
+		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+		return nil
+	}
+	for _, value := range models {
+		params.Name = value.Name
+		params.Cluster = value.Name
+		// labels := make(map[string]string)
+		label, _ := common.GetModel2(params, "metadata", "labels")
+		if label == nil {
+			return nil
+		}
+		// labels := label.(map[string]string)
+
+		fmt.Println("[#32] label:", reflect.ValueOf(label).Type())
+		// value.Lable = labels
+		// if err4 := json.Unmarshal([]byte(label), &labels); err4 != nil {
+		// 	panic(err)
+		// }
+		// getData, _ := common.GetModel2(params, "metadata", "labels")
+		// if getData == nil {
+		// 	return nil
+		// }
+		log.Println("getData is", getData)
+
+	}
+	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }

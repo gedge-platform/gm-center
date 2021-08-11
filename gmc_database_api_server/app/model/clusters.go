@@ -72,4 +72,4 @@ func (Cluster) TableName() string {
 	return "CLUSTER_INFO"
 }
 
-// type Clusters []Cluster
+type Clusters []Cluster

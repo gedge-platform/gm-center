@@ -35,12 +35,12 @@ type Cluster struct {
 	// Name       string            `json:"name"`
 	Status string `json:"status"`
 	// IP         string            `json:"ip"`
-	Network    string            `json:"network"`
-	Os         string            `json:"os"`
-	Kernel     string            `json:"kernel"`
-	Lable      map[string]string `json:"lables"`
-	Annotation map[string]string `json:"annotations"`
-	CreateAt   time.Time         `json:"created_at"`
+	Network    string      `json:"network"`
+	Os         string      `json:"os"`
+	Kernel     string      `json:"kernel"`
+	Label      interface{} `json:"lables"`
+	Annotation interface{} `json:"annotations"`
+	CreateAt   time.Time   `json:"created_at"`
 	// Pod        []Pod    `json:"pods"`
 	// Metadata   Metadata `json:"metadata"`
 	Events []EVENT `json:"events"`
@@ -72,4 +72,4 @@ func (Cluster) TableName() string {
 	return "CLUSTER_INFO"
 }
 
-// type Clusters []Cluster
+type Clusters []Cluster

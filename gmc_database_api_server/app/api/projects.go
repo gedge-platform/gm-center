@@ -26,7 +26,7 @@ func GetAllProjects(c echo.Context) (err error) {
 }
 func GetProject2(c echo.Context) *model.Project {
 	db := db.DbManager()
-	search_val := c.QueryParam("name")
+	search_val := c.Param("name")
 	models := FindProjectDB(db, "Name", search_val)
 
 	if models == nil {
@@ -143,6 +143,9 @@ func DeleteProject(c echo.Context) (err error) {
 
 func FindProjectDB(db *gorm.DB, select_val string, search_val string) *model.Project {
 	models := model.Project{}
+	if check := strings.Compare(search_val, "") == 0; check {
+		return nil
+	}
 	if strings.Compare(select_val, "Name") == 0 {
 		if err := db.First(&models, model.Project{Name: search_val}).Error; err != nil {
 			return nil

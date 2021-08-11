@@ -39,7 +39,7 @@ func GetCluster(c echo.Context) (err error) {
 }
 
 func GetCluster2(c echo.Context) *model.Cluster {
-	search_val := c.QueryParam("cluster")
+	search_val := c.Param("name")
 	db := db.DbManager()
 	// search_val := c.Param("name")
 	models := FindClusterDB(db, "Name", search_val)

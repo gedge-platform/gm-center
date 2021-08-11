@@ -9,23 +9,16 @@ type DEPLOYMENT struct {
 	WorkspaceName string      `json:"workspace"`
 	Stauts        string      `json:"stauts"`
 	Replica       REPLICA     `json:"replica"`
-	Strategy      STRATEGY    `json:"strategy"`
-	Containers    []CONTAINER `json:"containers"`
+	Strategy      interface{} `json:"strategy"`
+	Containers    interface{} `json:"containers"`
 	// PodInfo     []model.Pod     `json:"pods"`
 	// ServiceInfo []model.Service `json:"services"`
-	Lable      map[string]string     `json:"lables"`
+	Label      interface{}           `json:"labels"`
 	Events     []EVENT               `json:"events"`
-	Annotation map[string]string     `json:"annotations"`
+	Annotation interface{}           `json:"annotations"`
 	CreateAt   time.Time             `json:"createAt"`
 	UpdateAt   time.Time             `json:"updateAt"`
 	Resource   []DEPLOYMENT_RESOURCE `json:"resource"`
-	// jwt.StandardClaim
-}
-
-type STRATEGY struct {
-	Type           string `json:"type"`
-	MaxSurge       string `json:"maxSurge"`
-	MaxUnavailable string `json:"maxUnavailable"`
 	// jwt.StandardClaim
 }
 
@@ -38,20 +31,20 @@ type REPLICA struct {
 	// jwt.StandardClaim
 }
 
-type CONTAINER struct {
-	Image    string `json:"image"`
-	Name     string `json:"name"`
-	Resource struct {
-		Limit struct {
-			Cpu    string `json:"cpu"`
-			Memory string `json:"memory"`
-		} `json:"limits"`
-		Request struct {
-			Cpu    string `json:"cpu"`
-			Memory string `json:"memory"`
-		} `json:"requests"`
-	} `json:"resources"`
-}
+// type CONTAINER struct {
+// 	Image    string `json:"image"`
+// 	Name     string `json:"name"`
+// 	Resource struct {
+// 		Limit struct {
+// 			Cpu    string `json:"cpu"`
+// 			Memory string `json:"memory"`
+// 		} `json:"limits"`
+// 		Request struct {
+// 			Cpu    string `json:"cpu"`
+// 			Memory string `json:"memory"`
+// 		} `json:"requests"`
+// 	} `json:"resources"`
+// }
 
 type DEPLOYMENT_RESOURCE struct {
 }

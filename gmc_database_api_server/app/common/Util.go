@@ -8,6 +8,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/tidwall/gjson"
 )
@@ -207,3 +208,15 @@ func InterfaceToString(i interface{}) string {
 	str := fmt.Sprintf("%v", i)
 	return str
 }
+
+func InterfaceToTime(i interface{}) time.Time {
+	createTime := InterfaceToString(i)
+	timer, _ := time.Parse(time.RFC3339, createTime)
+	return timer
+}
+
+// func InterfaceToInt(i interface{}) int {
+// 	stringData := InterfaceToString(i)
+// 	intData, _ := api.StringToInt(stringData)
+// 	return intData
+// }

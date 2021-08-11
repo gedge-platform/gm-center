@@ -1,54 +1,74 @@
 package api
 
-// func Get_Deployment(c echo.Context) (err error) {
-// namespaceName := c.QueryParam("namespace")
-// clusterName := c.QueryParam("cluster")
-// workspaceName := c.QueryParam("workspace")
-// KubernetesDEPLOY, err := common.GetModel(c, "deployments")
-// var DeploymentModel model.DEPLOYMENT
-// var STRATEGY model.STRATEGY
-// var REPLICA model.REPLICA
-// DeploymentModel.Lable = common.Filter(KubernetesDEPLOY, "metadata.labels")
-// DeploymentModel.Annotation = common.Filter(KubernetesDEPLOY, "metadata.labels")
-// createTime := common.FilterStr(KubernetesDEPLOY, "metadata.creationTimestamp")
+import (
+	"fmt"
+	"gmc_database_api_server/app/common"
+	"gmc_database_api_server/app/model"
+	"log"
+	"net/http"
+	"reflect"
 
-// timer, err := time.Parse(time.RFC3339, createTime)
-// DeploymentModel.CreateAt = timer
-// Name := common.FilterStr(KubernetesDEPLOY, "metadata.name")
-// DeploymentModel.Name = Name
-// DeploymentModel.Namespace = namespaceName
-// DeploymentModel.ClusterName = clusterName
-// DeploymentModel.WorkspaceName = workspaceName
-// Replicas := common.FilterStr(KubernetesDEPLOY, "status.replicas")
-// REPLICA.Replicas = StringToInt(Replicas)
-// ReadyReplicas := common.FilterStr(KubernetesDEPLOY, "status.readyReplicas")
-// REPLICA.ReadyReplicas = StringToInt(ReadyReplicas)
-// UpdatedReplicas := common.FilterStr(KubernetesDEPLOY, "status.updatedReplicas")
-// REPLICA.UpdatedReplicas = StringToInt(UpdatedReplicas)
-// AvailableReplicas := common.FilterStr(KubernetesDEPLOY, "status.availableReplicas")
-// REPLICA.AvailableReplicas = StringToInt(AvailableReplicas)
-// UnavailableReplicas := common.FilterStr(KubernetesDEPLOY, "status.unavailableReplicas")
-// REPLICA.UnavailableReplicas = StringToInt(UnavailableReplicas)
-// DeploymentModel.Replica = REPLICA
-// strategyType := common.Finding(KubernetesDEPLOY, "spec.strategy", "type")
-// strategyMaxUnavailable := common.Finding(KubernetesDEPLOY, "spec.strategy", "MaxUnavailable")
-// strategyMaxSurge := common.Finding(KubernetesDEPLOY, "spec.strategy", "MaxSurge")
-// STRATEGY.Type = strategyType
-// STRATEGY.MaxUnavailable = strategyMaxUnavailable
-// STRATEGY.MaxSurge = strategyMaxSurge
-// DeploymentModel.Strategy = STRATEGY
-// containers := common.FilterStr(KubernetesDEPLOY, "spec.template.spec.containers")
-// containersData := []model.CONTAINER{}
-// err4 := json.Unmarshal([]byte(containers), &containersData)
-// if err4 != nil {
-// 	panic(err4)
-// }
+	"github.com/labstack/echo/v4"
+)
 
-// DeploymentModel.Containers = containersData
-// updateTime := common.Finding(KubernetesDEPLOY, "status.conditions", "lastUpdateTime")
-// timer2, err := time.Parse(time.RFC3339, updateTime)
-// DeploymentModel.UpdateAt = timer2
-// fmt.Printf("[#]updateTime : %+v\n", updateTime)
+func Get_Deployment(c echo.Context) (err error) {
+	// var ServicePorts []model.PORT
+	params := model.PARAMS{
+		Kind:      "deployments",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	getData, err := common.GetModel(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 
-// return c.JSON(http.StatusOK, echo.Map{"data": DeploymentModel})
-// }
+	getData0 := common.FindData(getData, "", "")
+	var Deployment model.Deployment
+	common.Transcode(getData0, &Deployment)
+	// getData1 := common.FindData(getData, "metadata", "labels")                            // metadata 의 name 찾기
+	// getData1Str := common.InterfaceToString(common.FindData(getData, "metadata", "name")) // interface to String 처리
+
+	// log.Println("getData0 is", getData0)
+	// log.Println("getData1 is", getData1)
+	// fmt.Println("getData1 type:", reflect.ValueOf(getData1).Type())
+	// log.Println("getData1Str is", getData1Str)
+	// fmt.Println("getData1Str type:", reflect.ValueOf(getData1Str).Type())
+
+	// interface{} -> struct 적용
+
+	log.Println("Service Model is", Deployment)
+	fmt.Println("[#32] type:", reflect.ValueOf(Deployment).Type())
+	// replica := StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "replicas")))
+	replicas := model.REPLICA{
+		Replicas:            StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
+		ReadyReplicas:       StringToInt(common.InterfaceToString(common.FindData(getData, "status", "readyReplicas"))),
+		UpdatedReplicas:     StringToInt(common.InterfaceToString(common.FindData(getData, "status", "updatedReplicas"))),
+		AvailableReplicas:   StringToInt(common.InterfaceToString(common.FindData(getData, "status", "availableReplicas"))),
+		UnavailableReplicas: StringToInt(common.InterfaceToString(common.FindData(getData, "status", "unavailableReplicas"))),
+	}
+
+	deployments := model.DEPLOYMENT{
+		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+		WorkspaceName: params.Workspace,
+		ClusterName:   params.Cluster,
+		Namespace:     params.Project,
+		Label:         common.FindData(getData, "metadata", "labels"),
+		Annotation:    common.FindData(getData, "metadata", "annotations"),
+		CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+		UpdateAt:      common.InterfaceToTime(common.FindData(getData, "status.conditions", "lastUpdateTime")),
+		Replica:       replicas,
+		Strategy:      common.FindData(getData, "spec", "strategy"),
+		Containers:    common.FindData(getData, "spec.template.spec", "containers"),
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"deployments": deployments,
+		// "getData":  getData98,
+	})
+}

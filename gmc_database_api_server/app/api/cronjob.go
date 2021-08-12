@@ -3,7 +3,6 @@ package api
 import (
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -130,12 +129,11 @@ func GetCronJobs(c echo.Context) (err error) {
 		Body:      c.Request().Body,
 	}
 
-	getData, _ := common.GetModel2(params, "metadata", "name")
-	if getData == nil {
+	getData, err := common.GetModel(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	log.Println("getData is", getData)
-
 	cronjobs := model.CRONJOB{
 
 		// Name:      common.GetModel2(params, "metadata", "name"),

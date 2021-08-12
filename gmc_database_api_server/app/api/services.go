@@ -23,56 +23,45 @@ func GetService(c echo.Context) error {
 		Body:      c.Request().Body,
 	}
 
-	getData, _ := common.GetModel2(params, "metadata.managedFields", "fieldsType")
-	if getData == nil {
+	getData, err := common.GetModel(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
 
-	log.Println("getData is", getData)
-	fmt.Println("[#32] type:", reflect.ValueOf(getData).Type())
+	getData0 := common.FindData(getData, "", "")                                          // 빈칸으로 둘 시, 전체 조회
+	getData1 := common.FindData(getData, "metadata", "name")                              // metadata 의 name 찾기
+	getData1Str := common.InterfaceToString(common.FindData(getData, "metadata", "name")) // interface to String 처리
+
+	log.Println("getData0 is", getData0)
+	log.Println("getData1 is", getData1)
+	fmt.Println("getData1 type:", reflect.ValueOf(getData1).Type())
+	log.Println("getData1Str is", getData1Str)
+	fmt.Println("getData1Str type:", reflect.ValueOf(getData1Str).Type())
 
 	var testServices model.Service
-	common.Transcode(getData, &testServices)
+	common.Transcode(getData0, &testServices) // interface{} -> struct 적용
 
 	log.Println("Service Model is", testServices)
 	fmt.Println("[#32] type:", reflect.ValueOf(testServices).Type())
 
 	services := model.SERVICE{
-		// Name:      common.Finding(getData, "metadata", "name"),
+		Name:      common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Workspace: params.Workspace,
 		Cluster:   params.Cluster,
 		Project:   params.Project,
 	}
 
-	// fmt.Printf("getData2 is %+v\n", getData2["Protocol"])
-	// err4 := json.Unmarshal([]byte(getData2), &ServicePortKube)
-	// if err4 != nil {
-	// 	fmt.Printf("Error : %s\n", err4)
-	// }
-
-	// fmt.Printf("ServicePortKube is %+v\n", ServicePortKube)
-	// Service.Ports = ServicePortKube
-	// Service.Cluster =
-
-	// fmt.Printf("data type is %s\n", common.Typeof(data))
-
-	// data1, _ := common.FilterStr(data, "metadata.ownerReferences")
-	// fmt.Printf("data1 type is %s\n", common.Typeof(data1))
-
-	// log.Println("[#2] data is", data2)
-	// log.Println("[#2-1] data is", data2["name"])
-	// data3, _ := common.Finding(data, "metadata.ownerReferences", "blockOwnerDeletion")
-	// fmt.Printf("data3 type is %s\n", common.Typeof(data3))
-
-	// log.Println("[#3] data is", data3)
-	// data4, _ := common.Finding(data, "spec.volumes", "name")
-	// fmt.Printf("data4 type is %s\n", common.Typeof(data4))
-
-	// log.Println("[#4] data is", data4)
+	getData99, err := common.GetModel(params, "Deployments")
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	getData98 := common.FindData(getData99, "", "")
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"services": services,
-		"getData":  getData,
+		"getData":  getData98,
 	})
 }
 

@@ -3,18 +3,13 @@ package model
 import "time"
 
 type JOB struct {
-	Workspace    string    `json:"workspace"`
-	Cluster      string    `json:"cluster"`
-	Project      string    `json:"project"`
-	Name         string    `json:"name"`
-	Kind         string    `json:"kind"`
-	Status       string    `json:"status"`
-	CreationTime time.Time `json:"created_at"`
-	// Cronjob   CRONJOB        `json:"cronjob"`
-}
-
-type JOBDETAIL struct {
-	JOB
+	Workspace      string            `json:"workspace"`
+	Cluster        string            `json:"cluster"`
+	Project        string            `json:"project"`
+	Name           string            `json:"name"`
+	Kind           string            `json:"kind"`
+	Status         bool              `json:"status"`
+	CreationTime   time.Time         `json:"created_at"`
 	Lable          map[string]string `json:"label"`
 	Annotations    map[string]string `json:"annotations"`
 	CONTAINERS     []CONTAINERS      `json:"containers"`
@@ -27,6 +22,23 @@ type JOBDETAIL struct {
 	StartTime      time.Time         `json:"startTime"`
 	CompletionTime time.Time         `json:"completionTime"`
 	EVENT          []EVENT           `json:"events"`
+	// Cronjob   CRONJOB        `json:"cronjob"`
+}
+
+type JOBDETAIL struct {
+	JOB
+	// Lable          map[string]string `json:"label"`
+	// Annotations    map[string]string `json:"annotations"`
+	// CONTAINERS     []CONTAINERS      `json:"containers"`
+	// BackoffLimit   int               `json:"backoffLimit"`
+	// Completions    int               `json:"completions"`
+	// Parallelism    int               `json:"parallelism"`
+	// OwnerReference []OwnerReference  `json:"ownerReferences"`
+	// POD            POD               `json:"referpod"`
+	// CONDITIONS     []CONDITIONS      `json:"conditions"`
+	// StartTime      time.Time         `json:"startTime"`
+	// CompletionTime time.Time         `json:"completionTime"`
+	// EVENT          []EVENT           `json:"events"`
 }
 
 // type JOBSTATUS struct {

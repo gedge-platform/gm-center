@@ -83,8 +83,8 @@ func GEdgeRoute(e *echo.Echo) {
 	// r.PUT("/jobs/:name", api.UpdateJobs)
 	// r.DELETE("/jobs/:name", api.DeleteJobs)
 	// r.GET("/cronjobs", api.GetAllCronJobs)
-	r.GET("/cronjobs", api.GetCronJobs)
-	// r.GET("/cronjobs/:name", api.GetCronJobs)
+	// r.GET("/cronjobs", api.GetCronJobs)
+	r.GET("/cronjobs/:name", api.GetCronJobs)
 	// r.GET("/pods", api.GetAllPods)
 	r.GET("/pods/:name", api.GetPods)
 

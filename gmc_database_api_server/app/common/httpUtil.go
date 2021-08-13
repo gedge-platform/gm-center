@@ -3,8 +3,6 @@ package common
 import (
 	"bytes"
 	"crypto/tls"
-	"errors"
-	"fmt"
 	"gmc_database_api_server/app/db"
 	"gmc_database_api_server/app/model"
 	"io"
@@ -90,28 +88,8 @@ var (
 	SetEvents              = new(model.EventList)
 )
 
-func GetModel(params model.PARAMS, arg ...string) (data string, err error) {
+func GetModel(params model.PARAMS) (data string, err error) {
 	var endPoint, token_value string
-
-	fmt.Printf("argCheck is %b\n", len(arg))
-	if len(arg) > 0 {
-		// argument 가 0개 이상일 때
-		argCheck := strings.Compare(arg[0], "") != 0
-		if argCheck {
-			arg[0] = strings.ToLower(arg[0])
-			switch arg[0] {
-			case "deployments":
-				// d, err := GetModelByUID(params, arg[0])
-				d, err := GetModelByName(params, arg[0])
-				return d, err
-				// getData, _ := common.GetModel(params)
-				// getData1 := common.FindData(getData, "metadata", "name")
-				// params2.Kind = arg[0]
-				// log.Println("params2 is ", params2)
-				// return GetModel(params2)
-			}
-		}
-	}
 
 	if err := validate(params); err != nil {
 		return "", err
@@ -284,78 +262,4 @@ func validate(params model.PARAMS) error {
 		return ErrWorkspaceInvalid
 	}
 	return nil
-}
-
-func GetModelByUID(params model.PARAMS, wantKind string) (string, error) {
-
-	data01, err := GetModel(params)
-	if err != nil {
-		return "", err
-	}
-	log.Println("data01(oldData) is :", data01)
-
-	uid := InterfaceToString(FindData(data01, "metadata", "uid"))
-	log.Println("uid is :", uid)
-
-	params2 := params
-	params2.Kind = wantKind
-	params2.Name = ""
-	log.Println("Params2 is :", params2)
-
-	data02, err := GetModel(params2)
-	if err != nil {
-		return "", err
-	}
-	log.Println("data02(newData) is :", data02)
-
-	data03 := FilterbyUID(data02, wantKind, uid)
-	log.Println("data03(FilterbyUUIDData) is :", data03)
-
-	return "", errors.New("")
-}
-
-func GetModelByName(params model.PARAMS, kind string) (string, error) {
-
-	data, err := GetModel(params)
-	if err != nil {
-		return "", err
-	}
-
-	log.Println("data(oldData) is :", data)
-	name := InterfaceToString(FindData(data, "metadata", "name"))
-
-	switch strings.ToLower(params.Kind) {
-	case "services":
-
-		params2 := params
-		params2.Kind = "pods"
-		params2.Name = ""
-
-		PodData, err := GetModel(params2)
-		if err != nil {
-			return "", err
-		}
-		log.Println("PodData is :", PodData)
-
-		fd := FilterbyName(PodData, "Pod", name)
-		log.Println("Filter Data is :", fd)
-
-	}
-
-	//
-	params2 := params
-	params2.Kind = kind
-	params2.Name = ""
-	log.Println("Params2 is :", params2)
-
-	data02, err := GetModel(params2)
-	if err != nil {
-		return "", err
-	}
-	log.Println("data02(newData) is :", data02)
-
-	data03 := FilterbyName(data02, kind, name)
-	log.Println("data03(FilterbyUidName) is :", data03)
-
-	return "", errors.New("")
 }

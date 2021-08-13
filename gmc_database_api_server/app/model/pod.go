@@ -7,40 +7,34 @@ type POD struct {
 	Cluster   string `json:"cluster"`
 	Project   string `json:"project"`
 	Name      string `json:"name"`
-	Kind      string `json:"kind"`
+	// Kind              string    `json:"kind"`
+	CreationTimestamp time.Time `json:"creationTimestamp"`
 	// Ready     int    `json:"Ready"`
-	Namespace string    `json:"namespace"`
-	Status    string    `json:"status"`
-	PodIP     string    `json:"podIP"`
-	CreatedAt time.Time `json:"created_at"`
-	NodeName  string    `json:"node_name"`
-}
-type PODALL struct {
-	Workspace string `json:"workspace"`
-	Cluster   string `json:"cluster"`
-	Project   string `json:"project"`
-	Name      string `json:"name"`
-	// Kind      string `json:"kind"`
-	// // Ready     int    `json:"Ready"`
-	// Namespace string `json:"namespace"`
-	// // Status    string    `json:"status"`
-	// PodIP     string    `json:"podIP"`
-	// CreatedAt time.Time `json:"created_at"`
-	// NodeName  string    `json:"node_name"`
-}
-type PODDETAIL struct {
-	POD
-	Lable             map[string]string   `json:"label"`
-	Annotations       map[string]string   `json:"annotations"`
-	OwnerReference    []OwnerReference    `json:"ownerReferences"`
-	Podcontainers     []PODCONTAINERS     `json:"Podcontainers"`
-	QosClass          string              `json:"qosClass"`
+	Namespace string   `json:"namespace"`
+	Status    string   `json:"status"`
+	HostIP    string   `json:"hostIP"`
+	PodIP     string   `json:"podIP"`
+	PodIPs    []PodIPs `json:"podIPs"`
+	// CreatedAt         time.Time           `json:"created_at"`
+	NodeName       string           `json:"node_name"`
+	Lable          interface{}      `json:"label"`
+	Annotations    interface{}      `json:"annotations"`
+	OwnerReference []OwnerReference `json:"ownerReferences"`
+	Podcontainers  []PODCONTAINERS  `json:"Podcontainers"`
+	QosClass       string           `json:"qosClass"`
+	// VolumeMounts      []VolumeMounts      `json:"volumemounts"`
 	ContainerStatuses []ContainerStatuses `json:"containerStatuses"`
 	DEPLOYMENT        []DEPLOYMENT        `json:"referdeployment"`
 	EVENT             []EVENT             `json:"event"`
 }
 
-type VOLUMEMOUNTS struct {
+type PodList1 struct {
+	Workspace string `json:"workspace"`
+	Cluster   string `json:"cluster"`
+	Project   string `json:"project"`
+	Name      string `json:"name"`
+}
+type VolumeMounts struct {
 	MountPath string `json:"mountpath"`
 	Name      string `json:"name"`
 	ReadOnly  bool   `json:"readonly"`
@@ -51,43 +45,53 @@ type PODCONTAINERS struct {
 	Image          string         `json:"image"`
 	ReadinessProbe ReadinessProbe `json:"readinessProbe",omitempty`
 	LivenessProbe  LivenessProbe  `json:"livenessProbe",omitempty`
-	PortsPOD       []PORTPOD      `json:"ports"`
+	Ports          []Ports        `json:"ports"`
 	Env            []ENV          `json:"env",omitempty`
-	VolumeMounts   []VOLUMEMOUNTS `json:"volumemounts"`
+	VolumeMounts   []VolumeMounts `json:"volumemounts"`
 }
 
 type ENV struct {
 	Name      string    `json:"name"`
+	Value     string    `json:"value"`
 	ValueFrom ValueFrom `json:"valueFrom"`
 }
 
 type ReadinessProbe struct {
-	FailureThreshold    int     `json:"failureThreshold"`
-	HTTPGET             HTTPGET `json:"httpGET"`
-	InitialDelaySeconds int     `json:"initialDelaySeconds"`
-	PeriodSeconds       int     `json:"periodSeconds"`
-	SuccessThreshold    int     `json:"successThreshold"`
-	TimeoutSeconds      int     `json:"timeoutSeconds"`
+	FailureThreshold int `json:"failureThreshold"`
+	HTTPGET          struct {
+		Path   string `json:"path"`
+		Port   int    `json:"port"`
+		Scheme string `json:"scheme"`
+	}
+	TcpSocket struct {
+		Port string `json:"port"`
+	}
+	InitialDelaySeconds int `json:"initialDelaySeconds"`
+	PeriodSeconds       int `json:"periodSeconds"`
+	SuccessThreshold    int `json:"successThreshold"`
+	TimeoutSeconds      int `json:"timeoutSeconds"`
 }
 type LivenessProbe struct {
-	FailureThreshold    int     `json:"failureThreshold"`
-	HTTPGET             HTTPGET `json:"httpGET"`
-	InitialDelaySeconds int     `json:"initialDelaySeconds"`
-	PeriodSeconds       int     `json:"periodSeconds"`
-	SuccessThreshold    int     `json:"successThreshold"`
-	TimeoutSeconds      int     `json:"timeoutSeconds"`
+	FailureThreshold int `json:"failureThreshold"`
+	HTTPGET          struct {
+		Path   string `json:"path"`
+		Port   int    `json:"port"`
+		Scheme string `json:"scheme"`
+	}
+	TcpSocket struct {
+		Port string `json:"port"`
+	}
+	InitialDelaySeconds int `json:"initialDelaySeconds"`
+	PeriodSeconds       int `json:"periodSeconds"`
+	SuccessThreshold    int `json:"successThreshold"`
+	TimeoutSeconds      int `json:"timeoutSeconds"`
 }
-type PORTPOD struct {
+type Ports struct {
 	Name          string `json:"name"`
 	ContainerPort int    `json:"containerPort"`
 	Protocol      string `json:"protocol"`
 }
 
-type HTTPGET struct {
-	Path   string `json:"path"`
-	Port   int    `json:"port"`
-	Scheme string `json:"scheme"`
-}
 type ContainerStatuses struct {
 	ContainerID  string `json:"containerID"`
 	Name         string `json:"name"`
@@ -113,7 +117,7 @@ type PodReferDeploy struct {
 	Namespace  string     `json:"namespace"`
 	Conditions Conditions `json:"status"`
 }
-type Conditions struct {
-	Reason string `json:"reason"`
-	Type   string `json:"type"`
+
+type PodIPs struct {
+	Ip string `json:"ip"`
 }

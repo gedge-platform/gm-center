@@ -32,3 +32,13 @@ type PORT struct {
 	protocol   Protocol           `json:"protocol"`
 	targetPort intstr.IntOrString `json:"targetPort"`
 }
+
+type SERVICELISTS struct {
+	Pods        interface{}       `json:"pods"`
+	Deployments SERVICEDEPLOYMENT `json:"deployments"`
+}
+
+type SERVICEDEPLOYMENT struct {
+	Name     string    `json:"name"`
+	UpdateAt time.Time `json:"updateAt"`
+}

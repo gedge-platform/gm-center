@@ -52,16 +52,16 @@ func GetService(c echo.Context) error {
 		Project:   params.Project,
 	}
 
-	getData99, err := common.GetModel(params, "Deployments")
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
-	getData98 := common.FindData(getData99, "", "")
+	// getData99, err := common.GetModel(params, "Deployments")
+	// if err != nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, err)
+	// 	return nil
+	// }
+	// getData98 := common.FindData(getData99, "", "")
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"services": services,
-		"getData":  getData98,
+		// "getData":  getData98,
 	})
 }
 

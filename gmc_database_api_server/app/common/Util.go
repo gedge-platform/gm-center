@@ -8,6 +8,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/tidwall/gjson"
 )
@@ -206,4 +207,18 @@ func Transcode(in, out interface{}) {
 func InterfaceToString(i interface{}) string {
 	str := fmt.Sprintf("%v", i)
 	return str
+}
+
+func StringToMapInterface(i string) map[string]interface{} {
+	x := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(i), &x); err != nil {
+		fmt.Printf("Error : %s\n", err)
+	}
+	return x
+}
+
+func InterfaceToTime(i interface{}) time.Time {
+	createTime := InterfaceToString(i)
+	timer, _ := time.Parse(time.RFC3339, createTime)
+	return timer
 }

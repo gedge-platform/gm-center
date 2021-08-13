@@ -199,6 +199,18 @@ func Finding(i string, find string) string {
 	return ReturnVal
 }
 
+func FindingLen(i string) int {
+	parse := gjson.Parse(i)
+	len := len(parse.Array())
+
+	return len
+}
+func FindingArray(i string) []gjson.Result {
+	parse := gjson.Parse(i)
+	array := parse.Array()
+
+	return array
+}
 func Typeof(v interface{}) string {
 	return reflect.TypeOf(v).String()
 }

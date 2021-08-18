@@ -2,8 +2,6 @@ package model
 
 import (
 	"time"
-
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type SERVICE struct {
@@ -14,23 +12,16 @@ type SERVICE struct {
 	Deployment []DEPLOYMENT `json:"deploymentInfo"`
 	// PodInfo         []POD                  `json:"podInfo"`
 	Type            string                 `json:"type"`
-	Ports           []PORT                 `json:"port"`
+	Ports           interface{}            `json:"port"`
 	ClusterIp       string                 `json:"clusterIp"`
 	ExternalIp      string                 `json:"externalIp"`
-	Selector        map[string]interface{} `json:"selector"`
+	Selector        interface{}            `json:"selector"`
 	Label           map[string]interface{} `json:"label"`
 	Annotation      map[string]interface{} `json:"annotation"`
 	SessionAffinity string                 `json:"sessionAffinity"`
 	Events          []EVENT                `json:"events"`
 	CreateAt        time.Time              `json:"createAt"`
 	UpdateAt        time.Time              `json:"updateAt"`
-}
-
-type PORT struct {
-	name       string             `json:"name"`
-	port       int32              `json:"port"`
-	protocol   Protocol           `json:"protocol"`
-	targetPort intstr.IntOrString `json:"targetPort"`
 }
 
 type SERVICELISTS struct {

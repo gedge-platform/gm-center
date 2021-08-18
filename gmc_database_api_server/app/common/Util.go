@@ -227,13 +227,7 @@ func InterfaceToTime(i interface{}) time.Time {
 	timer, _ := time.Parse(time.RFC3339, createTime)
 	return timer
 }
-func StringToInterface(i string) interface{} {
-	var x interface{}
-	if err := json.Unmarshal([]byte(i), &x); err != nil {
-		fmt.Printf("Error : %s\n", err)
-	}
-	return x
-}
+
 func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 	data, err := GetModel(params)

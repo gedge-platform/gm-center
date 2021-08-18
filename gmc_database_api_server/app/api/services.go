@@ -59,7 +59,7 @@ func GetService(c echo.Context) error {
 		return nil
 	}
 
-	babo, err := common.FindDataArr(testing, "items", "uid", "bce54421-37ec-42cb-a74d-64471d7ffc8a")
+	babo, err := common.FindDataArr(testing, "items", "namespace", "default")
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil

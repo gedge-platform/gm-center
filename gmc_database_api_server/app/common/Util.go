@@ -43,52 +43,6 @@ func SearchNestedValue(obj interface{}, key string, uniq string) (interface{}, b
 	return nil, false
 }
 
-func InterfaceMerge(x1, x2 interface{}) (interface{}, error) {
-	data1, err := json.Marshal(x1)
-	if err != nil {
-		return nil, err
-	}
-	data2, err := json.Marshal(x2)
-	if err != nil {
-		return nil, err
-	}
-	var j1 interface{}
-	err = json.Unmarshal(data1, &j1)
-	if err != nil {
-		return nil, err
-	}
-	var j2 interface{}
-	err = json.Unmarshal(data2, &j2)
-	if err != nil {
-		return nil, err
-	}
-	return merge(j1, j2), nil
-}
-
-func merge(x1, x2 interface{}) interface{} {
-	switch x1 := x1.(type) {
-	case map[string]interface{}:
-		x2, ok := x2.(map[string]interface{})
-		if !ok {
-			return x1
-		}
-		for k, v2 := range x2 {
-			if v1, ok := x1[k]; ok {
-				x1[k] = merge(v1, v2)
-			} else {
-				x1[k] = v2
-			}
-		}
-	case nil:
-		// merge(nil, map[string]interface{...}) -> map[string]interface{...}
-		x2, ok := x2.(map[string]interface{})
-		if ok {
-			return x2
-		}
-	}
-	return x1
-}
-
 func CreateKeyValuePairs(m map[string]string) []string {
 	var r []string
 	for key, value := range m {
@@ -179,6 +133,7 @@ func FindDataArr(i interface{}, p, f, u string) (interface{}, error) {
 	var parse, data gjson.Result
 	var arr []gjson.Result
 	var result interface{}
+	var results []interface{}
 	ia := InterfaceToString(i)
 
 	parse = gjson.Parse(ia)
@@ -211,7 +166,12 @@ func FindDataArr(i interface{}, p, f, u string) (interface{}, error) {
 				fmt.Printf("Arr[%d] Found it ! \n", t)
 				fmt.Printf("Unique is : %+v\n", v)
 				fmt.Printf("data is %s\n", arr[t])
-				result, _ = InterfaceMerge(result, StringToInterface(arr[t].String()))
+				err := json.Unmarshal([]byte(arr[t].String()), &result)
+				if err != nil {
+					fmt.Println("[!53] error")
+				}
+				results = append(results, result)
+				fmt.Printf("[%d] result Data is %s", t, results)
 			} else {
 				fmt.Printf("Arr[%d] Key not found\n", t)
 			}
@@ -230,7 +190,7 @@ func FindDataArr(i interface{}, p, f, u string) (interface{}, error) {
 		}
 
 		// list 출력
-		return result, nil
+		return results, nil
 
 	} else {
 		return StringToInterface(data.String()), nil

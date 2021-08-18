@@ -3,11 +3,20 @@ package api
 import (
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
+// GetJobs godoc
+// @Summary Show detail job
+// @Description get job Details
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.JOB
+// @Header 200 {string} Token "qwerty"
+// @Router /jobs/:name [get]
 func GetJobs(c echo.Context) error {
 	params := model.PARAMS{
 		Kind:      "jobs",
@@ -36,6 +45,10 @@ func GetJobs(c echo.Context) error {
 	var ownerReferencesInfo []model.OwnerReference
 	common.Transcode(ownerReferencesData, &ownerReferencesInfo)
 
+	// getData22, _ := common.GetModelRelatedList(params)
+	// log.Printf("#####getdata22 ", getData22)
+	getData99, _ := common.GetModelRelatedList(params)
+	log.Printf("#####getdata99 ", getData99)
 	jobinfos := model.JOB{
 		Workspace:      params.Workspace,
 		Cluster:        params.Cluster,
@@ -58,6 +71,8 @@ func GetJobs(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"jobDetails": jobinfos,
+		// "test":       getData22,
+		"jobreferpod": getData99,
 	})
 }
 

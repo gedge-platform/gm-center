@@ -8,6 +8,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetCronjobs godoc
+// @Summary Show detail cronjob
+// @Description get cronjob Details
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.CRONJOB
+// @Header 200 {string} Token "qwerty"
+// @Router /cronjobs/:name [get]
 func GetCronJobs(c echo.Context) (err error) {
 
 	params := model.PARAMS{

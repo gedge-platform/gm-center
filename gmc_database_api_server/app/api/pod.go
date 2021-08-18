@@ -8,6 +8,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetPods godoc
+// @Summary Show detail pods
+// @Description get pods Details
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.POD
+// @Header 200 {string} Token "qwerty"
+// @Router /pods/:name [get]
 func GetPods(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "pods",

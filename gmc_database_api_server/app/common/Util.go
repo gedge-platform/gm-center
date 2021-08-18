@@ -227,7 +227,13 @@ func InterfaceToTime(i interface{}) time.Time {
 	timer, _ := time.Parse(time.RFC3339, createTime)
 	return timer
 }
-
+func StringToInterface(i string) interface{} {
+	var x interface{}
+	if err := json.Unmarshal([]byte(i), &x); err != nil {
+		fmt.Printf("Error : %s\n", err)
+	}
+	return x
+}
 func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 	data, err := GetModel(params)
@@ -278,9 +284,75 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		}
 
 	case "deployments":
-		// params2.Kind = "endpoints"
-		// params2.Name = InterfaceToString(FindData(data, "metadata", "name"))
+	// params2.Kind = "endpoints"
+	// params2.Name = InterfaceToString(FindData(data, "metadata", "name"))
 
+	case "jobs":
+		params.Kind = "pods"
+		uniq := InterfaceToString(FindData(data, "metadata", "name"))
+
+		log.Println("PARAMS.NAEMData12 : ", params.Name)
+		log.Println("uniq Data12 : ", uniq)
+		if data, err := GetModel(params); err != nil {
+			return nil, err
+		} else {
+			PodDataA := FindData(data, "metadata", "items")
+			params.Name = InterfaceToString(FindData(data, "metadata", "name"))
+			log.Println("Pod List Data12 : ", data)
+			log.Println("Pod List 데이터뿌려주기  : ", PodDataA)
+			log.Println("Pod params Data125 : ", params.Name)
+			if data, err := GetModel(params); err != nil {
+				return nil, err
+			} else {
+				var Only interface{}
+				var List []interface{}
+				n := gjson.Parse(data)
+				// log.Println("all gjson parse List Data124 : ", n)
+				k := n.Get("items").Array()
+				log.Println("onlygjson parse List Data124 : ", k)
+				result := n.Get("items.#.metadata").Array()
+				result2 := n.Get("items.#.spec").Array()
+				fmt.Println(result2)
+				for num, _ := range k {
+
+					// r2esult := n.Get(`items.#.metadata.labels.job-name`).Array()
+					log.Printf("####135555confirm ", result[num].Get(`labels.job-name`))
+					arr := k[num].Get(`metadata`).Get(`labels.job-name`).String()
+					log.Printf("###arrr ", arr)
+
+					if strings.Contains(arr, uniq) == true {
+						fmt.Println(arr)
+						// if k[num].Get(`metadata`).Get(`labels.job-name`).String() == uniq {
+						// if k[num].Get(`metadata.labels.job-name`).String() == uniq {
+						log.Printf("metadata ", k[num].Get(`metadata`).Get(`labels.job-name`).String())
+						log.Printf("DATA CONFIRM")
+
+						// err := json.Unmarshal([]byte(result[num].String()), &Only)
+						// fmt.Println(err)
+						test := k[num].String()
+						// err := json.Unmarshal([]byte(test))
+						fmt.Println("eeeeee", test)
+						// fmt.Println("eeeeeeFFFF", err)
+						// err2 := StringToInterface(test), &Only
+
+						err := json.Unmarshal([]byte(test), &Only)
+						if err != nil {
+							fmt.Println("[!53] error")
+						}
+						List = append(List, Only)
+
+						// fmt.Println(err2)
+						// log.Printf("err confirm ", err)
+						// log.Printf("List ", Only)
+						// if err != nil {
+						// 	panic(err)
+						// }
+						// List = append(List, Only)
+						return List, nil
+					}
+				}
+			}
+		}
 	}
 	return nil, errors.New("")
 }

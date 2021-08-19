@@ -15,22 +15,25 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func SearchNested(obj interface{}, key string) (interface{}, bool) {
-	log.Println("obj is ", obj)
+func SearchNestedValue(obj interface{}, key string, uniq string) (interface{}, bool) {
+	// log.Println("obj is ", obj)
 
 	switch t := obj.(type) {
 	case map[string]interface{}:
 		if v, ok := t[key]; ok {
-			return v, ok
+			if strings.Compare(InterfaceToString(v), uniq) == 0 {
+				log.Printf("[#1] sfsdfs v is %s, uniq is %s, ok is %t", v, uniq, ok)
+				return v, ok
+			}
 		}
 		for _, v := range t {
-			if result, ok := SearchNested(v, key); ok {
+			if result, ok := SearchNestedValue(v, key, uniq); ok {
 				return result, ok
 			}
 		}
 	case []interface{}:
 		for _, v := range t {
-			if result, ok := SearchNested(v, key); ok {
+			if result, ok := SearchNestedValue(v, key, uniq); ok {
 				return result, ok
 			}
 		}
@@ -96,10 +99,10 @@ func FindDataStr(data string, findPath, findValue string) string {
 	log.Println("FindPath is ", findPath)
 	findPathCheck := strings.Compare(findPath, "") != 0
 	if findPathCheck {
-		// findkey 입력이 있을 경우
+		// findPath 입력이 있을 경우
 		data = Filter(data, findPath)
 	} else {
-		// findkey 가 "" 일 경우
+		// findPath 가 "" 일 경우
 
 	}
 
@@ -119,45 +122,80 @@ func FindDataStr(data string, findPath, findValue string) string {
 	return data
 }
 
-// func FindDataArr(data string, findPath, uniq string) string {
+func FindDataArr(i interface{}, p, f, u string) (interface{}, error) {
+	log.Println("[In #FindDataArr]")
+	log.Println("[#1] Data is ", i)
+	log.Println("[#2] find path string is ", p)
+	log.Println("[#2] find key string is ", f)
+	log.Println("[#3] uniq string is ", u)
 
-// 	log.Println("FindPath is ", findPath)
-// 	log.Println("findValue is ", compareValue)
+	// var itemCheck bool
+	var parse, data gjson.Result
+	var arr []gjson.Result
+	var result interface{}
+	var results []interface{}
+	ia := InterfaceToString(i)
 
-// 	findValueCheck := strings.Compare(compareValue, "") != 0
-// 	if findValueCheck {
-// 		// findValue 입력이 있을 경우
-// 		data = Finding(data, compareValue)
+	parse = gjson.Parse(ia)
+	log.Println("[#4] Parse is ", parse)
 
-// 	} else {
-// 		// findValue 가 "" 일 경우
-// 	}
+	pathCheck := strings.Compare(p, "") != 0
+	// itemCheck = len(parse.Get("items").Array()) > 0
+	// log.Println("[#4] itemCheck is ", itemCheck)
 
-// 	log.Println("최종 data is : ", data)
-// 	fmt.Println("type:", reflect.ValueOf(data).Type())
+	if pathCheck {
+		data = parse.Get(p)
+		log.Println("[#5] filter data is ", data)
+	} else {
+		data = parse
+		log.Println("[#5] filter data is ", data)
+	}
 
-// 	return data
-// }
+	len := len(data.Array())
+	log.Println("[#6] len(data) is ", len)
 
-// func FilterUniq(i string, uniq string) string {
-// 	parse := gjson.Parse(i)
-// 	Dat := parse.Get(path)
-// 	// Arr := parse.Get(path).Array()
-// 	len := len(parse.Get(path).Array())
+	if len > 0 {
+		// list
+		arr = data.Array()
+		log.Println("[#7-1] len > 0, list")
+		for t, _ := range arr {
 
-// 	if len > 0 {
-// 		// list
-// 		// log.Printf("[#36] Arr is %+v\n", Arr)
-// 		// err3 := json.Unmarshal([]byte(Arr[0].String()), &x)
-// 		// if err3 != nil {
-// 		// 	fmt.Printf("Error : %s\n", err3)
-// 		// }
-// 		// fmt.Println("[#35] is ", x)
-// 		return Dat.String()
-// 	} else {
-// 		return Dat.String()
-// 	}
-// }
+			dataInterface := StringToMapInterface(arr[t].String())
+
+			if v, ok := SearchNestedValue(dataInterface, f, u); ok {
+				fmt.Printf("Arr[%d] Found it ! \n", t)
+				fmt.Printf("Unique is : %+v\n", v)
+				fmt.Printf("data is %s\n", arr[t])
+				err := json.Unmarshal([]byte(arr[t].String()), &result)
+				if err != nil {
+					fmt.Println("[!53] error")
+				}
+				results = append(results, result)
+				fmt.Printf("[%d] result Data is %s", t, results)
+			} else {
+				fmt.Printf("Arr[%d] Key not found\n", t)
+			}
+		}
+
+		if len == 1 {
+			log.Println("[#7-2] len == 1, list")
+			dataInterface := StringToInterface(arr[0].String())
+			if v, ok := SearchNestedValue(dataInterface, f, u); ok {
+				fmt.Println("Found it !")
+				fmt.Printf("Unique is : %+v\n", v)
+				return StringToInterface(arr[0].String()), nil
+			} else {
+				return nil, nil
+			}
+		}
+
+		// list 출력
+		return results, nil
+
+	} else {
+		return StringToInterface(data.String()), nil
+	}
+}
 
 func Filter(i string, path string) string {
 	parse := gjson.Parse(i)
@@ -215,6 +253,14 @@ func Typeof(v interface{}) string {
 	return reflect.TypeOf(v).String()
 }
 
+func StringToInterface(i string) interface{} {
+	var x interface{}
+	if err := json.Unmarshal([]byte(i), &x); err != nil {
+		fmt.Printf("Error : %s\n", err)
+	}
+	return x
+}
+
 func Transcode(in, out interface{}) {
 	buf := new(bytes.Buffer)
 	json.NewEncoder(buf).Encode(in)
@@ -256,9 +302,13 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			return nil, err
 		} else {
 			PodData := FindData(data, "subsets.#.addresses", "")
+			log.Println("endPoints 뿌려주기 : ", PodData)
+
 			splits := strings.SplitN(InterfaceToString(FindData(data, "subsets.#.addresses.0", "targetRef.name")), "-", 3)
 			log.Printf("Endpoints [%s] Data is %s \n", params.Name, data)
 			log.Printf("splits %s \n", splits)
+
+			// TODO: splits 가 여러개 일 수 있으니, 수정 필요(맨 마지막 - 이후로 제거)
 			podName := splits[0] + "-" + splits[1]
 
 			params.Kind = "replicasets"
@@ -290,8 +340,16 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		}
 
 	case "deployments":
-		// params2.Kind = "endpoints"
-		// params2.Name = InterfaceToString(FindData(data, "metadata", "name"))
+		log.Println("[#5] data is ", data)
+
+		// params.Kind = "deployments"
+		// params.Name = InterfaceToString(FindData(data, "metadata", "uid"))
+
+		// if data, err := GetModel(params); err != nil {
+		// 	return nil, err
+		// } else {
+		// 	log.Println("data is ", data)
+		// }
 
 	}
 	return nil, errors.New("")

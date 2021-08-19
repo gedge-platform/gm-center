@@ -43,7 +43,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r5 := e.Group("/testing/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		return api.AuthenticateUser(id, password), nil
 	}))
-	r5.GET("/services", api.GetService)
+	r5.GET("/services", api.GetServices)
 	r5.GET("/services/:name", api.GetService)
 
 	// /gmcapi/v1

@@ -48,3 +48,8 @@ type REPLICA struct {
 
 type DEPLOYMENT_RESOURCE struct {
 }
+
+type DEPLOYMENTLISTS struct {
+	Pods     interface{} `json:"pods"`
+	Services interface{} `json:"services"`
+}

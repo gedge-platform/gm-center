@@ -52,6 +52,20 @@ func CreateKeyValuePairs(m map[string]string) []string {
 	return r
 }
 
+func MakeSliceUnique(s []int) []int {
+	keys := make(map[int]struct{})
+	res := make([]int, 0)
+	for _, val := range s {
+		if _, ok := keys[val]; ok {
+			continue
+		} else {
+			keys[val] = struct{}{}
+			res = append(res, val)
+		}
+	}
+	return res
+}
+
 func ArrStringtoBytes(i []string) []byte {
 	buf := &bytes.Buffer{}
 	gob.NewEncoder(buf).Encode(i)
@@ -281,64 +295,92 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		return "", err
 	}
 
+	origName := InterfaceToString(FindData(data, "metadata", "name"))
+	origUid := InterfaceToString(FindData(data, "metadata", "uid"))
+
 	switch strings.ToLower(params.Kind) {
 	case "services":
 		params.Kind = "endpoints"
-		params.Name = InterfaceToString(FindData(data, "metadata", "name"))
+		params.Name = origName
 
-		if data, err := GetModel(params); err != nil {
+		endPointData, err := GetModel(params)
+		if err != nil {
 			return nil, err
-		} else {
-			PodData := FindData(data, "subsets.#.addresses", "")
-			log.Println("endPoints 뿌려주기 : ", PodData)
-
-			splits := strings.SplitN(InterfaceToString(FindData(data, "subsets.#.addresses.0", "targetRef.name")), "-", 3)
-			log.Printf("Endpoints [%s] Data is %s \n", params.Name, data)
-			log.Printf("splits %s \n", splits)
-
-			// TODO: splits 가 여러개 일 수 있으니, 수정 필요(맨 마지막 - 이후로 제거)
-			podName := splits[0] + "-" + splits[1]
-
-			params.Kind = "replicasets"
-			params.Name = podName
-
-			if data, err := GetModel(params); err != nil {
-				return nil, err
-			} else {
-				log.Printf("replicasets [%s] Data is %s \n", params.Name, data)
-				params.Kind = "deployments"
-				params.Name = FindDataStr(data, "metadata.ownerReferences.0", "name")
-
-				if data, err := GetModel(params); err != nil {
-					return nil, err
-				} else {
-					var deployModel model.Deployment
-					Transcode(data, &deployModel)
-
-					services := model.SERVICELISTS{
-						Pods: PodData,
-						Deployments: model.SERVICEDEPLOYMENT{
-							Name:     InterfaceToString(FindData(data, "metadata", "name")),
-							UpdateAt: InterfaceToTime(FindData(data, "status.conditions", "lastUpdateTime")),
-						},
-					}
-					return services, nil
-				}
-			}
 		}
 
+		PodData := FindData(endPointData, "subsets.#.addresses", "")
+		log.Println("endPoints 뿌려주기 : ", PodData)
+
+		splits := strings.SplitN(InterfaceToString(FindData(endPointData, "subsets.#.addresses.0", "targetRef.name")), "-", 3)
+		log.Printf("Endpoints [%s] Data is %s \n", params.Name, endPointData)
+		log.Printf("splits %s \n", splits)
+
+		// TODO: splits 가 여러개 일 수 있으니, 수정 필요(맨 마지막 - 이후로 제거)
+		podName := splits[0] + "-" + splits[1]
+
+		params.Kind = "replicasets"
+		params.Name = podName
+
+		replData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("replicasets [%s] Data is %s \n", params.Name, replData)
+		params.Kind = "deployments"
+		params.Name = FindDataStr(replData, "metadata.ownerReferences.0", "name")
+
+		DeployData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+
+		// var deployModel model.Deployment
+		// Transcode(DeployData, &deployModel)
+
+		services := model.SERVICELISTS{
+			Pods: PodData,
+			Deployments: model.SERVICEDEPLOYMENT{
+				Name:     InterfaceToString(FindData(DeployData, "metadata", "name")),
+				UpdateAt: InterfaceToTime(FindData(DeployData, "status.conditions", "lastUpdateTime")),
+			},
+		}
+		return services, nil
+
 	case "deployments":
-		log.Println("[#5] data is ", data)
+		// log.Println("[#5] data is ", data)
+		selectorName := InterfaceToString(FindData(data, "spec.selector.matchLabels", "run"))
 
-		// params.Kind = "deployments"
-		// params.Name = InterfaceToString(FindData(data, "metadata", "uid"))
+		params.Kind = "replicasets"
+		params.Name = ""
 
-		// if data, err := GetModel(params); err != nil {
-		// 	return nil, err
-		// } else {
-		// 	log.Println("data is ", data)
-		// }
+		replData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
 
+		podData, err := FindDataArr(replData, "items", "uid", origUid)
+		if err != nil {
+			return nil, err
+		}
+
+		params.Kind = "services"
+		params.Name = ""
+
+		svcsData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+
+		svcData, err := FindDataArr(svcsData, "items", "run", selectorName)
+		if err != nil {
+			return nil, err
+		}
+
+		deployments := model.DEPLOYMENTLISTS{
+			Pods:     podData,
+			Services: svcData,
+		}
+		return deployments, nil
 	}
 	return nil, errors.New("")
 }

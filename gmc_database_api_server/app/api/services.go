@@ -3,7 +3,6 @@ package api
 import (
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -43,34 +42,9 @@ func GetService(c echo.Context) error {
 
 	involveData, _ := common.GetModelRelatedList(params) // Pods, Deployments
 
-	params = model.PARAMS{
-		Kind:      "services",
-		Name:      "",
-		Cluster:   c.QueryParam("cluster"),
-		Workspace: c.QueryParam("workspace"),
-		Project:   c.QueryParam("project"),
-		Method:    c.Request().Method,
-		Body:      c.Request().Body,
-	}
-
-	testing, err := common.GetModel(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
-
-	babo, err := common.FindDataArr(testing, "items", "namespace", "default")
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
-
-	log.Println("[TT] : ", babo)
-
 	return c.JSON(http.StatusOK, echo.Map{
 		"services": services,
 		"involves": involveData,
-		"babo":     babo,
 	})
 }
 

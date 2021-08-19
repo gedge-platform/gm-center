@@ -16,7 +16,7 @@ type Project struct {
 	WorkspaceName string           `gorm:"column:workspaceName; not null; default:null" json:"workspaceName"`
 	Status        string           `json:"status"`
 	ClusterName   string           `json:"clusterName"`
-	SelectCluster string           `json:"selectCluster"`
+	SelectCluster string           `gorm:"column:selectCluster; not null; default:null" json:"selectCluster"`
 	Resource      PROJECT_RESOURCE `json:"resource"`
 	Label         interface{}      `json:"labels"`
 	Annotation    interface{}      `json:"annotations"`

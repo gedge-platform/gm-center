@@ -59,6 +59,8 @@ func GetProject3(params model.PARAMS) *model.Project {
 		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		var model model.Project
 		model.Type = "system"
+		model.WorkspaceName = "system"
+		model.SelectCluster = params.Cluster
 		return &model
 	}
 

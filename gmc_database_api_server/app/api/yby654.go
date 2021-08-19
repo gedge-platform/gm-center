@@ -146,7 +146,6 @@ func Get_Clusters(c echo.Context) (err error) {
 }
 func Get_Projects(c echo.Context) (err error) {
 	var Projects model.Projects
-	// ProjectModel := model.Project{}
 	params := model.PARAMS{
 		Kind:      "namespaces",
 		Name:      c.Param("name"),
@@ -161,24 +160,21 @@ func Get_Projects(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	var Namespace model.Namespace
 	getData0 := common.FindingArray(common.Finding(getData, "items"))
-	// getData0 := common.FindData(getData, "items", "")
-	// data234 := common.InterfaceToString(getData0)
 	for k, _ := range getData0 {
 		params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
-
 		ProjectModel := GetProject3(params)
-		fmt.Printf("[######]ProjectModel  : %+v\n", ProjectModel)
-		// for key, value := range getData0 {
-		Projects = append(Projects, ProjectModel)
+		var Project model.Project
+		common.Transcode(ProjectModel, &Project)
+		fmt.Printf("[######]ProjectModel  : %+v\n", Project)
+		Project.Name = params.Name
+		Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
+		Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
+		Project.ClusterName = params.Cluster
+		Projects = append(Projects, Project)
 	}
-	// }
-	// fmt.Printf("{###]stirng: %s\n", getData0)
 
-	common.Transcode(getData0, &Namespace)
 	return c.JSON(http.StatusOK, echo.Map{
-		// "projects": projectModel,
-		"data": ProjectModels,
+		"data": Projects,
 	})
 }

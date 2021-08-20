@@ -15,7 +15,7 @@ import (
 
 var nowNamespaceMetric = map[string]string{
 	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
-	"namespace_memory":    "sum(sum(container_memory_usage_bytes{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)",
+	"namespace_memory":    "sum(sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)",
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 

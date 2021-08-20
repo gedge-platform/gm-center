@@ -5,18 +5,16 @@ import (
 )
 
 type EVENT struct {
-	Kind      string `json:"kind"`
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Message   string `json:"message"`
+	Metadata struct {
+		Name              string    `json:"name"`
+		Namespace         string    `json:"namespace"`
+		CreationTimestamp time.Time `json:"creationTimestamp"`
+	} `json:"metadata"`
 	Regarding struct {
 		Kind string `json:"kind"`
 		Name string `json:"name"`
-		// Monitoring []MONITOR `json:"monitoring"`
-	}
-	Reason    string    `json:"reason"`
-	Type      string    `json:"type"`
-	EventTime time.Time `json:"eventTime"`
-	Note      string    `json:"note"`
-	// Monitoring []MONITOR `json:"monitoring"`
+	} `json:"regarding"`
+	Reason string `json:"reason"`
+	Type   string `json:"type"`
+	Note   string `json:"note"`
 }

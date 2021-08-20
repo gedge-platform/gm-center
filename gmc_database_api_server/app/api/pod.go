@@ -3,6 +3,7 @@ package api
 import (
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -31,6 +32,7 @@ func GetPods(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
+
 	ownerReferencesData := common.FindData(getData, "metadata", "ownerReferences")
 	var ownerReferencesInfo []model.OwnerReference
 	common.Transcode(ownerReferencesData, &ownerReferencesInfo)
@@ -50,6 +52,8 @@ func GetPods(c echo.Context) (err error) {
 	// volumeMountsData := common.FindData(getData, "spec.containers", "volumeMounts")
 	// var volumeMountsInfo []model.VolumeMounts
 	// common.Transcode(volumeMountsData, &volumeMountsInfo)
+	getData99, _ := common.GetModelRelatedList(params)
+	log.Printf("#####getdata99 ", getData99)
 
 	podinfos := model.POD{
 		Workspace:         params.Workspace,
@@ -72,35 +76,7 @@ func GetPods(c echo.Context) (err error) {
 		// VolumeMounts:      volumeMountsInfo,
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"podDetails": podinfos,
+		"podDetail": podinfos,
+		"event":     getData99,
 	})
 }
-
-// func GetAllPods(c echo.Context) (err error) {
-
-// 	params := model.PARAMS{
-// 		Kind:      "pods",
-// 		Name:      "",
-// 		Cluster:   c.QueryParam("cluster"),
-// 		Workspace: c.QueryParam("workspace"),
-// 		Project:   c.QueryParam("project"),
-// 		Method:    c.Request().Method,
-// 		Body:      c.Request().Body,
-// 	}
-// 	getPodData, err := common.GetModel(params, "pods")
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, err)
-// 		return nil
-// 	}
-// 	getPodData1 := common.FindData(getPodData, "", "")
-// 	cronjobInfos := model.PodList1{
-// 		Workspace: params.Workspace,
-// 		Cluster:   params.Cluster,
-// 		// Project:   params.Project,
-// 		Name: common.InterfaceToString(common.FindData(getPodData, "metadata", "name")),
-// 	}
-// 	return c.JSON(http.StatusOK, echo.Map{
-// 		"podList": cronjobInfos,
-// 		"podAll":  getPodData1,
-// 	})
-// }

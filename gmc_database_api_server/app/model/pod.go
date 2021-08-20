@@ -24,8 +24,6 @@ type POD struct {
 	QosClass       string           `json:"qosClass"`
 	// VolumeMounts      []VolumeMounts      `json:"volumemounts"`
 	ContainerStatuses []ContainerStatuses `json:"containerStatuses"`
-	DEPLOYMENT        []DEPLOYMENT        `json:"referdeployment"`
-	EVENT             []EVENT             `json:"event"`
 }
 
 type PodList1 struct {
@@ -41,13 +39,13 @@ type VolumeMounts struct {
 }
 
 type PODCONTAINERS struct {
-	Name           string         `json:"name"`
-	Image          string         `json:"image"`
-	ReadinessProbe ReadinessProbe `json:"readinessProbe",omitempty`
-	LivenessProbe  LivenessProbe  `json:"livenessProbe",omitempty`
-	Ports          []Ports        `json:"ports"`
-	Env            []ENV          `json:"env",omitempty`
-	VolumeMounts   []VolumeMounts `json:"volumemounts"`
+	Name  string `json:"name"`
+	Image string `json:"image"`
+	// ReadinessProbe ReadinessProbe `json:"readinessProbe",omitempty`
+	// LivenessProbe  LivenessProbe  `json:"livenessProbe",omitempty`
+	Ports        []Ports        `json:"ports"`
+	Env          []ENV          `json:"env",omitempty`
+	VolumeMounts []VolumeMounts `json:"volumemounts"`
 }
 
 type ENV struct {
@@ -112,12 +110,24 @@ type ConfigMapKeyRef struct {
 	Name string `json:"name"`
 	Key  string `json:"key"`
 }
-type PodReferDeploy struct {
-	Name       string     `json:"name"`
-	Namespace  string     `json:"namespace"`
-	Conditions Conditions `json:"status"`
-}
+
+// type PodReferDeploy struct {
+// 	Name       string     `json:"name"`
+// 	Namespace  string     `json:"namespace"`
+// 	Conditions Conditions `json:"status"`
+// }
 
 type PodIPs struct {
 	Ip string `json:"ip"`
+}
+type DeployInfo struct {
+	Metadata struct {
+		Name              string    `json:"name"`
+		Namespace         string    `json:"namespace"`
+		CreationTimestamp time.Time `json:"creationTimestamp"`
+	} `json:"metadata"`
+}
+type ReferDataDeploy struct {
+	DeployInfo []DeployInfo `json:"deployList"`
+	Event      []EVENT      `json:"event"`
 }

@@ -45,10 +45,9 @@ func GetJobs(c echo.Context) error {
 	var ownerReferencesInfo []model.OwnerReference
 	common.Transcode(ownerReferencesData, &ownerReferencesInfo)
 
-	// getData22, _ := common.GetModelRelatedList(params)
-	// log.Printf("#####getdata22 ", getData22)
-	getData99, _ := common.GetModelRelatedList(params)
-	log.Printf("#####getdata99 ", getData99)
+	referData, _ := common.GetModelRelatedList(params)
+	log.Printf("#####getdata99 ", referData)
+
 	jobinfos := model.JOB{
 		Workspace:      params.Workspace,
 		Cluster:        params.Cluster,
@@ -70,31 +69,7 @@ func GetJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"jobDetails": jobinfos,
-		// "test":       getData22,
-		"jobreferpod": getData99,
+		"jobDetail": jobinfos,
+		"referData": referData,
 	})
 }
-
-// func GetAllJobs(c echo.Context) (err error) {
-
-// 	params := model.PARAMS{
-// 		Kind:      "jobs",
-// 		Name:      "",
-// 		Cluster:   c.QueryParam("cluster"),
-// 		Workspace: c.QueryParam("workspace"),
-// 		Project:   c.QueryParam("project"),
-// 		Method:    c.Request().Method,
-// 		Body:      c.Request().Body,
-// 	}
-// 	getData99, err := common.GetModel(params, "jobs")
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, err)
-// 		return nil
-// 	}
-// 	getData98 := common.FindData(getData99, "", "")
-
-// 	return c.JSON(http.StatusOK, echo.Map{
-// 		"jobList": getData98,
-// 	})
-// }

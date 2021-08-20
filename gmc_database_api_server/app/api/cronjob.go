@@ -3,6 +3,7 @@ package api
 import (
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -40,6 +41,9 @@ func GetCronJobs(c echo.Context) (err error) {
 	var activeInfo []model.Active
 	common.Transcode(activeData, &activeInfo)
 
+	referData, _ := common.GetModelRelatedList(params)
+	log.Printf("#####referDataJob ", referData)
+
 	cronjobInfos := model.CRONJOB{
 		Workspace:                  params.Workspace,
 		Cluster:                    params.Cluster,
@@ -58,30 +62,6 @@ func GetCronJobs(c echo.Context) (err error) {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"cronjobDetail": cronjobInfos,
+		"referData":     referData,
 	})
 }
-
-// func GetAllCronJobs(c echo.Context) (err error) {
-
-// 	params := model.PARAMS{
-// 		Kind:      "cronjobs",
-// 		Name:      "",
-// 		Cluster:   c.QueryParam("cluster"),
-// 		Workspace: c.QueryParam("workspace"),
-// 		Project:   c.QueryParam("project"),
-// 		Method:    c.Request().Method,
-// 		Body:      c.Request().Body,
-// 	}
-// 	getData99, err := common.GetModel(params, "cronjobs")
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, err)
-// 		return nil
-// 	}
-// 	getData98 := common.FindData(getData99, "", "")
-// 	// cronjobInfos := []model.CRONJOB{
-// 	// 	getData98
-// 	// }
-// 	return c.JSON(http.StatusOK, echo.Map{
-// 		"cronjobList": getData98,
-// 	})
-// }

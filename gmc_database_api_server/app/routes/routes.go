@@ -34,15 +34,15 @@ func GEdgeRoute(e *echo.Echo) {
 		return api.AuthenticateUser(id, password), nil
 	}))
 	// r0.GET("/cluster", api.Cluster)
-	r0.GET("/getCluster", api.Get_Cluster)
-	r0.GET("/getProject", api.Get_Project)
-	r0.GET("/getDeployment/:name", api.Get_Deployment)
-	r0.GET("/gethttp", api.Get_http)
+	r0.GET("/getClusters/:name", api.Get_Cluster)
+	r0.GET("/getClusters", api.Get_Clusters)
+	r0.GET("/getProjects/:name", api.Get_Project)
+	r0.GET("/getDeployments/:name", api.Get_Deployment)
 
 	r5 := e.Group("/testing/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		return api.AuthenticateUser(id, password), nil
 	}))
-	r5.GET("/services", api.GetService)
+	r5.GET("/services", api.GetServices)
 	r5.GET("/services/:name", api.GetService)
 
 	// /gmcapi/v1

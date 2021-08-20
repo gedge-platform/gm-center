@@ -5,21 +5,21 @@ import (
 )
 
 type Project struct {
-	Num           int               `gorm:"column:projectNum; primary_key" json:"projectNum"`
-	Name          string            `gorm:"column:projectName; not null; default:null" json:"projectName"`
-	Postfix       string            `gorm:"column:projectPostfix; not null; default:null" json:"projectPostfix"`
-	Description   string            `gorm:"column:projectDescription; not null; default:null" json:"projectDescription"`
-	Type          string            `gorm:"column:projectType; not null; default:null" json:"projectType"`
-	Owner         string            `gorm:"column:projectOwner; not null; default:null" json:"projectOwner"`
-	Creator       string            `gorm:"column:projectCreator; not null; default:null" json:"projectCreator"`
-	Created_at    time.Time         `gorm:"column:created_at" json:"created_at"`
-	WorkspaceName string            `gorm:"column:workspaceName; not null; default:null" json:"workspaceName"`
-	Status        string            `json:"status"`
-	ClusterName   string            `json:"clusterName"`
-	Resource      PROJECT_RESOURCE  `json:"resource"`
-	Lable         map[string]string `json:"lables"`
-	Annotation    map[string]string `json:"annotations"`
-	Events        []EVENT           `json:"events"`
+	Num           int              `gorm:"column:projectNum; primary_key" json:"projectNum"`
+	Name          string           `gorm:"column:projectName; not null; default:null" json:"projectName"`
+	Postfix       string           `gorm:"column:projectPostfix; not null; default:null" json:"projectPostfix"`
+	Description   string           `gorm:"column:projectDescription; not null; default:null" json:"projectDescription"`
+	Type          string           `gorm:"column:projectType; not null; default:null" json:"projectType"`
+	Owner         string           `gorm:"column:projectOwner; not null; default:null" json:"projectOwner"`
+	Creator       string           `gorm:"column:projectCreator; not null; default:null" json:"projectCreator"`
+	CreateAt      time.Time        `gorm:"column:created_at" json:"created_at"`
+	WorkspaceName string           `gorm:"column:workspaceName; not null; default:null" json:"workspaceName"`
+	Status        string           `json:"status"`
+	ClusterName   string           `json:"clusterName"`
+	Resource      PROJECT_RESOURCE `json:"resource"`
+	Label         interface{}      `json:"labels"`
+	Annotation    interface{}      `json:"annotations"`
+	Events        []EVENT          `json:"events"`
 }
 
 // type PROJECT_DETAIL struct {

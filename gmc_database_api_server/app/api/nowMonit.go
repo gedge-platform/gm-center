@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
@@ -55,7 +54,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 				"cluster":   c,
 				"namespace": n,
 			}
-			data = QueryRange2(addr, metricExpr2(nowNamespaceMetric[m[i]], temp_filter))
+			data = nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
 		default:
 			return nil
 		}
@@ -66,7 +65,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 	return result
 }
 
-func QueryRange2(endpointAddr string, query string) model.Value {
+func nowQueryRange(endpointAddr string, query string) model.Value {
 	var start_time time.Time
 	var end_time time.Time
 	var step time.Duration
@@ -118,15 +117,7 @@ func QueryRange2(endpointAddr string, query string) model.Value {
 	return result
 }
 
-func GetDuration2(c echo.Context) int64 {
-	t, _ := time.ParseDuration(c.QueryParam("step"))
-	// log.Printf("#4d - %s", t)
-	returnVal := int64(t / time.Second)
-	// log.Printf("#5d - %t", returnVal)
-	return returnVal
-}
-
-func metricExpr2(val string, filter map[string]string) string {
+func nowMetricExpr(val string, filter map[string]string) string {
 	var returnVal string
 
 	for k, v := range filter {

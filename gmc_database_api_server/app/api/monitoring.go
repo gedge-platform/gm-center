@@ -104,11 +104,11 @@ var gpuMetric = map[string]string{
 func Monit(c echo.Context) (err error) {
 
 	kind := c.Param("kind")
-	fmt.Println("=========================")
-	tempMetric := []string{"namespace_cpu", "namespace_memory"}
-	tempresult := NowMonit("namespace", "cluster2", "default", tempMetric)
-	fmt.Println(tempresult)
-	fmt.Println("=========================")
+	// fmt.Println("=========================")
+	// tempMetric := []string{"namespace_cpu", "namespace_memory"}
+	// tempresult := NowMonit("namespace", "cluster2", "default", tempMetric)
+	// fmt.Println(tempresult)
+	// fmt.Println("=========================")
 	//0. parameter 입력값이 올바른지 검증한다.
 	if !validateParam(c) {
 		return c.JSON(http.StatusBadRequest, echo.Map{
@@ -426,13 +426,13 @@ func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
 	return result
 }
 
-func GetDuration(c echo.Context) int64 {
-	t, _ := time.ParseDuration(c.QueryParam("step"))
-	// log.Printf("#4d - %s", t)
-	returnVal := int64(t / time.Second)
-	// log.Printf("#5d - %t", returnVal)
-	return returnVal
-}
+// func GetDuration(c echo.Context) int64 {
+// 	t, _ := time.ParseDuration(c.QueryParam("step"))
+// 	// log.Printf("#4d - %s", t)
+// 	returnVal := int64(t / time.Second)
+// 	// log.Printf("#5d - %t", returnVal)
+// 	return returnVal
+// }
 
 func metricExpr(val string, filter map[string]string) string {
 	var returnVal string

@@ -3,8 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"gmc_database_api_server/app/common"
-	"gmc_database_api_server/app/db"
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +18,7 @@ import (
 
 var clusterMetric = map[string]string{
 	"cpu_util":     "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster)*100),0.1)",
-	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[2m]))by(cluster),0.01)",
+	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[5m]))by(cluster),0.01)",
 	"cpu_total":    "sum(machine_cpu_cores{$1})by(cluster)",
 	"memory_util":  "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)",
 	"memory_usage": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
@@ -103,10 +101,14 @@ var gpuMetric = map[string]string{
 	"gpu_fan_speed":    "nvidia_smi_fan_speed_ratio{$1}",
 }
 
-func Metrics(c echo.Context) (err error) {
+func Monit(c echo.Context) (err error) {
 
 	kind := c.Param("kind")
-
+	fmt.Println("=========================")
+	tempMetric := []string{"namespace_cpu", "namespace_memory"}
+	tempresult := NowMonit("namespace", "cluster2", "default", tempMetric)
+	fmt.Println(tempresult)
+	fmt.Println("=========================")
 	//0. parameter 입력값이 올바른지 검증한다.
 	if !validateParam(c) {
 		return c.JSON(http.StatusBadRequest, echo.Map{
@@ -139,25 +141,25 @@ func Metrics(c echo.Context) (err error) {
 
 func mericResult(c echo.Context, kind string, a []string) error {
 	// fmt.Println("metricResult")
-	db := db.DbManager()
+	// db := db.DbManager()
 	addr := "http://192.168.150.115:31298/"
 
 	cluster := c.QueryParam("cluster_filter")
 	//cluster DB 유무 체크
 
-	switch cluster {
-	case "all":
-	default:
-		models := FindClusterDB(db, "Name", cluster)
+	// switch cluster {
+	// case "all":
+	// default:
+	// 	models := FindClusterDB(db, "Name", cluster)
 
-		if models == nil {
-			log.Println(cluster, "models Not find !")
-			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-			return nil
-		} else {
-			log.Println("models find it !")
-		}
-	}
+	// 	if models == nil {
+	// 		log.Println(cluster, "models Not find !")
+	// 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+	// 		return nil
+	// 	} else {
+	// 		log.Println("models find it !")
+	// 	}
+	// }
 
 	//결과를 담기 위한
 	result := map[string]model.Value{}
@@ -368,16 +370,6 @@ func validateParam(c echo.Context) bool {
 
 // 	return nil
 // }
-
-func printError(c echo.Context) error {
-	return c.JSON(http.StatusNotFound, echo.Map{
-		"errors": echo.Map{
-			"status_code": http.StatusNotFound,
-			"message":     "Not Found",
-			"command":     "cpu, memory, disk..",
-		},
-	})
-}
 
 func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
 	log.Println("queryrange in")

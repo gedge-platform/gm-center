@@ -3,8 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"gmc_database_api_server/app/common"
-	"gmc_database_api_server/app/db"
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +18,7 @@ import (
 
 var clusterMetric = map[string]string{
 	"cpu_util":     "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster)*100),0.1)",
-	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[2m]))by(cluster),0.01)",
+	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[5m]))by(cluster),0.01)",
 	"cpu_total":    "sum(machine_cpu_cores{$1})by(cluster)",
 	"memory_util":  "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)",
 	"memory_usage": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
@@ -33,10 +31,14 @@ var clusterMetric = map[string]string{
 	"pod_util":     "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
 
 	"apiserver_request_rate": "round(sum(irate(apiserver_request_total{$1}[5m]))by(cluster),0.001)",
-	//
-	"scheduler_schedule_attempts_total": "scheduler_pod_scheduling_attempts_count{$1}",
-	"scheduler_schedule_fail":           "sum(rate(scheduler_pending_pods{$1}[5m]))by(cluster)",
-	"scheduler_schedule_fail_total":     "sum(scheduler_pending_pods{$1})by(cluster)",
+	// latency 보완 필요
+	"apiserver_latency": "round(sum(irate(apiserver_request_total{$1}[5m]))by(cluster),0.001)",
+
+	//attempt 보완 필요
+	"scheduler_attempts":       "scheduler_pod_scheduling_attempts_count{$1}",
+	"scheduler_attempts_total": "scheduler_pod_scheduling_attempts_count{$1}",
+	"scheduler_fail":           "sum(rate(scheduler_pending_pods{$1}[5m]))by(cluster)",
+	"scheduler_fail_total":     "sum(scheduler_pending_pods{$1})by(cluster)",
 }
 
 var namespaceMetric = map[string]string{ //쿼리문 확인 필요
@@ -45,7 +47,7 @@ var namespaceMetric = map[string]string{ //쿼리문 확인 필요
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 
-var podMetric = map[string]string{ //테스트 중
+var podMetric = map[string]string{ //테스트 중 파드필터 치환 필요
 	"pod_cpu":                   "round(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster)*1000,0.001)",
 	"pod_memory":                "sum(container_memory_usage_bytes{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster)", //쿼리문 확인 필요
 	"pod_net_bytes_transmitted": "round(sum(irate(container_network_transmit_bytes_total{pod!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster)/125,0.01)",
@@ -53,27 +55,27 @@ var podMetric = map[string]string{ //테스트 중
 }
 
 var nodeMetric = map[string]string{ //쿼리 수정 필요
-	"node_cpu_util":           "100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(instance)*100)",
-	"node_cpu_usage":          "sum(rate(container_cpu_usage_seconds_total{id='/'}[5m]))by(node)",
-	"node_cpu_total":          "sum(machine_cpu_cores)by(node)",
-	"node_memory_util":        "(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)/node_memory_MemTotal_bytes",
-	"node_memory_usage":       "node_memory_MemTotal_bytes-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes",
-	"node_memory_total":       "sum(node_memory_MemTotal_bytes)by(instance)",
-	"node_disk_size_util":     "100-((node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs'} * 100)/node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})",
-	"node_disk_size_usage":    "(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'}-(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs'}))",
-	"node_disk_size_capacity": "/api/v1/query_range?query(node_filesystem_size_bytes{mountpoint='/'',fstype!='rootfs'})",
+	"node_cpu_util":     "100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(instance)*100)",
+	"node_cpu_usage":    "sum(rate(container_cpu_usage_seconds_total{id='/', $1}[5m]))by(node)",
+	"node_cpu_total":    "sum(machine_cpu_cores{$1})by(node)",
+	"node_memory_util":  "(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)/node_memory_MemTotal_bytes",
+	"node_memory_usage": "node_memory_MemTotal_bytes-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes",
+	"node_memory_total": "sum(node_memory_MemTotal_bytes{$1})by(instance)",
+	"node_disk_util":    "100-((node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1} * 100)/node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1})",
+	"node_disk_usage":   "(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1}-(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1}))",
+	"node_disk_total":   "/api/v1/query_range?query(node_filesystem_size_bytes{mountpoint='/'',fstype!='rootfs',$1})",
 	// node_pod_utilisation/{cluster_name} "sum(kubelet_running_pods)by(node)/(max(kube_node_status_capacity%7Bcluster='{cluster_name}',resource='pods'%7D)by(node)unless%20on(node)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))*100"
-	"node_pod_running_count":     "sum(kubelet_running_pods)by(node)",
-	"node_pod_quota":             "max(kube_node_status_capacity{resource='pods'})by(node)unless on(node)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0)",
-	"node_disk_inode_util":       "100-(node_filesystem_files_free{mountpoint='/'}/node_filesystem_files{mountpoint='/'}*100)",
-	"node_disk_inode_total":      "node_filesystem_files{mountpoint='/'}",
-	"node_disk_inode_usage":      "node_filesystem_files{mountpoint='/'}-node_filesystem_files_free{mountpoint='/'}",
-	"node_disk_read_iops":        "rate(node_disk_reads_completed_total[5m])",
-	"node_disk_write_iops":       "rate(node_disk_writes_completed_total[5m])",
-	"node_disk_read_throughput":  "irate(node_disk_read_bytes_total[5m])",
-	"node_disk_write_throughput": "irate(node_disk_written_bytes_total[5m])",
-	"node_net_bytes_transmitted": "irate(node_network_transmit_bytes_total{device='ens3'}[5m])",
-	"node_net_bytes_received":    "irate(node_network_receive_bytes_total{device='ens3'}[5m])",
+	"node_pod_running":           "sum(kubelet_running_pods{$1})by(node)",
+	"node_pod_quota":             "max(kube_node_status_capacity{resource='pods',$1})by(node)unless on(node)(kube_node_status_condition{condition='Ready',status=~'unknown|false',$1}>0)",
+	"node_disk_inode_util":       "100-(node_filesystem_files_free{mountpoint='/',$1}/node_filesystem_files{mountpoint='/',$1}*100)",
+	"node_disk_inode_total":      "node_filesystem_files{mountpoint='/',$1}",
+	"node_disk_inode_usage":      "node_filesystem_files{mountpoint='/',$1}-node_filesystem_files_free{mountpoint='/',$1}",
+	"node_disk_read_iops":        "rate(node_disk_reads_completed_total{$1}[5m])",
+	"node_disk_write_iops":       "rate(node_disk_writes_completed_total{$1}[5m])",
+	"node_disk_read_throughput":  "irate(node_disk_read_bytes_total{$1}[5m])",
+	"node_disk_write_throughput": "irate(node_disk_written_bytes_total{$1}[5m])",
+	"node_net_bytes_transmitted": "irate(node_network_transmit_bytes_total{device='ens3',$1}[5m])",
+	"node_net_bytes_received":    "irate(node_network_receive_bytes_total{device='ens3',$1}[5m])",
 }
 
 var appMetric = map[string]string{
@@ -99,10 +101,14 @@ var gpuMetric = map[string]string{
 	"gpu_fan_speed":    "nvidia_smi_fan_speed_ratio{$1}",
 }
 
-func Metrics(c echo.Context) (err error) {
+func Monit(c echo.Context) (err error) {
 
 	kind := c.Param("kind")
-
+	// fmt.Println("=========================")
+	// tempMetric := []string{"namespace_cpu", "namespace_memory"}
+	// tempresult := NowMonit("namespace", "cluster2", "default", tempMetric)
+	// fmt.Println(tempresult)
+	// fmt.Println("=========================")
 	//0. parameter 입력값이 올바른지 검증한다.
 	if !validateParam(c) {
 		return c.JSON(http.StatusBadRequest, echo.Map{
@@ -135,25 +141,25 @@ func Metrics(c echo.Context) (err error) {
 
 func mericResult(c echo.Context, kind string, a []string) error {
 	// fmt.Println("metricResult")
-	db := db.DbManager()
+	// db := db.DbManager()
 	addr := "http://192.168.150.115:31298/"
 
 	cluster := c.QueryParam("cluster_filter")
 	//cluster DB 유무 체크
 
-	switch cluster {
-	case "all":
-	default:
-		models := FindClusterDB(db, "Name", cluster)
+	// switch cluster {
+	// case "all":
+	// default:
+	// 	models := FindClusterDB(db, "Name", cluster)
 
-		if models == nil {
-			log.Println(cluster, "models Not find !")
-			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-			return nil
-		} else {
-			log.Println("models find it !")
-		}
-	}
+	// 	if models == nil {
+	// 		log.Println(cluster, "models Not find !")
+	// 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+	// 		return nil
+	// 	} else {
+	// 		log.Println("models find it !")
+	// 	}
+	// }
 
 	//결과를 담기 위한
 	result := map[string]model.Value{}
@@ -311,6 +317,7 @@ func validateFilter(k string, c echo.Context) bool {
 	case "namespace":
 		cluster := c.QueryParam("cluster_filter")
 		namespace := c.QueryParam("namespace_filter")
+		fmt.Println(cluster)
 		if check := strings.Compare(cluster, "")*strings.Compare(namespace, "") == 0; check {
 			return false
 		}
@@ -363,16 +370,6 @@ func validateParam(c echo.Context) bool {
 
 // 	return nil
 // }
-
-func printError(c echo.Context) error {
-	return c.JSON(http.StatusNotFound, echo.Map{
-		"errors": echo.Map{
-			"status_code": http.StatusNotFound,
-			"message":     "Not Found",
-			"command":     "cpu, memory, disk..",
-		},
-	})
-}
 
 func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
 	log.Println("queryrange in")
@@ -429,13 +426,13 @@ func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
 	return result
 }
 
-func GetDuration(c echo.Context) int64 {
-	t, _ := time.ParseDuration(c.QueryParam("step"))
-	// log.Printf("#4d - %s", t)
-	returnVal := int64(t / time.Second)
-	// log.Printf("#5d - %t", returnVal)
-	return returnVal
-}
+// func GetDuration(c echo.Context) int64 {
+// 	t, _ := time.ParseDuration(c.QueryParam("step"))
+// 	// log.Printf("#4d - %s", t)
+// 	returnVal := int64(t / time.Second)
+// 	// log.Printf("#5d - %t", returnVal)
+// 	return returnVal
+// }
 
 func metricExpr(val string, filter map[string]string) string {
 	var returnVal string

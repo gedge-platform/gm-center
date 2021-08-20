@@ -36,6 +36,7 @@ var realMetricTemplate = map[string]string{
   |> filter(fn: (r) => r["device"] == "vda1")
   |> filter(fn: (r) => r["fstype"] == "ext4")
   |> filter(fn: (r) => r["mode"] == "ro")
+//   |> timeShift(duration: 9h)
   |> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
 }
 
@@ -174,6 +175,7 @@ func rowModel(m string) (map[string]string, []string) {
 	sort.Strings(slice)
 	for _, v := range slice {
 		slice2 := strings.Split(v, ":")
+
 		switch slice2[0] {
 		case "_time":
 			valueMap = append(valueMap, slice2[1]+":"+slice2[2]+":"+slice2[3])

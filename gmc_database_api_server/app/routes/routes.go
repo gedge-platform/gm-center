@@ -99,7 +99,7 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r2.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 	r2.GET("/monitoring", echo.WrapHandler(promhttp.Handler()))
-	r2.Any("/monitoring/:kind", api.Metrics)
-	r2.Any("/monitoring/:kind/:name", api.Metrics)
+	r2.Any("/monitoring/:kind", api.Monit)
+	r2.Any("/monitoring/:kind/:name", api.Monit)
 	r2.Any("/monitoring/realtime/:kind", api.RealMetrics)
 }

@@ -50,15 +50,15 @@ func GetCluster(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
 
-func GetCluster2(c echo.Context) *model.Cluster {
-	search_val := c.Param("name")
+func GetCluster2(params model.PARAMS) *model.Cluster {
+	search_val := params.Name
 	db := db.DbManager()
 	// search_val := c.Param("name")
 	models := FindClusterDB(db, "Name", search_val)
 
 	if models == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-
+		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
 	}
 
 	return models

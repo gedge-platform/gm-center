@@ -6,6 +6,7 @@ import (
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/tidwall/gjson"
@@ -30,7 +31,11 @@ func Get_Cluster(c echo.Context) (err error) {
 	getData0 := common.FindData(getData, "", "") // 빈칸으로 둘 시, 전체 조회
 	var Cluster model.Node
 	common.Transcode(getData0, &Cluster)
-	clusterModel := GetCluster2(c)
+	clusterModel := GetCluster2(params)
+	if clusterModel == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
+	}
 	clusterModel.Label = common.FindData(getData, "metadata", "labels")
 	clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
 	clusterModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
@@ -111,38 +116,75 @@ func ResourceCnt(params model.PARAMS, kind string) int {
 }
 
 func Get_Clusters(c echo.Context) (err error) {
-	clusterModel := GetAllClusters2(c)
-	for k, _ := range clusterModel {
-		fmt.Printf("value : %+v\n", clusterModel[k].Name)
-		params := model.PARAMS{
-			Kind:      "nodes",
-			Name:      clusterModel[k].Name,
-			Cluster:   clusterModel[k].Name,
-			Workspace: clusterModel[k].Name,
-			Project:   clusterModel[k].Name,
-			Method:    c.Request().Method,
-			Body:      c.Request().Body,
-		}
-		// params.Name = value.Name
-		getData, err := common.GetModel(params)
-		if err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, err)
-			return nil
-		}
-		getData0 := common.FindData(getData, "", "") // 빈칸으로 둘 시, 전체 조회
-		var Cluster model.Node
-		common.Transcode(getData0, &Cluster)
-		clusterModel[k].Label = common.FindData(getData, "metadata", "labels")
-		clusterModel[k].Annotation = common.FindData(getData, "metadata", "annotations")
-		clusterModel[k].CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
-		clusterModel[k].Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
-		clusterModel[k].Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
-		clusterModel[k].Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
-		// clusterModel[k].Kernel = "123"
+	params := model.PARAMS{
+		Kind: "nodes",
+		// Name:      clusterModel[k].Name,
+		// Cluster:   clusterModel[k].Name,
+		// Workspace: clusterModel[k].Name,
+		// Project:   clusterModel[k].Name,
+		Method: c.Request().Method,
+		Body:   c.Request().Body,
 	}
-	return c.JSON(http.StatusOK, echo.Map{
-		"clusters": clusterModel,
-	})
+	if c.QueryParam("workspace") == "" {
+		clusterModel := GetAllClusters2(c)
+		for k, _ := range clusterModel {
+			fmt.Printf("value : %+v\n", clusterModel[k].Name)
+			params.Name = clusterModel[k].Name
+			params.Cluster = clusterModel[k].Name
+			params.Workspace = clusterModel[k].Name
+			params.Project = clusterModel[k].Name
+			// params.Name = value.Name
+			getData, err := common.GetModel(params)
+			if err != nil {
+				common.ErrorMsg(c, http.StatusNotFound, err)
+				return nil
+			}
+			getData0 := common.FindData(getData, "", "") // 빈칸으로 둘 시, 전체 조회
+			var Cluster model.Node
+			common.Transcode(getData0, &Cluster)
+			clusterModel[k].Label = common.FindData(getData, "metadata", "labels")
+			clusterModel[k].Annotation = common.FindData(getData, "metadata", "annotations")
+			clusterModel[k].CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+			clusterModel[k].Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
+			clusterModel[k].Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
+			clusterModel[k].Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+			// clusterModel[k].Kernel = "123"
+		}
+		return c.JSON(http.StatusOK, echo.Map{
+			"clusters": clusterModel,
+		})
+	} else {
+		var clusterModel []model.Cluster
+		params.Workspace = c.QueryParam("workspace")
+		workspace := GetWorkspace2(params)
+		if workspace == nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return
+		}
+		selectCluster := workspace.SelectCluster
+		slice := strings.Split(selectCluster, ",")
+		for i, _ := range slice {
+			cluster := GetCluster2(params)
+			var Cluster model.Cluster
+			common.Transcode(cluster, &Cluster)
+			params.Name = slice[i]
+			params.Cluster = slice[i]
+			params.Project = slice[i]
+
+			getData, err := common.GetModel(params)
+			if err != nil {
+				common.ErrorMsg(c, http.StatusNotFound, err)
+				return nil
+			}
+			fmt.Printf("[###data] : %s\n", getData)
+			clusterModel = append(clusterModel, Cluster)
+
+		}
+		return c.JSON(http.StatusOK, echo.Map{
+			"clusters": clusterModel,
+		})
+	}
+
 }
 func Get_Projects(c echo.Context) (err error) {
 	var Projects model.Projects
@@ -150,30 +192,64 @@ func Get_Projects(c echo.Context) (err error) {
 		Kind:      "namespaces",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
-		Workspace: c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("cluster"),
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
-	getData, err := common.GetModel(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
-	getData0 := common.FindingArray(common.Finding(getData, "items"))
-	for k, _ := range getData0 {
-		params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
-		ProjectModel := GetProject3(params)
-		var Project model.Project
-		common.Transcode(ProjectModel, &Project)
-		fmt.Printf("[######]ProjectModel  : %+v\n", Project)
-		Project.Name = params.Name
-		Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
-		Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
-		Project.ClusterName = params.Cluster
-		Projects = append(Projects, Project)
-	}
+	if c.QueryParam("workspace") == "" {
+		params.Workspace = c.QueryParam("cluster")
+		params.Project = c.QueryParam("cluster")
+		getData, err := common.GetModel(params)
+		if err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, err)
+			return nil
+		}
+		getData0 := common.FindingArray(common.Finding(getData, "items"))
+		for k, _ := range getData0 {
+			params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
+			ProjectModel := GetProject3(params)
+			var Project model.Project
+			common.Transcode(ProjectModel, &Project)
+			Project.Name = params.Name
+			Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
+			Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
+			Project.ClusterName = params.Cluster
+			Projects = append(Projects, Project)
+		}
 
+	} else {
+		params.Workspace = c.QueryParam("workspace")
+		params.Project = c.QueryParam("workspace")
+		workspace := GetWorkspace2(params)
+		if workspace == nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return
+		}
+		selectCluster := workspace.SelectCluster
+		slice := strings.Split(selectCluster, ",")
+		for i, _ := range slice {
+			params.Cluster = slice[i]
+			params.Name = ""
+			getData, err := common.GetModel(params)
+			if err != nil {
+				common.ErrorMsg(c, http.StatusNotFound, err)
+				return nil
+			}
+			getData0 := common.FindingArray(common.Finding(getData, "items"))
+			for k, _ := range getData0 {
+				params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
+				ProjectModel := GetProject3(params)
+				var Project model.Project
+				common.Transcode(ProjectModel, &Project)
+				Project.Name = params.Name
+				Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
+				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
+				Project.ClusterName = params.Cluster
+				Projects = append(Projects, Project)
+			}
+		}
+	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": Projects,
 	})

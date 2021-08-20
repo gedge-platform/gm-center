@@ -39,11 +39,9 @@ func GetWorkspace2(params model.PARAMS) *model.Workspace {
 	db := db.DbManager()
 	search_val := params.Workspace
 	models := FindWorkspaceDB(db, "Name", search_val)
-
 	if models == nil {
-
-		return nil
 		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
 	}
 
 	return models

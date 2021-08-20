@@ -164,13 +164,13 @@ func Get_Clusters(c echo.Context) (err error) {
 		selectCluster := workspace.SelectCluster
 		slice := strings.Split(selectCluster, ",")
 		for i, _ := range slice {
-			cluster := GetCluster2(params)
-			var Cluster model.Cluster
-			common.Transcode(cluster, &Cluster)
+
 			params.Name = slice[i]
 			params.Cluster = slice[i]
 			params.Project = slice[i]
-
+			cluster := GetCluster2(params)
+			var Cluster model.Cluster
+			common.Transcode(cluster, &Cluster)
 			getData, err := common.GetModel(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)

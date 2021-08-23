@@ -248,8 +248,14 @@ func Get_Projects(c echo.Context) (err error) {
 				Project.ClusterName = params.Cluster
 				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
 				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-				fmt.Printf("[###]tempresult:%+v", NowMonit("namespace", params.Cluster, params.Name, tempMetric))
+				fmt.Printf("###tempresult : %+v\n", tempresult)
+
+				// for keys, values := range tempresult {
+				// 	fmt.Printf("keys : %+v\n", tempresult[keys])
+				// 	fmt.Printf("values : %+v\n", values)
+				// }
 				Project.CPU_usage = tempresult
+
 				// Project.Memory_usage = NowMonit("namespace", "cluster2", "default", "namespace_cpu")
 				// Project.Pod_count = NowMonit("namespace", "cluster2", "default", "namespace_cpu")
 				Projects = append(Projects, Project)

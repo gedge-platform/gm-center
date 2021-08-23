@@ -211,6 +211,80 @@ func FindDataArr(i interface{}, p, f, u string) (interface{}, error) {
 	}
 }
 
+func FindDataArrStr(i interface{}, p, f, u string) (string, error) {
+	log.Println("[In #FindDataArr]")
+	log.Println("[#1] Data is ", i)
+	log.Println("[#2] find path string is ", p)
+	log.Println("[#2] find key string is ", f)
+	log.Println("[#3] uniq string is ", u)
+
+	// var itemCheck bool
+	var parse, data gjson.Result
+	var arr []gjson.Result
+	var result interface{}
+	var results []interface{}
+	ia := InterfaceToString(i)
+
+	parse = gjson.Parse(ia)
+	log.Println("[#4] Parse is ", parse)
+
+	pathCheck := strings.Compare(p, "") != 0
+	// itemCheck = len(parse.Get("items").Array()) > 0
+	// log.Println("[#4] itemCheck is ", itemCheck)
+
+	if pathCheck {
+		data = parse.Get(p)
+		log.Println("[#5] filter data is ", data)
+	} else {
+		data = parse
+		log.Println("[#5] filter data is ", data)
+	}
+
+	len := len(data.Array())
+	log.Println("[#6] len(data) is ", len)
+
+	if len > 0 {
+		// list
+		arr = data.Array()
+		log.Println("[#7-1] len > 0, list")
+		for t, _ := range arr {
+
+			dataInterface := StringToMapInterface(arr[t].String())
+
+			if v, ok := SearchNestedValue(dataInterface, f, u); ok {
+				fmt.Printf("Arr[%d] Found it ! \n", t)
+				fmt.Printf("Unique is : %+v\n", v)
+				fmt.Printf("data is %s\n", arr[t])
+				err := json.Unmarshal([]byte(arr[t].String()), &result)
+				if err != nil {
+					fmt.Println("[!53] error")
+				}
+				results = append(results, result)
+				fmt.Printf("[%d] result Data is %s", t, results)
+			} else {
+				fmt.Printf("Arr[%d] Key not found\n", t)
+			}
+		}
+
+		if len == 1 {
+			log.Println("[#7-2] len == 1, list")
+			dataInterface := StringToInterface(arr[0].String())
+			if v, ok := SearchNestedValue(dataInterface, f, u); ok {
+				fmt.Println("Found it !")
+				fmt.Printf("Unique is : %+v\n", v)
+				return arr[0].String(), nil
+			} else {
+				return "nil", nil
+			}
+		}
+
+		// list 출력
+		return InterfaceToString(results), nil
+
+	} else {
+		return data.String(), nil
+	}
+}
 func Filter(i string, path string) string {
 	parse := gjson.Parse(i)
 	Dat := parse.Get(path)
@@ -347,22 +421,33 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		return services, nil
 
 	case "deployments":
+		fmt.Printf("[#####]origUid : %s\n", origUid)
 		// log.Println("[#5] data is ", data)
 		selectorName := InterfaceToString(FindData(data, "spec.selector.matchLabels", "run"))
 
 		params.Kind = "replicasets"
 		params.Name = ""
 
-		replData, err := GetModel(params)
+		replsData, err := GetModel(params)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("[#####]replData : %+v", replData)
-		podData, err := FindDataArr(replData, "items", "uid", origUid)
+
+		replData, err := FindDataArrStr(replsData, "items", "uid", origUid)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("[#####]podData : %+v", podData)
+		replicaName := InterfaceToString(FindData(replData, "metadata", "name"))
+		// fmt.Printf("[####podssss : %s\n", FindData(podData, "metadata", "name"))
+		params.Kind = "pods"
+		params.Name = ""
+		podsData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+		podData, err := FindDataArrStr(podsData, "items", "name", replicaName)
+		fmt.Printf("\n[####podssss : %+v", podData)
+		fmt.Printf("$######name : %s\n", InterfaceToString(FindData(podData, "metadata", "name")))
 		// podList := model.DEPLOYMENTPOD{
 		// 	Name:,
 		// 	Status:,

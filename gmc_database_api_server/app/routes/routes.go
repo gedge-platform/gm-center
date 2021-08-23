@@ -37,6 +37,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r0.GET("/getClusters/:name", api.Get_Cluster)
 	r0.GET("/getClusters", api.Get_Clusters)
 	r0.GET("/getProjects/:name", api.Get_Project)
+	r0.GET("/getProjects", api.Get_Projects)
 	r0.GET("/getDeployments/:name", api.Get_Deployment)
 
 	r5 := e.Group("/testing/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {

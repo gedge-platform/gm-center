@@ -21,6 +21,9 @@ type Project struct {
 	Label         interface{}      `json:"labels"`
 	Annotation    interface{}      `json:"annotations"`
 	Events        []EVENT          `json:"events"`
+	CPU_usage     interface{}      `json:"cpuUsage"`
+	Memory_usage  interface{}      `json:"memoryUsage"`
+	Pod_count     interface{}      `json:"podCount"`
 }
 
 // type PROJECT_DETAIL struct {

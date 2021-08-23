@@ -357,12 +357,19 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-
+		fmt.Printf("[#####]replData : %+v", replData)
 		podData, err := FindDataArr(replData, "items", "uid", origUid)
 		if err != nil {
 			return nil, err
 		}
-
+		fmt.Printf("[#####]podData : %+v", podData)
+		// podList := model.DEPLOYMENTPOD{
+		// 	Name:,
+		// 	Status:,
+		// 	Node:,
+		// 	PodIP:,
+		// 	RestartCount:,
+		// }
 		params.Kind = "services"
 		params.Name = ""
 

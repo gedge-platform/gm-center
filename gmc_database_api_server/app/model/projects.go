@@ -16,10 +16,14 @@ type Project struct {
 	WorkspaceName string           `gorm:"column:workspaceName; not null; default:null" json:"workspaceName"`
 	Status        string           `json:"status"`
 	ClusterName   string           `json:"clusterName"`
+	SelectCluster string           `gorm:"column:selectCluster; not null; default:null" json:"selectCluster"`
 	Resource      PROJECT_RESOURCE `json:"resource"`
 	Label         interface{}      `json:"labels"`
 	Annotation    interface{}      `json:"annotations"`
 	Events        []EVENT          `json:"events"`
+	CPU_usage     interface{}      `json:"cpuUsage"`
+	Memory_usage  interface{}      `json:"memoryUsage"`
+	Pod_count     interface{}      `json:"podCount"`
 }
 
 // type PROJECT_DETAIL struct {
@@ -44,6 +48,8 @@ type PROJECT_RESOURCE struct {
 	JobCount        int `json:"job_count"`
 	VolumeCount     int `json:"volume_count"`
 }
+
+type Projects []Project
 
 func (Project) TableName() string {
 	return "PROJECT_INFO"

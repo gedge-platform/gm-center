@@ -357,12 +357,19 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-
+		fmt.Printf("[#####]replData : %+v", replData)
 		podData, err := FindDataArr(replData, "items", "uid", origUid)
 		if err != nil {
 			return nil, err
 		}
-
+		fmt.Printf("[#####]podData : %+v", podData)
+		// podList := model.DEPLOYMENTPOD{
+		// 	Name:,
+		// 	Status:,
+		// 	Node:,
+		// 	PodIP:,
+		// 	RestartCount:,
+		// }
 		params.Kind = "services"
 		params.Name = ""
 
@@ -383,4 +390,16 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		return deployments, nil
 	}
 	return nil, errors.New("")
+}
+func FindingLen(i string) int {
+	parse := gjson.Parse(i)
+	len := len(parse.Array())
+
+	return len
+}
+func FindingArray(i string) []gjson.Result {
+	parse := gjson.Parse(i)
+	array := parse.Array()
+
+	return array
 }

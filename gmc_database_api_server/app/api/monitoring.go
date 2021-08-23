@@ -416,7 +416,7 @@ func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
 	if err != nil {
 		log.Printf("Error querying Prometheus: %v\n", err)
 		os.Exit(1)
-		//실행 폭파 f
+		//실행 폭파 -> 500 에러처리로 변경
 	}
 
 	if len(warnings) > 0 {

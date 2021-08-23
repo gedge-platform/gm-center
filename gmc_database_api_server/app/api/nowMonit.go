@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -19,9 +20,13 @@ var nowNamespaceMetric = map[string]string{
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 
+type TempType struct {
+	test1 interface{}
+}
+
 func NowMonit(k string, c string, n string, m []string) interface{} {
 
-	fmt.Println(c, n)
+	// fmt.Println(c, n)
 
 	//필요 파라미터 검증
 	if check := strings.Compare(c, "")*strings.Compare(n, "")*len(m) == 0; check {
@@ -42,26 +47,37 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 	addr := "http://192.168.150.115:31298/"
 	// result := map[string]model.Value{}
 
-	result := map[string]model.Value{}
+	result := map[string]interface{}{}
 	for i, metric := range m {
 		if metric == "" {
 			continue
 		}
 		var data model.Value
+		var jsonString interface{}
 		switch k {
 		case "namespace":
 			temp_filter := map[string]string{
 				"cluster":   c,
 				"namespace": n,
 			}
+			fmt.Println("==============")
 			data = nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
+
+			jsonBytes, err := json.Marshal(data)
+			jsonString = string(jsonBytes)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(jsonString)
+
 		default:
 			return nil
 		}
 
-		result[m[i]] = data
+		result[m[i]] = jsonString
 	}
 
+	// fmt.Println(result["namespace_cpu"])
 	return result
 }
 

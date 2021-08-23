@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -53,31 +52,69 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			continue
 		}
 		var data model.Value
-		var jsonString interface{}
+		// var jsonString interface{}
+		// mapData := make(map[model.Time]model.SampleValue)
+		var myData interface{}
 		switch k {
 		case "namespace":
 			temp_filter := map[string]string{
 				"cluster":   c,
 				"namespace": n,
 			}
-			fmt.Println("==============")
+			// fmt.Println("==============")
 			data = nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
+			// fmt.Println(data, reflect.TypeOf(data), len(data.(model.Matrix)))
+			// fmt.Println(k, c, n, m)
 
-			jsonBytes, err := json.Marshal(data)
-			jsonString = string(jsonBytes)
-			if err != nil {
-				panic(err)
+			//값 존재 check
+			if check := len(data.(model.Matrix)) != 0; check {
+				for _, val := range data.(model.Matrix)[0].Values {
+					// mapData[val.Timestamp] = val.Value
+					myData = val.Value
+				}
 			}
-			fmt.Println(jsonString)
+
+			// fmt.Println(mapData)
+
+			// var jsonString interface{}
+			// jsonBytes, err := json.Marshal(data)
+			// jsonString = string(jsonBytes)
+			// str := fmt.Sprint(jsonString)
+			// fmt.Println(str)4
+			// if err != nil {
+			// 	panic(err)
+			// }
+			// byt := []byte(str)
+
+			// var dat map[string]interface{}
+
+			// if err := json.Unmarshal(byt, &dat); err != nil {
+			// 	panic(err)
+			// }
+			// fmt.Println(dat)
+
+			// num := dat["metric"]
+			// fmt.Println(num)
+
+			// jsonBytes, err := json.Marshal(data)
+			// jsonString = string(jsonBytes)
+			// if err != nil {
+			// 	panic(err)
+			// }
+			// fmt.Println(jsonString)
 
 		default:
 			return nil
 		}
 
-		result[m[i]] = jsonString
+		result[m[i]] = myData
+		// result[m[i]] = jsonString
+		// fmt.Println(jsonString)
 	}
 
+	// fmt.Println(result)
 	// fmt.Println(result["namespace_cpu"])
+
 	return result
 }
 

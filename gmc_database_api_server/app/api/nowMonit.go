@@ -13,32 +13,51 @@ import (
 	"github.com/prometheus/common/model"
 )
 
+var nowClusterMetric = map[string]string{
+	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[5m]))by(cluster),0.01)",
+	"memory_usage": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
+	"pod_running":  "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster)",
+}
+
 var nowNamespaceMetric = map[string]string{
 	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
 	"namespace_memory":    "sum(sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)",
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 
-type TempType struct {
-	test1 interface{}
-}
-
 func NowMonit(k string, c string, n string, m []string) interface{} {
 
 	// fmt.Println(c, n)
 
-	//필요 파라미터 검증
-	if check := strings.Compare(c, "")*strings.Compare(n, "")*len(m) == 0; check {
-		return nil //에러 반환
-	}
-
-	//메트릭 검증
-	for _, metric := range m {
-		if metric == "" {
-			continue
+	switch k {
+	case "namespace":
+		//필요 파라미터 검증
+		if check := strings.Compare(c, "")*strings.Compare(n, "")*len(m) == 0; check {
+			return nil //에러 반환
 		}
-		if check := strings.Compare(nowNamespaceMetric[metric], "") == 0; check {
-			return nil
+
+		//메트릭 검증
+		for _, metric := range m {
+			if metric == "" {
+				continue
+			}
+			if check := strings.Compare(nowNamespaceMetric[metric], "") == 0; check {
+				return nil
+			}
+		}
+	case "cluster":
+		if check := strings.Compare(c, "")*len(m) == 0; check {
+			return nil //에러 반환
+		}
+
+		//메트릭 검증
+		for _, metric := range m {
+			if metric == "" {
+				continue
+			}
+			if check := strings.Compare(nowClusterMetric[metric], "") == 0; check {
+				return nil
+			}
 		}
 	}
 
@@ -51,70 +70,42 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 		if metric == "" {
 			continue
 		}
-		var data model.Value
+		// var data model.Value
 		// var jsonString interface{}
 		// mapData := make(map[model.Time]model.SampleValue)
-		var myData interface{}
+		var value interface{}
 		switch k {
 		case "namespace":
 			temp_filter := map[string]string{
 				"cluster":   c,
 				"namespace": n,
 			}
-			// fmt.Println("==============")
-			data = nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
-			// fmt.Println(data, reflect.TypeOf(data), len(data.(model.Matrix)))
-			// fmt.Println(k, c, n, m)
+			data := nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
 
-			//값 존재 check
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
 					// mapData[val.Timestamp] = val.Value
-					myData = val.Value
+					value = val.Value
 				}
 			}
 
-			// fmt.Println(mapData)
+		case "cluster":
+			temp_filter := map[string]string{
+				"cluster": c,
+			}
+			data := nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
 
-			// var jsonString interface{}
-			// jsonBytes, err := json.Marshal(data)
-			// jsonString = string(jsonBytes)
-			// str := fmt.Sprint(jsonString)
-			// fmt.Println(str)4
-			// if err != nil {
-			// 	panic(err)
-			// }
-			// byt := []byte(str)
-
-			// var dat map[string]interface{}
-
-			// if err := json.Unmarshal(byt, &dat); err != nil {
-			// 	panic(err)
-			// }
-			// fmt.Println(dat)
-
-			// num := dat["metric"]
-			// fmt.Println(num)
-
-			// jsonBytes, err := json.Marshal(data)
-			// jsonString = string(jsonBytes)
-			// if err != nil {
-			// 	panic(err)
-			// }
-			// fmt.Println(jsonString)
-
+			if check := len(data.(model.Matrix)) != 0; check {
+				for _, val := range data.(model.Matrix)[0].Values {
+					value = val.Value
+				}
+			}
 		default:
 			return nil
 		}
 
-		result[m[i]] = myData
-		// result[m[i]] = jsonString
-		// fmt.Println(jsonString)
+		result[m[i]] = value
 	}
-
-	// fmt.Println(result)
-	// fmt.Println(result["namespace_cpu"])
-
 	return result
 }
 

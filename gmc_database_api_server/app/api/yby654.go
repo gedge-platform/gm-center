@@ -148,6 +148,9 @@ func Get_Clusters(c echo.Context) (err error) {
 			clusterModel[k].Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
 			clusterModel[k].Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
 			clusterModel[k].Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+			tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
+			tempresult := NowMonit("cluster", params.Cluster, params.Name, tempMetric)
+			clusterModel[k].ResourceUsage = tempresult
 			// clusterModel[k].Kernel = "123"
 		}
 		return c.JSON(http.StatusOK, echo.Map{
@@ -215,6 +218,9 @@ func Get_Projects(c echo.Context) (err error) {
 			Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
 			Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
 			Project.ClusterName = params.Cluster
+			tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+			tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+			Project.ResourceUsage = tempresult
 			Projects = append(Projects, Project)
 		}
 
@@ -247,15 +253,8 @@ func Get_Projects(c echo.Context) (err error) {
 				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
 				Project.ClusterName = params.Cluster
 				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-				// tempMetric := []string{"namespace_cpu"}
-				// tempresult := common.InterfaceToString(NowMonit("namespace", params.Cluster, params.Name, tempMetric))
 				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-
-				// fmt.Printf("[###]tempresult:%+v", NowMonit("namespace", params.Cluster, params.Name, tempMetric))
-				Project.CPU_usage = tempresult
-
-				// Project.Memory_usage = NowMonit("namespace", "cluster2", "default", "namespace_cpu")
-				// Project.Pod_count = NowMonit("namespace", "cluster2", "default", "namespace_cpu")
+				Project.ResourceUsage = tempresult
 				Projects = append(Projects, Project)
 			}
 		}

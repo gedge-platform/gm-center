@@ -250,12 +250,8 @@ func Get_Projects(c echo.Context) (err error) {
 				// tempMetric := []string{"namespace_cpu"}
 				// tempresult := common.InterfaceToString(NowMonit("namespace", params.Cluster, params.Name, tempMetric))
 				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-				fmt.Printf("###tempresult : %s\n", tempresult)
 
-				// for keys, values := range tempresult {
-				// 	fmt.Printf("keys : %+v\n", tempresult[keys])
-				// 	fmt.Printf("values : %+v\n", values)
-				// }
+				// fmt.Printf("[###]tempresult:%+v", NowMonit("namespace", params.Cluster, params.Name, tempMetric))
 				Project.CPU_usage = tempresult
 
 				// Project.Memory_usage = NowMonit("namespace", "cluster2", "default", "namespace_cpu")

@@ -118,7 +118,7 @@ func nowQueryRange(endpointAddr string, query string) model.Value {
 	var end_time time.Time
 	var step time.Duration
 
-	fmt.Println(query)
+	// fmt.Println(query)
 	t := time.Now()
 
 	start_time = time.Unix(t.Unix(), 0)
@@ -179,8 +179,8 @@ func nowMetricExpr(val string, filter map[string]string) string {
 	return strings.Replace(val, "$1", returnVal, -1)
 }
 
-func GpuCheck(c string) ([]string, bool) {
-	var gpuList []string
+func GpuCheck(c string) ([]interface{}, bool) {
+	var gpuList []interface{}
 
 	if check := strings.Compare(c, "") == 0; check {
 		return gpuList, false
@@ -203,7 +203,8 @@ func GpuCheck(c string) ([]string, bool) {
 		// }
 		for _, val := range data.(model.Matrix) {
 			// value = val.Value
-			fmt.Println(val.Metric)
+			fmt.Println(val.Metric["name"])
+			gpuList = append(gpuList, val.Metric["name"])
 		}
 	} else {
 		return gpuList, false

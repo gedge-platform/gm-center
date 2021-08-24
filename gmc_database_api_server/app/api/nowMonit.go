@@ -25,6 +25,10 @@ var nowNamespaceMetric = map[string]string{
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 
+var nowGpuMetric = map[string]string{
+	"gpu_info": "nvidia_smi_gpu_info{$1}",
+}
+
 func NowMonit(k string, c string, n string, m []string) interface{} {
 
 	// fmt.Println(c, n)
@@ -93,7 +97,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			temp_filter := map[string]string{
 				"cluster": c,
 			}
-			data := nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
+			data := nowQueryRange(addr, nowMetricExpr(nowClusterMetric[m[i]], temp_filter))
 
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
@@ -114,18 +118,15 @@ func nowQueryRange(endpointAddr string, query string) model.Value {
 	var end_time time.Time
 	var step time.Duration
 
+	fmt.Println(query)
 	t := time.Now()
-	// tm, _ := strconv.ParseInt(c.QueryParam("start"), 10, 64)
-	start_time = time.Unix(t.Unix(), 0)
-	// log.Println(start_time)
 
-	// tm2, _ := strconv.ParseInt(c.QueryParam("end"), 10, 64)
+	start_time = time.Unix(t.Unix(), 0)
+
 	end_time = time.Unix(t.Unix(), 0)
-	// log.Println(end_time)
 
 	tm3, _ := time.ParseDuration("1s")
 	step = tm3
-	// log.Println(step)
 
 	client, err := api.NewClient(api.Config{
 		Address: endpointAddr,
@@ -176,4 +177,37 @@ func nowMetricExpr(val string, filter map[string]string) string {
 	}
 
 	return strings.Replace(val, "$1", returnVal, -1)
+}
+
+func GpuCheck(c string) ([]string, bool) {
+	var gpuList []string
+
+	if check := strings.Compare(c, "") == 0; check {
+		return gpuList, false
+	}
+
+	addr := "http://192.168.150.115:31298/"
+
+	temp_filter := map[string]string{
+		"cluster": c,
+	}
+
+	data := nowQueryRange(addr, nowMetricExpr(nowGpuMetric["gpu_info"], temp_filter))
+
+	fmt.Println(data)
+	fmt.Println("======value======")
+	if check := len(data.(model.Matrix)) != 0; check {
+		// for _, val := range data.(model.Matrix)[0].Values {
+		// 	// value = val.Value
+		// 	fmt.Println(val)
+		// }
+		for _, val := range data.(model.Matrix) {
+			// value = val.Value
+			fmt.Println(val.Metric)
+		}
+	} else {
+		return gpuList, false
+	}
+
+	return gpuList, true
 }

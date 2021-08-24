@@ -60,7 +60,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 				"cluster":   c,
 				"namespace": n,
 			}
-			fmt.Println("==============")
+			// fmt.Println("==============")
 			data = nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
 
 			jsonBytes, err := json.Marshal(data)
@@ -68,13 +68,20 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println(jsonString)
+			// fmt.Println(jsonString)
 
 		default:
 			return nil
 		}
 
 		result[m[i]] = jsonString
+		// test := result["namespace_cpu"]
+		// fmt.Printf("[###]data : %+v\n", test)
+		// fmt.Printf("[###]result : %+v\n", test["values"])
+
+		// models := apimodel.PROJECT_USAGE{
+		// 	Metric : result[""]
+		// }
 	}
 
 	// fmt.Println(result["namespace_cpu"])

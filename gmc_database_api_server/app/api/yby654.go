@@ -247,8 +247,10 @@ func Get_Projects(c echo.Context) (err error) {
 				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
 				Project.ClusterName = params.Cluster
 				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+				// tempMetric := []string{"namespace_cpu"}
+				// tempresult := common.InterfaceToString(NowMonit("namespace", params.Cluster, params.Name, tempMetric))
 				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-				fmt.Printf("###tempresult : %+v\n", tempresult)
+				fmt.Printf("###tempresult : %s\n", tempresult)
 
 				// for keys, values := range tempresult {
 				// 	fmt.Printf("keys : %+v\n", tempresult[keys])

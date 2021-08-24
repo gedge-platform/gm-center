@@ -25,6 +25,10 @@ type Project struct {
 	Memory_usage  interface{}      `json:"memoryUsage"`
 	Pod_count     interface{}      `json:"podCount"`
 }
+type PROJECT_USAGE struct {
+	Metric interface{} `json:"metric"`
+	Values interface{} `json:"values"`
+}
 
 // type PROJECT_DETAIL struct {
 // 	Name        string                 `json:"name"`

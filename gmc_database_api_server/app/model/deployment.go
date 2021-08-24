@@ -66,3 +66,22 @@ type DEPLOYMENTSVC struct {
 	Name string      `json:"name"`
 	Port interface{} `json:"port"`
 }
+
+type DEPLOYMENTTEST struct {
+	Metadata struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
+	Status struct {
+		HostIP string `json:"hostIP"`
+		Phase  string `json:"phase"`
+		PodIP  string `json:"podIP"`
+	} `json:"status"`
+}
+
+type DEPLOYMENTTEST2 struct {
+	Name string `json:"name"`
+
+	HostIP string `json:"hostIP"`
+	Phase  string `json:"phase"`
+	PodIP  string `json:"podIP"`
+}

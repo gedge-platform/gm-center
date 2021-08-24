@@ -1,12 +1,9 @@
 package api
 
 import (
-	"fmt"
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
-	"log"
 	"net/http"
-	"reflect"
 
 	"github.com/labstack/echo/v4"
 )
@@ -32,8 +29,8 @@ func Get_Deployment(c echo.Context) (err error) {
 	var Deployment model.Deployment
 	common.Transcode(getData0, &Deployment)
 
-	log.Println("Service Model is", Deployment)
-	fmt.Println("[#32] type:", reflect.ValueOf(Deployment).Type())
+	// log.Println("Service Model is", Deployment)
+	// fmt.Println("[#32] type:", reflect.ValueOf(Deployment).Type())
 	// replica := StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "replicas")))
 	replicas := model.REPLICA{
 		Replicas:            StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
@@ -57,7 +54,7 @@ func Get_Deployment(c echo.Context) (err error) {
 		Containers:    common.FindData(getData, "spec.template.spec", "containers"),
 	}
 	testData, _ := common.GetModelRelatedList(params)
-	fmt.Printf("[####]data : %+v\n", testData)
+	// fmt.Printf("[####]data : %+v\n", testData)
 	return c.JSON(http.StatusOK, echo.Map{
 		"deployments": deployments,
 		"getData":     testData,

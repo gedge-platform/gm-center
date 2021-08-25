@@ -52,8 +52,8 @@ func GetPods(c echo.Context) (err error) {
 	// volumeMountsData := common.FindData(getData, "spec.containers", "volumeMounts")
 	// var volumeMountsInfo []model.VolumeMounts
 	// common.Transcode(volumeMountsData, &volumeMountsInfo)
-	getData99, _ := common.GetModelRelatedList(params)
-	log.Printf("#####getdata99 ", getData99)
+	referData, _ := common.GetModelRelatedList(params)
+	log.Printf("#####getdata99 ", referData)
 
 	podinfos := model.POD{
 		Workspace:         params.Workspace,
@@ -61,7 +61,7 @@ func GetPods(c echo.Context) (err error) {
 		Project:           params.Project,
 		Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Namespace:         common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
-		CreationTimestamp: common.InterfaceToTime(common.FindData(getData, "metadata", "CreationTimestamp")),
+		CreationTimestamp: common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		NodeName:          common.InterfaceToString(common.FindData(getData, "spec", "nodeName")),
 		Lable:             common.FindData(getData, "metadata", "labels"),
 		Annotations:       common.FindData(getData, "metadata", "annotations"),
@@ -77,6 +77,6 @@ func GetPods(c echo.Context) (err error) {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"podDetail": podinfos,
-		"event":     getData99,
+		"referData": referData,
 	})
 }

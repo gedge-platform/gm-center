@@ -22,6 +22,23 @@ type JOB struct {
 	CompletionTime time.Time        `json:"completionTime"`
 	// Cronjob   CRONJOB        `json:"cronjob"`
 }
+type JOBALL struct {
+	Metadata struct {
+		Name           string           `json:"name"`
+		Namespace      string           `json:"namespace"`
+		OwnerReference []OwnerReference `json:"ownerReferences"`
+	} `json:"metadata"`
+	Sepc struct {
+		Template struct {
+			Spec struct {
+				Containers []Containers `json:"containers"`
+			} `json:"spec"`
+		} `json:"template"`
+	} `json:"spec"`
+	Status struct {
+		Succeeded int `json:"succeeded"`
+	} `json:"status"`
+}
 
 // type JOBSTATUS struct {
 // 	CompletionTime time.Time `json:"completionTime"`

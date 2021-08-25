@@ -73,3 +73,56 @@ func GetJobs(c echo.Context) error {
 		"referData": referData,
 	})
 }
+
+// func GetAllJobs(c echo.Context) error {
+// 	params := model.PARAMSAll{
+// 		Kind: "jobs",
+// 		Name: "",
+// 		// Cluster: c.QueryParam("cluster"),
+// 		// Workspace: c.QueryParam("workspace"),
+// 		Project: c.QueryParam("project"),
+// 		Method:  c.Request().Method,
+// 		Body:    c.Request().Body,
+// 	}
+// 	getData, err := common.GetModel2(params)
+// 	if err != nil {
+// 		common.ErrorMsg(c, http.StatusNotFound, err)
+// 		return nil
+// 	}
+// 	log.Printf("testing data ", getData)
+// 	testing, err := common.GetModel2(params)
+// 	if err != nil {
+// 		common.ErrorMsg(c, http.StatusNotFound, err)
+// 		return nil
+// 	}
+// 	// log.Printf("[#1111]", common.SetJobs)
+// 	// GetAllClusters(c)
+// 	// GetCluster2(c)
+// 	log.Printf("###11111", GetAllClusters(c))
+// 	// log.Printf("###22222", GetCluster2(c))
+// 	// ClusterAll
+
+// 	List := []model.JOBALL{}
+// 	Only := model.JOBALL{}
+// 	n := gjson.Parse(testing)
+// 	log.Printf("testing data ", n)
+// 	k := n.Get("items").Array()
+// 	log.Printf("testing data items  ", k)
+
+// 	for num, _ := range k {
+
+// 		test := k[num].String()
+// 		log.Printf("testing data only items  ", test)
+// 		err := json.Unmarshal([]byte(test), &Only)
+// 		if err != nil {
+// 			fmt.Println("[!53] error")
+// 		}
+// 		List = append(List, Only)
+
+// 	}
+
+// 	return c.JSON(http.StatusOK, echo.Map{
+// 		"allData": List,
+// 		// "test":    testing,
+// 	})
+// }

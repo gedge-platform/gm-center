@@ -439,17 +439,17 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 	case "pods":
 		params.Kind = "deployments"
 		params.Name = ""
-		serviceAccount := InterfaceToString(FindData(data, "spec", "serviceAccount"))
+		labelApp := InterfaceToString(FindData(data, "metadata.labels", "app"))
 		uid := InterfaceToString(FindData(data, "metadata", "uid"))
 
 		log.Println("PARAMS.NAEMData12 : ", params.Name)
-		log.Println("serviceAccount Data12 : ", serviceAccount)
+		log.Println("serviceAccount Data12 : ", labelApp)
 
 		deployData, err := GetModel(params)
 		if err != nil {
 			return nil, err
 		}
-		deployRefer, err := FindDataArr(deployData, "items", "name", serviceAccount)
+		deployRefer, err := FindDataArr(deployData, "items", "app", labelApp)
 		log.Printf("[###123]jobData", deployData)
 		if err != nil {
 			return nil, err
@@ -466,6 +466,18 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		params.Kind = "endpoints"
+		serviceData, err := GetModel(params)
+		log.Printf("[#222]", serviceData)
+		if err != nil {
+			return nil, err
+		}
+		// serviceRefer, err := FindDataArr(serviceData, "items", "uid", uid)
+		// log.Println("[#11eventRefer Data12 : ", eventRefer)
+		// if err != nil {
+		// 	return nil, err
+		// }
 		var EventInfo []model.EVENT
 		EventData := eventRefer
 		log.Printf("# 확인 ", EventData)

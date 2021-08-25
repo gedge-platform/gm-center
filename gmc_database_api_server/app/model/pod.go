@@ -126,6 +126,11 @@ type DeployInfo struct {
 		Namespace         string    `json:"namespace"`
 		CreationTimestamp time.Time `json:"creationTimestamp"`
 	} `json:"metadata"`
+	Status struct {
+		ReadyReplicas   int `json:"readyReplicas"`
+		Replicas        int `json:"replicas"`
+		UpdatedReplicas int `json:"updatedReplicas"`
+	} `json:"status"`
 }
 type ReferDataDeploy struct {
 	DeployInfo []DeployInfo `json:"deployList"`

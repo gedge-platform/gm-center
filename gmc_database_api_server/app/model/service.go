@@ -11,17 +11,17 @@ type SERVICE struct {
 	Project    string       `json:"project"`
 	Deployment []DEPLOYMENT `json:"deploymentInfo"`
 	// PodInfo         []POD                  `json:"podInfo"`
-	Type            string                 `json:"type"`
-	Ports           interface{}            `json:"port"`
-	ClusterIp       string                 `json:"clusterIp"`
-	ExternalIp      string                 `json:"externalIp"`
-	Selector        interface{}            `json:"selector"`
-	Label           map[string]interface{} `json:"label"`
-	Annotation      map[string]interface{} `json:"annotation"`
-	SessionAffinity string                 `json:"sessionAffinity"`
-	Events          []EVENT                `json:"events"`
-	CreateAt        time.Time              `json:"createAt"`
-	UpdateAt        time.Time              `json:"updateAt"`
+	Type            string      `json:"type"`
+	Ports           interface{} `json:"port"`
+	ClusterIp       string      `json:"clusterIp"`
+	ExternalIp      string      `json:"externalIp"`
+	Selector        interface{} `json:"selector"`
+	Label           interface{} `json:"label"`
+	Annotation      interface{} `json:"annotation"`
+	SessionAffinity string      `json:"sessionAffinity"`
+	Events          []EVENT     `json:"events"`
+	CreateAt        time.Time   `json:"createAt"`
+	UpdateAt        time.Time   `json:"updateAt"`
 }
 
 type SERVICELISTS struct {

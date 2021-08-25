@@ -25,6 +25,18 @@ func GetAllClusters(c echo.Context) (err error) {
 	fmt.Printf("[3##]models : %+v\n", models)
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
+func GetAllClusters2(c echo.Context) []model.Cluster {
+	db := db.DbManager()
+	models := []model.Cluster{}
+	db.Find(&models)
+
+	if db.Find(&models).RowsAffected == 0 {
+		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+		return nil
+	}
+	fmt.Printf("[3##]models : %+v\n", models)
+	return models
+}
 func GetCluster(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")
@@ -47,17 +59,15 @@ func GetClusterList(c echo.Context) (err error) {
 		return
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{"data": models})
-}
-func GetCluster2(c echo.Context) *model.Cluster {
-	search_val := c.Param("name")
+func GetCluster2(params model.PARAMS) *model.Cluster {
+	search_val := params.Name
 	db := db.DbManager()
 	// search_val := c.Param("name")
 	models := FindClusterDB(db, "Name", search_val)
 
 	if models == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-
+		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
 	}
 
 	return models

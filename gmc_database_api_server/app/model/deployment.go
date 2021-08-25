@@ -48,3 +48,40 @@ type REPLICA struct {
 
 type DEPLOYMENT_RESOURCE struct {
 }
+
+type DEPLOYMENTLISTS struct {
+	// Pods     []DEPLOYMENTPOD `json:"pods"`
+	Pods     interface{} `json:"pods"`
+	Services interface{} `json:"services"`
+}
+type DEPLOYMENTPOD struct {
+	Name         string `json:"name"`
+	Status       string `json:"status"`
+	Node         string `json:"node"`
+	PodIP        string `json:"podIP"`
+	RestartCount int    `json:"restart"`
+}
+
+type DEPLOYMENTSVC struct {
+	Name string      `json:"name"`
+	Port interface{} `json:"port"`
+}
+
+type DEPLOYMENTTEST struct {
+	Metadata struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
+	Status struct {
+		HostIP string `json:"hostIP"`
+		Phase  string `json:"phase"`
+		PodIP  string `json:"podIP"`
+	} `json:"status"`
+}
+
+type DEPLOYMENTTEST2 struct {
+	Name string `json:"name"`
+
+	HostIP string `json:"hostIP"`
+	Phase  string `json:"phase"`
+	PodIP  string `json:"podIP"`
+}

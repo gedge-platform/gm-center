@@ -15,13 +15,19 @@ import (
 )
 
 var realMetricTemplate = map[string]string{
-	"cpu": `from(bucket:"monitoring")|> range(start: -$1)  |> filter(fn: (r) => r["_measurement"] == "cpu") |> filter(fn: (r) => r["_field"] == "$2") |> filter(fn: (r) => r["cluter"] == "$3") |> filter(fn: (r) => r["cpu"] == "cpu-total")`,
-	// "cpu":  `from(bucket:"monitoring")|> range(start: -1h)  |> filter(fn: (r) => r["_measurement"] == "cpu") |> filter(fn: (r) => r["_field"] == "usage_idle") |> filter(fn: (r) => r["cluter"] == "cluster2") |> filter(fn: (r) => r["cpu"] == "cpu-total")`,
+	"cpu": `from(bucket:"monitoring")
+	|> range(start: -$1)
+	|> filter(fn: (r) => r["_measurement"] == "cpu")
+	|> filter(fn: (r) => r["_field"] == "$2") 
+	|> filter(fn: (r) => r["cluter"] == "$3") 
+	|> filter(fn: (r) => r["cpu"] == "cpu-total")
+	|> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
 	"memory": `from(bucket: "monitoring")
   |> range(start: -$1)
   |> filter(fn: (r) => r["_measurement"] == "mem")
   |> filter(fn: (r) => r["_field"] == "$2")
-  |> filter(fn: (r) => r["cluter"] == "$3")`,
+  |> filter(fn: (r) => r["cluter"] == "$3")
+  |> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
 	"disk": `from(bucket: "monitoring")
   |> range(start: -$1)
   |> filter(fn: (r) => r["_measurement"] == "disk")
@@ -29,7 +35,9 @@ var realMetricTemplate = map[string]string{
   |> filter(fn: (r) => r["cluter"] == "$3")
   |> filter(fn: (r) => r["device"] == "vda1")
   |> filter(fn: (r) => r["fstype"] == "ext4")
-  |> filter(fn: (r) => r["mode"] == "ro")`,
+  |> filter(fn: (r) => r["mode"] == "ro")
+//   |> timeShift(duration: 9h)
+  |> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
 }
 
 var realCpuMetric = map[string]string{
@@ -167,6 +175,7 @@ func rowModel(m string) (map[string]string, []string) {
 	sort.Strings(slice)
 	for _, v := range slice {
 		slice2 := strings.Split(v, ":")
+
 		switch slice2[0] {
 		case "_time":
 			valueMap = append(valueMap, slice2[1]+":"+slice2[2]+":"+slice2[3])
@@ -287,7 +296,6 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 						t.Metric = prevMetric
 						t.Values = prevValues
 						valueResult = append(valueResult, t)
-						// 초기화 필요
 						tempValues = init
 					}
 				}
@@ -299,7 +307,6 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 			t.Values = tempValues
 			valueResult = append(valueResult, t)
 
-			// fmt.Println(valueResult)
 			if result.Err() != nil {
 				fmt.Printf("Query error: %s\n", result.Err().Error())
 			}
@@ -334,7 +341,6 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 						t.Metric = prevMetric
 						t.Values = prevValues
 						valueResult = append(valueResult, t)
-						// 초기화 필요
 						tempValues = init
 					}
 				}
@@ -346,7 +352,6 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 			t.Values = tempValues
 			valueResult = append(valueResult, t)
 
-			// fmt.Println(valueResult)
 			if result.Err() != nil {
 				fmt.Printf("Query error: %s\n", result.Err().Error())
 			}
@@ -363,17 +368,10 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 }
 
 func realMetricExpr(m string, val string, filter map[string]string) string {
-	// var returnVal string
-	//m: metric (cpu_idle etc...)
-	//val: querytemplate
-	//filter: filter value (time, cluster)
 
-	// fmt.Println(val)
-
-	//realCpuMetric
 	queryString := strings.Replace(val, "$1", filter["time"], -1)
 	queryString = strings.Replace(queryString, "$2", m, -1)
 	queryString = strings.Replace(queryString, "$3", filter["cluster"], -1)
-	// fmt.Println(queryString)
+
 	return queryString
 }

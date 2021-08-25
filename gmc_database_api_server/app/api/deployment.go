@@ -1,12 +1,9 @@
 package api
 
 import (
-	"fmt"
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
-	"log"
 	"net/http"
-	"reflect"
 
 	"github.com/labstack/echo/v4"
 )
@@ -31,19 +28,9 @@ func Get_Deployment(c echo.Context) (err error) {
 	getData0 := common.FindData(getData, "", "")
 	var Deployment model.Deployment
 	common.Transcode(getData0, &Deployment)
-	// getData1 := common.FindData(getData, "metadata", "labels")                            // metadata 의 name 찾기
-	// getData1Str := common.InterfaceToString(common.FindData(getData, "metadata", "name")) // interface to String 처리
 
-	// log.Println("getData0 is", getData0)
-	// log.Println("getData1 is", getData1)
-	// fmt.Println("getData1 type:", reflect.ValueOf(getData1).Type())
-	// log.Println("getData1Str is", getData1Str)
-	// fmt.Println("getData1Str type:", reflect.ValueOf(getData1Str).Type())
-
-	// interface{} -> struct 적용
-
-	log.Println("Service Model is", Deployment)
-	fmt.Println("[#32] type:", reflect.ValueOf(Deployment).Type())
+	// log.Println("Service Model is", Deployment)
+	// fmt.Println("[#32] type:", reflect.ValueOf(Deployment).Type())
 	// replica := StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "replicas")))
 	replicas := model.REPLICA{
 		Replicas:            StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
@@ -66,9 +53,10 @@ func Get_Deployment(c echo.Context) (err error) {
 		Strategy:      common.FindData(getData, "spec", "strategy"),
 		Containers:    common.FindData(getData, "spec.template.spec", "containers"),
 	}
-
+	testData, _ := common.GetModelRelatedList(params)
+	// fmt.Printf("[####]data : %+v\n", testData)
 	return c.JSON(http.StatusOK, echo.Map{
 		"deployments": deployments,
-		// "getData":  getData98,
+		"getData":     testData,
 	})
 }

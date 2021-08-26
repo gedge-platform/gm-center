@@ -33,3 +33,11 @@ type messageFormat struct {
 	StatusCode int    `json:"status_code"`
 	Message    string `json:"message,omitempty"`
 }
+
+func ErrorMsg2(status int, err error) *messageFormat {
+	errMsg := messageFormat{
+		StatusCode: status,
+		Message:    err.Error(),
+	}
+	return &errMsg
+}

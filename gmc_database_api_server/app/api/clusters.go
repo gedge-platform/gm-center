@@ -25,13 +25,13 @@ func GetAllClusters(c echo.Context) (err error) {
 	fmt.Printf("[3##]models : %+v\n", models)
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-func GetAllClusters2(c echo.Context) []model.Cluster {
+func GetAllClusters2(params model.PARAMS) []model.Cluster {
 	db := db.DbManager()
 	models := []model.Cluster{}
 	db.Find(&models)
 
 	if db.Find(&models).RowsAffected == 0 {
-		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+		// common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
 		return nil
 	}
 	fmt.Printf("[3##]models : %+v\n", models)

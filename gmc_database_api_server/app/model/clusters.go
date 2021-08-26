@@ -35,15 +35,15 @@ type Cluster struct {
 	// Name       string            `json:"name"`
 	Status string `json:"status"`
 	// IP         string            `json:"ip"`
-	Network    string      `json:"network"`
-	Os         string      `json:"os"`
-	Kernel     string      `json:"kernel"`
-	Label      interface{} `json:"lables"`
-	Annotation interface{} `json:"annotations"`
-	CreateAt   time.Time   `json:"created_at"`
+	Network       string      `json:"network"`
+	Os            string      `json:"os"`
+	Kernel        string      `json:"kernel"`
+	Label         interface{} `json:"lables"`
+	Annotation    interface{} `json:"annotations"`
+	CreateAt      time.Time   `json:"created_at"`
+	ResourceUsage interface{} `json:"resourceUsage"`
 	// Pod        []Pod    `json:"pods"`
 	// Metadata   Metadata `json:"metadata"`
-	Events []EVENT `json:"events"`
 	// Monitoring []MONITOR `json:"monitoring"`
 }
 

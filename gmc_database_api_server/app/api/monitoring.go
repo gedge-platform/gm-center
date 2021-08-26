@@ -114,10 +114,10 @@ func Monit(c echo.Context) (err error) {
 			"Error": "Bad Parameter",
 		})
 	}
-	fmt.Println("======GpuCheck 함수 테스트=====")
-	list, temp := GpuCheck("cluster4")
-	fmt.Println("============")
-	fmt.Println(list, temp)
+	// fmt.Println("======GpuCheck 함수 테스트=====")
+	// list, temp := GpuCheck(c.QueryParam("cluster_filter"))
+	// fmt.Println("============")
+	// fmt.Println(list, temp)
 
 	// fmt.Println("======nowMonit 함수 테스트=====")
 	// tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
@@ -339,9 +339,9 @@ func validateParam(c echo.Context) bool {
 }
 
 func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
-	log.Println("queryrange in")
-	log.Println(query)
-	log.Println(endpointAddr)
+	// log.Println("queryrange in")
+	// log.Println(query)
+	// log.Println(endpointAddr)
 	var start_time time.Time
 	var end_time time.Time
 	var step time.Duration

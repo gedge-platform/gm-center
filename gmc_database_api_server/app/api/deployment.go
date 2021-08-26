@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
 	"net/http"
@@ -50,6 +51,7 @@ func Get_Deployment(c echo.Context) (err error) {
 		CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		UpdateAt:      common.InterfaceToTime(common.FindData(getData, "status.conditions", "lastUpdateTime")),
 		Replica:       replicas,
+		Stauts:        common.InterfaceToString(common.FindData(getData, "status.conditions", "status")),
 		Strategy:      common.FindData(getData, "spec", "strategy"),
 		Containers:    common.FindData(getData, "spec.template.spec", "containers"),
 	}
@@ -58,5 +60,44 @@ func Get_Deployment(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"deployments": deployments,
 		"getData":     testData,
+	})
+}
+func Get_Deployments(c echo.Context) (err error) {
+	var deployments []model.DEPLOYMENT
+	params := model.PARAMS{
+		Kind:      "deployments",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	data := GetModelList(params)
+	fmt.Printf("#################dataerr : %s", data)
+	for i, _ := range data {
+		replicas := model.REPLICA{
+			Replicas:            StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "replicas"))),
+			ReadyReplicas:       StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))),
+			UpdatedReplicas:     StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "updatedReplicas"))),
+			AvailableReplicas:   StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "availableReplicas"))),
+			UnavailableReplicas: StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "unavailableReplicas"))),
+		}
+		deployment := model.DEPLOYMENT{
+			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Namespace:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Replica:     replicas,
+			ClusterName: common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+			UpdateAt:    common.InterfaceToTime(common.FindData(data[i], "status.conditions", "lastUpdateTime")),
+			Stauts:      common.InterfaceToString(common.FindData(data[i], "status.conditions", "status")),
+		}
+		deployments = append(deployments, deployment)
+	}
+
+	// fmt.Printf("getData : %s\n", data)
+	return c.JSON(http.StatusOK, echo.Map{
+		// "deployments": data,
+		"deployments": deployments,
 	})
 }

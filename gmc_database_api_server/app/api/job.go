@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
 	"log"
@@ -49,10 +50,11 @@ func GetJobs(c echo.Context) error {
 	log.Printf("#####getdata99 ", referData)
 
 	jobinfos := model.JOB{
-		Workspace:      params.Workspace,
-		Cluster:        params.Cluster,
-		Project:        params.Project,
+		Workspace: params.Workspace,
+		Cluster:   params.Cluster,
+		// Project:        params.Project,
 		Name:           common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+		Namespace:      common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
 		Lable:          common.FindData(getData, "metadata", "labels"),
 		Annotations:    common.FindData(getData, "metadata", "annotations"),
 		Kind:           common.InterfaceToString(common.FindData(getData, "kind", "")),
@@ -74,55 +76,41 @@ func GetJobs(c echo.Context) error {
 	})
 }
 
-// func GetAllJobs(c echo.Context) error {
-// 	params := model.PARAMSAll{
-// 		Kind: "jobs",
-// 		Name: "",
-// 		// Cluster: c.QueryParam("cluster"),
-// 		// Workspace: c.QueryParam("workspace"),
-// 		Project: c.QueryParam("project"),
-// 		Method:  c.Request().Method,
-// 		Body:    c.Request().Body,
-// 	}
-// 	getData, err := common.GetModel2(params)
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, err)
-// 		return nil
-// 	}
-// 	log.Printf("testing data ", getData)
-// 	testing, err := common.GetModel2(params)
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, err)
-// 		return nil
-// 	}
-// 	// log.Printf("[#1111]", common.SetJobs)
-// 	// GetAllClusters(c)
-// 	// GetCluster2(c)
-// 	log.Printf("###11111", GetAllClusters(c))
-// 	// log.Printf("###22222", GetCluster2(c))
-// 	// ClusterAll
+// GetJobs godoc
+// @Summary Show List job
+// @Description get job List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.JOB
+// @Header 200 {string} Token "qwerty"
+// @Router /jobs [get]
+func GetAllJobs(c echo.Context) error {
+	var jobs []model.JOB
+	fmt.Printf("## jobs", jobs)
+	params := model.PARAMS{
+		Kind:      "jobs",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	data := GetModelList(params)
+	fmt.Printf("####data confirm : %s", data)
+	for i, _ := range data {
 
-// 	List := []model.JOBALL{}
-// 	Only := model.JOBALL{}
-// 	n := gjson.Parse(testing)
-// 	log.Printf("testing data ", n)
-// 	k := n.Get("items").Array()
-// 	log.Printf("testing data items  ", k)
+		job := model.JOB{
+			Name:           common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Namespace:      common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Cluster:        common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Status:         StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "succeeded"))),
+			CompletionTime: common.InterfaceToTime(common.FindData(data[i], "status", "completionTime")),
+		}
+		jobs = append(jobs, job)
+	}
 
-// 	for num, _ := range k {
-
-// 		test := k[num].String()
-// 		log.Printf("testing data only items  ", test)
-// 		err := json.Unmarshal([]byte(test), &Only)
-// 		if err != nil {
-// 			fmt.Println("[!53] error")
-// 		}
-// 		List = append(List, Only)
-
-// 	}
-
-// 	return c.JSON(http.StatusOK, echo.Map{
-// 		"allData": List,
-// 		// "test":    testing,
-// 	})
-// }
+	return c.JSON(http.StatusOK, echo.Map{
+		"jobs": jobs,
+	})
+}

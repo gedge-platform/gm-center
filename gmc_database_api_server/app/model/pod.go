@@ -3,35 +3,26 @@ package model
 import "time"
 
 type POD struct {
-	Workspace string `json:"workspace"`
-	Cluster   string `json:"cluster"`
-	Project   string `json:"project"`
-	Name      string `json:"name"`
-	// Kind              string    `json:"kind"`
-	CreationTimestamp time.Time `json:"creationTimestamp"`
-	// Ready     int    `json:"Ready"`
-	Namespace string   `json:"namespace"`
-	Status    string   `json:"status"`
-	HostIP    string   `json:"hostIP"`
-	PodIP     string   `json:"podIP"`
-	PodIPs    []PodIPs `json:"podIPs"`
-	// CreatedAt         time.Time           `json:"created_at"`
-	NodeName       string           `json:"node_name"`
-	Lable          interface{}      `json:"label"`
-	Annotations    interface{}      `json:"annotations"`
-	OwnerReference []OwnerReference `json:"ownerReferences"`
-	Podcontainers  []PODCONTAINERS  `json:"Podcontainers"`
-	QosClass       string           `json:"qosClass"`
+	Workspace         string             `json:"workspace,omitempty"`
+	Cluster           string             `json:"cluster"`
+	Name              string             `json:"name"`
+	CreationTimestamp time.Time          `json:"creationTimestamp"`
+	Namespace         string             `json:"project"`
+	Status            string             `json:"status"`
+	HostIP            string             `json:"hostIP,omitempty"`
+	PodIP             string             `json:"podIP,omitempty"`
+	PodIPs            []PodIPs           `json:"podIPs,omitempty"`
+	NodeName          string             `json:"node_name,omitempty"`
+	Lable             interface{}        `json:"label,omitempty"`
+	Annotations       interface{}        `json:"annotations,omitempty"`
+	OwnerReference    []OwnerReference   `json:"ownerReferences,omitempty"`
+	Podcontainers     []PODCONTAINERS    `json:"Podcontainers,omitempty"`
+	QosClass          string             `json:"qosClass,omitempty"`
+	StatusConditions  []StatusConditions `json:"statusConditions,omitempty"`
 	// VolumeMounts      []VolumeMounts      `json:"volumemounts"`
-	ContainerStatuses []ContainerStatuses `json:"containerStatuses"`
+	ContainerStatuses []ContainerStatuses `json:"containerStatuses,omitempty"`
 }
 
-type PodList1 struct {
-	Workspace string `json:"workspace"`
-	Cluster   string `json:"cluster"`
-	Project   string `json:"project"`
-	Name      string `json:"name"`
-}
 type VolumeMounts struct {
 	MountPath string `json:"mountpath"`
 	Name      string `json:"name"`
@@ -39,92 +30,97 @@ type VolumeMounts struct {
 }
 
 type PODCONTAINERS struct {
-	Name  string `json:"name"`
-	Image string `json:"image"`
+	Name  string `json:"name,omitempty"`
+	Image string `json:"image,omitempty"`
 	// ReadinessProbe ReadinessProbe `json:"readinessProbe",omitempty`
 	// LivenessProbe  LivenessProbe  `json:"livenessProbe",omitempty`
-	Ports        []Ports        `json:"ports"`
-	Env          []ENV          `json:"env",omitempty`
+	Ports        []Ports        `json:"ports,omitempty"`
+	Env          []ENV          `json:"env,omitempty"`
 	VolumeMounts []VolumeMounts `json:"volumemounts"`
 }
 
 type ENV struct {
-	Name      string    `json:"name"`
-	Value     string    `json:"value"`
-	ValueFrom ValueFrom `json:"valueFrom"`
+	Name      string    `json:"name,omitempty"`
+	Value     string    `json:"value,omitempty"`
+	ValueFrom ValueFrom `json:"valueFrom,omitempty"`
 }
 
 type ReadinessProbe struct {
-	FailureThreshold int `json:"failureThreshold"`
+	FailureThreshold int `json:"failureThreshold,omitempty"`
 	HTTPGET          struct {
-		Path   string `json:"path"`
-		Port   int    `json:"port"`
-		Scheme string `json:"scheme"`
+		Path   string `json:"path,omitempty"`
+		Port   int    `json:"port,omitempty"`
+		Scheme string `json:"scheme,omitempty"`
 	}
 	TcpSocket struct {
-		Port string `json:"port"`
+		Port string `json:"port,omitempty"`
 	}
-	InitialDelaySeconds int `json:"initialDelaySeconds"`
-	PeriodSeconds       int `json:"periodSeconds"`
-	SuccessThreshold    int `json:"successThreshold"`
-	TimeoutSeconds      int `json:"timeoutSeconds"`
+	InitialDelaySeconds int `json:"initialDelaySeconds,omitempty"`
+	PeriodSeconds       int `json:"periodSeconds,omitempty"`
+	SuccessThreshold    int `json:"successThreshold,omitempty"`
+	TimeoutSeconds      int `json:"timeoutSeconds,omitempty"`
 }
 type LivenessProbe struct {
-	FailureThreshold int `json:"failureThreshold"`
+	FailureThreshold int `json:"failureThreshold,omitempty"`
 	HTTPGET          struct {
-		Path   string `json:"path"`
-		Port   int    `json:"port"`
-		Scheme string `json:"scheme"`
+		Path   string `json:"path,omitempty"`
+		Port   int    `json:"port,omitempty"`
+		Scheme string `json:"scheme,omitempty"`
 	}
 	TcpSocket struct {
-		Port string `json:"port"`
+		Port string `json:"port,omitempty"`
 	}
-	InitialDelaySeconds int `json:"initialDelaySeconds"`
-	PeriodSeconds       int `json:"periodSeconds"`
-	SuccessThreshold    int `json:"successThreshold"`
-	TimeoutSeconds      int `json:"timeoutSeconds"`
+	InitialDelaySeconds int `json:"initialDelaySeconds,omitempty"`
+	PeriodSeconds       int `json:"periodSeconds,omitempty"`
+	SuccessThreshold    int `json:"successThreshold,omitempty"`
+	TimeoutSeconds      int `json:"timeoutSeconds,omitempty"`
 }
 type Ports struct {
-	Name          string `json:"name"`
-	ContainerPort int    `json:"containerPort"`
-	Protocol      string `json:"protocol"`
+	Name          string `json:"name,omitempty"`
+	ContainerPort int    `json:"containerPort,omitempty"`
+	Port          int    `json:"port,omitempty"`
+	Protocol      string `json:"protocol,omitempty"`
 }
-
+type StatusConditions struct {
+	LastTransitionTime time.Time `json:"lastTransitionTime,omitempty"`
+	Status             string    `json:"status,omitempty"`
+	Type               string    `json:"type,omitempty"`
+}
 type ContainerStatuses struct {
-	ContainerID  string `json:"containerID"`
-	Name         string `json:"name"`
-	Ready        bool   `json:"ready"`
-	RestartCount int    `json:"restartCount"`
-	Image        string `json:"image"`
-	Started      bool   `json:"started"`
+	ContainerID  string `json:"containerID,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Ready        bool   `json:"ready,omitempty"`
+	RestartCount int    `json:"restartCount,omitempty"`
+	Image        string `json:"image,omitempty"`
+	Started      bool   `json:"started,omitempty"`
 }
 type ValueFrom struct {
-	FieldRef        FieldRef        `json:"fieldRef" `
-	ConfigMapKeyRef ConfigMapKeyRef `json:"configMapKeyRef" `
+	FieldRef        FieldRef        `json:"fieldRef,omitempty"`
+	ConfigMapKeyRef ConfigMapKeyRef `json:"configMapKeyRef,omitempty"`
 }
 type FieldRef struct {
-	ApiVersion string `json:"apiVersion"`
-	FieldPath  string `json:"fieldPath"`
+	ApiVersion string `json:"apiVersion,omitempty"`
+	FieldPath  string `json:"fieldPath,omitempty"`
 }
 type ConfigMapKeyRef struct {
-	Name string `json:"name"`
-	Key  string `json:"key"`
+	Name string `json:"name,omitempty"`
+	Key  string `json:"key,omitempty"`
 }
 
 type PodIPs struct {
-	Ip string `json:"ip"`
+	Ip string `json:"ip",omitempty`
 }
 type DeployInfo struct {
 	Metadata struct {
-		Name              string           `json:"name"`
-		Namespace         string           `json:"namespace"`
-		CreationTimestamp time.Time        `json:"creationTimestamp"`
-		OwnerReference    []OwnerReference `json:"ownerReferences"`
+		Name              string           `json:"name,omitempty"`
+		Namespace         string           `json:"namespace,omitempty"`
+		CreationTimestamp time.Time        `json:"creationTimestamp,omitempty"`
+		OwnerReference    []OwnerReference `json:"ownerReferences,omitempty"`
 	} `json:"metadata"`
 	Status struct {
-		ReadyReplicas   int `json:"readyReplicas"`
-		Replicas        int `json:"replicas"`
-		UpdatedReplicas int `json:"updatedReplicas"`
+		ReadyReplicas   int `json:"readyReplicas,omitempty"`
+		Replicas        int `json:"replicas,omitempty"`
+		UpdatedReplicas int `json:"updatedReplicas,omitempty"`
 	} `json:"status"`
 }
 type ReferDataDeploy struct {
@@ -134,22 +130,17 @@ type ReferDataDeploy struct {
 }
 type ServiceInfo struct {
 	Metadata struct {
-		Name              string    `json:"name"`
-		Namespace         string    `json:"namespace"`
-		CreationTimestamp time.Time `json:"creationTimestamp"`
+		Name              string    `json:"name,omitempty"`
+		Namespace         string    `json:"namespace,omitempty"`
+		CreationTimestamp time.Time `json:"creationTimestamp,omitempty"`
 	} `json:"metadata"`
-	Subsets []Subsets `json:"subsets"`
+	Subsets []Subsets `json:"subsets,omitempty"`
 }
 type Subsets struct {
-	Addresses    []Addresses    `json:"addresses"`
-	SubsetsPorts []SubsetsPorts `json:"ports"`
+	Addresses []Addresses `json:"addresses,omitempty"`
+	Ports     []Ports     `json:"ports,omitempty"`
 }
 type Addresses struct {
-	NodeName string `json:"nodename"`
-	Ip       string `json:"ip"`
-}
-type SubsetsPorts struct {
-	Name     string `json:"name"`
-	Port     int    `json:"port"`
-	Protocol string `json:"protocol"`
+	NodeName string `json:"nodename,omitempty"`
+	Ip       string `json:"ip,omitempty"`
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
 	"log"
@@ -49,6 +50,10 @@ func GetPods(c echo.Context) (err error) {
 	var podcontainersDataInfo []model.PODCONTAINERS
 	common.Transcode(podcontainersData, &podcontainersDataInfo)
 
+	StatusConditionsData := common.FindData(getData, "status", "conditions")
+	var StatusConditionsInfo []model.StatusConditions
+	common.Transcode(StatusConditionsData, &StatusConditionsInfo)
+
 	// volumeMountsData := common.FindData(getData, "spec.containers", "volumeMounts")
 	// var volumeMountsInfo []model.VolumeMounts
 	// common.Transcode(volumeMountsData, &volumeMountsInfo)
@@ -56,9 +61,9 @@ func GetPods(c echo.Context) (err error) {
 	log.Printf("#####getdata99 ", referData)
 
 	podinfos := model.POD{
-		Workspace:         params.Workspace,
-		Cluster:           params.Cluster,
-		Project:           params.Project,
+		Workspace: params.Workspace,
+		Cluster:   params.Cluster,
+		// Project:           params.Project,
 		Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Namespace:         common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
 		CreationTimestamp: common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
@@ -67,6 +72,7 @@ func GetPods(c echo.Context) (err error) {
 		Annotations:       common.FindData(getData, "metadata", "annotations"),
 		QosClass:          common.InterfaceToString(common.FindData(getData, "status", "qosClass")),
 		OwnerReference:    ownerReferencesInfo,
+		StatusConditions:  StatusConditionsInfo,
 		Status:            common.InterfaceToString(common.FindData(getData, "status", "phase")),
 		HostIP:            common.InterfaceToString(common.FindData(getData, "status", "hostIP")),
 		PodIP:             common.InterfaceToString(common.FindData(getData, "status", "podIP")),
@@ -78,5 +84,48 @@ func GetPods(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"podDetail": podinfos,
 		"referData": referData,
+	})
+}
+
+// GetPods godoc
+// @Summary Show List pods
+// @Description get pods List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.POD
+// @Header 200 {string} Token "qwerty"
+// @Router /pods [get]
+func GetAllPods(c echo.Context) error {
+	var pods []model.POD
+	fmt.Printf("## pods", pods)
+	params := model.PARAMS{
+		Kind:      "pods",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	data := GetModelList(params)
+	fmt.Printf("####Pod data confirm : %s", data)
+
+	for i, _ := range data {
+
+		pod := model.POD{
+			Name:              common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Namespace:         common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Cluster:           common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			CreationTimestamp: common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+			Status:            common.InterfaceToString(common.FindData(data[i], "status", "phase")),
+			NodeName:          common.InterfaceToString(common.FindData(data[i], "spec", "nodeName")),
+			PodIP:             common.InterfaceToString(common.FindData(data[i], "status", "podIP")),
+			HostIP:            common.InterfaceToString(common.FindData(data[i], "status", "hostIP")),
+		}
+		pods = append(pods, pod)
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"pods": pods,
 	})
 }

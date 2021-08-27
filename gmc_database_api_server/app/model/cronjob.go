@@ -5,24 +5,19 @@ import "time"
 type CRONJOB struct {
 	Workspace                  string       `json:"workspace"`
 	Cluster                    string       `json:"cluster"`
-	Project                    string       `json:"project"`
+	Namespace                  string       `json:"project"`
 	Name                       string       `json:"name"`
-	Schedule                   string       `json:"schedule"`
-	ConcurrencyPolicy          string       `json:"concurrencyPolicy"`
-	SuccessfulJobsHistoryLimit int          `json:"successfulJobsHistoryLimit"`
-	FailedJobsHistoryLimit     int          `json:"failedJobsHistoryLimit"`
-	LastScheduleTime           time.Time    `json:"lastScheduleTime"`
-	CreationTimestamp          time.Time    `json:"creationTimestamp"`
-	Containers                 []Containers `json:"containers"`
-	Active                     []Active     `json:"active"`
-	Lable                      interface{}  `json:"label"`
-	Annotations                interface{}  `json:"annotations"`
+	Schedule                   string       `json:"schedule,omitempty"`
+	ConcurrencyPolicy          string       `json:"concurrencyPolicy,omitempty"`
+	SuccessfulJobsHistoryLimit int          `json:"successfulJobsHistoryLimit,omitempty"`
+	FailedJobsHistoryLimit     int          `json:"failedJobsHistoryLimit,omitempty"`
+	LastScheduleTime           time.Time    `json:"lastScheduleTime,omitempty"`
+	CreationTimestamp          time.Time    `json:"creationTimestamp,omitempty"`
+	Containers                 []Containers `json:"containers,omitempty"`
+	Active                     []Active     `json:"active,omitempty"`
+	Lable                      interface{}  `json:"label,omitempty"`
+	Annotations                interface{}  `json:"annotations,omitempty"`
 }
-
-type REFERJOB struct {
-	Name string `json:"name"`
-}
-
 type Active struct {
 	Name      string `json:"name"`
 	Kind      string `json:"kind"`

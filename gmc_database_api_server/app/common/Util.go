@@ -674,24 +674,46 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 		return &ReferData, nil
 	case "pods":
+		params.Kind = "replicasets"
+		params.Name = ""
+		labelApp := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name"))
+		selectLable := InterfaceToString(FindData(data, "metadata", "labels"))
+		uid := InterfaceToString(FindData(data, "metadata", "uid"))
+		podName := InterfaceToString(FindData(data, "metadata", "name"))
+		log.Println("PARAMS.NAEMData12 : ", params.Name)
+		log.Println("labels Data12 : ", labelApp)
+		log.Println("#44podName: ", podName)
+		log.Println("##55selectLable : ", selectLable)
+		log.Println("uid data : ", uid)
+
+		repliData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+		repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
+		log.Printf("[###123]deployData", repliData)
+		log.Println("DeployRefer Data12 : ", repliRefer)
+
+		if err != nil {
+			return nil, err
+		}
+		repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
+
+		log.Println("[#4]deplyName ", repliuid)
+
 		params.Kind = "deployments"
 		params.Name = ""
-		labelApp := InterfaceToString(FindData(data, "metadata.labels", "app"))
-		uid := InterfaceToString(FindData(data, "metadata", "uid"))
-
-		log.Println("PARAMS.NAEMData12 : ", params.Name)
-		log.Println("serviceAccount Data12 : ", labelApp)
 
 		deployData, err := GetModel(params)
 		if err != nil {
 			return nil, err
 		}
-		deployRefer, err := FindDataArr(deployData, "items", "app", labelApp)
-		log.Printf("[###123]jobData", deployData)
+		log.Println("deploydata Data132 : ", deployData)
+		deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
 		if err != nil {
 			return nil, err
 		}
-		log.Println("DeployRefer Data12 : ", deployRefer)
+		log.Println("deploy refer Data132 : ", deployRefer)
 
 		params.Kind = "events"
 		eventsData, err := GetModel(params)
@@ -703,18 +725,21 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		params.Kind = "endpoints"
+		params.Name = ""
 		serviceData, err := GetModel(params)
 		log.Printf("[#222]", serviceData)
 		if err != nil {
 			return nil, err
 		}
-		// serviceRefer, err := FindDataArr(serviceData, "items", "uid", uid)
-		// log.Println("[#11eventRefer Data12 : ", eventRefer)
-		// if err != nil {
-		// 	return nil, err
-		// }
+		serviceRefer, err := FindDataArr(serviceData, "items", "uid", uid)
+		log.Println("[#33 service refer] : ", serviceRefer)
+		if err != nil {
+			return nil, err
+		}
+		var ServiceInfo []model.ServiceInfo
+		ServiceData := serviceRefer
+		Transcode(ServiceData, &ServiceInfo)
 		var EventInfo []model.EVENT
 		EventData := eventRefer
 		log.Printf("# 확인 ", EventData)
@@ -725,8 +750,9 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		Transcode(DeployData, &DeployInfo)
 
 		ReferData := model.ReferDataDeploy{
-			DeployInfo: DeployInfo,
-			Event:      EventInfo,
+			DeployInfo:  DeployInfo,
+			ServiceInfo: ServiceInfo,
+			Event:       EventInfo,
 		}
 		return ReferData, nil
 

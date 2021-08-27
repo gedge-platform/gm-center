@@ -111,20 +111,15 @@ type ConfigMapKeyRef struct {
 	Key  string `json:"key"`
 }
 
-// type PodReferDeploy struct {
-// 	Name       string     `json:"name"`
-// 	Namespace  string     `json:"namespace"`
-// 	Conditions Conditions `json:"status"`
-// }
-
 type PodIPs struct {
 	Ip string `json:"ip"`
 }
 type DeployInfo struct {
 	Metadata struct {
-		Name              string    `json:"name"`
-		Namespace         string    `json:"namespace"`
-		CreationTimestamp time.Time `json:"creationTimestamp"`
+		Name              string           `json:"name"`
+		Namespace         string           `json:"namespace"`
+		CreationTimestamp time.Time        `json:"creationTimestamp"`
+		OwnerReference    []OwnerReference `json:"ownerReferences"`
 	} `json:"metadata"`
 	Status struct {
 		ReadyReplicas   int `json:"readyReplicas"`
@@ -133,6 +128,28 @@ type DeployInfo struct {
 	} `json:"status"`
 }
 type ReferDataDeploy struct {
-	DeployInfo []DeployInfo `json:"deployList"`
-	Event      []EVENT      `json:"event"`
+	DeployInfo  []DeployInfo  `json:"deployList"`
+	ServiceInfo []ServiceInfo `json:"serviceList"`
+	Event       []EVENT       `json:"event"`
+}
+type ServiceInfo struct {
+	Metadata struct {
+		Name              string    `json:"name"`
+		Namespace         string    `json:"namespace"`
+		CreationTimestamp time.Time `json:"creationTimestamp"`
+	} `json:"metadata"`
+	Subsets []Subsets `json:"subsets"`
+}
+type Subsets struct {
+	Addresses    []Addresses    `json:"addresses"`
+	SubsetsPorts []SubsetsPorts `json:"ports"`
+}
+type Addresses struct {
+	NodeName string `json:"nodename"`
+	Ip       string `json:"ip"`
+}
+type SubsetsPorts struct {
+	Name     string `json:"name"`
+	Port     int    `json:"port"`
+	Protocol string `json:"protocol"`
 }

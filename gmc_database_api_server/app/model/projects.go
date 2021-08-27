@@ -17,17 +17,10 @@ type Project struct {
 	Status        string           `json:"status"`
 	ClusterName   string           `json:"clusterName"`
 	SelectCluster string           `gorm:"column:selectCluster; not null; default:null" json:"selectCluster"`
-	Resource      PROJECT_RESOURCE `json:"resource"`
-	Label         interface{}      `json:"labels"`
-	Annotation    interface{}      `json:"annotations"`
-	Events        []EVENT          `json:"events"`
-	CPU_usage     interface{}      `json:"cpuUsage"`
-	Memory_usage  interface{}      `json:"memoryUsage"`
-	Pod_count     interface{}      `json:"podCount"`
-}
-type PROJECT_USAGE struct {
-	Metric interface{} `json:"metric"`
-	Values interface{} `json:"values"`
+	Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
+	Label         interface{}      `json:"labels,omitempty",`
+	Annotation    interface{}      `json:"annotations,omitempty"`
+	ResourceUsage interface{}      `json:"resourceUsage"`
 }
 
 // type PROJECT_DETAIL struct {

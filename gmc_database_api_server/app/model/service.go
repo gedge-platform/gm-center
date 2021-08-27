@@ -5,21 +5,19 @@ import (
 )
 
 type SERVICE struct {
-	Name       string       `json:"name"`
-	Workspace  string       `json:"workspace"`
-	Cluster    string       `json:"cluster"`
-	Project    string       `json:"project"`
-	Deployment []DEPLOYMENT `json:"deploymentInfo"`
-	// PodInfo         []POD                  `json:"podInfo"`
+	Name            string      `json:"name"`
+	Workspace       string      `json:"workspace,omitempty"`
+	Cluster         string      `json:"cluster"`
+	Project         string      `json:"project"`
 	Type            string      `json:"type"`
 	Ports           interface{} `json:"port"`
 	ClusterIp       string      `json:"clusterIp"`
-	ExternalIp      string      `json:"externalIp"`
-	Selector        interface{} `json:"selector"`
-	Label           interface{} `json:"label"`
-	Annotation      interface{} `json:"annotation"`
-	SessionAffinity string      `json:"sessionAffinity"`
-	Events          []EVENT     `json:"events"`
+	ExternalIp      string      `json:"externalIp,omitempty"`
+	Selector        interface{} `json:"selector,omitempty"`
+	Label           interface{} `json:"label,omitempty"`
+	Annotation      interface{} `json:"annotation,omitempty"`
+	SessionAffinity string      `json:"sessionAffinity,omitempty"`
+	Events          []EVENT     `json:"events,omitempty"`
 	CreateAt        time.Time   `json:"createAt"`
 	UpdateAt        time.Time   `json:"updateAt"`
 }

@@ -9,7 +9,6 @@ import (
 )
 
 func GetService(c echo.Context) error {
-
 	params := model.PARAMS{
 		Kind:      "services",
 		Name:      c.Param("name"),
@@ -19,7 +18,6 @@ func GetService(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
-
 	getData, err := common.GetModel(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
@@ -36,6 +34,7 @@ func GetService(c echo.Context) error {
 		Selector:        common.FindData(getData, "spec", "selector"),
 		Ports:           common.FindData(getData, "spec", "ports"),
 		SessionAffinity: common.InterfaceToString(common.FindData(getData, "spec", "type")),
+		Events:          getCallEvent(params),
 		CreateAt:        common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
 	}
@@ -49,6 +48,31 @@ func GetService(c echo.Context) error {
 }
 
 func GetServices(c echo.Context) (err error) {
-
-	return nil
+	var services []model.SERVICE
+	params := model.PARAMS{
+		Kind:      "services",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	data := GetModelList(params)
+	// fmt.Printf("#################dataerr : %s", data)
+	for i, _ := range data {
+		service := model.SERVICE{
+			Name:      common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Cluster:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Project:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Type:      common.InterfaceToString(common.FindData(data[i], "spec", "type")),
+			ClusterIp: common.InterfaceToString(common.FindData(data[i], "spec", "clusterIP")),
+			Ports:     common.FindData(data[i], "spec", "ports"),
+			CreateAt:  common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+		}
+		services = append(services, service)
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"services": services,
+	})
 }

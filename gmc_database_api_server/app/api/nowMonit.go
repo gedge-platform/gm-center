@@ -179,8 +179,9 @@ func nowMetricExpr(val string, filter map[string]string) string {
 	return strings.Replace(val, "$1", returnVal, -1)
 }
 
-func GpuCheck(c string) ([]interface{}, bool) {
-	var gpuList []interface{}
+func GpuCheck(c string) ([]map[string]interface{}, bool) {
+	// var gpuList []interface{}
+	var gpuList []map[string]interface{}
 
 	if check := strings.Compare(c, "") == 0; check {
 		return gpuList, false
@@ -202,9 +203,14 @@ func GpuCheck(c string) ([]interface{}, bool) {
 		// 	fmt.Println(val)
 		// }
 		for _, val := range data.(model.Matrix) {
+			gpu := make(map[string]interface{})
 			// value = val.Value
 			fmt.Println(val.Metric["name"])
-			gpuList = append(gpuList, val.Metric["name"])
+			gpu["name"] = val.Metric["name"]
+			gpu["container"] = val.Metric["container"]
+			gpu["vbios_version"] = val.Metric["vbios_version"]
+			gpuList = append(gpuList, gpu)
+
 		}
 	} else {
 		return gpuList, false

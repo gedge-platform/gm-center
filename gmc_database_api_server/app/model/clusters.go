@@ -22,16 +22,17 @@ import (
 // }
 
 type Cluster struct {
-	Num      int    `gorm:"column:clusterNum; primary_key" json:"clusterNum"`
-	Name     string `gorm:"column:clusterName; not null" json:"clusterName"`
-	Ip       string `gorm:"column:ipAddr; not null" json:"ipAddr"`
-	Role     string `json:"clusterRole"`
-	Type     string `gorm:"column:clusterType; not null" json:"clusterType"`
-	Gpu      string `json:"gpu"`
-	Endpoint string `gorm:"column:clusterEndpoint; not null" json:"clusterEndpoint"`
-	Creator  string `gorm:"column:clusterCreator; not null" json:"clusterCreator"`
-	Version  string `json:"kubeVersion"`
-	Token    string `gorm:"column:token; not null" json:"token"`
+	Num  int    `gorm:"column:clusterNum; primary_key" json:"clusterNum"`
+	Name string `gorm:"column:clusterName; not null" json:"clusterName"`
+	Ip   string `gorm:"column:ipAddr; not null" json:"ipAddr"`
+	Role string `json:"clusterRole"`
+	Type string `gorm:"column:clusterType; not null" json:"clusterType"`
+	// Gpu      []GPU  `json:"gpu"`
+	Gpu      []map[string]interface{} `json:"gpu"`
+	Endpoint string                   `gorm:"column:clusterEndpoint; not null" json:"clusterEndpoint"`
+	Creator  string                   `gorm:"column:clusterCreator; not null" json:"clusterCreator"`
+	Version  string                   `json:"kubeVersion"`
+	Token    string                   `gorm:"column:token; not null" json:"token"`
 	// Name       string            `json:"name"`
 	Status string `json:"status"`
 	// IP         string            `json:"ip"`
@@ -42,9 +43,13 @@ type Cluster struct {
 	Annotation    interface{} `json:"annotations"`
 	CreateAt      time.Time   `json:"created_at"`
 	ResourceUsage interface{} `json:"resourceUsage"`
+	Events        []EVENT     `json:"events"`
 	// Pod        []Pod    `json:"pods"`
 	// Metadata   Metadata `json:"metadata"`
 	// Monitoring []MONITOR `json:"monitoring"`
+}
+type GPU struct {
+	Name string `json:"name"`
 }
 
 // type CLUSTER struct {

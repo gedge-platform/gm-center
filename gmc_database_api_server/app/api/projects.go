@@ -104,7 +104,6 @@ func CreateProject(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusExpectationFailed, err)
 		return nil
 	}
-
 	return c.JSON(http.StatusCreated, echo.Map{"data": models})
 }
 
@@ -212,10 +211,13 @@ func Get_Project(c echo.Context) (err error) {
 		// return c.JSON(http.StatusNotFound, errJson)
 		return c.JSON(http.StatusNotFound, errJson)
 	}
-	projectModel := GetProject2(c)
-	getData0 := common.FindData(getData, "", "") // 빈칸으로 둘 시, 전체 조회
-	var Namespace model.Namespace
-	common.Transcode(getData0, &Namespace)
+	project := GetProject2(c)
+	var tsproject model.Project
+	var projectModel model.PROJECT
+	common.Transcode(project, &tsproject)
+	common.Transcode(tsproject, &projectModel)
+
+	// proejectModel.Project = tsproject
 	projectModel.Name = common.InterfaceToString(common.FindData(getData, "metadata", "name"))
 	projectModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
 	projectModel.Label = common.FindData(getData, "metadata", "labels")
@@ -239,7 +241,7 @@ func Get_Project(c echo.Context) (err error) {
 	})
 }
 func Get_Projects(c echo.Context) (err error) {
-	var Projects model.Projects
+	var Projects model.PROJECTS
 	params := model.PARAMS{
 		Kind:      "namespaces",
 		Name:      c.Param("name"),
@@ -260,9 +262,11 @@ func Get_Projects(c echo.Context) (err error) {
 		getData0 := common.FindingArray(common.Finding(getData, "items"))
 		for k, _ := range getData0 {
 			params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
-			ProjectModel := GetProject3(params)
-			var Project model.Project
-			common.Transcode(ProjectModel, &Project)
+			project := GetProject3(params)
+			var tsproject model.Project
+			var Project model.PROJECT
+			common.Transcode(project, &tsproject)
+			common.Transcode(tsproject, &Project)
 			Project.Name = params.Name
 			Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
 			Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
@@ -294,9 +298,11 @@ func Get_Projects(c echo.Context) (err error) {
 			getData0 := common.FindingArray(common.Finding(getData, "items"))
 			for k, _ := range getData0 {
 				params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
-				ProjectModel := GetProject3(params)
-				var Project model.Project
-				common.Transcode(ProjectModel, &Project)
+				project := GetProject3(params)
+				var tsproject model.Project
+				var Project model.PROJECT
+				common.Transcode(project, &tsproject)
+				common.Transcode(tsproject, &Project)
 				Project.Name = params.Name
 				Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
 				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
@@ -311,13 +317,20 @@ func Get_Projects(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": Projects,
 	})
+	// return nil
 }
 func ResourceCnt(params model.PARAMS, kind string) int {
+	// fmt.Printf("[##]params : %+v\n", params)
 	params.Kind = kind
+	params.Project = params.Name
 	params.Name = ""
 	deployments, _ := common.GetModel(params)
-	deployment := common.FindDataStr(deployments, "items", "")
-	deployment_cnt := common.FindingLen(deployment)
-	fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
+	deployment := common.FindingArray(common.Finding(deployments, "items"))
+	// for i, _ := range deployment {
+	// 	fmt.Printf("[##]names : %s\n", (gjson.Get(deployment[i].String(), "metadata.name")).String())
+	// 	fmt.Printf("[##]index : %d\n", i)
+	// }
+	deployment_cnt := common.FindingLen2(deployment)
+	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
 	return deployment_cnt
 }

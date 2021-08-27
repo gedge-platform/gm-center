@@ -185,15 +185,16 @@ func Get_Cluster(c echo.Context) (err error) {
 		return nil
 	}
 
-	getData0 := common.FindData(getData, "", "") // 빈칸으로 둘 시, 전체 조회
-	var Cluster model.Node
-
-	common.Transcode(getData0, &Cluster)
-	clusterModel := GetCluster2(params)
-	if clusterModel == nil {
+	cluster := GetCluster2(params)
+	if cluster == nil {
 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		return nil
 	}
+	var tsCluster model.Cluster
+	var clusterModel model.CLUSTER
+	common.Transcode(cluster, &tsCluster)
+	common.Transcode(tsCluster, &clusterModel)
+
 	gpuList, check := GpuCheck(params.Name)
 	if check != false {
 		clusterModel.Gpu = gpuList
@@ -202,7 +203,7 @@ func Get_Cluster(c echo.Context) (err error) {
 	}
 	clusterModel.Label = common.FindData(getData, "metadata", "labels")
 	clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
-	clusterModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+	clusterModel.Created_at = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
 	clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
 	clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
 	clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
@@ -218,6 +219,7 @@ func Get_Cluster(c echo.Context) (err error) {
 }
 
 func Get_Clusters(c echo.Context) (err error) {
+	var clusterList []model.CLUSTER
 	params := model.PARAMS{
 		Kind: "nodes",
 		// Name:      clusterModel[k].Name,
@@ -228,44 +230,47 @@ func Get_Clusters(c echo.Context) (err error) {
 		Body:   c.Request().Body,
 	}
 	if c.QueryParam("workspace") == "" {
-		clusterModel := GetAllClusters2(params)
-		for k, _ := range clusterModel {
-			fmt.Printf("value : %+v\n", clusterModel[k].Name)
-			params.Name = clusterModel[k].Name
-			params.Cluster = clusterModel[k].Name
-			params.Workspace = clusterModel[k].Name
-			params.Project = clusterModel[k].Name
+		clusters := GetAllClusters2(params)
+		if clusters == nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return nil
+		}
+		for k, _ := range clusters {
+			fmt.Printf("value : %+v\n", clusters[k].Name)
+			params.Name = clusters[k].Name
+			params.Cluster = clusters[k].Name
+			params.Workspace = clusters[k].Name
+			params.Project = clusters[k].Name
 			// params.Name = value.Name
 			getData, err := common.GetModel(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
 			}
-			getData0 := common.FindData(getData, "", "") // 빈칸으로 둘 시, 전체 조회
-			var Cluster model.Node
-			common.Transcode(getData0, &Cluster)
+			var clusterModel model.CLUSTER
+			common.Transcode(clusters[k], &clusterModel)
 			gpuList, check := GpuCheck(params.Name)
 			if check != false {
-				clusterModel[k].Gpu = gpuList
+				clusterModel.Gpu = gpuList
 			} else {
-				clusterModel[k].Gpu = nil
+				clusterModel.Gpu = nil
 			}
-			clusterModel[k].Label = common.FindData(getData, "metadata", "labels")
-			clusterModel[k].Annotation = common.FindData(getData, "metadata", "annotations")
-			clusterModel[k].CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
-			clusterModel[k].Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
-			clusterModel[k].Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
-			clusterModel[k].Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+			clusterModel.Label = common.FindData(getData, "metadata", "labels")
+			clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
+			clusterModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+			clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
+			clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
+			clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
 			tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
 			tempresult := NowMonit("cluster", params.Cluster, params.Name, tempMetric)
-			clusterModel[k].ResourceUsage = tempresult
+			clusterModel.ResourceUsage = tempresult
+			clusterList = append(clusterList, clusterModel)
 			// clusterModel[k].Kernel = "123"
 		}
 		return c.JSON(http.StatusOK, echo.Map{
-			"clusters": clusterModel,
+			"clusters": clusterList,
 		})
 	} else {
-		var clusterModel []model.Cluster
 		params.Workspace = c.QueryParam("workspace")
 		workspace := GetWorkspace2(params)
 		if workspace == nil {
@@ -275,24 +280,44 @@ func Get_Clusters(c echo.Context) (err error) {
 		selectCluster := workspace.SelectCluster
 		slice := strings.Split(selectCluster, ",")
 		for i, _ := range slice {
-
 			params.Name = slice[i]
 			params.Cluster = slice[i]
 			params.Project = slice[i]
 			cluster := GetCluster2(params)
-			var Cluster model.Cluster
-			common.Transcode(cluster, &Cluster)
+			if cluster == nil {
+				common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+				return nil
+			}
+			var tsCluster model.Cluster
+			var clusterModel model.CLUSTER
+			common.Transcode(cluster, &tsCluster)
+			common.Transcode(tsCluster, &clusterModel)
 			getData, err := common.GetModel(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
 			}
 			fmt.Printf("[###data] : %s\n", getData)
-			clusterModel = append(clusterModel, Cluster)
+			gpuList, check := GpuCheck(params.Name)
+			if check != false {
+				clusterModel.Gpu = gpuList
+			} else {
+				clusterModel.Gpu = nil
+			}
+			clusterModel.Label = common.FindData(getData, "metadata", "labels")
+			clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
+			clusterModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+			clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
+			clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
+			clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+			tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
+			tempresult := NowMonit("cluster", params.Cluster, params.Name, tempMetric)
+			clusterModel.ResourceUsage = tempresult
+			clusterList = append(clusterList, clusterModel)
 
 		}
 		return c.JSON(http.StatusOK, echo.Map{
-			"clusters": clusterModel,
+			"clusters": clusterList,
 		})
 	}
 

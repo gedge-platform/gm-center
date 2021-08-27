@@ -585,6 +585,12 @@ func FindingLen(i string) int {
 
 	return len
 }
+func FindingLen2(i []gjson.Result) int {
+
+	len := len(i)
+
+	return len
+}
 func FindingArray(i string) []gjson.Result {
 	parse := gjson.Parse(i)
 	array := parse.Array()

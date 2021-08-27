@@ -123,8 +123,8 @@ func UpdateProject(c echo.Context) (err error) {
 
 	models2 := FindProjectDB(db, "Name", search_val)
 
-	if models.Postfix != "" {
-		models2.Postfix = models.Postfix
+	if models.SelectCluster != "" {
+		models2.SelectCluster = models.SelectCluster
 	}
 	if models.Description != "" {
 		models2.Description = models.Description

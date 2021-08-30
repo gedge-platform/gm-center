@@ -42,10 +42,10 @@ func GetCronJobs(c echo.Context) (err error) {
 	var activeInfo []model.Active
 	common.Transcode(activeData, &activeInfo)
 
-	referData, _ := common.GetModelRelatedList(params)
-	log.Printf("#####referDataJob ", referData)
+	involvesData, _ := common.GetModelRelatedList(params)
+	log.Printf("#####referDataJob ", involvesData)
 
-	cronjobInfos := model.CRONJOB{
+	cronjob := model.CRONJOB{
 		Workspace: params.Workspace,
 		Cluster:   params.Cluster,
 		// Project:                    params.Project,
@@ -63,8 +63,8 @@ func GetCronJobs(c echo.Context) (err error) {
 		Active:                     activeInfo,
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"cronjobDetail": cronjobInfos,
-		"referData":     referData,
+		"cronjob":      cronjob,
+		"involvesData": involvesData,
 	})
 }
 
@@ -104,6 +104,6 @@ func GetCronAllJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"cronjob": cronjobs,
+		"cronjobs": cronjobs,
 	})
 }

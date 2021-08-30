@@ -57,10 +57,10 @@ func GetPods(c echo.Context) (err error) {
 	// volumeMountsData := common.FindData(getData, "spec.containers", "volumeMounts")
 	// var volumeMountsInfo []model.VolumeMounts
 	// common.Transcode(volumeMountsData, &volumeMountsInfo)
-	referData, _ := common.GetModelRelatedList(params)
-	log.Printf("#####getdata99 ", referData)
+	involvesData, _ := common.GetModelRelatedList(params)
+	log.Printf("#####getdata99 ", involvesData)
 
-	podinfos := model.POD{
+	pod := model.POD{
 		Workspace: params.Workspace,
 		Cluster:   params.Cluster,
 		// Project:           params.Project,
@@ -82,8 +82,8 @@ func GetPods(c echo.Context) (err error) {
 		// VolumeMounts:      volumeMountsInfo,
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"podDetail": podinfos,
-		"referData": referData,
+		"pod":          pod,
+		"involvesData": involvesData,
 	})
 }
 

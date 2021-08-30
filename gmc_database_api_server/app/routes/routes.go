@@ -52,9 +52,9 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/projects", api.Get_Projects)
 	r.POST("/projects", api.CreateProjects)
-
 	r.GET("/projects/:name", api.Get_Project)
-	// r.PUT("/projects/:name", api.Update_Project)
+	// r.PUT("/projects/:name", api.UpdateProjects)
+	r.PATCH("/projects/:name", api.UpdateProjects)
 	r.DELETE("/projects/:name", api.DeleteProjects)
 
 	r.GET("/deployments", api.Get_Deployments)

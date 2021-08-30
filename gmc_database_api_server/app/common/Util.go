@@ -539,7 +539,9 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			fmt.Printf("[##]containerStatuses :%+v\n", containerStatuses)
 
 			fmt.Printf("##restartCnt :%d\n", RestartCnt)
-			PodNames = append(PodNames, InterfaceToString(FindData(podData[x], "metadata", "name")))
+			if InterfaceToString(FindData(podData[x], "status", "phase")) == "Running" {
+				PodNames = append(PodNames, InterfaceToString(FindData(podData[x], "metadata", "name")))
+			}
 			podList := model.DEPLOYMENTPOD{
 				Name:         InterfaceToString(FindData(podData[x], "metadata", "name")),
 				Status:       InterfaceToString(FindData(podData[x], "status", "phase")),

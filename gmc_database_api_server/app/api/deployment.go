@@ -20,12 +20,16 @@ func GetDeployment(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
+
+	deploymentName := params.Name
+	params.Name = params.Project
+	project := GetDBProject(params)
+	params.Name = deploymentName
 	getData, err := common.GetModel(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-
 	getData0 := common.FindData(getData, "", "")
 	var Deployment model.Deployment
 	common.Transcode(getData0, &Deployment)
@@ -39,7 +43,7 @@ func GetDeployment(c echo.Context) (err error) {
 
 	deployment := model.DEPLOYMENT{
 		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-		WorkspaceName: params.Workspace,
+		WorkspaceName: project.WorkspaceName,
 		ClusterName:   params.Cluster,
 		Namespace:     params.Project,
 		Label:         common.FindData(getData, "metadata", "labels"),

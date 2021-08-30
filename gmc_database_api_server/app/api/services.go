@@ -24,7 +24,7 @@ func GetService(c echo.Context) error {
 		return nil
 	}
 
-	services := model.SERVICE{
+	service := model.SERVICE{
 		Name:            common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Workspace:       params.Workspace,
 		Cluster:         params.Cluster,
@@ -39,11 +39,11 @@ func GetService(c echo.Context) error {
 		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
 	}
 
-	involveData, _ := common.GetModelRelatedList(params) // Pods, Deployments
+	involves, _ := common.GetModelRelatedList(params) // Pods, Deployments
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"services": services,
-		"involves": involveData,
+		"service":      service,
+		"involvesData": involves,
 	})
 }
 

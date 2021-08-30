@@ -37,7 +37,7 @@ func GetDeployment(c echo.Context) (err error) {
 		UnavailableReplicas: StringToInt(common.InterfaceToString(common.FindData(getData, "status", "unavailableReplicas"))),
 	}
 
-	deployments := model.DEPLOYMENT{
+	deployment := model.DEPLOYMENT{
 		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		WorkspaceName: params.Workspace,
 		ClusterName:   params.Cluster,
@@ -52,11 +52,11 @@ func GetDeployment(c echo.Context) (err error) {
 		Containers:    common.FindData(getData, "spec.template.spec", "containers"),
 		Events:        getCallEvent(params),
 	}
-	testData, _ := common.GetModelRelatedList(params)
+	involvesData, _ := common.GetModelRelatedList(params)
 	// fmt.Printf("[####]data : %+v\n", testData)
 	return c.JSON(http.StatusOK, echo.Map{
-		"deployments": deployments,
-		"getData":     testData,
+		"deployment":   deployment,
+		"involvesData": involvesData,
 	})
 }
 func GetDeployments(c echo.Context) (err error) {

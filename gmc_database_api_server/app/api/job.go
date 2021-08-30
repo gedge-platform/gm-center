@@ -46,10 +46,10 @@ func GetJobs(c echo.Context) error {
 	var ownerReferencesInfo []model.OwnerReference
 	common.Transcode(ownerReferencesData, &ownerReferencesInfo)
 
-	referData, _ := common.GetModelRelatedList(params)
-	log.Printf("#####getdata99 ", referData)
+	involvesData, _ := common.GetModelRelatedList(params)
+	log.Printf("#####getdata99 ", involvesData)
 
-	jobinfos := model.JOB{
+	job := model.JOB{
 		Workspace: params.Workspace,
 		Cluster:   params.Cluster,
 		// Project:        params.Project,
@@ -71,8 +71,8 @@ func GetJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"jobDetail": jobinfos,
-		"referData": referData,
+		"job":          job,
+		"involvesData": involvesData,
 	})
 }
 

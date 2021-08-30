@@ -1,136 +1,116 @@
 package api
 
 import (
+	"fmt"
+	"gmc_database_api_server/app/common"
+	"gmc_database_api_server/app/model"
+	"log"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
-func GetJobs(c echo.Context) (err error) {
-	// // db := db.DbManager()
-	// job_name := c.Param("name")
-	// workspace_name := c.QueryParam("workspace")
-	// project_name := c.QueryParam("project")
-	// cluster_name := c.QueryParam("cluster")
+// GetJobs godoc
+// @Summary Show detail job
+// @Description get job Details
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.JOB
+// @Header 200 {string} Token "qwerty"
+// @Router /jobs/:name [get]
+func GetJobs(c echo.Context) error {
+	params := model.PARAMS{
+		Kind:      "jobs",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
 
-	// fmt.Printf("job_name is %s\n, workspace name is %s\n, project name is %s", job_name, workspace_name, project_name)
+	getData, err := common.GetModel(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	containerData := common.FindData(getData, "spec.template.spec", "containers")
+	var containerInfo []model.Containers
+	common.Transcode(containerData, &containerInfo)
 
-	// // KubernetesJOB := get(job_name)
-	// //
-	// KubernetesJOB, _ := HttpRequest(c, "https://g-api-test.innogrid.tech/kube/v1/cluster3/default/jobs/hello-job", false)
-	// // https: //g-api-test.innogrid.tech/kube/v1/test1/default/jobs/hello-27133072
-	// data, err := common.GetModel(c, "jobs")
-	// if err != nil {
-	// 	common.ErrorMsg(c, http.StatusNotFound, err)
-	// 	return nil
-	// }
-	// fmt.Printf("[34] data is %s", data)
+	conditionData := common.FindData(getData, "status", "conditions")
+	var conditionInfo []model.Conditions
+	common.Transcode(conditionData, &conditionInfo)
 
-	// var jobModel model.JOB
+	ownerReferencesData := common.FindData(getData, "metadata", "ownerReferences")
+	var ownerReferencesInfo []model.OwnerReference
+	common.Transcode(ownerReferencesData, &ownerReferencesInfo)
 
-	// containerInfo := []model.CONTAINERS{}
-	// container := model.CONTAINERS{}
-	// conditionInfo := []model.CONDITIONS{}
-	// condition := model.CONDITIONS{}
-	// i := gjson.Get(KubernetesJOB, `status.succeeded`).String()
-	// //labels
-	// t := make(map[string]string)
-	// labels := gjson.Get(KubernetesJOB, `metadata.labels`)
-	// fmt.Printf("[labels] is %s\n", labels)
-	// err_labels := json.Unmarshal([]byte(labels.String()), &t)
-	// if err_labels != nil {
-	// 	fmt.Printf("Error : %s\n", err_labels)
-	// }
-	// //annotations
-	// x := make(map[string]string)
-	// annotations := gjson.Get(KubernetesJOB, `metadata.annotations`)
-	// fmt.Printf("[annotations] is %s\n", annotations)
-	// err_annotation := json.Unmarshal([]byte(annotations.String()), &x)
-	// if err_annotation != nil {
-	// 	fmt.Printf("Error : %s\n", err_annotation)
-	// }
-	// kind := gjson.Get(KubernetesJOB, `kind`).String()
-	// backoffLimit := gjson.Get(KubernetesJOB, `spec.backoffLimit`).String()
-	// completions := gjson.Get(KubernetesJOB, `spec.completions`).String()
-	// parallelism := gjson.Get(KubernetesJOB, `spec.parallelism`).String()
-	// creationTimestamp := gjson.Get(KubernetesJOB, `metadata.creationTimestamp`).Time()
-	// startTime := gjson.Get(KubernetesJOB, `status.startTime`).Time()
-	// fmt.Printf("[startTimep] is %s\n", startTime)
-	// completionTime := gjson.Get(KubernetesJOB, `status.completionTime`).Time()
-	// fmt.Printf("[completionTime] is %s\n", completionTime)
-	// // time := gjson.Get(KubernetesJOB, `metadata.managedFields`).String()
-	// // fmt.Printf("[time] is %s\n", time)
-	// fmt.Printf("[creationTimestamp] is %s\n", creationTimestamp)
-	// //ownerReferences
-	// l := []model.OwnerReference{}
-	// o := model.OwnerReference{}
-	// k := gjson.Get(KubernetesJOB, `metadata.ownerReferences`).Array()
-	// fmt.Printf("k is %s\n", k)
-	// for n, _ := range k {
-	// 	fmt.Printf("data is %s\n", k[n])
-	// 	err := json.Unmarshal([]byte(k[n].String()), &o)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	l = append(l, o)
-	// }
-	// containers := gjson.Get(KubernetesJOB, `spec.template.spec.containers`).Array()
-	// fmt.Printf("[#contaienr ] is %s\n", containers)
-	// for n, _ := range containers {
-	// 	fmt.Printf("containerdata is %s\n", containers[n])
-	// 	err := json.Unmarshal([]byte(containers[n].String()), &container)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	containerInfo = append(containerInfo, container)
-	// }
-	// conditions := gjson.Get(KubernetesJOB, `status.conditions`).Array()
-	// fmt.Printf("[#conditions ] is %s\n", conditions)
-	// for n, _ := range conditions {
-	// 	fmt.Printf("containerdata is %s\n", conditions[n])
-	// 	err := json.Unmarshal([]byte(conditions[n].String()), &condition)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	conditionInfo = append(conditionInfo, condition)
-	// }
-	// var Str string
-	// if i == "1" {
-	// 	Str = "Running"
-	// } else {
-	// 	Str = "Pending"
-	// }
+	referData, _ := common.GetModelRelatedList(params)
+	log.Printf("#####getdata99 ", referData)
 
-	// jobModel.Workspace = workspace_name
-	// jobModel.Project = project_name
-	// jobModel.Cluster = cluster_name
-	// jobModel.Name = job_name
+	jobinfos := model.JOB{
+		Workspace: params.Workspace,
+		Cluster:   params.Cluster,
+		// Project:        params.Project,
+		Name:           common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+		Namespace:      common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
+		Lable:          common.FindData(getData, "metadata", "labels"),
+		Annotations:    common.FindData(getData, "metadata", "annotations"),
+		Kind:           common.InterfaceToString(common.FindData(getData, "kind", "")),
+		OwnerReference: ownerReferencesInfo,
+		BackoffLimit:   StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "backoffLimit"))),
+		Completions:    StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "completions"))),
+		Parallelism:    StringToInt(common.InterfaceToString(common.FindData(getData, "spe", "parallelism"))),
+		Status:         StringToInt(common.InterfaceToString(common.FindData(getData, "status", "succeeded"))),
+		CreationTime:   common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+		StartTime:      common.InterfaceToTime(common.FindData(getData, "status", "startTime")),
+		CompletionTime: common.InterfaceToTime(common.FindData(getData, "status", "completionTime")),
+		Conditions:     conditionInfo,
+		Containers:     containerInfo,
+	}
 
-	// jobModel.UpdateAt = creationTimestamp
-	// jobModel.Status = Str
-	// //detail
-	// var jobDetail model.JOBDETAIL
-	// jobDetail.Kind = kind
-	// jobDetail.Workspace = workspace_name
-	// jobDetail.Project = project_name
-	// jobDetail.Cluster = cluster_name
-	// jobDetail.Name = job_name
-	// jobDetail.Lable = t
-	// jobDetail.Annotations = x
-	// jobDetail.Parent = l
-	// jobDetail.Status = Str
-	// jobDetail.UpdateAt = creationTimestamp
-	// jobDetail.CONTAINERS = containerInfo
-	// jobDetail.StartTime = startTime
-	// jobDetail.CompletionTime = completionTime
-	// jobDetail.BackoffLimit = StringToInt(backoffLimit)
-	// jobDetail.Completions = StringToInt(completions)
-	// jobDetail.Parallelism = StringToInt(parallelism)
-	// jobDetail.CONDITIONS = conditionInfo
-
-	// // return c.JSON(http.StatusOK, echo.Map{"job": jobModel, "jobDetails": jobDetail})
-	// return c.JSON(http.StatusOK, echo.Map{"jobDetails": jobDetail})
-	return nil
+	return c.JSON(http.StatusOK, echo.Map{
+		"jobDetail": jobinfos,
+		"referData": referData,
+	})
 }
 
-// func ReturnBool(i int) string {
+// GetJobs godoc
+// @Summary Show List job
+// @Description get job List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.JOB
+// @Header 200 {string} Token "qwerty"
+// @Router /jobs [get]
+func GetAllJobs(c echo.Context) error {
+	var jobs []model.JOB
+	fmt.Printf("## jobs", jobs)
+	params := model.PARAMS{
+		Kind:      "jobs",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	data := GetModelList(params)
+	fmt.Printf("####data confirm : %s", data)
+	for i, _ := range data {
 
-// }
+		job := model.JOB{
+			Name:           common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Namespace:      common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Cluster:        common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Status:         StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "succeeded"))),
+			CompletionTime: common.InterfaceToTime(common.FindData(data[i], "status", "completionTime")),
+		}
+		jobs = append(jobs, job)
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"jobs": jobs,
+	})
+}

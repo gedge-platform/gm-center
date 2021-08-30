@@ -576,8 +576,190 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			Services: Svcs,
 		}
 		return deployments, nil
+	case "jobs":
+		params.Kind = "pods"
+		params.Name = ""
+		jobName := InterfaceToString(FindData(data, "metadata", "name"))
+		uid := InterfaceToString(FindData(data, "metadata", "uid"))
+		log.Println("PARAMS.NAEMData12 : ", params.Name)
+		log.Println("jobName Data12 : ", jobName)
+		log.Println("uid Data12 : ", uid)
+		podData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+		podRefer, err := FindDataArr(podData, "items", "job-name", jobName)
+		if err != nil {
+			return nil, err
+		}
+		log.Println("jobRefer Data12 : ", podRefer)
+
+		params.Kind = "events"
+		params.Name = ""
+
+		eventsData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+
+		eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
+		if err != nil {
+			return nil, err
+		}
+		var EventInfo []model.EVENT1
+		EventData := eventRefer
+		// log.Printf("# 확인 ", EventData)
+		Transcode(EventData, &EventInfo)
+
+		var PodsInfo []model.ReferPodList
+		PodsData := podRefer
+		// log.Printf("# pod list확인 ", podRefer)
+		Transcode(PodsData, &PodsInfo)
+		// log.Printf("# job list확인22 ", PodsInfo)
+
+		ReferDataJob := model.ReferDataJob{
+			ReferPodList: PodsInfo,
+			Event:        EventInfo,
+		}
+		return ReferDataJob, nil
+
+	case "cronjobs":
+		params.Kind = "jobs"
+		params.Name = ""
+		cronjobName := InterfaceToString(FindData(data, "metadata", "name"))
+		uid := InterfaceToString(FindData(data, "metadata", "uid"))
+
+		log.Println("PARAMS.NAEMData12 : ", params.Name)
+		log.Println("jobName Data12 : ", cronjobName)
+		jobData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+		jobRefer, err := FindDataArr(jobData, "items", "name", cronjobName)
+		log.Printf("[###123]jobData", jobData)
+		if err != nil {
+			return nil, err
+		}
+		log.Println("jobRefer Data12 : ", jobRefer)
+
+		params.Kind = "events"
+		params.Name = ""
+		test := InterfaceToString(FindData(jobData, "metadata", "name"))
+		log.Println("[#11test Data12 : ", test)
+		eventsData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+
+		eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
+		log.Println("[#11eventRefer Data12 : ", eventRefer)
+		if err != nil {
+			return nil, err
+		}
+		var EventInfo []model.EVENT1
+		EventData := eventRefer
+		log.Printf("# 확인 ", EventData)
+		Transcode(EventData, &EventInfo)
+
+		var JobsInfo []model.JOBList
+		JobData := jobRefer
+		log.Printf("# job list확인 ", jobRefer)
+		Transcode(JobData, &JobsInfo)
+		log.Printf("# job list확인22 ", JobsInfo)
+
+		ReferData := model.ReferCronJob{
+			JOBList: JobsInfo,
+			Event:   EventInfo,
+		}
+
+		return &ReferData, nil
+	case "pods":
+		params.Kind = "replicasets"
+		params.Name = ""
+		labelApp := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name"))
+		selectLable := InterfaceToString(FindData(data, "metadata", "labels"))
+		uid := InterfaceToString(FindData(data, "metadata", "uid"))
+		podName := InterfaceToString(FindData(data, "metadata", "name"))
+		log.Println("PARAMS.NAEMData12 : ", params.Name)
+		log.Println("labels Data12 : ", labelApp)
+		log.Println("#44podName: ", podName)
+		log.Println("##55selectLable : ", selectLable)
+		log.Println("uid data : ", uid)
+
+		repliData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+		repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
+		log.Printf("[###123]deployData", repliData)
+		log.Println("DeployRefer Data12 : ", repliRefer)
+
+		if err != nil {
+			return nil, err
+		}
+		repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
+
+		log.Println("[#4]deplyName ", repliuid)
+
+		params.Kind = "deployments"
+		params.Name = ""
+
+		deployData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+		log.Println("deploydata Data132 : ", deployData)
+		deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
+		if err != nil {
+			return nil, err
+		}
+		log.Println("deploy refer Data132 : ", deployRefer)
+
+		params.Kind = "events"
+		eventsData, err := GetModel(params)
+		if err != nil {
+			return nil, err
+		}
+		eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
+		log.Println("[#11eventRefer Data12 : ", eventRefer)
+		if err != nil {
+			return nil, err
+		}
+		params.Kind = "endpoints"
+		params.Name = ""
+		serviceData, err := GetModel(params)
+		log.Printf("[#222]", serviceData)
+		if err != nil {
+			return nil, err
+		}
+		serviceRefer, err := FindDataArr(serviceData, "items", "uid", uid)
+		log.Println("[#33 service refer] : ", serviceRefer)
+		if err != nil {
+			return nil, err
+		}
+		var ServiceInfo []model.ServiceInfo
+		ServiceData := serviceRefer
+		Transcode(ServiceData, &ServiceInfo)
+		var EventInfo []model.EVENT1
+		EventData := eventRefer
+		log.Printf("# 확인 ", EventData)
+		Transcode(EventData, &EventInfo)
+
+		var DeployInfo []model.DeployInfo
+		DeployData := deployRefer
+		Transcode(DeployData, &DeployInfo)
+
+		ReferData := model.ReferDataDeploy{
+			DeployInfo:  DeployInfo,
+			ServiceInfo: ServiceInfo,
+			Event:       EventInfo,
+		}
+		return ReferData, nil
+
 	}
+
 	return nil, errors.New("")
+
 }
 func FindingLen(i string) int {
 	parse := gjson.Parse(i)

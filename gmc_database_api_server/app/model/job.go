@@ -3,46 +3,70 @@ package model
 import "time"
 
 type JOB struct {
-	Workspace string    `json:"workspace"`
-	Cluster   string    `json:"cluster"`
-	Project   string    `json:"project"`
-	Name      string    `json:"name"`
-	Kind      string    `json:"kind"`
-	Status    string    `json:"status"`
-	UpdateAt  time.Time `json:"updated_at"`
+	Workspace      string           `json:"workspace"`
+	Cluster        string           `json:"cluster"`
+	Namespace      string           `json:"project"`
+	Name           string           `json:"name"`
+	Kind           string           `json:"kind,omitempty"`
+	Status         int              `json:"status,omitempty"`
+	CreationTime   time.Time        `json:"created_at,omitempty"`
+	Lable          interface{}      `json:"label,omitempty"`
+	Annotations    interface{}      `json:"annotations,omitempty"`
+	Containers     []Containers     `json:"containers,omitempty"`
+	BackoffLimit   int              `json:"backoffLimit,omitempty"`
+	Completions    int              `json:"completions,omitempty"`
+	Parallelism    int              `json:"parallelism,omitempty"`
+	OwnerReference []OwnerReference `json:"ownerReferences,omitempty"`
+	Conditions     []Conditions     `json:"conditions,omitempty"`
+	StartTime      time.Time        `json:"startTime,omitempty"`
+	CompletionTime time.Time        `json:"completionTime,omitempty"`
 	// Cronjob   CRONJOB        `json:"cronjob"`
 }
-
-type JOBDETAIL struct {
-	JOB
-	Lable             map[string]string `json:"label"`
-	Annotations       map[string]string `json:"annotations"`
-	CONTAINERS        []CONTAINERS      `json:"containers"`
-	BackoffLimit      int               `json:"backoffLimit"`
-	Completions       int               `json:"completions"`
-	Parallelism       int               `json:"parallelism"`
-	Parent            []OwnerReference  `json:"ownerReferences"`
-	CreationTimestamp time.Time         `json:"create_at"`
-	// Time              string            `json:"time"`
-	CONDITIONS     []CONDITIONS `json:"conditions"`
-	StartTime      time.Time    `json:"startTime"`
-	CompletionTime time.Time    `json:"completionTime"`
+type JOBALL struct {
+	Metadata struct {
+		Name           string           `json:"name"`
+		Namespace      string           `json:"namespace"`
+		OwnerReference []OwnerReference `json:"ownerReferences,omitempty"`
+	} `json:"metadata"`
+	Sepc struct {
+		Template struct {
+			Spec struct {
+				Containers []Containers `json:"containers,omitempty"`
+			} `json:"spec"`
+		} `json:"template"`
+	} `json:"spec"`
+	Status struct {
+		Succeeded int `json:"succeeded"`
+	} `json:"status"`
 }
 
-// type JOBSTATUS struct {
-// 	CompletionTime time.Time `json:"completionTime"`
-// 	StartTime      time.Time `json:"startTime"`
-// }
-type CONTAINERS struct {
+type Containers struct {
 	Name  string `json:"name"`
 	Image string `json:"image"`
 }
-type CONDITIONS struct {
-	Status        string    `json:"status"`
-	Type          string    `json:"type"`
-	LastProbeTime time.Time `json:"lastProbeTime"`
+type Conditions struct {
+	Status        string    `json:"status,omitempty"`
+	Type          string    `json:"type,omitempty"`
+	LastProbeTime time.Time `json:"lastProbeTime,omitempty"`
 }
-type Evnet struct {
-	Reason  string `json:"reson"`
-	Message string `json:"type"`
+type JOBEvent struct {
+	Reason  string `json:"reson,omitempty"`
+	Message string `json:"type,omitempty"`
+}
+type ReferDataJob struct {
+	ReferPodList []ReferPodList `json:"podList"`
+	Event        []EVENT1       `json:"event"`
+}
+type ReferPodList struct {
+	Metadata struct {
+		Name string `json:"name,omitempty"`
+	} `json:"metadata"`
+	Status struct {
+		Phase  string `json:"phase,omitempty"`
+		HostIP string `json:"hostIP,omitempty"`
+		PodIP  string `json:"podIP,omitempty"`
+	} `json:"status"`
+	Spec struct {
+		NodeName string `json:"nodeName,omitempty"`
+	} `json:"spec"`
 }

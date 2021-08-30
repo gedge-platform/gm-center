@@ -79,15 +79,15 @@ func GEdgeRoute(e *echo.Echo) {
 	r.PUT("/workspaces/:name", api.UpdateWorkspace)
 	r.DELETE("/workspaces/:name", api.DeleteWorkspace)
 
-	// r.GET("/jobs", api.GetAllJobs)
+	r.GET("/jobs", api.GetAllJobs)
 	// r.POST("/jobs", api.CreateJobs)
 	r.GET("/jobs/:name", api.GetJobs)
 	// r.PUT("/jobs/:name", api.UpdateJobs)
 	// r.DELETE("/jobs/:name", api.DeleteJobs)
 	// r.GET("/cronjobs", api.GetAllCronJobs)
-
+	r.GET("/cronjobs", api.GetCronAllJobs)
 	r.GET("/cronjobs/:name", api.GetCronJobs)
-
+	r.GET("/pods", api.GetAllPods)
 	r.GET("/pods/:name", api.GetPods)
 
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {

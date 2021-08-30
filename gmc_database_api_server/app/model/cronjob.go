@@ -3,43 +3,39 @@ package model
 import "time"
 
 type CRONJOB struct {
-	Workspace         string    `json:"workspace"`
-	Cluster           string    `json:"cluster"`
-	Project           string    `json:"project"`
-	Name              string    `json:"name"`
-	Kind              string    `json:"kind"`
-	Schedule          string    `json:"schedule"`
-	CreationTimestamp time.Time `json:"created_at"`
-	LastScheduleTime  time.Time `json:"lastScheduleTime"`
+	Workspace                  string       `json:"workspace"`
+	Cluster                    string       `json:"cluster"`
+	Namespace                  string       `json:"project"`
+	Name                       string       `json:"name"`
+	Schedule                   string       `json:"schedule,omitempty"`
+	ConcurrencyPolicy          string       `json:"concurrencyPolicy,omitempty"`
+	SuccessfulJobsHistoryLimit int          `json:"successfulJobsHistoryLimit,omitempty"`
+	FailedJobsHistoryLimit     int          `json:"failedJobsHistoryLimit,omitempty"`
+	LastScheduleTime           time.Time    `json:"lastScheduleTime,omitempty"`
+	CreationTimestamp          time.Time    `json:"creationTimestamp,omitempty"`
+	Containers                 []Containers `json:"containers,omitempty"`
+	Active                     []Active     `json:"active,omitempty"`
+	Lable                      interface{}  `json:"label,omitempty"`
+	Annotations                interface{}  `json:"annotations,omitempty"`
 }
-
-type CRONJOBDETAIL struct {
-	CRONJOB
-	Lable                      map[string]string `json:"label"`
-	Annotations                map[string]string `json:"annotations"`
-	CONTAINERS                 []CONTAINERS      `json:"containers"`
-	ConcurrencyPolicy          string            `json:"concurrencyPolicy"`
-	FailedJobsHistoryLimit     int               `json:"failedJobsHistoryLimit"`
-	SuccessfulJobsHistoryLimit int               `json:"successfulJobsHistoryLimit"`
-	Status                     string            `json:"status"`
-	LastScheduleTime           time.Time         `json:"lastScheduleTime"`
-	JobRecords                 JOB               `json:"jobRecords"`
-	JOBSTATUS                  string            `json:"jobstatus"`
-	ACTIVE                     []ACTIVE          `json:"active"`
-	UpdateAt                   time.Time         `json:"updateAt"`
-	Events                     []EVENT           `json:"events"`
+type Active struct {
+	Name      string `json:"name"`
+	Kind      string `json:"kind"`
+	Namespace string `json:"namespace"`
 }
-
-// type SPEC struct {
-// 	ConcurrencyPolicy          string `json:"concurrencyPolicy"`
-// 	FailedJobsHistoryLimit     int    `json:"failedJobsHistoryLimit"`
-// 	Schedule                   string `json:"schedule"`
-// 	SuccessfulJobsHistoryLimit int    `json:"successfulJobsHistoryLimit"`
-// 	Suspend                    bool   `json:"suspend"`
-// }
-
-type ACTIVE struct {
-	name      string `json:"name"`
-	kind      string `json:"kind"`
-	namespace string `json:"namespace"`
+type ReferCronJob struct {
+	JOBList []JOBList `json:"jobs"`
+	Event   []EVENT1  `json:"events"`
+}
+type JOBList struct {
+	Metadata struct {
+		Name      string `json:"name"`
+		Namespace string `json:"namespace"`
+	} `json:"metadata"`
+	Status struct {
+		Conditions     []Conditions `json:"conditions"`
+		CompletionTime time.Time    `json:"completionTime"`
+		StartTime      time.Time    `json:"startTime"`
+		Succeeded      int          `json:"succeeded"`
+	} `json:"status"`
 }

@@ -36,7 +36,6 @@ func CreateProjects(c echo.Context) (err error) {
 		return err
 	}
 
-	fmt.Println("1")
 	selectCluster := models.SelectCluster
 	slice := strings.Split(selectCluster, ",")
 
@@ -69,7 +68,15 @@ func CreateProjects(c echo.Context) (err error) {
 			return err
 		}
 	}
-	fmt.Println("2")
+
+	return nil
+}
+
+func DeleteProjects(c echo.Context) (err error) {
+	fmt.Println("delete")
+	//1. DB 에서 삭제
+
+	//2. 삭제 요청
 
 	return nil
 }

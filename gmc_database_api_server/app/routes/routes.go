@@ -30,25 +30,6 @@ func (dv *DataValidator) Validate(i interface{}) error {
 func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
-	r0 := e.Group("/test/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
-		return api.AuthenticateUser(id, password), nil
-	}))
-	// r0.GET("/cluster", api.Cluster)
-	r0.GET("/getClusters/:name", api.Get_Cluster)
-	r0.GET("/getClusters", api.Get_Clusters)
-	r0.GET("/getProjects/:name", api.Get_Project)
-	r0.GET("/getProjects", api.Get_Projects)
-	r0.GET("/getDeployments/:name", api.Get_Deployment)
-	r0.GET("/getDeployments", api.Get_Deployments)
-
-	r0.POST("/createProjects", api.CreateProjects)
-
-	r5 := e.Group("/testing/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
-		return api.AuthenticateUser(id, password), nil
-	}))
-	r5.GET("/services", api.GetServices)
-	r5.GET("/services/:name", api.GetService)
-
 	// /gmcapi/v1
 	r := e.Group("/gmcapi/v1")
 	r.GET("/members", api.GetAllMembers)
@@ -63,17 +44,24 @@ func GEdgeRoute(e *echo.Echo) {
 	r.PUT("/apps/:name", api.UpdateApp)
 	r.DELETE("/apps/:name", api.DeleteApp)
 
-	r.GET("/clusters", api.GetAllClusters)
-	r.POST("/clusters", api.CreateCluster)
-	r.GET("/clusters/:name", api.GetCluster)
-	r.PUT("/clusters/:name", api.UpdateCluster)
-	r.DELETE("/clusters/:name", api.DeleteCluster)
+	r.GET("/clusters", api.Get_Clusters)
+	// r.POST("/clusters", api.Create_Cluster)
+	r.GET("/clusters/:name", api.Get_Cluster)
+	// r.PUT("/clusters/:name", api.Update_Cluster)
+	// r.DELETE("/clusters/:name", api.Delete_Cluster)
 
-	r.GET("/projects", api.GetAllProjects)
-	r.POST("/projects", api.CreateProject)
-	r.GET("/projects/:name", api.GetProject)
-	r.PUT("/projects/:name", api.UpdateProject)
-	r.DELETE("/projects/:name", api.DeleteProject)
+	r.GET("/projects", api.Get_Projects)
+	r.POST("/projects", api.CreateProjects)
+
+	r.GET("/projects/:name", api.Get_Project)
+	// r.PUT("/projects/:name", api.Update_Project)
+	r.DELETE("/projects/:name", api.DeleteProjects)
+
+	r.GET("/deployments", api.Get_Deployments)
+	// r.POST("/deployments", api.Create_Deployment)
+	r.GET("/deployments/:name", api.Get_Deployment)
+	// r.PUT("/deployments/:name", api.Update_Deployment)
+	// r.DELETE("/deployments/:name", api.Delete_Deployment)
 
 	r.GET("/workspaces", api.GetAllWorkspaces)
 	r.POST("/workspaces", api.CreateWorkspace)
@@ -81,16 +69,41 @@ func GEdgeRoute(e *echo.Echo) {
 	r.PUT("/workspaces/:name", api.UpdateWorkspace)
 	r.DELETE("/workspaces/:name", api.DeleteWorkspace)
 
-	// r.GET("/jobs", api.GetAllJobs)
+	r.GET("/pods", api.GetAllPods)
+	// r.POST("/pods", api.CreatePods)
+	r.GET("/pods/:name", api.GetPods)
+	// r.PUT("/pods/:name", api.UpdatePods)
+	// r.DELETE("/pods/:name", api.DeletePods)
+
+	r.GET("/jobs", api.GetAllJobs)
 	// r.POST("/jobs", api.CreateJobs)
 	r.GET("/jobs/:name", api.GetJobs)
 	// r.PUT("/jobs/:name", api.UpdateJobs)
 	// r.DELETE("/jobs/:name", api.DeleteJobs)
-	// r.GET("/cronjobs", api.GetAllCronJobs)
 
+	r.GET("/cronjobs", api.GetCronAllJobs)
+	// r.POST("/cronjobs", api.CreateCronJobs)
 	r.GET("/cronjobs/:name", api.GetCronJobs)
+	// r.PUT("/cronjobs/:name", api.UpdateCronJobs)
+	// r.DELETE("/cronjobs/:name", api.DeleteCronJobs)
 
-	r.GET("/pods/:name", api.GetPods)
+	r.GET("/services", api.GetServices)
+	// r.POST("/services", api.CreateService)
+	r.GET("/services/:name", api.GetService)
+	// r.PUT("/services/:name", api.UpdateService)
+	// r.DELETE("/services/:name", api.DeleteService)
+
+	// r.GET("/clusters", api.GetAllClusters)
+	// r.POST("/clusters", api.CreateCluster)
+	// r.GET("/clusters/:name", api.GetCluster)
+	// r.PUT("/clusters/:name", api.UpdateCluster)
+	// r.DELETE("/clusters/:name", api.DeleteCluster)
+
+	// r.GET("/projects", api.GetAllProjects)
+	// r.POST("/projects", api.CreateProject)
+	// r.GET("/projects/:name", api.GetProject)
+	// r.PUT("/projects/:name", api.UpdateProject)
+	// r.DELETE("/projects/:name", api.DeleteProject)
 
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		return api.AuthenticateUser(id, password), nil

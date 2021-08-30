@@ -490,6 +490,82 @@ func HttpRequest(c echo.Context, url string, check bool) (data string, err error
 	}
 }
 
+func HttpRequest3(c echo.Context, url string, check bool) (data string, err error) {
+	var responseString, token, token_value string
+
+	db := db.DbManager()
+	if models := FindClusterDB(db, "Name", c.QueryParam("cluster")); models == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return
+	} else {
+		token_value = models.Token
+	}
+
+	reqMethod := c.Request().Method
+	passBody := responseBody(c.Request().Body)
+
+	// tokens, ok := c.Request().Header["Authorization"]
+	// if ok && len(tokens) >= 1 {
+	// 	token = tokens[0]
+	// 	token = strings.TrimPrefix(token, "Bearer ")
+	// }
+
+	token = token_value
+
+	client := resty.New()
+	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	client.SetTimeout(1 * time.Minute)
+	client.SetHeaders(map[string]string{
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type":                "application/json; charset=utf-8",
+		"Accept":                      "application/json; charset=utf-8",
+	})
+
+	switch reqMethod {
+	case "GET":
+		if resp, err := client.R().SetAuthToken(token).Get(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "POST":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Post(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "PATCH":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "PUT":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "DELETE":
+		if resp, err := client.R().SetAuthToken(token).Delete(url); err != nil {
+			panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	}
+
+	content, ok := gjson.Parse(responseString).Value().(map[string]interface{})
+	if !ok {
+		panic("err")
+	}
+
+	if check == true {
+		return responseString, c.JSON(http.StatusOK, content)
+	} else {
+		return responseString, nil
+	}
+}
+
 func lastString(ss []string) string {
 	return ss[len(ss)-1]
 }

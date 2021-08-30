@@ -1,143 +1,131 @@
 package api
 
 import (
+	"fmt"
+	"gmc_database_api_server/app/common"
+	"gmc_database_api_server/app/model"
+	"log"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
+// GetPods godoc
+// @Summary Show detail pods
+// @Description get pods Details
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.POD
+// @Header 200 {string} Token "qwerty"
+// @Router /pods/:name [get]
 func GetPods(c echo.Context) (err error) {
-	// pod_name := c.Param("name")
-	// workspace_name := c.QueryParam("workspace")
-	// project_name := c.QueryParam("project")
-	// cluster_name := c.QueryParam("cluster")
-	// fmt.Printf("cronjob_name is %s\n, workspace name is %s\n, project name is %s", pod_name, workspace_name, project_name, cluster_name)
-	// var podDetail model.PODDETAIL
-	// data, err := common.GetModel(c, "pods")
-	// if err != nil {
-	// 	common.ErrorMsg(c, http.StatusNotFound, err)
-	// 	return nil
-	// }
-	// fmt.Printf("[#55555]data is info %s", data)
+	params := model.PARAMS{
+		Kind:      "pods",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	getData, err := common.GetModel(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 
-	// // if err != nil {
-	// // 	common.ErrorMsg(c, http.StatusNotFound, err)
-	// // 	return nil
-	// // }
-	// // fmt.Printf("[#456789]eventdata is info %s", eventdata)
-	// pod_uid := common.FilterStr(data, "metadata.uid")
-	// fmt.Printf("[#666]pod_uid type is %s\n", pod_uid)
-	// getCallEvent(c)
-	// // GetClusterEP(C, getURL(c, "pods"))
-	// // eventlist := getURL(c, "pods")
-	// // eventList := getEvents(c, "events", pod_uid)
-	// // fmt.Printf("[#7777]eventlist is %s\n", eventlist)
-	// // eventdata, err := common.GetModel(c, "events")
-	// // getCallEvent(c, "pods")
-	// // fmt.Printf("[#1eventdata]data is info %s", eventdata)
-	// // fmt.Printf("[#함수]data is info %s", getCallEvent())
-	// name := common.Finding(data, "metadata", "name")
-	// kind := common.Finding(data, "metadata", "kind")
-	// fmt.Printf("kind is info %s", kind)
+	ownerReferencesData := common.FindData(getData, "metadata", "ownerReferences")
+	var ownerReferencesInfo []model.OwnerReference
+	common.Transcode(ownerReferencesData, &ownerReferencesInfo)
 
-	// namespace := common.Finding(data, "metadata", "namespace")
-	// startTime := common.FilterStr(data, "metadata.creationTimestamp")
-	// status := common.Finding(data, "status", "phase")
+	podIPsData := common.FindData(getData, "status", "podIPs")
+	var podIPsInfo []model.PodIPs
+	common.Transcode(podIPsData, &podIPsInfo)
 
-	// timeformat, _ := time.Parse("2006-01-02 15:04:05\n", startTime)
-	// fmt.Println(timeformat.Format(time.RFC3339))
-	// log.Println("[#48888] data is\n", startTime)
-	// log.Println("[#48888] data is\n", timeformat)
+	containerStatusesData := common.FindData(getData, "status", "containerStatuses")
+	var containerStatusesInfo []model.ContainerStatuses
+	common.Transcode(containerStatusesData, &containerStatusesInfo)
 
-	// qosClass := common.Finding(data, "status", "qosClass")
+	podcontainersData := common.FindData(getData, "spec", "containers")
+	var podcontainersDataInfo []model.PODCONTAINERS
+	common.Transcode(podcontainersData, &podcontainersDataInfo)
 
-	// podIP := common.Finding(data, "status", "podIP")
-	// nodeName := common.Finding(data, "spec", "nodeName")
+	StatusConditionsData := common.FindData(getData, "status", "conditions")
+	var StatusConditionsInfo []model.StatusConditions
+	common.Transcode(StatusConditionsData, &StatusConditionsInfo)
 
-	// log.Println("[#4] data is", name)
-	// // ownerReferencesInfo := []model.CONTAINERS{}
-	// // ownerReference := model.CONTAINERS{}
-	// ownerReferencesInfo := []model.OwnerReference{}
+	// volumeMountsData := common.FindData(getData, "spec.containers", "volumeMounts")
+	// var volumeMountsInfo []model.VolumeMounts
+	// common.Transcode(volumeMountsData, &volumeMountsInfo)
+	referData, _ := common.GetModelRelatedList(params)
+	log.Printf("#####getdata99 ", referData)
 
-	// ownerReferences := common.FilterStr(data, "metadata.ownerReferences")
-	// fmt.Printf("data1 type is %s\n", common.Typeof(ownerReferences))
-	// log.Printf("[#523] t is %s\n", ownerReferences)
-	// ownerReferences_err := json.Unmarshal([]byte(ownerReferences), &ownerReferencesInfo)
-	// if err != nil {
-	// 	panic(ownerReferences_err)
-	// }
+	podinfos := model.POD{
+		Workspace: params.Workspace,
+		Cluster:   params.Cluster,
+		// Project:           params.Project,
+		Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+		Namespace:         common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
+		CreationTimestamp: common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+		NodeName:          common.InterfaceToString(common.FindData(getData, "spec", "nodeName")),
+		Lable:             common.FindData(getData, "metadata", "labels"),
+		Annotations:       common.FindData(getData, "metadata", "annotations"),
+		QosClass:          common.InterfaceToString(common.FindData(getData, "status", "qosClass")),
+		OwnerReference:    ownerReferencesInfo,
+		StatusConditions:  StatusConditionsInfo,
+		Status:            common.InterfaceToString(common.FindData(getData, "status", "phase")),
+		HostIP:            common.InterfaceToString(common.FindData(getData, "status", "hostIP")),
+		PodIP:             common.InterfaceToString(common.FindData(getData, "status", "podIP")),
+		PodIPs:            podIPsInfo,
+		ContainerStatuses: containerStatusesInfo,
+		Podcontainers:     podcontainersDataInfo,
+		// VolumeMounts:      volumeMountsInfo,
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"podDetail": podinfos,
+		"referData": referData,
+	})
+}
 
-	// log.Printf("[#53] t is %s\n", ownerReferencesInfo)
-	// containerspec := []model.PODCONTAINERS{}
-	// containers := common.FilterStr(data, "spec.containers")
-	// fmt.Printf("data1 type is %s\n", common.Typeof(containers))
-	// log.Printf("[#523] t is %s\n", containers)
+// GetPods godoc
+// @Summary Show List pods
+// @Description get pods List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.POD
+// @Header 200 {string} Token "qwerty"
+// @Router /pods [get]
+func GetAllPods(c echo.Context) error {
+	var pods []model.POD
+	fmt.Printf("## pods", pods)
+	params := model.PARAMS{
+		Kind:      "pods",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	data := GetModelList(params)
+	fmt.Printf("####Pod data confirm : %s", data)
 
-	// sepcContainer := json.Unmarshal([]byte(containers), &containerspec)
-	// if err != nil {
-	// 	panic(sepcContainer)
-	// }
-	// log.Printf("[#53] t is %s\n", containerspec)
+	for i, _ := range data {
 
-	// data3 := common.Finding(data, "spec.containers.volumeMounts", "name")
-	// fmt.Printf("readonly type is %s\n", data3)
-	// log.Printf("[#789789798] data3 is %s\n", data3)
-	// // StringToInt(data3)
-	// // fmt.Printf("data3 type change type is %s\n", data3)
-	// // if data3 == "true" {
-	// // 	data3 = strng1
-	// // } else {
-	// // 	data3 = 0
-	// // }
-	// containerStatuses := []model.ContainerStatuses{}
-	// ContainerStatuses_info := common.FilterStr(data, "status.containerStatuses")
-	// fmt.Printf("###888 envs type is %s\n", ContainerStatuses_info)
-	// fmt.Printf("###555 envs type is %s\n", common.Typeof(ContainerStatuses_info))
-	// log.Printf("[#798] t is %s\n", ContainerStatuses_info)
+		pod := model.POD{
+			Name:              common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Namespace:         common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Cluster:           common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			CreationTimestamp: common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+			Status:            common.InterfaceToString(common.FindData(data[i], "status", "phase")),
+			NodeName:          common.InterfaceToString(common.FindData(data[i], "spec", "nodeName")),
+			PodIP:             common.InterfaceToString(common.FindData(data[i], "status", "podIP")),
+			HostIP:            common.InterfaceToString(common.FindData(data[i], "status", "hostIP")),
+		}
+		pods = append(pods, pod)
+	}
 
-	// ContainerStatuses_pod := json.Unmarshal([]byte(ContainerStatuses_info), &containerStatuses)
-	// if err != nil {
-	// 	panic(ContainerStatuses_pod)
-	// }
-
-	// label := make(map[string]string)
-	// labels := common.FilterStr(data, "metadata.labels")
-	// fmt.Printf("[labels] is %s\n", labels)
-	// err_labels := json.Unmarshal([]byte(labels), &label)
-
-	// if err_labels != nil {
-	// 	fmt.Printf("Error : %s\n", err_labels)
-	// }
-	// annotation := make(map[string]string)
-	// annotations := common.FilterStr(data, "metadata.annotations")
-	// err_annotation := json.Unmarshal([]byte(annotations), &annotation)
-	// if err_annotation != nil {
-	// 	fmt.Printf("Error : %s\n", err_annotation)
-	// }
-	// // var ReadyCount string
-	// // if ContainerStatuses_info == true {
-	// // 	ReadyCount = "1"
-	// // } else {
-	// // 	ReadyCount = "2"
-	// // }
-
-	// podDetail.Name = pod_name
-	// podDetail.Workspace = workspace_name
-	// podDetail.Project = project_name
-	// podDetail.Cluster = cluster_name
-	// podDetail.Namespace = namespace
-	// podDetail.Status = status
-	// podDetail.CreatedAt = startTime
-	// podDetail.NodeName = nodeName
-	// podDetail.PodIP = podIP
-	// podDetail.QosClass = qosClass
-	// podDetail.Podcontainers = containerspec
-	// podDetail.ContainerStatuses = containerStatuses
-	// podDetail.OwnerReference = ownerReferencesInfo
-	// podDetail.Lable = label
-	// podDetail.Annotations = annotation
-
-	// return c.JSON(http.StatusOK, echo.Map{
-	// 	"items": podDetail,
-	// 	//  "events": eventList
-	// })
-	return nil
+	return c.JSON(http.StatusOK, echo.Map{
+		"pods": pods,
+	})
 }

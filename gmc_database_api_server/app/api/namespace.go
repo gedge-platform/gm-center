@@ -65,6 +65,7 @@ func CreateProjects(c echo.Context) (err error) {
 		switch code {
 		case 200:
 		case 201:
+		case 202:
 		default:
 			common.ErrorMsg(c, http.StatusBadRequest, err)
 			return err
@@ -74,8 +75,56 @@ func CreateProjects(c echo.Context) (err error) {
 	return nil
 }
 
-//프로젝트 수정
-func UpdateProjects(c echo.Context) (err error) {
+//프로젝트 전체 업데이트
+func UpdateProjectsPUT(c echo.Context) (err error) {
+
+	name := c.Param("name")
+	if check := strings.Compare(name, "") == 0; check {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return err
+	}
+
+	models := GetProjectModel(name)
+	selectCluster := models.SelectCluster
+	slice := strings.Split(selectCluster, ",")
+
+	for _, cluster := range slice {
+		clusters := GetCluster3(cluster)
+
+		namesapce := Namespace{}
+
+		//put 요청시 Body 내용에 대해 수정이 필요함.
+		namesapce.APIVersion = "v1"
+		namesapce.Kind = "Namespace"
+		namesapce.Metadata.Name = models.Name
+
+		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/" + name
+		Token := clusters.Token
+
+		data, err := json.Marshal(namesapce)
+
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+
+		var jsonStr = []byte(fmt.Sprint(string(data)))
+
+		code, _ := RequsetKube(url, "PATCH", jsonStr, Token)
+
+		switch code {
+		case 200:
+		case 201:
+		default:
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+	}
+	return nil
+}
+
+//프로젝트 부분 업데이트
+func UpdateProjectsPATCH(c echo.Context) (err error) {
 
 	name := c.Param("name")
 	if check := strings.Compare(name, "") == 0; check {
@@ -148,7 +197,7 @@ func DeleteProjects(c echo.Context) (err error) {
 
 		switch code {
 		case 200:
-		case 201:
+		case 202:
 		default:
 			common.ErrorMsg(c, http.StatusBadRequest, err)
 			return err

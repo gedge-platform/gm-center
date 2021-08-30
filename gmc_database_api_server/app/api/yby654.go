@@ -21,7 +21,7 @@ func GetModelList(params model.PARAMS) []string {
 
 	if params.Workspace == "" && params.Cluster == "" && params.Project == "" {
 		fmt.Println("#################ALL List")
-		Clusters := GetAllClusters2(params)
+		Clusters := GetAllDBClusters(params)
 		for c, _ := range Clusters {
 			params.Cluster = Clusters[c].Name
 			params.Workspace = Clusters[c].Name
@@ -70,7 +70,7 @@ func GetModelList(params model.PARAMS) []string {
 		return DataList
 	} else if params.Workspace != "" && params.Cluster == "" && params.Project == "" {
 		fmt.Println("#################Workspace List")
-		workspace := GetWorkspace2(params)
+		workspace := GetDBWorkspace(params)
 		selectCluster := workspace.SelectCluster
 		slice := strings.Split(selectCluster, ",")
 		for w, _ := range slice {
@@ -100,7 +100,7 @@ func GetModelList(params model.PARAMS) []string {
 	} else if params.Project != "" && params.Workspace != "" {
 		fmt.Println("#################Project List")
 		params.Name = params.Project
-		project := GetProject3(params)
+		project := GetDBProject(params)
 		if project.Type == "user" {
 			fmt.Println("#################user project")
 			if project.WorkspaceName != params.Workspace {
@@ -127,7 +127,7 @@ func GetModelList(params model.PARAMS) []string {
 			return DataList
 		} else {
 			fmt.Println("#################system project")
-			workspace := GetWorkspace2(params)
+			workspace := GetDBWorkspace(params)
 			selectCluster := workspace.SelectCluster
 			slice := strings.Split(selectCluster, ",")
 			for w, _ := range slice {

@@ -27,33 +27,34 @@ func GetAllProjects(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-func GetAllProjects2(c echo.Context) []model.Project {
-	db := db.DbManager()
-	models := []model.Project{}
-	db.Find(&models)
 
-	if db.Find(&models).RowsAffected == 0 {
-		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+// func GetAllDBProjects(c echo.Context) []model.Project {
+// 	db := db.DbManager()
+// 	models := []model.Project{}
+// 	db.Find(&models)
 
-	}
+// 	if db.Find(&models).RowsAffected == 0 {
+// 		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
 
-	return models
-}
-func GetProject2(c echo.Context) *model.Project {
-	db := db.DbManager()
-	search_val := c.Param("name")
-	models := FindProjectDB(db, "Name", search_val)
+// 	}
 
-	if models == nil {
-		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		var model model.Project
-		model.Type = "system"
-		return &model
-	}
+// 	return models
+// }
+// func GetProject2(c echo.Context) *model.Project {
+// 	db := db.DbManager()
+// 	search_val := c.Param("name")
+// 	models := FindProjectDB(db, "Name", search_val)
 
-	return models
-}
-func GetProject3(params model.PARAMS) *model.Project {
+// 	if models == nil {
+// 		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+// 		var model model.Project
+// 		model.Type = "system"
+// 		return &model
+// 	}
+
+// 	return models
+// }
+func GetDBProject(params model.PARAMS) *model.Project {
 	db := db.DbManager()
 	search_val := params.Name
 	models := FindProjectDB(db, "Name", search_val)
@@ -70,18 +71,18 @@ func GetProject3(params model.PARAMS) *model.Project {
 	return models
 }
 
-func GetProject(c echo.Context) (err error) {
-	db := db.DbManager()
-	search_val := c.Param("name")
-	models := FindProjectDB(db, "Name", search_val)
+// func GetProject(c echo.Context) (err error) {
+// 	db := db.DbManager()
+// 	search_val := c.Param("name")
+// 	models := FindProjectDB(db, "Name", search_val)
 
-	if models == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return
-	}
+// 	if models == nil {
+// 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+// 		return
+// 	}
 
-	return c.JSON(http.StatusOK, echo.Map{"data": models})
-}
+// 	return c.JSON(http.StatusOK, echo.Map{"data": models})
+// }
 
 func CreateProject(c echo.Context) (err error) {
 	db := db.DbManager()
@@ -183,7 +184,7 @@ func FindProjectDB(db *gorm.DB, select_val string, search_val string) *model.Pro
 	}
 	return &models
 }
-func Get_Project(c echo.Context) (err error) {
+func GetProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "namespaces",
 		Name:    c.Param("name"),
@@ -211,7 +212,7 @@ func Get_Project(c echo.Context) (err error) {
 		// return c.JSON(http.StatusNotFound, errJson)
 		return c.JSON(http.StatusNotFound, errJson)
 	}
-	project := GetProject2(c)
+	project := GetDBProject(params)
 	var tsproject model.Project
 	var projectModel model.PROJECT
 	common.Transcode(project, &tsproject)
@@ -240,7 +241,7 @@ func Get_Project(c echo.Context) (err error) {
 		"project": projectModel,
 	})
 }
-func Get_Projects(c echo.Context) (err error) {
+func GetProjects(c echo.Context) (err error) {
 	var Projects model.PROJECTS
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -251,7 +252,7 @@ func Get_Projects(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
-	if c.QueryParam("workspace") == "" {
+	if c.QueryParam("workspace") == "" && c.QueryParam("cluster") != "" {
 		params.Workspace = c.QueryParam("cluster")
 		params.Project = c.QueryParam("cluster")
 		getData, err := common.GetModel(params)
@@ -262,7 +263,7 @@ func Get_Projects(c echo.Context) (err error) {
 		getData0 := common.FindingArray(common.Finding(getData, "items"))
 		for k, _ := range getData0 {
 			params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
-			project := GetProject3(params)
+			project := GetDBProject(params)
 			var tsproject model.Project
 			var Project model.PROJECT
 			common.Transcode(project, &tsproject)
@@ -276,11 +277,11 @@ func Get_Projects(c echo.Context) (err error) {
 			Project.ResourceUsage = tempresult
 			Projects = append(Projects, Project)
 		}
-
-	} else {
+	} else if c.QueryParam("workspace") != "" && c.QueryParam("cluster") == "" {
 		params.Workspace = c.QueryParam("workspace")
+		params.Cluster = c.QueryParam("workspace")
 		params.Project = c.QueryParam("workspace")
-		workspace := GetWorkspace2(params)
+		workspace := GetDBWorkspace(params)
 		if workspace == nil {
 			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 			return
@@ -298,7 +299,36 @@ func Get_Projects(c echo.Context) (err error) {
 			getData0 := common.FindingArray(common.Finding(getData, "items"))
 			for k, _ := range getData0 {
 				params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
-				project := GetProject3(params)
+				project := GetDBProject(params)
+				var tsproject model.Project
+				var Project model.PROJECT
+				common.Transcode(project, &tsproject)
+				common.Transcode(tsproject, &Project)
+				Project.Name = params.Name
+				Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
+				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
+				Project.ClusterName = params.Cluster
+				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+				Project.ResourceUsage = tempresult
+				Projects = append(Projects, Project)
+			}
+		}
+	} else {
+		Clusters := GetAllDBClusters(params)
+		for i, _ := range Clusters {
+			params.Cluster = Clusters[i].Name
+			params.Workspace = Clusters[i].Name
+			params.Name = ""
+			getData, err := common.GetModel(params)
+			if err != nil {
+				common.ErrorMsg(c, http.StatusNotFound, err)
+				return nil
+			}
+			getData0 := common.FindingArray(common.Finding(getData, "items"))
+			for k, _ := range getData0 {
+				params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
+				project := GetDBProject(params)
 				var tsproject model.Project
 				var Project model.PROJECT
 				common.Transcode(project, &tsproject)

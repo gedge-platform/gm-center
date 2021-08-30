@@ -25,13 +25,13 @@ func GetAllClusters(c echo.Context) (err error) {
 	fmt.Printf("[3##]models : %+v\n", models)
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-func GetAllClusters2(c echo.Context) []model.Cluster {
+func GetAllClusters2(params model.PARAMS) []model.Cluster {
 	db := db.DbManager()
 	models := []model.Cluster{}
 	db.Find(&models)
 
 	if db.Find(&models).RowsAffected == 0 {
-		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+		// common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
 		return nil
 	}
 	fmt.Printf("[3##]models : %+v\n", models)
@@ -167,4 +167,158 @@ func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Clu
 		}
 	}
 	return &models
+}
+
+func Get_Cluster(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "nodes",
+		Name:      c.Param("name"),
+		Cluster:   c.Param("name"),
+		Workspace: c.Param("name"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	getData, err := common.GetModel(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	cluster := GetCluster2(params)
+	if cluster == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
+	}
+	var tsCluster model.Cluster
+	var clusterModel model.CLUSTER
+	common.Transcode(cluster, &tsCluster)
+	common.Transcode(tsCluster, &clusterModel)
+
+	gpuList, check := GpuCheck(params.Name)
+	if check != false {
+		clusterModel.Gpu = gpuList
+	} else {
+		clusterModel.Gpu = nil
+	}
+	clusterModel.Label = common.FindData(getData, "metadata", "labels")
+	clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
+	clusterModel.Created_at = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+	clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
+	clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
+	clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+	clusterModel.Events = getCallEvent(params)
+	// common.Transcode(getData0, &clusterModel)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"cluster": clusterModel,
+		// "getData":  getData98,
+	})
+
+	// return nil
+}
+
+func Get_Clusters(c echo.Context) (err error) {
+	var clusterList []model.CLUSTER
+	params := model.PARAMS{
+		Kind: "nodes",
+		// Name:      clusterModel[k].Name,
+		// Cluster:   clusterModel[k].Name,
+		// Workspace: clusterModel[k].Name,
+		// Project:   clusterModel[k].Name,
+		Method: c.Request().Method,
+		Body:   c.Request().Body,
+	}
+	if c.QueryParam("workspace") == "" {
+		clusters := GetAllClusters2(params)
+		if clusters == nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return nil
+		}
+		for k, _ := range clusters {
+			fmt.Printf("value : %+v\n", clusters[k].Name)
+			params.Name = clusters[k].Name
+			params.Cluster = clusters[k].Name
+			params.Workspace = clusters[k].Name
+			params.Project = clusters[k].Name
+			// params.Name = value.Name
+			getData, err := common.GetModel(params)
+			if err != nil {
+				common.ErrorMsg(c, http.StatusNotFound, err)
+				return nil
+			}
+			var clusterModel model.CLUSTER
+			common.Transcode(clusters[k], &clusterModel)
+			gpuList, check := GpuCheck(params.Name)
+			if check != false {
+				clusterModel.Gpu = gpuList
+			} else {
+				clusterModel.Gpu = nil
+			}
+			clusterModel.Label = common.FindData(getData, "metadata", "labels")
+			clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
+			clusterModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+			clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
+			clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
+			clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+			tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
+			tempresult := NowMonit("cluster", params.Cluster, params.Name, tempMetric)
+			clusterModel.ResourceUsage = tempresult
+			clusterList = append(clusterList, clusterModel)
+			// clusterModel[k].Kernel = "123"
+		}
+		return c.JSON(http.StatusOK, echo.Map{
+			"clusters": clusterList,
+		})
+	} else {
+		params.Workspace = c.QueryParam("workspace")
+		workspace := GetWorkspace2(params)
+		if workspace == nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return
+		}
+		selectCluster := workspace.SelectCluster
+		slice := strings.Split(selectCluster, ",")
+		for i, _ := range slice {
+			params.Name = slice[i]
+			params.Cluster = slice[i]
+			params.Project = slice[i]
+			cluster := GetCluster2(params)
+			if cluster == nil {
+				common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+				return nil
+			}
+			var tsCluster model.Cluster
+			var clusterModel model.CLUSTER
+			common.Transcode(cluster, &tsCluster)
+			common.Transcode(tsCluster, &clusterModel)
+			getData, err := common.GetModel(params)
+			if err != nil {
+				common.ErrorMsg(c, http.StatusNotFound, err)
+				return nil
+			}
+			fmt.Printf("[###data] : %s\n", getData)
+			gpuList, check := GpuCheck(params.Name)
+			if check != false {
+				clusterModel.Gpu = gpuList
+			} else {
+				clusterModel.Gpu = nil
+			}
+			clusterModel.Label = common.FindData(getData, "metadata", "labels")
+			clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
+			clusterModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+			clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
+			clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
+			clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+			tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
+			tempresult := NowMonit("cluster", params.Cluster, params.Name, tempMetric)
+			clusterModel.ResourceUsage = tempresult
+			clusterList = append(clusterList, clusterModel)
+
+		}
+		return c.JSON(http.StatusOK, echo.Map{
+			"clusters": clusterList,
+		})
+	}
+
 }

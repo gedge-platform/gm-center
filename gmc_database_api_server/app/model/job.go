@@ -3,7 +3,7 @@ package model
 import "time"
 
 type JOB struct {
-	Workspace      string           `json:"workspace"`
+	Workspace      string           `json:"workspace,omitempty"`
 	Cluster        string           `json:"cluster"`
 	Namespace      string           `json:"project"`
 	Name           string           `json:"name"`
@@ -20,25 +20,25 @@ type JOB struct {
 	Conditions     []Conditions     `json:"conditions,omitempty"`
 	StartTime      time.Time        `json:"startTime,omitempty"`
 	CompletionTime time.Time        `json:"completionTime,omitempty"`
-	// Cronjob   CRONJOB        `json:"cronjob"`
 }
-type JOBALL struct {
-	Metadata struct {
-		Name           string           `json:"name"`
-		Namespace      string           `json:"namespace"`
-		OwnerReference []OwnerReference `json:"ownerReferences,omitempty"`
-	} `json:"metadata"`
-	Sepc struct {
-		Template struct {
-			Spec struct {
-				Containers []Containers `json:"containers,omitempty"`
-			} `json:"spec"`
-		} `json:"template"`
-	} `json:"spec"`
-	Status struct {
-		Succeeded int `json:"succeeded"`
-	} `json:"status"`
-}
+
+// type JOBALL struct {
+// 	Metadata struct {
+// 		Name           string           `json:"name"`
+// 		Namespace      string           `json:"namespace"`
+// 		OwnerReference []OwnerReference `json:"ownerReferences,omitempty"`
+// 	} `json:"metadata"`
+// 	Sepc struct {
+// 		Template struct {
+// 			Spec struct {
+// 				Containers []Containers `json:"containers,omitempty"`
+// 			} `json:"spec"`
+// 		} `json:"template"`
+// 	} `json:"spec"`
+// 	Status struct {
+// 		Succeeded int `json:"succeeded"`
+// 	} `json:"status"`
+// }
 
 type Containers struct {
 	Name  string `json:"name"`

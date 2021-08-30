@@ -108,7 +108,7 @@ type ConfigMapKeyRef struct {
 }
 
 type PodIPs struct {
-	Ip string `json:"ip",omitempty`
+	Ip string `json:"ip,omitempty"`
 }
 type DeployInfo struct {
 	Metadata struct {

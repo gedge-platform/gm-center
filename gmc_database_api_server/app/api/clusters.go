@@ -25,7 +25,7 @@ func GetAllClusters(c echo.Context) (err error) {
 	fmt.Printf("[3##]models : %+v\n", models)
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-func GetAllClusters2(params model.PARAMS) []model.Cluster {
+func GetAllDBClusters(params model.PARAMS) []model.Cluster {
 	db := db.DbManager()
 	models := []model.Cluster{}
 	db.Find(&models)
@@ -37,20 +37,21 @@ func GetAllClusters2(params model.PARAMS) []model.Cluster {
 	fmt.Printf("[3##]models : %+v\n", models)
 	return models
 }
-func GetCluster(c echo.Context) (err error) {
-	db := db.DbManager()
-	search_val := c.Param("name")
-	models := FindClusterDB(db, "Name", search_val)
 
-	if models == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return
-	}
+// func GetCluster(c echo.Context) (err error) {
+// 	db := db.DbManager()
+// 	search_val := c.Param("name")
+// 	models := FindClusterDB(db, "Name", search_val)
 
-	return c.JSON(http.StatusOK, echo.Map{"data": models})
-}
+// 	if models == nil {
+// 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+// 		return
+// 	}
 
-func GetCluster2(params model.PARAMS) *model.Cluster {
+// 	return c.JSON(http.StatusOK, echo.Map{"data": models})
+// }
+
+func GetDBCluster(params model.PARAMS) *model.Cluster {
 	search_val := params.Name
 	db := db.DbManager()
 	// search_val := c.Param("name")
@@ -169,7 +170,7 @@ func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Clu
 	return &models
 }
 
-func Get_Cluster(c echo.Context) (err error) {
+func GetCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "nodes",
 		Name:      c.Param("name"),
@@ -185,7 +186,7 @@ func Get_Cluster(c echo.Context) (err error) {
 		return nil
 	}
 
-	cluster := GetCluster2(params)
+	cluster := GetDBCluster(params)
 	if cluster == nil {
 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		return nil
@@ -218,7 +219,7 @@ func Get_Cluster(c echo.Context) (err error) {
 	// return nil
 }
 
-func Get_Clusters(c echo.Context) (err error) {
+func GetClusters(c echo.Context) (err error) {
 	var clusterList []model.CLUSTER
 	params := model.PARAMS{
 		Kind: "nodes",
@@ -230,7 +231,7 @@ func Get_Clusters(c echo.Context) (err error) {
 		Body:   c.Request().Body,
 	}
 	if c.QueryParam("workspace") == "" {
-		clusters := GetAllClusters2(params)
+		clusters := GetAllDBClusters(params)
 		if clusters == nil {
 			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 			return nil
@@ -272,7 +273,7 @@ func Get_Clusters(c echo.Context) (err error) {
 		})
 	} else {
 		params.Workspace = c.QueryParam("workspace")
-		workspace := GetWorkspace2(params)
+		workspace := GetDBWorkspace(params)
 		if workspace == nil {
 			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 			return
@@ -283,7 +284,7 @@ func Get_Clusters(c echo.Context) (err error) {
 			params.Name = slice[i]
 			params.Cluster = slice[i]
 			params.Project = slice[i]
-			cluster := GetCluster2(params)
+			cluster := GetDBCluster(params)
 			if cluster == nil {
 				common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 				return nil

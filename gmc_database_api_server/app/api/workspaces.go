@@ -35,7 +35,7 @@ func GetWorkspace(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-func GetWorkspace2(params model.PARAMS) *model.Workspace {
+func GetDBWorkspace(params model.PARAMS) *model.Workspace {
 	db := db.DbManager()
 	search_val := params.Workspace
 	models := FindWorkspaceDB(db, "Name", search_val)

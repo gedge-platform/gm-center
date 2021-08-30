@@ -55,7 +55,7 @@ type JOBEvent struct {
 }
 type ReferDataJob struct {
 	ReferPodList []ReferPodList `json:"podList"`
-	Event        []EVENT        `json:"event"`
+	Event        []EVENT1       `json:"event"`
 }
 type ReferPodList struct {
 	Metadata struct {

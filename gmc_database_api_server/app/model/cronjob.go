@@ -25,7 +25,7 @@ type Active struct {
 }
 type ReferCronJob struct {
 	JOBList []JOBList `json:"jobs"`
-	Event   []EVENT   `json:"events"`
+	Event   []EVENT1  `json:"events"`
 }
 type JOBList struct {
 	Metadata struct {

@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type EVENT struct {
+type EVENT1 struct {
 	Metadata struct {
 		Name              string    `json:"name"`
 		Namespace         string    `json:"namespace"`
@@ -17,4 +17,15 @@ type EVENT struct {
 	Reason string `json:"reason"`
 	Type   string `json:"type"`
 	Note   string `json:"note"`
+}
+
+type EVENT struct {
+	Kind      string    `json:"kind"`
+	Name      string    `json:"name"`
+	Namespace string    `json:"namespace"`
+	Message   string    `json:"message"`
+	Reason    string    `json:"reason"`
+	Type      string    `json:"type"`
+	EventTime time.Time `json:"eventTime"`
+	// Monitoring []MONITOR `json:"monitoring"`
 }

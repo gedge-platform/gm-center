@@ -606,7 +606,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		var EventInfo []model.EVENT
+		var EventInfo []model.EVENT1
 		EventData := eventRefer
 		// log.Printf("# 확인 ", EventData)
 		Transcode(EventData, &EventInfo)
@@ -656,7 +656,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		var EventInfo []model.EVENT
+		var EventInfo []model.EVENT1
 		EventData := eventRefer
 		log.Printf("# 확인 ", EventData)
 		Transcode(EventData, &EventInfo)
@@ -740,7 +740,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		var ServiceInfo []model.ServiceInfo
 		ServiceData := serviceRefer
 		Transcode(ServiceData, &ServiceInfo)
-		var EventInfo []model.EVENT
+		var EventInfo []model.EVENT1
 		EventData := eventRefer
 		log.Printf("# 확인 ", EventData)
 		Transcode(EventData, &EventInfo)
@@ -764,6 +764,12 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 func FindingLen(i string) int {
 	parse := gjson.Parse(i)
 	len := len(parse.Array())
+
+	return len
+}
+func FindingLen2(i []gjson.Result) int {
+
+	len := len(i)
 
 	return len
 }

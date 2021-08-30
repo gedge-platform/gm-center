@@ -3,6 +3,7 @@ package common
 import (
 	"bytes"
 	"crypto/tls"
+	"fmt"
 	"gmc_database_api_server/app/db"
 	"gmc_database_api_server/app/model"
 	"io"
@@ -196,12 +197,12 @@ func UrlExpr(endpoint, project, item, kind string) string {
 
 	defaultUrl := "https://" + endpoint + ":6443"
 	var returnUrl string
-
+	fmt.Printf("##### teststest : %v,%v \n", check_project, check_item)
 	if check_project || check_item {
 		// project or item value exist
-		if err := errCheck(project, item, kind); err != "" {
-			return err
-		}
+		// if err := errCheck(project, item, kind); err != "" {
+		// 	return err
+		// }
 		returnUrl = defaultUrl + ProjectExpr(nsTemplates[kind], project, item)
 	} else {
 		returnUrl = defaultUrl + listTemplates[kind]
@@ -250,14 +251,14 @@ func errCheck(project, item, kind string) string {
 func validate(params model.PARAMS) error {
 	workspaceCheck := strings.Compare(params.Workspace, "") != 0
 	clusterCheck := strings.Compare(params.Cluster, "") != 0
-	projectCheck := strings.Compare(params.Project, "") != 0
+	// projectCheck := strings.Compare(params.Project, "") != 0
 
 	if !clusterCheck {
 		return ErrClusterInvalid
 	}
-	if !projectCheck {
-		return ErrProjectInvalid
-	}
+	// if !projectCheck {
+	// 	return ErrProjectInvalid
+	// }
 	if !workspaceCheck {
 		return ErrWorkspaceInvalid
 	}

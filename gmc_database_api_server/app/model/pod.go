@@ -126,7 +126,7 @@ type DeployInfo struct {
 type ReferDataDeploy struct {
 	DeployInfo  []DeployInfo  `json:"deployList"`
 	ServiceInfo []ServiceInfo `json:"serviceList"`
-	Event       []EVENT       `json:"event"`
+	Event       []EVENT1      `json:"event"`
 }
 type ServiceInfo struct {
 	Metadata struct {

@@ -54,6 +54,7 @@ func Get_Deployment(c echo.Context) (err error) {
 		Stauts:        common.InterfaceToString(common.FindData(getData, "status.conditions", "status")),
 		Strategy:      common.FindData(getData, "spec", "strategy"),
 		Containers:    common.FindData(getData, "spec.template.spec", "containers"),
+		Events:        getCallEvent(params),
 	}
 	testData, _ := common.GetModelRelatedList(params)
 	// fmt.Printf("[####]data : %+v\n", testData)
@@ -94,10 +95,7 @@ func Get_Deployments(c echo.Context) (err error) {
 		}
 		deployments = append(deployments, deployment)
 	}
-
-	// fmt.Printf("getData : %s\n", data)
 	return c.JSON(http.StatusOK, echo.Map{
-		// "deployments": data,
 		"deployments": deployments,
 	})
 }

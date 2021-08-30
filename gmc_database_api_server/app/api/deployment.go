@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Get_Deployment(c echo.Context) (err error) {
+func GetDeployment(c echo.Context) (err error) {
 	// var ServicePorts []model.PORT
 	params := model.PARAMS{
 		Kind:      "deployments",
@@ -29,10 +29,6 @@ func Get_Deployment(c echo.Context) (err error) {
 	getData0 := common.FindData(getData, "", "")
 	var Deployment model.Deployment
 	common.Transcode(getData0, &Deployment)
-
-	// log.Println("Service Model is", Deployment)
-	// fmt.Println("[#32] type:", reflect.ValueOf(Deployment).Type())
-	// replica := StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "replicas")))
 	replicas := model.REPLICA{
 		Replicas:            StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
 		ReadyReplicas:       StringToInt(common.InterfaceToString(common.FindData(getData, "status", "readyReplicas"))),
@@ -63,7 +59,7 @@ func Get_Deployment(c echo.Context) (err error) {
 		"getData":     testData,
 	})
 }
-func Get_Deployments(c echo.Context) (err error) {
+func GetDeployments(c echo.Context) (err error) {
 	var deployments []model.DEPLOYMENT
 	params := model.PARAMS{
 		Kind:      "deployments",

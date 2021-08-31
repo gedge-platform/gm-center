@@ -282,6 +282,10 @@ func validate(params model.PARAMS) error {
 		if !nameCheck {
 			return ErrDetailNameInvalid
 		}
+	} else if Method == "GET" {
+		if !clusterCheck {
+			return ErrClusterInvalid
+		}
 	} else {
 		if !clusterCheck {
 			return ErrClusterInvalid

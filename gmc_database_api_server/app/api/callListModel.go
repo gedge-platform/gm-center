@@ -24,7 +24,7 @@ func GetModelList(params model.PARAMS) []string {
 		Clusters := GetAllDBClusters(params)
 		for c, _ := range Clusters {
 			params.Cluster = Clusters[c].Name
-			params.Workspace = Clusters[c].Name
+			// params.Workspace = Clusters[c].Name
 			// params.Kind = "namespaces"
 			getData, _ := common.DataRequest(params)
 			getData0 := gjson.Get(getData, "items").Array()
@@ -43,7 +43,7 @@ func GetModelList(params model.PARAMS) []string {
 	} else if params.Workspace == "" && params.Cluster != "" && params.Project == "" {
 		fmt.Println("#################Cluster List")
 		// params.Cluster = Clusters[c].Name
-		params.Workspace = params.Cluster
+		// params.Workspace = params.Cluster
 		// params.Kind = "namespaces"
 		getData, _ := common.DataRequest(params)
 		getData0 := gjson.Get(getData, "items").Array()
@@ -120,6 +120,20 @@ func GetModelList(params model.PARAMS) []string {
 			}
 		}
 		return DataList
+	} else if params.Project != "" && params.Cluster != "" {
+		fmt.Println("#################Project in Cluster List")
+		// params.Workspace = params.Cluster
+		getData, _ := common.DataRequest(params)
+		getData0 := gjson.Get(getData, "items").Array()
+		// getData0 := common.FindingArray(common.Finding(getData, "items"))
+		for k, _ := range getData0 {
+			str := getData0[k].String()
+			strVal, _ := sjson.Set(str, "clusterName", params.Cluster)
+			DataList = append(DataList, strVal)
+		}
+
+		return DataList
+
 	}
 	return nil
 }

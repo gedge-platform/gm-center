@@ -1,8 +1,11 @@
 package api
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -14,6 +17,18 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/tidwall/gjson"
 )
+
+type Namespace struct {
+	APIVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
+	Metadata   struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
+	Spec struct {
+	} `json:"spec"`
+	Status struct {
+	} `json:"status"`
+}
 
 func GetAllProjects(c echo.Context) (err error) {
 	db := db.DbManager()
@@ -27,33 +42,34 @@ func GetAllProjects(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
-func GetAllProjects2(c echo.Context) []model.Project {
-	db := db.DbManager()
-	models := []model.Project{}
-	db.Find(&models)
 
-	if db.Find(&models).RowsAffected == 0 {
-		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+// func GetAllDBProjects(c echo.Context) []model.Project {
+// 	db := db.DbManager()
+// 	models := []model.Project{}
+// 	db.Find(&models)
 
-	}
+// 	if db.Find(&models).RowsAffected == 0 {
+// 		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
 
-	return models
-}
-func GetProject2(c echo.Context) *model.Project {
-	db := db.DbManager()
-	search_val := c.Param("name")
-	models := FindProjectDB(db, "Name", search_val)
+// 	}
 
-	if models == nil {
-		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		var model model.Project
-		model.Type = "system"
-		return &model
-	}
+// 	return models
+// }
+// func GetProject2(c echo.Context) *model.Project {
+// 	db := db.DbManager()
+// 	search_val := c.Param("name")
+// 	models := FindProjectDB(db, "Name", search_val)
 
-	return models
-}
-func GetProject3(params model.PARAMS) *model.Project {
+// 	if models == nil {
+// 		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+// 		var model model.Project
+// 		model.Type = "system"
+// 		return &model
+// 	}
+
+// 	return models
+// }
+func GetDBProject(params model.PARAMS) *model.Project {
 	db := db.DbManager()
 	search_val := params.Name
 	models := FindProjectDB(db, "Name", search_val)
@@ -70,30 +86,446 @@ func GetProject3(params model.PARAMS) *model.Project {
 	return models
 }
 
-func GetProject(c echo.Context) (err error) {
-	db := db.DbManager()
-	search_val := c.Param("name")
-	models := FindProjectDB(db, "Name", search_val)
+// func GetProject(c echo.Context) (err error) {
+// 	db := db.DbManager()
+// 	search_val := c.Param("name")
+// 	models := FindProjectDB(db, "Name", search_val)
 
-	if models == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return
+// 	if models == nil {
+// 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+// 		return
+// 	}
+
+// 	return c.JSON(http.StatusOK, echo.Map{"data": models})
+// }
+
+func CreateProject(c echo.Context) (err error) {
+
+	err, models := CreateProjectDB(c)
+
+	if err != nil {
+		return err
 	}
+
+	selectCluster := models.SelectCluster
+	slice := strings.Split(selectCluster, ",")
+
+	for _, cluster := range slice {
+
+		clusters := GetClusterDB(cluster)
+
+		namesapce := Namespace{}
+		namesapce.APIVersion = "v1"
+		namesapce.Kind = "Namespace"
+		namesapce.Metadata.Name = models.Name
+
+		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/"
+		Token := clusters.Token
+
+		data, err := json.Marshal(namesapce)
+
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+
+		var jsonStr = []byte(fmt.Sprint(string(data)))
+
+		code, _ := RequsetKube(url, "POST", jsonStr, Token)
+
+		switch code {
+		case 200:
+		case 201:
+		case 202:
+		default:
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+	}
+
+	return c.JSON(http.StatusCreated, echo.Map{"data": models})
+}
+
+func UpdateProject(c echo.Context) (err error) {
+	//Patch
+	name := c.Param("name")
+	if check := strings.Compare(name, "") == 0; check {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return err
+	}
+
+	models := GetProjectModel(name)
+	selectCluster := models.SelectCluster
+	slice := strings.Split(selectCluster, ",")
+
+	for _, cluster := range slice {
+		clusters := GetClusterDB(cluster)
+
+		namesapce := Namespace{}
+
+		//patch 요청시 Body 내용에 대해 수정이 필요함.
+		namesapce.APIVersion = "v1"
+		namesapce.Kind = "Namespace"
+		namesapce.Metadata.Name = models.Name
+
+		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/" + name
+		Token := clusters.Token
+
+		data, err := json.Marshal(namesapce)
+
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+
+		var jsonStr = []byte(fmt.Sprint(string(data)))
+
+		code, _ := RequsetKube(url, "PATCH", jsonStr, Token)
+
+		switch code {
+		case 200:
+		case 201:
+		default:
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+	}
+	SaveProjectDB(c)
+	return c.JSON(http.StatusOK, echo.Map{"data": models})
+}
+
+func ReplaceProject(c echo.Context) (err error) {
+	//PUT
+	return nil
+}
+
+func DeleteProject(c echo.Context) (err error) {
+
+	name := c.Param("name")
+	if check := strings.Compare(name, "") == 0; check {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return err
+	}
+
+	models := GetProjectModel(name)
+	selectCluster := models.SelectCluster
+	slice := strings.Split(selectCluster, ",")
+	for _, cluster := range slice {
+		clusters := GetClusterDB(cluster)
+
+		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/" + name
+		Token := clusters.Token
+
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+
+		code := RequsetKubeDelete(url, "DELETE", Token)
+
+		switch code {
+		case 200:
+		case 202:
+		default:
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+	}
+	DeleteProjectDB(c)
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
 
-func CreateProject(c echo.Context) (err error) {
+func FindProjectDB(db *gorm.DB, select_val string, search_val string) *model.Project {
+	models := model.Project{}
+	if check := strings.Compare(search_val, "") == 0; check {
+		return nil
+	}
+	if strings.Compare(select_val, "Name") == 0 {
+		if err := db.First(&models, model.Project{Name: search_val}).Error; err != nil {
+			return nil
+		}
+	}
+	return &models
+}
+func GetProject(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "namespaces",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    c.Request().Body,
+	}
+	params.Workspace = c.Param("name")
+	getData, err := common.GetModel(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	if common.FindData(getData, "status", "") == "Failure" {
+		fmt.Printf("error code : %s\n", getData)
+		err_data := common.InterfaceToString(getData)
+		// errReturn := KubernetesNS.Array()
+		errJson := make(map[string]string)
+		err_ns := json.Unmarshal([]byte(err_data), &errJson)
+		if err_ns != nil {
+			fmt.Printf("err_ns : %s\n", err_ns)
+		}
+		// 	common.ErrorMsg(c, http.StatusNotFound, err)
+		// return c.JSON(http.StatusNotFound, errJson)
+		return c.JSON(http.StatusNotFound, errJson)
+	}
+	project := GetDBProject(params)
+	var tsproject model.Project
+	var projectModel model.PROJECT
+	common.Transcode(project, &tsproject)
+	common.Transcode(tsproject, &projectModel)
+
+	// proejectModel.Project = tsproject
+	projectModel.Name = common.InterfaceToString(common.FindData(getData, "metadata", "name"))
+	projectModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+	projectModel.Label = common.FindData(getData, "metadata", "labels")
+	projectModel.Annotation = common.FindData(getData, "metadata", "annotations")
+	params.Workspace = projectModel.WorkspaceName
+	projectModel.Status = common.InterfaceToString(common.FindData(getData, "status", "phase"))
+	projectModel.ClusterName = c.QueryParam("cluster")
+	projectModel.Events = getCallEvent(params)
+	ResourceCnt := model.PROJECT_RESOURCE{
+		DeploymentCount: ResourceCnt(params, "deployments"),
+		PodCount:        ResourceCnt(params, "pods"),
+		ServiceCount:    ResourceCnt(params, "services"),
+		CronjobCount:    ResourceCnt(params, "cronjobs"),
+		JobCount:        ResourceCnt(params, "jobs"),
+		// VolumeCount:     ResourceCnt(params, "deployments"),
+	}
+
+	projectModel.Resource = ResourceCnt
+	return c.JSON(http.StatusOK, echo.Map{
+		"project": projectModel,
+	})
+}
+func GetProjects(c echo.Context) (err error) {
+	var Projects model.PROJECTS
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("cluster"),
+		Method:    c.Request().Method,
+		Body:      c.Request().Body,
+	}
+	if c.QueryParam("workspace") == "" && c.QueryParam("cluster") != "" {
+		params.Workspace = c.QueryParam("cluster")
+		params.Project = c.QueryParam("cluster")
+		getData, err := common.GetModel(params)
+		if err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, err)
+			return nil
+		}
+		getData0 := common.FindingArray(common.Finding(getData, "items"))
+		for k, _ := range getData0 {
+			params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
+			project := GetDBProject(params)
+			var tsproject model.Project
+			var Project model.PROJECT
+			common.Transcode(project, &tsproject)
+			common.Transcode(tsproject, &Project)
+			Project.Name = params.Name
+			Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
+			Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
+			Project.ClusterName = params.Cluster
+			tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+			tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+			Project.ResourceUsage = tempresult
+			Projects = append(Projects, Project)
+		}
+	} else if c.QueryParam("workspace") != "" && c.QueryParam("cluster") == "" {
+		params.Workspace = c.QueryParam("workspace")
+		params.Cluster = c.QueryParam("workspace")
+		params.Project = c.QueryParam("workspace")
+		workspace := GetDBWorkspace(params)
+		if workspace == nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return
+		}
+		selectCluster := workspace.SelectCluster
+		slice := strings.Split(selectCluster, ",")
+		for i, _ := range slice {
+			params.Cluster = slice[i]
+			params.Name = ""
+			getData, err := common.GetModel(params)
+			if err != nil {
+				common.ErrorMsg(c, http.StatusNotFound, err)
+				return nil
+			}
+			getData0 := common.FindingArray(common.Finding(getData, "items"))
+			for k, _ := range getData0 {
+				params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
+				project := GetDBProject(params)
+				var tsproject model.Project
+				var Project model.PROJECT
+				common.Transcode(project, &tsproject)
+				common.Transcode(tsproject, &Project)
+				Project.Name = params.Name
+				Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
+				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
+				Project.ClusterName = params.Cluster
+				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+				Project.ResourceUsage = tempresult
+				Projects = append(Projects, Project)
+			}
+		}
+	} else {
+		Clusters := GetAllDBClusters(params)
+		for i, _ := range Clusters {
+			params.Cluster = Clusters[i].Name
+			params.Workspace = Clusters[i].Name
+			params.Name = ""
+			getData, err := common.GetModel(params)
+			if err != nil {
+				common.ErrorMsg(c, http.StatusNotFound, err)
+				return nil
+			}
+			getData0 := common.FindingArray(common.Finding(getData, "items"))
+			for k, _ := range getData0 {
+				params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
+				project := GetDBProject(params)
+				var tsproject model.Project
+				var Project model.PROJECT
+				common.Transcode(project, &tsproject)
+				common.Transcode(tsproject, &Project)
+				Project.Name = params.Name
+				Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
+				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
+				Project.ClusterName = params.Cluster
+				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+				Project.ResourceUsage = tempresult
+				Projects = append(Projects, Project)
+			}
+		}
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": Projects,
+	})
+	// return nil
+}
+func ResourceCnt(params model.PARAMS, kind string) int {
+	// fmt.Printf("[##]params : %+v\n", params)
+	params.Kind = kind
+	params.Project = params.Name
+	params.Name = ""
+	deployments, _ := common.GetModel(params)
+	deployment := common.FindingArray(common.Finding(deployments, "items"))
+	// for i, _ := range deployment {
+	// 	fmt.Printf("[##]names : %s\n", (gjson.Get(deployment[i].String(), "metadata.name")).String())
+	// 	fmt.Printf("[##]index : %d\n", i)
+	// }
+	deployment_cnt := common.FindingLen2(deployment)
+	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
+	return deployment_cnt
+}
+
+func RequsetKube(url string, method string, reqdata []byte, token string) (int, string) {
+
+	client := &http.Client{}
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer(reqdata))
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return 0, ""
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return 0, ""
+	}
+
+	return res.StatusCode, string(body)
+}
+
+func RequsetKubeDelete(url string, method string, token string) int {
+
+	client := &http.Client{}
+	req, _ := http.NewRequest(method, url, nil)
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return 500
+	}
+
+	return res.StatusCode
+}
+
+func GetClusterDB(str string) *model.Cluster {
+	search_val := str
+	db := db.DbManager()
+	models := FindClusterDB(db, "Name", search_val)
+
+	return models
+}
+
+func GetProjectModel(str string) *model.Project {
+	db := db.DbManager()
+	models := FindProjectDB(db, "Name", str)
+
+	return models
+}
+
+func DeleteProjectDB(c echo.Context) (err error) {
+	db := db.DbManager()
+	search_val := c.Param("name")
+	// fmt.Println(search_val)
+
+	if err := FindProjectDB(db, "Name", search_val); err == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
+	}
+
+	models := FindProjectDB(db, "Name", search_val)
+	fmt.Println(models)
+	if err := db.Delete(&models).Error; err != nil {
+		common.ErrorMsg(c, http.StatusInternalServerError, err)
+		return nil
+	}
+
+	return nil
+}
+
+func CreateProjectDB(c echo.Context) (err error, st *model.Project) {
 	db := db.DbManager()
 	models := new(model.Project)
 
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
-		return nil
+		return err, models
 	}
+
 	if err = c.Validate(models); err != nil {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
-		return nil
+		return err, models
+	}
+
+	if check := strings.Compare(models.Name, "") == 0; check {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return err, models
 	}
 
 	if err != nil {
@@ -102,12 +534,14 @@ func CreateProject(c echo.Context) (err error) {
 
 	if err := db.Create(&models).Error; err != nil {
 		common.ErrorMsg(c, http.StatusExpectationFailed, err)
-		return nil
+		return err, models
 	}
-	return c.JSON(http.StatusCreated, echo.Map{"data": models})
+
+	return nil, models
 }
 
-func UpdateProject(c echo.Context) (err error) {
+func SaveProjectDB(c echo.Context) (err error) {
+
 	db := db.DbManager()
 	search_val := c.Param("name")
 	models := model.Project{}
@@ -149,188 +583,5 @@ func UpdateProject(c echo.Context) (err error) {
 		return nil
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{"data": models2})
-}
-
-func DeleteProject(c echo.Context) (err error) {
-	db := db.DbManager()
-	search_val := c.Param("name")
-
-	if err := FindProjectDB(db, "Name", search_val); err == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return nil
-	}
-
-	models := FindProjectDB(db, "Name", search_val)
-
-	if err := db.Delete(&models).Error; err != nil {
-		common.ErrorMsg(c, http.StatusInternalServerError, err)
-		return nil
-	}
-
-	return c.JSON(http.StatusOK, echo.Map{"data": models})
-}
-
-func FindProjectDB(db *gorm.DB, select_val string, search_val string) *model.Project {
-	models := model.Project{}
-	if check := strings.Compare(search_val, "") == 0; check {
-		return nil
-	}
-	if strings.Compare(select_val, "Name") == 0 {
-		if err := db.First(&models, model.Project{Name: search_val}).Error; err != nil {
-			return nil
-		}
-	}
-	return &models
-}
-func Get_Project(c echo.Context) (err error) {
-	params := model.PARAMS{
-		Kind:    "namespaces",
-		Name:    c.Param("name"),
-		Cluster: c.QueryParam("cluster"),
-		Project: c.QueryParam("project"),
-		Method:  c.Request().Method,
-		Body:    c.Request().Body,
-	}
-	params.Workspace = c.Param("name")
-	getData, err := common.GetModel(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
-	if common.FindData(getData, "status", "") == "Failure" {
-		fmt.Printf("error code : %s\n", getData)
-		err_data := common.InterfaceToString(getData)
-		// errReturn := KubernetesNS.Array()
-		errJson := make(map[string]string)
-		err_ns := json.Unmarshal([]byte(err_data), &errJson)
-		if err_ns != nil {
-			fmt.Printf("err_ns : %s\n", err_ns)
-		}
-		// 	common.ErrorMsg(c, http.StatusNotFound, err)
-		// return c.JSON(http.StatusNotFound, errJson)
-		return c.JSON(http.StatusNotFound, errJson)
-	}
-	project := GetProject2(c)
-	var tsproject model.Project
-	var projectModel model.PROJECT
-	common.Transcode(project, &tsproject)
-	common.Transcode(tsproject, &projectModel)
-
-	// proejectModel.Project = tsproject
-	projectModel.Name = common.InterfaceToString(common.FindData(getData, "metadata", "name"))
-	projectModel.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
-	projectModel.Label = common.FindData(getData, "metadata", "labels")
-	projectModel.Annotation = common.FindData(getData, "metadata", "annotations")
-	params.Workspace = projectModel.WorkspaceName
-	projectModel.Status = common.InterfaceToString(common.FindData(getData, "status", "phase"))
-	projectModel.ClusterName = c.QueryParam("cluster")
-	projectModel.Events = getCallEvent(params)
-	ResourceCnt := model.PROJECT_RESOURCE{
-		DeploymentCount: ResourceCnt(params, "deployments"),
-		PodCount:        ResourceCnt(params, "pods"),
-		ServiceCount:    ResourceCnt(params, "services"),
-		CronjobCount:    ResourceCnt(params, "cronjobs"),
-		JobCount:        ResourceCnt(params, "jobs"),
-		// VolumeCount:     ResourceCnt(params, "deployments"),
-	}
-
-	projectModel.Resource = ResourceCnt
-	return c.JSON(http.StatusOK, echo.Map{
-		"project": projectModel,
-	})
-}
-func Get_Projects(c echo.Context) (err error) {
-	var Projects model.PROJECTS
-	params := model.PARAMS{
-		Kind:      "namespaces",
-		Name:      c.Param("name"),
-		Cluster:   c.QueryParam("cluster"),
-		Workspace: c.QueryParam("workspace"),
-		Project:   c.QueryParam("cluster"),
-		Method:    c.Request().Method,
-		Body:      c.Request().Body,
-	}
-	if c.QueryParam("workspace") == "" {
-		params.Workspace = c.QueryParam("cluster")
-		params.Project = c.QueryParam("cluster")
-		getData, err := common.GetModel(params)
-		if err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, err)
-			return nil
-		}
-		getData0 := common.FindingArray(common.Finding(getData, "items"))
-		for k, _ := range getData0 {
-			params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
-			project := GetProject3(params)
-			var tsproject model.Project
-			var Project model.PROJECT
-			common.Transcode(project, &tsproject)
-			common.Transcode(tsproject, &Project)
-			Project.Name = params.Name
-			Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
-			Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
-			Project.ClusterName = params.Cluster
-			tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-			tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-			Project.ResourceUsage = tempresult
-			Projects = append(Projects, Project)
-		}
-
-	} else {
-		params.Workspace = c.QueryParam("workspace")
-		params.Project = c.QueryParam("workspace")
-		workspace := GetWorkspace2(params)
-		if workspace == nil {
-			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-			return
-		}
-		selectCluster := workspace.SelectCluster
-		slice := strings.Split(selectCluster, ",")
-		for i, _ := range slice {
-			params.Cluster = slice[i]
-			params.Name = ""
-			getData, err := common.GetModel(params)
-			if err != nil {
-				common.ErrorMsg(c, http.StatusNotFound, err)
-				return nil
-			}
-			getData0 := common.FindingArray(common.Finding(getData, "items"))
-			for k, _ := range getData0 {
-				params.Name = (gjson.Get(getData0[k].String(), "metadata.name")).String()
-				project := GetProject3(params)
-				var tsproject model.Project
-				var Project model.PROJECT
-				common.Transcode(project, &tsproject)
-				common.Transcode(tsproject, &Project)
-				Project.Name = params.Name
-				Project.Status = (gjson.Get(getData0[k].String(), "status.phase")).String()
-				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
-				Project.ClusterName = params.Cluster
-				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-				Project.ResourceUsage = tempresult
-				Projects = append(Projects, Project)
-			}
-		}
-	}
-	return c.JSON(http.StatusOK, echo.Map{
-		"data": Projects,
-	})
-	// return nil
-}
-func ResourceCnt(params model.PARAMS, kind string) int {
-	// fmt.Printf("[##]params : %+v\n", params)
-	params.Kind = kind
-	params.Project = params.Name
-	params.Name = ""
-	deployments, _ := common.GetModel(params)
-	deployment := common.FindingArray(common.Finding(deployments, "items"))
-	// for i, _ := range deployment {
-	// 	fmt.Printf("[##]names : %s\n", (gjson.Get(deployment[i].String(), "metadata.name")).String())
-	// 	fmt.Printf("[##]index : %d\n", i)
-	// }
-	deployment_cnt := common.FindingLen2(deployment)
-	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
-	return deployment_cnt
+	return nil
 }

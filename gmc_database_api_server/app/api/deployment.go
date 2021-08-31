@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Get_Deployment(c echo.Context) (err error) {
+func GetDeployment(c echo.Context) (err error) {
 	// var ServicePorts []model.PORT
 	params := model.PARAMS{
 		Kind:      "deployments",
@@ -20,19 +20,19 @@ func Get_Deployment(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
+
+	deploymentName := params.Name
+	params.Name = params.Project
+	project := GetDBProject(params)
+	params.Name = deploymentName
 	getData, err := common.GetModel(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-
 	getData0 := common.FindData(getData, "", "")
 	var Deployment model.Deployment
 	common.Transcode(getData0, &Deployment)
-
-	// log.Println("Service Model is", Deployment)
-	// fmt.Println("[#32] type:", reflect.ValueOf(Deployment).Type())
-	// replica := StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "replicas")))
 	replicas := model.REPLICA{
 		Replicas:            StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
 		ReadyReplicas:       StringToInt(common.InterfaceToString(common.FindData(getData, "status", "readyReplicas"))),
@@ -43,7 +43,7 @@ func Get_Deployment(c echo.Context) (err error) {
 
 	deployment := model.DEPLOYMENT{
 		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-		WorkspaceName: params.Workspace,
+		WorkspaceName: project.WorkspaceName,
 		ClusterName:   params.Cluster,
 		Namespace:     params.Project,
 		Label:         common.FindData(getData, "metadata", "labels"),
@@ -63,7 +63,7 @@ func Get_Deployment(c echo.Context) (err error) {
 		"involvesData": involvesData,
 	})
 }
-func Get_Deployments(c echo.Context) (err error) {
+func GetDeployments(c echo.Context) (err error) {
 	var deployments []model.DEPLOYMENT
 	params := model.PARAMS{
 		Kind:      "deployments",

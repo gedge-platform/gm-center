@@ -464,12 +464,30 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		PodData := FindData(endPointData, "subsets.#.addresses", "")
 		log.Println("endPoints 뿌려주기 : ", PodData)
 
-		splits := strings.SplitN(InterfaceToString(FindData(endPointData, "subsets.#.addresses.0", "targetRef.name")), "-", 3)
-		log.Printf("Endpoints [%s] Data is %s \n", params.Name, endPointData)
+		testData := FindData(endPointData, "subsets.#.addresses.0", "targetRef.name")
+		log.Println("testData 뿌려주기 : ", testData)
+
+		splits := InterfaceToString(FindData(endPointData, "subsets.#.addresses.0", "targetRef.name"))
+		log.Printf("Endpoints [%s] \nData is %s \n", params.Name, endPointData)
 		log.Printf("splits %s \n", splits)
 
+		slices := strings.Split(splits, "-")
+		lenSlices := len(slices)
+		log.Printf("slices is %s \n", slices)
+		log.Printf("lenSlices %d \n", lenSlices)
+
+		var slice string
+		for i := 0; i < lenSlices-1; i++ {
+			if i == 0 {
+				slice = slices[i]
+			} else {
+				slice = slice + "-" + slices[i]
+			}
+		}
+
 		// TODO: splits 가 여러개 일 수 있으니, 수정 필요(맨 마지막 - 이후로 제거)
-		podName := splits[0] + "-" + splits[1]
+		podName := slice
+		log.Println("PodName is ", podName)
 
 		params.Kind = "replicasets"
 		params.Name = podName
@@ -539,7 +557,9 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			fmt.Printf("[##]containerStatuses :%+v\n", containerStatuses)
 
 			fmt.Printf("##restartCnt :%d\n", RestartCnt)
-			PodNames = append(PodNames, InterfaceToString(FindData(podData[x], "metadata", "name")))
+			if InterfaceToString(FindData(podData[x], "status", "phase")) == "Running" {
+				PodNames = append(PodNames, InterfaceToString(FindData(podData[x], "metadata", "name")))
+			}
 			podList := model.DEPLOYMENTPOD{
 				Name:         InterfaceToString(FindData(podData[x], "metadata", "name")),
 				Status:       InterfaceToString(FindData(podData[x], "status", "phase")),

@@ -255,6 +255,7 @@ func validate(params model.PARAMS) error {
 	workspaceCheck := strings.Compare(params.Workspace, "") != 0
 	clusterCheck := strings.Compare(params.Cluster, "") != 0
 	projectCheck := strings.Compare(params.Project, "") != 0
+	nameCheck := strings.Compare(params.Name, "") != 0
 
 	Method := params.Method
 	// Body := responseBody(params.Body)
@@ -270,6 +271,16 @@ func validate(params model.PARAMS) error {
 		}
 		if !projectCheck {
 			return ErrProjectInvalid
+		}
+	} else if Method == "DELETE" {
+		if !clusterCheck {
+			return ErrClusterInvalid
+		}
+		if !projectCheck {
+			return ErrProjectInvalid
+		}
+		if !nameCheck {
+			return ErrDetailNameInvalid
 		}
 	} else {
 		if !clusterCheck {

@@ -134,3 +134,24 @@ func CreateJob(c echo.Context) (err error) {
 		"info": common.StringToInterface(postData),
 	})
 }
+
+func DeleteJob(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "jobs",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
+	})
+}

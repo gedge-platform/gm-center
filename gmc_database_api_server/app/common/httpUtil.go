@@ -254,7 +254,7 @@ func errCheck(project, item, kind string) string {
 func validate(params model.PARAMS) error {
 	workspaceCheck := strings.Compare(params.Workspace, "") != 0
 	clusterCheck := strings.Compare(params.Cluster, "") != 0
-	// projectCheck := strings.Compare(params.Project, "") != 0
+	projectCheck := strings.Compare(params.Project, "") != 0
 
 	Method := params.Method
 	// Body := responseBody(params.Body)
@@ -268,13 +268,13 @@ func validate(params model.PARAMS) error {
 		if !clusterCheck {
 			return ErrClusterInvalid
 		}
+		if !projectCheck {
+			return ErrProjectInvalid
+		}
 	} else {
 		if !clusterCheck {
 			return ErrClusterInvalid
 		}
-		// if !projectCheck {
-		// 	return ErrProjectInvalid
-		// }
 		if !workspaceCheck {
 			return ErrWorkspaceInvalid
 		}

@@ -115,8 +115,7 @@ func CreateDeployment(c echo.Context) (err error) {
 		return nil
 	}
 
-	fmt.Printf("", postData)
 	return c.JSON(http.StatusOK, echo.Map{
-		"success": "success",
+		"info": common.StringToInterface(postData),
 	})
 }

@@ -114,3 +114,23 @@ func GetAllJobs(c echo.Context) error {
 		"jobs": jobs,
 	})
 }
+
+func CreateJob(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "jobs",
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
+	})
+}

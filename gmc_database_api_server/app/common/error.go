@@ -18,6 +18,7 @@ var (
 	ErrClusterInvalid    = errors.New("Required Cluster Name")
 	// Account
 	ErrIdInvalid = errors.New("id is empty")
+	ErrBodyEmpty = errors.New("Body is empty")
 )
 
 // Error Message

@@ -255,7 +255,7 @@ func GetProject(c echo.Context) (err error) {
 		Cluster: c.QueryParam("cluster"),
 		Project: c.QueryParam("project"),
 		Method:  c.Request().Method,
-		Body:    c.Request().Body,
+		Body:    responseBody(c.Request().Body),
 	}
 	params.Workspace = c.Param("name")
 	getData, err := common.DataRequest(params)
@@ -314,7 +314,7 @@ func GetProjects(c echo.Context) (err error) {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("cluster"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	if c.QueryParam("workspace") == "" && c.QueryParam("cluster") != "" {
 		params.Workspace = c.QueryParam("cluster")

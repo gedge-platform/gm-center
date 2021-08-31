@@ -27,7 +27,7 @@ func GetCronJobs(c echo.Context) (err error) {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	getData, err := common.DataRequest(params)
 	if err != nil {
@@ -86,7 +86,7 @@ func GetCronAllJobs(c echo.Context) error {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
 	fmt.Printf("####data confirm : %s", data)
@@ -105,5 +105,46 @@ func GetCronAllJobs(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"cronjobs": cronjobs,
+	})
+}
+
+func CreateCronJob(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "cronjobs",
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
+	})
+}
+
+func DeleteCronJob(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "cronjobs",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
 	})
 }

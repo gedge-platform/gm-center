@@ -117,7 +117,10 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	log.Printf("[#31] url is %s", url)
 	var responseString, token string
 	reqMethod := params.Method
-	passBody := responseBody(params.Body)
+	// passBody := responseBody(params.Body)
+	passBody := params.Body
+
+	log.Printf("[#32] passBody is %s", passBody)
 	token = token_value
 
 	client := resty.New()
@@ -251,16 +254,42 @@ func errCheck(project, item, kind string) string {
 func validate(params model.PARAMS) error {
 	workspaceCheck := strings.Compare(params.Workspace, "") != 0
 	clusterCheck := strings.Compare(params.Cluster, "") != 0
-	// projectCheck := strings.Compare(params.Project, "") != 0
+	projectCheck := strings.Compare(params.Project, "") != 0
+	nameCheck := strings.Compare(params.Name, "") != 0
 
-	if !clusterCheck {
-		return ErrClusterInvalid
+	Method := params.Method
+	// Body := responseBody(params.Body)
+	Body := params.Body
+	BodyCheck := strings.Compare(Body, "") != 0
+
+	if Method == "POST" {
+		if !BodyCheck {
+			return ErrBodyEmpty
+		}
+		if !clusterCheck {
+			return ErrClusterInvalid
+		}
+		if !projectCheck {
+			return ErrProjectInvalid
+		}
+	} else if Method == "DELETE" {
+		if !clusterCheck {
+			return ErrClusterInvalid
+		}
+		if !projectCheck {
+			return ErrProjectInvalid
+		}
+		if !nameCheck {
+			return ErrDetailNameInvalid
+		}
+	} else {
+		if !clusterCheck {
+			return ErrClusterInvalid
+		}
+		if !workspaceCheck {
+			return ErrWorkspaceInvalid
+		}
 	}
-	// if !projectCheck {
-	// 	return ErrProjectInvalid
-	// }
-	if !workspaceCheck {
-		return ErrWorkspaceInvalid
-	}
+
 	return nil
 }

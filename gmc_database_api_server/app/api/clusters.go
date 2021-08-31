@@ -178,7 +178,7 @@ func GetCluster(c echo.Context) (err error) {
 		Workspace: c.Param("name"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	getData, err := common.DataRequest(params)
 	if err != nil {
@@ -228,7 +228,7 @@ func GetClusters(c echo.Context) (err error) {
 		// Workspace: clusterModel[k].Name,
 		// Project:   clusterModel[k].Name,
 		Method: c.Request().Method,
-		Body:   c.Request().Body,
+		Body:   responseBody(c.Request().Body),
 	}
 	if c.QueryParam("workspace") == "" {
 		clusters := GetAllDBClusters(params)

@@ -17,7 +17,7 @@ func GetService(c echo.Context) error {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	getData, err := common.DataRequest(params)
 	if err != nil {
@@ -58,7 +58,7 @@ func GetServices(c echo.Context) (err error) {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
 	// fmt.Printf("#################dataerr : %s", data)
@@ -76,5 +76,46 @@ func GetServices(c echo.Context) (err error) {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"services": services,
+	})
+}
+
+func CreateService(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "services",
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
+	})
+}
+
+func DeleteService(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "services",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
 	})
 }

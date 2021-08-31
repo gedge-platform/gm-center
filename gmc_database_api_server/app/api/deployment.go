@@ -25,7 +25,7 @@ func GetDeployment(c echo.Context) (err error) {
 	params.Name = params.Project
 	project := GetDBProject(params)
 	params.Name = deploymentName
-	getData, err := common.GetModel(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -34,11 +34,11 @@ func GetDeployment(c echo.Context) (err error) {
 	var Deployment model.Deployment
 	common.Transcode(getData0, &Deployment)
 	replicas := model.REPLICA{
-		Replicas:            StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
-		ReadyReplicas:       StringToInt(common.InterfaceToString(common.FindData(getData, "status", "readyReplicas"))),
-		UpdatedReplicas:     StringToInt(common.InterfaceToString(common.FindData(getData, "status", "updatedReplicas"))),
-		AvailableReplicas:   StringToInt(common.InterfaceToString(common.FindData(getData, "status", "availableReplicas"))),
-		UnavailableReplicas: StringToInt(common.InterfaceToString(common.FindData(getData, "status", "unavailableReplicas"))),
+		Replicas:            common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
+		ReadyReplicas:       common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "readyReplicas"))),
+		UpdatedReplicas:     common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "updatedReplicas"))),
+		AvailableReplicas:   common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "availableReplicas"))),
+		UnavailableReplicas: common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "unavailableReplicas"))),
 	}
 
 	deployment := model.DEPLOYMENT{
@@ -78,11 +78,11 @@ func GetDeployments(c echo.Context) (err error) {
 	fmt.Printf("#################dataerr : %s", data)
 	for i, _ := range data {
 		replicas := model.REPLICA{
-			Replicas:            StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "replicas"))),
-			ReadyReplicas:       StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))),
-			UpdatedReplicas:     StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "updatedReplicas"))),
-			AvailableReplicas:   StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "availableReplicas"))),
-			UnavailableReplicas: StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "unavailableReplicas"))),
+			Replicas:            common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "replicas"))),
+			ReadyReplicas:       common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))),
+			UpdatedReplicas:     common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "updatedReplicas"))),
+			AvailableReplicas:   common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "availableReplicas"))),
+			UnavailableReplicas: common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "unavailableReplicas"))),
 		}
 		deployment := model.DEPLOYMENT{
 			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),

@@ -1,8 +1,11 @@
 package api
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -14,6 +17,18 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/tidwall/gjson"
 )
+
+type Namespace struct {
+	APIVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
+	Metadata   struct {
+		Name string `json:"name"`
+	} `json:"metadata"`
+	Spec struct {
+	} `json:"spec"`
+	Status struct {
+	} `json:"status"`
+}
 
 func GetAllProjects(c echo.Context) (err error) {
 	db := db.DbManager()
@@ -85,89 +100,138 @@ func GetDBProject(params model.PARAMS) *model.Project {
 // }
 
 func CreateProject(c echo.Context) (err error) {
-	db := db.DbManager()
-	models := new(model.Project)
 
-	if err = c.Bind(models); err != nil {
-		common.ErrorMsg(c, http.StatusBadRequest, err)
-		return nil
-	}
-	if err = c.Validate(models); err != nil {
-		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
-		return nil
-	}
+	err, models := CreateProjectDB(c)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	if err := db.Create(&models).Error; err != nil {
-		common.ErrorMsg(c, http.StatusExpectationFailed, err)
-		return nil
+	selectCluster := models.SelectCluster
+	slice := strings.Split(selectCluster, ",")
+
+	for _, cluster := range slice {
+
+		clusters := GetClusterDB(cluster)
+
+		namesapce := Namespace{}
+		namesapce.APIVersion = "v1"
+		namesapce.Kind = "Namespace"
+		namesapce.Metadata.Name = models.Name
+
+		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/"
+		Token := clusters.Token
+
+		data, err := json.Marshal(namesapce)
+
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+
+		var jsonStr = []byte(fmt.Sprint(string(data)))
+
+		code, _ := RequsetKube(url, "POST", jsonStr, Token)
+
+		switch code {
+		case 200:
+		case 201:
+		case 202:
+		default:
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
 	}
+
 	return c.JSON(http.StatusCreated, echo.Map{"data": models})
 }
 
 func UpdateProject(c echo.Context) (err error) {
-	db := db.DbManager()
-	search_val := c.Param("name")
-	models := model.Project{}
-
-	if err := c.Bind(&models); err != nil {
-		return c.NoContent(http.StatusBadRequest)
+	//Patch
+	name := c.Param("name")
+	if check := strings.Compare(name, "") == 0; check {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return err
 	}
 
-	if err := FindProjectDB(db, "Name", search_val); err == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return nil
-	} else {
-		models.Name = search_val
-	}
+	models := GetProjectModel(name)
+	selectCluster := models.SelectCluster
+	slice := strings.Split(selectCluster, ",")
 
-	models2 := FindProjectDB(db, "Name", search_val)
+	for _, cluster := range slice {
+		clusters := GetClusterDB(cluster)
 
-	if models.SelectCluster != "" {
-		models2.SelectCluster = models.SelectCluster
-	}
-	if models.Description != "" {
-		models2.Description = models.Description
-	}
-	if models.Type != "" {
-		models2.Type = models.Type
-	}
-	if models.Owner != "" {
-		models2.Owner = models.Owner
-	}
-	if models.Creator != "" {
-		models2.Creator = models.Creator
-	}
-	if models.WorkspaceName != "" {
-		models2.WorkspaceName = models.WorkspaceName
-	}
+		namesapce := Namespace{}
 
-	if err := db.Save(&models2).Error; err != nil {
-		common.ErrorMsg(c, http.StatusExpectationFailed, err)
-		return nil
-	}
+		//patch 요청시 Body 내용에 대해 수정이 필요함.
+		namesapce.APIVersion = "v1"
+		namesapce.Kind = "Namespace"
+		namesapce.Metadata.Name = models.Name
 
-	return c.JSON(http.StatusOK, echo.Map{"data": models2})
+		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/" + name
+		Token := clusters.Token
+
+		data, err := json.Marshal(namesapce)
+
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+
+		var jsonStr = []byte(fmt.Sprint(string(data)))
+
+		code, _ := RequsetKube(url, "PATCH", jsonStr, Token)
+
+		switch code {
+		case 200:
+		case 201:
+		default:
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+	}
+	SaveProjectDB(c)
+	return c.JSON(http.StatusOK, echo.Map{"data": models})
+}
+
+func ReplaceProject(c echo.Context) (err error) {
+	//PUT
+	return nil
 }
 
 func DeleteProject(c echo.Context) (err error) {
-	db := db.DbManager()
-	search_val := c.Param("name")
 
-	if err := FindProjectDB(db, "Name", search_val); err == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return nil
+	name := c.Param("name")
+	if check := strings.Compare(name, "") == 0; check {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return err
 	}
 
-	models := FindProjectDB(db, "Name", search_val)
+	models := GetProjectModel(name)
+	selectCluster := models.SelectCluster
+	slice := strings.Split(selectCluster, ",")
+	for _, cluster := range slice {
+		clusters := GetClusterDB(cluster)
 
-	if err := db.Delete(&models).Error; err != nil {
-		common.ErrorMsg(c, http.StatusInternalServerError, err)
-		return nil
+		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/" + name
+		Token := clusters.Token
+
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+
+		code := RequsetKubeDelete(url, "DELETE", Token)
+
+		switch code {
+		case 200:
+		case 202:
+		default:
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
 	}
+	DeleteProjectDB(c)
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
 }
@@ -194,7 +258,7 @@ func GetProject(c echo.Context) (err error) {
 		Body:    c.Request().Body,
 	}
 	params.Workspace = c.Param("name")
-	getData, err := common.GetModel(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -255,7 +319,7 @@ func GetProjects(c echo.Context) (err error) {
 	if c.QueryParam("workspace") == "" && c.QueryParam("cluster") != "" {
 		params.Workspace = c.QueryParam("cluster")
 		params.Project = c.QueryParam("cluster")
-		getData, err := common.GetModel(params)
+		getData, err := common.DataRequest(params)
 		if err != nil {
 			common.ErrorMsg(c, http.StatusNotFound, err)
 			return nil
@@ -291,7 +355,7 @@ func GetProjects(c echo.Context) (err error) {
 		for i, _ := range slice {
 			params.Cluster = slice[i]
 			params.Name = ""
-			getData, err := common.GetModel(params)
+			getData, err := common.DataRequest(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
@@ -320,7 +384,7 @@ func GetProjects(c echo.Context) (err error) {
 			params.Cluster = Clusters[i].Name
 			params.Workspace = Clusters[i].Name
 			params.Name = ""
-			getData, err := common.GetModel(params)
+			getData, err := common.DataRequest(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
@@ -354,7 +418,7 @@ func ResourceCnt(params model.PARAMS, kind string) int {
 	params.Kind = kind
 	params.Project = params.Name
 	params.Name = ""
-	deployments, _ := common.GetModel(params)
+	deployments, _ := common.DataRequest(params)
 	deployment := common.FindingArray(common.Finding(deployments, "items"))
 	// for i, _ := range deployment {
 	// 	fmt.Printf("[##]names : %s\n", (gjson.Get(deployment[i].String(), "metadata.name")).String())
@@ -363,4 +427,161 @@ func ResourceCnt(params model.PARAMS, kind string) int {
 	deployment_cnt := common.FindingLen2(deployment)
 	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
 	return deployment_cnt
+}
+
+func RequsetKube(url string, method string, reqdata []byte, token string) (int, string) {
+
+	client := &http.Client{}
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer(reqdata))
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return 0, ""
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return 0, ""
+	}
+
+	return res.StatusCode, string(body)
+}
+
+func RequsetKubeDelete(url string, method string, token string) int {
+
+	client := &http.Client{}
+	req, _ := http.NewRequest(method, url, nil)
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return 500
+	}
+
+	return res.StatusCode
+}
+
+func GetClusterDB(str string) *model.Cluster {
+	search_val := str
+	db := db.DbManager()
+	models := FindClusterDB(db, "Name", search_val)
+
+	return models
+}
+
+func GetProjectModel(str string) *model.Project {
+	db := db.DbManager()
+	models := FindProjectDB(db, "Name", str)
+
+	return models
+}
+
+func DeleteProjectDB(c echo.Context) (err error) {
+	db := db.DbManager()
+	search_val := c.Param("name")
+	// fmt.Println(search_val)
+
+	if err := FindProjectDB(db, "Name", search_val); err == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
+	}
+
+	models := FindProjectDB(db, "Name", search_val)
+	fmt.Println(models)
+	if err := db.Delete(&models).Error; err != nil {
+		common.ErrorMsg(c, http.StatusInternalServerError, err)
+		return nil
+	}
+
+	return nil
+}
+
+func CreateProjectDB(c echo.Context) (err error, st *model.Project) {
+	db := db.DbManager()
+	models := new(model.Project)
+
+	if err = c.Bind(models); err != nil {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return err, models
+	}
+
+	if err = c.Validate(models); err != nil {
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return err, models
+	}
+
+	if check := strings.Compare(models.Name, "") == 0; check {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return err, models
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	if err := db.Create(&models).Error; err != nil {
+		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+		return err, models
+	}
+
+	return nil, models
+}
+
+func SaveProjectDB(c echo.Context) (err error) {
+
+	db := db.DbManager()
+	search_val := c.Param("name")
+	models := model.Project{}
+
+	if err := c.Bind(&models); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	if err := FindProjectDB(db, "Name", search_val); err == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
+	} else {
+		models.Name = search_val
+	}
+
+	models2 := FindProjectDB(db, "Name", search_val)
+
+	if models.SelectCluster != "" {
+		models2.SelectCluster = models.SelectCluster
+	}
+	if models.Description != "" {
+		models2.Description = models.Description
+	}
+	if models.Type != "" {
+		models2.Type = models.Type
+	}
+	if models.Owner != "" {
+		models2.Owner = models.Owner
+	}
+	if models.Creator != "" {
+		models2.Creator = models.Creator
+	}
+	if models.WorkspaceName != "" {
+		models2.WorkspaceName = models.WorkspaceName
+	}
+
+	if err := db.Save(&models2).Error; err != nil {
+		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+		return nil
+	}
+
+	return nil
 }

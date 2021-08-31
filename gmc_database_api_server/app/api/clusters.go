@@ -180,7 +180,7 @@ func GetCluster(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
-	getData, err := common.GetModel(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -243,7 +243,7 @@ func GetClusters(c echo.Context) (err error) {
 			params.Workspace = clusters[k].Name
 			params.Project = clusters[k].Name
 			// params.Name = value.Name
-			getData, err := common.GetModel(params)
+			getData, err := common.DataRequest(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
@@ -293,7 +293,7 @@ func GetClusters(c echo.Context) (err error) {
 			var clusterModel model.CLUSTER
 			common.Transcode(cluster, &tsCluster)
 			common.Transcode(tsCluster, &clusterModel)
-			getData, err := common.GetModel(params)
+			getData, err := common.DataRequest(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil

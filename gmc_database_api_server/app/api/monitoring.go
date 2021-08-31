@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +15,7 @@ import (
 	"github.com/prometheus/common/model"
 )
 
+//memory -> GI / Disk -> GB / CPU -> Core / Net -> Kbps
 var clusterMetric = map[string]string{
 	"cpu_util":     "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster)*100),0.1)",
 	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[5m]))by(cluster),0.01)",
@@ -34,51 +34,51 @@ var clusterMetric = map[string]string{
 	// latency 보완 필요 (느림)
 	"apiserver_latency": "histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{verb!~'CONNECT|WATCH',$1}[1m])) by (le,cluster))",
 
-	//attempt 보완 필요
 	"scheduler_attempts":       "sum(increase(scheduler_schedule_attempts_total{$1}[1m]))by(result,cluster)",
 	"scheduler_attempts_total": "sum(scheduler_pod_scheduling_attempts_count{$1})by(cluster)",
 	"scheduler_fail":           "sum(rate(scheduler_pending_pods{$1}[1m]))by(cluster)",
 	"scheduler_fail_total":     "sum(scheduler_pending_pods{$1})by(cluster)",
-	"scheduler_latency":        "histogram_quantile(0.95,sum(rate(scheduler_e2e_scheduling_duration_seconds_bucket{$1}[5m]))by(le,cluster))",
+	//에러
+	// "scheduler_latency": "histogram_quantile(0.95,sum(rate(scheduler_e2e_scheduling_duration_seconds_bucket{$1}[5m]))by(le,cluster))",
+	"scheduler_latency": "histogram_quantile(0.95,sum(scheduler_e2e_scheduling_duration_seconds_bucket{$1})by(le,cluster))",
 }
 
-var namespaceMetric = map[string]string{ //쿼리문 확인 필요
+var namespaceMetric = map[string]string{
 	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
 	"namespace_memory":    "sum(sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)",
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 
-var podMetric = map[string]string{ //테스트 중 파드필터 치환 필요
-	"pod_cpu":                   "round(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster),0.001)",
-	"pod_memory":                "sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(cluster,pod,namespace)", //쿼리문 확인 필요
+var podMetric = map[string]string{
+	"pod_cpu":    "round(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster),0.001)",
+	"pod_memory": "sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(cluster,pod,namespace)",
+	//1bytes -> 8bps / 1bps -> 0.125bytes / 현재 단위 1kbps -> 125bytes
 	"pod_net_bytes_transmitted": "round(sum(irate(container_network_transmit_bytes_total{pod!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster)/125,0.01)",
 	"pod_net_bytes_received":    "round(sum(irate(container_network_receive_bytes_total{pod!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster)/125,0.01)",
 }
 
 var nodeMetric = map[string]string{ //쿼리 수정 필요
-	"node_cpu_util":     "100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(instance)*100)", //node label x
-	"node_cpu_usage":    "sum(rate(container_cpu_usage_seconds_total{id='/', $1}[5m]))by(node)",
-	"node_cpu_total":    "sum(machine_cpu_cores{$1})by(node)",
-	"node_memory_util":  "(node_memory_MemTotal_bytes-node_memory_MemAvailable_bytes)/node_memory_MemTotal_bytes",                                                       //node label x
-	"node_memory_usage": "node_memory_MemTotal_bytes-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes",       //node label x
-	"node_memory_total": "sum(node_memory_MemTotal_bytes{$1})by(instance)",                                                                                              //node label x
-	"node_disk_util":    "100-((node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1} * 100)/node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1})", //node label x
-	"node_disk_usage":   "(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1}-(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1}))",           //node label x
-	"node_disk_total":   "(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1})",                                                                             //node label x
-	// node_pod_utilisation/{cluster_name} "sum(kubelet_running_pods)by(node)/(max(kube_node_status_capacity%7Bcluster='{cluster_name}',resource='pods'%7D)by(node)unless%20on(node)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))*100"
-	"node_pod_running":           "sum(kubelet_running_pods{$1})by(node)",
-	"node_pod_quota":             "max(kube_node_status_capacity{resource='pods',$1})by(node)unless on(node)(kube_node_status_condition{condition='Ready',status=~'unknown|false',$1}>0)",
-	"node_disk_inode_util":       "100-(node_filesystem_files_free{mountpoint='/',$1}/node_filesystem_files{mountpoint='/',$1}*100)", //node label x
-	"node_disk_inode_total":      "node_filesystem_files{mountpoint='/',$1}",                                                         //node label x
-	"node_disk_inode_usage":      "node_filesystem_files{mountpoint='/',$1}-node_filesystem_files_free{mountpoint='/',$1}",           //node label x
-	"node_disk_read_iops":        "rate(node_disk_reads_completed_total{$1}[5m])",                                                    //node label x
-	"node_disk_write_iops":       "rate(node_disk_writes_completed_total{$1}[5m])",                                                   //node label x
-	"node_disk_read_throughput":  "irate(node_disk_read_bytes_total{$1}[5m])",                                                        //node label x
-	"node_disk_write_throughput": "irate(node_disk_written_bytes_total{$1}[5m])",                                                     //node label x
-	"node_net_bytes_transmitted": "irate(node_network_transmit_bytes_total{device='ens3',$1}[5m])",                                   //node label x
-	"node_net_bytes_received":    "irate(node_network_receive_bytes_total{device='ens3',$1}[5m])",                                    //node label x
-
-	"node_info": "kube_node_info{$1}",
+	"node_cpu_util":              "100-avg(irate(node_cpu_seconds_total{mode='idle',$1}[5m]) * on(instance) group_left(nodename) node_uname_info)by(nodename,cluster)*100",
+	"node_cpu_usage":             "sum (rate (container_cpu_usage_seconds_total{id='/',$1}[5m])) by (instance,cluster,node)",
+	"node_cpu_total":             "sum(machine_cpu_cores{$1}) by (cluster,node)",
+	"node_memory_util":           "((node_memory_MemTotal_bytes{$1} * on(instance) group_left(nodename) node_uname_info ) - (node_memory_MemAvailable_bytes{$1} * on(instance) group_left(nodename) node_uname_info ) ) / (node_memory_MemTotal_bytes{$1} * on(instance) group_left(nodename) node_uname_info) *100",
+	"node_memory_usage":          "((node_memory_MemTotal_bytes{$1} * on(instance) group_left(nodename) node_uname_info ) - (node_memory_MemFree_bytes{$1}* on(instance) group_left(nodename) node_uname_info) - (node_memory_Buffers_bytes{$1}* on(instance) group_left(nodename) node_uname_info) - (node_memory_Cached_bytes{$1}* on(instance) group_left(nodename) node_uname_info) - (node_memory_SReclaimable_bytes{$1}* on(instance) group_left(nodename) node_uname_info))/1024/1024/1024",
+	"node_memory_total":          "sum(node_memory_MemTotal_bytes{$1} * on(instance) group_left(nodename) node_uname_info)by(cluster,nodename)/1024/1024/1024",
+	"node_disk_util":             "100- (node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info) /  (node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info) *100",
+	"node_disk_usage":            "((node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info) - (node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info))/1000/1000/1000",
+	"node_disk_total":            "((node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1})* on(instance) group_left(nodename) node_uname_info ) /1000/1000/1000",
+	"node_pod_running":           "sum(kubelet_running_pods{node!='',$1}) by(cluster,node)",
+	"node_pod_quota":             "max(kube_node_status_capacity{resource='pods',$1}) by (node,cluster) unless on (node,cluster) (kube_node_status_condition{condition='Ready',status=~'unknown|false',$1} > 0)",
+	"node_disk_inode_util":       "100 - ((node_filesystem_files_free{mountpoint=`/`,$1}* on(instance) group_left(nodename) node_uname_info) / (node_filesystem_files{mountpoint='/',$1}* on(instance) group_left(nodename) node_uname_info) * 100)",
+	"node_disk_inode_total":      "(node_filesystem_files{mountpoint='/',$1}* on(instance) group_left(nodename) node_uname_info)",
+	"node_disk_inode_usage":      "((node_filesystem_files{mountpoint='/',$1}* on(instance) group_left(nodename) node_uname_info) - (node_filesystem_files_free{mountpoint='/',$1}* on(instance) group_left(nodename) node_uname_info))",
+	"node_disk_read_iops":        "(rate(node_disk_reads_completed_total{device=~'vda',$1}[5m])* on(instance) group_left(nodename) node_uname_info)",
+	"node_disk_write_iops":       "(rate(node_disk_writes_completed_total{device=~'vda',$1}[5m])* on(instance) group_left(nodename) node_uname_info)",
+	"node_disk_read_throughput":  "(irate(node_disk_read_bytes_total{device=~'vda',$1}[5m])* on(instance) group_left(nodename) node_uname_info)",
+	"node_disk_write_throughput": "(irate(node_disk_written_bytes_total{device=~'vda',$1}[5m])* on(instance) group_left(nodename) node_uname_info)",
+	"node_net_bytes_transmitted": "(irate(node_network_transmit_bytes_total{device='ens3'}[5m])* on(instance) group_left(nodename) node_uname_info)/125",
+	"node_net_bytes_received":    "(irate(node_network_receive_bytes_total{device='ens3'}[5m])* on(instance) group_left(nodename) node_uname_info)/125",
+	"node_info":                  "kube_node_info{$1}",
 }
 
 var appMetric = map[string]string{
@@ -162,18 +162,21 @@ func mericResult(c echo.Context, kind string, a []string) error {
 		}
 
 		var data model.Value
+		var err error
 
 		switch kind {
 		case "cluster":
 			temp_filter := map[string]string{
 				"cluster": cluster,
 			}
-			data = QueryRange(addr, metricExpr(clusterMetric[a[k]], temp_filter), c)
+			data, err = QueryRange(addr, metricExpr(clusterMetric[a[k]], temp_filter), c)
+
 		case "node":
 			temp_filter := map[string]string{
 				"cluster": cluster,
 			}
-			data = QueryRange(addr, metricExpr(nodeMetric[a[k]], temp_filter), c)
+			data, err = QueryRange(addr, metricExpr(nodeMetric[a[k]], temp_filter), c)
+
 		case "pod":
 			namespace := c.QueryParam("namespace_filter")
 			pod := c.QueryParam("pod_filter")
@@ -183,13 +186,14 @@ func mericResult(c echo.Context, kind string, a []string) error {
 				"pod":       pod,
 			}
 
-			data = QueryRange(addr, metricExpr(podMetric[a[k]], temp_filter), c)
+			data, err = QueryRange(addr, metricExpr(podMetric[a[k]], temp_filter), c)
 
 		case "app":
 			temp_filter := map[string]string{
 				"cluster": cluster,
 			}
-			data = QueryRange(addr, metricExpr(appMetric[a[k]], temp_filter), c)
+			data, err = QueryRange(addr, metricExpr(appMetric[a[k]], temp_filter), c)
+
 		case "namespace":
 			namespace := c.QueryParam("namespace_filter")
 			temp_filter := map[string]string{
@@ -197,12 +201,14 @@ func mericResult(c echo.Context, kind string, a []string) error {
 				"namespace": namespace,
 			}
 
-			data = QueryRange(addr, metricExpr(namespaceMetric[a[k]], temp_filter), c)
+			data, err = QueryRange(addr, metricExpr(namespaceMetric[a[k]], temp_filter), c)
+
 		case "gpu":
 			temp_filter := map[string]string{
 				"cluster": cluster,
 			}
-			data = QueryRange(addr, metricExpr(gpuMetric[a[k]], temp_filter), c)
+			data, err = QueryRange(addr, metricExpr(gpuMetric[a[k]], temp_filter), c)
+
 		default:
 			return c.JSON(http.StatusNotFound, echo.Map{
 				"errors": echo.Map{
@@ -211,7 +217,11 @@ func mericResult(c echo.Context, kind string, a []string) error {
 				},
 			})
 		}
-
+		if err != nil {
+			return c.JSON(http.StatusNotFound, echo.Map{
+				"errors": err,
+			})
+		}
 		result[a[k]] = data
 	}
 
@@ -338,7 +348,7 @@ func validateParam(c echo.Context) bool {
 	return true
 }
 
-func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
+func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value, error) {
 	// log.Println("queryrange in")
 	// log.Println(query)
 	// log.Println(endpointAddr)
@@ -361,8 +371,9 @@ func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
 
 	if err != nil {
 		log.Printf("Error creating client: %v\n", err)
-		os.Exit(1)
-		// return nil
+		var tempResult model.Value
+		return tempResult, err
+
 	}
 
 	v1api := v1.NewAPI(client)
@@ -380,15 +391,15 @@ func QueryRange(endpointAddr string, query string, c echo.Context) model.Value {
 
 	if err != nil {
 		log.Printf("Error querying Prometheus: %v\n", err)
-		os.Exit(1)
-		//실행 폭파 -> 500 에러처리로 변경
+		return result, err
+		// os.Exit(1)
 	}
 
 	if len(warnings) > 0 {
 		log.Printf("Warnings: %v\n", warnings)
 	}
 
-	return result
+	return result, nil
 }
 
 func metricExpr(val string, filter map[string]string) string {

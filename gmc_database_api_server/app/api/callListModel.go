@@ -26,7 +26,7 @@ func GetModelList(params model.PARAMS) []string {
 			params.Cluster = Clusters[c].Name
 			params.Workspace = Clusters[c].Name
 			// params.Kind = "namespaces"
-			getData, _ := common.GetData(params)
+			getData, _ := common.DataRequest(params)
 			getData0 := gjson.Get(getData, "items").Array()
 			// getData0 := common.FindingArray(common.Finding(getData, "items"))
 			for k, _ := range getData0 {
@@ -45,7 +45,7 @@ func GetModelList(params model.PARAMS) []string {
 		// params.Cluster = Clusters[c].Name
 		params.Workspace = params.Cluster
 		// params.Kind = "namespaces"
-		getData, _ := common.GetData(params)
+		getData, _ := common.DataRequest(params)
 		getData0 := gjson.Get(getData, "items").Array()
 		// getData0 := common.FindingArray(common.Finding(getData, "items"))
 		for k, _ := range getData0 {
@@ -64,7 +64,7 @@ func GetModelList(params model.PARAMS) []string {
 			params.Cluster = slice[w]
 			// params.Project = slice[w]
 			// fmt.Printf("#################clusterName:%s\n", params.Cluster)
-			getData, _ := common.GetData(params)
+			getData, _ := common.DataRequest(params)
 			getData0 := gjson.Get(getData, "items").Array()
 			// getData0 := common.FindingArray(common.Finding(getData, "items"))
 			for k, _ := range getData0 {
@@ -90,7 +90,7 @@ func GetModelList(params model.PARAMS) []string {
 			for w, _ := range slice {
 				params.Cluster = slice[w]
 				// fmt.Printf("#################clusterName:%s\n", params.Cluster)
-				getData, _ := common.GetData(params)
+				getData, _ := common.DataRequest(params)
 				getData0 := gjson.Get(getData, "items").Array()
 				// getData0 := common.FindingArray(common.Finding(getData, "items"))
 				for k, _ := range getData0 {
@@ -109,7 +109,7 @@ func GetModelList(params model.PARAMS) []string {
 				params.Cluster = slice[w]
 				// params.Name = ""
 				params.Kind = staticKind
-				getData, _ := common.GetData(params)
+				getData, _ := common.DataRequest(params)
 				getData0 := common.FindingArray(common.Finding(getData, "items"))
 				for k, _ := range getData0 {
 					str := getData0[k].String()

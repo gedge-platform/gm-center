@@ -29,7 +29,7 @@ func GetCronJobs(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
-	getData, err := common.GetData(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil

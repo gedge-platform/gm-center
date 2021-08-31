@@ -258,7 +258,7 @@ func GetProject(c echo.Context) (err error) {
 		Body:    c.Request().Body,
 	}
 	params.Workspace = c.Param("name")
-	getData, err := common.GetData(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -319,7 +319,7 @@ func GetProjects(c echo.Context) (err error) {
 	if c.QueryParam("workspace") == "" && c.QueryParam("cluster") != "" {
 		params.Workspace = c.QueryParam("cluster")
 		params.Project = c.QueryParam("cluster")
-		getData, err := common.GetData(params)
+		getData, err := common.DataRequest(params)
 		if err != nil {
 			common.ErrorMsg(c, http.StatusNotFound, err)
 			return nil
@@ -355,7 +355,7 @@ func GetProjects(c echo.Context) (err error) {
 		for i, _ := range slice {
 			params.Cluster = slice[i]
 			params.Name = ""
-			getData, err := common.GetData(params)
+			getData, err := common.DataRequest(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
@@ -384,7 +384,7 @@ func GetProjects(c echo.Context) (err error) {
 			params.Cluster = Clusters[i].Name
 			params.Workspace = Clusters[i].Name
 			params.Name = ""
-			getData, err := common.GetData(params)
+			getData, err := common.DataRequest(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
@@ -418,7 +418,7 @@ func ResourceCnt(params model.PARAMS, kind string) int {
 	params.Kind = kind
 	params.Project = params.Name
 	params.Name = ""
-	deployments, _ := common.GetData(params)
+	deployments, _ := common.DataRequest(params)
 	deployment := common.FindingArray(common.Finding(deployments, "items"))
 	// for i, _ := range deployment {
 	// 	fmt.Printf("[##]names : %s\n", (gjson.Get(deployment[i].String(), "metadata.name")).String())

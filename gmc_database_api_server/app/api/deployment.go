@@ -25,7 +25,7 @@ func GetDeployment(c echo.Context) (err error) {
 	params.Name = params.Project
 	project := GetDBProject(params)
 	params.Name = deploymentName
-	getData, err := common.GetData(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil

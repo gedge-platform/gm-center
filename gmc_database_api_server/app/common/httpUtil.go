@@ -89,7 +89,7 @@ var (
 	SetEvents              = new(model.EventList)
 )
 
-func GetData(params model.PARAMS) (data string, err error) {
+func DataRequest(params model.PARAMS) (data string, err error) {
 	var endPoint, token_value string
 
 	if err := validate(params); err != nil {

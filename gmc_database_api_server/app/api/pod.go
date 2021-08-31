@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Success 200 {object} model.POD
 // @Header 200 {string} Token "qwerty"
-// @Router /pods/:name [get]
+// @Router /pod/:name [get]
 func GetPods(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "pods",

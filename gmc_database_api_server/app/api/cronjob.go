@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Success 200 {object} model.CRONJOB
 // @Header 200 {string} Token "qwerty"
-// @Router /cronjobs/:name [get]
+// @Router /cronjob/:name [get]
 func GetCronJobs(c echo.Context) (err error) {
 
 	params := model.PARAMS{

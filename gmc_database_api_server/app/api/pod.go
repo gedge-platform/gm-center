@@ -28,7 +28,7 @@ func GetPods(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
-	getData, err := common.GetModel(params)
+	getData, err := common.GetData(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil

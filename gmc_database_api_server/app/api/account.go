@@ -42,7 +42,7 @@ func ClusterTest(c echo.Context) (err error) {
 	}
 
 	// data, err := common.GetModel(c, "serviceaccounts")
-	getData, err := common.GetModel(params)
+	getData, err := common.GetData(params)
 
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)

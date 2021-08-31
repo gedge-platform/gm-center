@@ -29,7 +29,7 @@ func GetJobs(c echo.Context) error {
 		Body:      c.Request().Body,
 	}
 
-	getData, err := common.GetModel(params)
+	getData, err := common.GetData(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -47,9 +47,9 @@ func GetJobs(c echo.Context) error {
 	common.Transcode(ownerReferencesData, &ownerReferencesInfo)
 
 	involvesData, _ := common.GetModelRelatedList(params)
-	log.Printf("#####getdata99 ", involvesData)
+	log.Printf("#####involvesData ", involvesData)
 
-	job := model.JOB{
+	jobinfos := model.JOB{
 		Workspace: params.Workspace,
 		Cluster:   params.Cluster,
 		// Project:        params.Project,
@@ -59,10 +59,10 @@ func GetJobs(c echo.Context) error {
 		Annotations:    common.FindData(getData, "metadata", "annotations"),
 		Kind:           common.InterfaceToString(common.FindData(getData, "kind", "")),
 		OwnerReference: ownerReferencesInfo,
-		BackoffLimit:   StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "backoffLimit"))),
-		Completions:    StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "completions"))),
-		Parallelism:    StringToInt(common.InterfaceToString(common.FindData(getData, "spe", "parallelism"))),
-		Status:         StringToInt(common.InterfaceToString(common.FindData(getData, "status", "succeeded"))),
+		BackoffLimit:   common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "backoffLimit"))),
+		Completions:    common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "completions"))),
+		Parallelism:    common.StringToInt(common.InterfaceToString(common.FindData(getData, "spe", "parallelism"))),
+		Status:         common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "succeeded"))),
 		CreationTime:   common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		StartTime:      common.InterfaceToTime(common.FindData(getData, "status", "startTime")),
 		CompletionTime: common.InterfaceToTime(common.FindData(getData, "status", "completionTime")),
@@ -71,8 +71,8 @@ func GetJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"job":          job,
-		"involvesData": involvesData,
+		"jobs":     jobinfos,
+		"involves": involvesData,
 	})
 }
 
@@ -104,7 +104,7 @@ func GetAllJobs(c echo.Context) error {
 			Name:           common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:      common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
 			Cluster:        common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-			Status:         StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "succeeded"))),
+			Status:         common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "succeeded"))),
 			CompletionTime: common.InterfaceToTime(common.FindData(data[i], "status", "completionTime")),
 		}
 		jobs = append(jobs, job)

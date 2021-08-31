@@ -15,7 +15,7 @@ func getCallEvent(params model.PARAMS) []model.EVENT {
 	params.Name = ""
 	params.Kind = "events"
 	fmt.Printf("[#]staticKind : %s\n", staticKind)
-	getData, _ := common.GetModel(params)
+	getData, _ := common.GetData(params)
 	fmt.Printf("[###]getData : %+v\n", getData)
 	if staticKind == "nodes" || staticKind == "namespaces" {
 		params.Cluster = params.Name

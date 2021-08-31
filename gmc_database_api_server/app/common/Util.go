@@ -443,7 +443,7 @@ func InterfaceToTime(i interface{}) time.Time {
 
 func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
-	data, err := GetModel(params)
+	data, err := GetData(params)
 	if err != nil {
 		return "", err
 	}
@@ -456,7 +456,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "endpoints"
 		params.Name = origName
 
-		endPointData, err := GetModel(params)
+		endPointData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -492,7 +492,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "replicasets"
 		params.Name = podName
 
-		replData, err := GetModel(params)
+		replData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -500,7 +500,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "deployments"
 		params.Name = FindDataStr(replData, "metadata.ownerReferences.0", "name")
 
-		DeployData, err := GetModel(params)
+		DeployData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -525,7 +525,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "replicasets"
 		params.Name = ""
 
-		replsData, err := GetModel(params)
+		replsData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -538,7 +538,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		// fmt.Printf("[####replicaName : %s\n", replicaName)
 		params.Kind = "pods"
 		params.Name = ""
-		podsData, err := GetModel(params)
+		podsData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -573,7 +573,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "endpoints"
 		params.Name = ""
 
-		svcsData, err := GetModel(params)
+		svcsData, err := GetData(params)
 		var Svcs model.DEPLOYMENTSVC
 		if err != nil {
 			return nil, err
@@ -604,7 +604,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		log.Println("PARAMS.NAEMData12 : ", params.Name)
 		log.Println("jobName Data12 : ", jobName)
 		log.Println("uid Data12 : ", uid)
-		podData, err := GetModel(params)
+		podData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -617,7 +617,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "events"
 		params.Name = ""
 
-		eventsData, err := GetModel(params)
+		eventsData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -651,7 +651,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 		log.Println("PARAMS.NAEMData12 : ", params.Name)
 		log.Println("jobName Data12 : ", cronjobName)
-		jobData, err := GetModel(params)
+		jobData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -666,7 +666,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Name = ""
 		test := InterfaceToString(FindData(jobData, "metadata", "name"))
 		log.Println("[#11test Data12 : ", test)
-		eventsData, err := GetModel(params)
+		eventsData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -706,7 +706,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		log.Println("##55selectLable : ", selectLable)
 		log.Println("uid data : ", uid)
 
-		repliData, err := GetModel(params)
+		repliData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -724,7 +724,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "deployments"
 		params.Name = ""
 
-		deployData, err := GetModel(params)
+		deployData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -736,7 +736,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		log.Println("deploy refer Data132 : ", deployRefer)
 
 		params.Kind = "events"
-		eventsData, err := GetModel(params)
+		eventsData, err := GetData(params)
 		if err != nil {
 			return nil, err
 		}
@@ -747,7 +747,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		}
 		params.Kind = "endpoints"
 		params.Name = ""
-		serviceData, err := GetModel(params)
+		serviceData, err := GetData(params)
 		log.Printf("[#222]", serviceData)
 		if err != nil {
 			return nil, err
@@ -802,5 +802,10 @@ func FindingArray(i string) []gjson.Result {
 func InterfaceToInt(i interface{}) int {
 	str := InterfaceToString(i)
 	v, _ := strconv.Atoi(str)
+	return v
+}
+
+func StringToInt(i string) int {
+	v, _ := strconv.Atoi(i)
 	return v
 }

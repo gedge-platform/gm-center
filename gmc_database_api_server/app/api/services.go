@@ -3,6 +3,7 @@ package api
 import (
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -18,7 +19,7 @@ func GetService(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      c.Request().Body,
 	}
-	getData, err := common.GetModel(params)
+	getData, err := common.GetData(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -39,11 +40,12 @@ func GetService(c echo.Context) error {
 		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
 	}
 
-	involves, _ := common.GetModelRelatedList(params) // Pods, Deployments
+	involvesData, _ := common.GetModelRelatedList(params) // Pods, Deployments
+	log.Printf("#####involvesData ", involvesData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"service":      service,
-		"involvesData": involves,
+		"involvesData": involvesData,
 	})
 }
 

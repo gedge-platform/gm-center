@@ -38,7 +38,7 @@ func ClusterTest(c echo.Context) (err error) {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 
 	// data, err := common.GetModel(c, "serviceaccounts")

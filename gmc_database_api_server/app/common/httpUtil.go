@@ -117,7 +117,10 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	log.Printf("[#31] url is %s", url)
 	var responseString, token string
 	reqMethod := params.Method
-	passBody := responseBody(params.Body)
+	// passBody := responseBody(params.Body)
+	passBody := params.Body
+
+	log.Printf("[#32] passBody is %s", passBody)
 	token = token_value
 
 	client := resty.New()
@@ -253,14 +256,29 @@ func validate(params model.PARAMS) error {
 	clusterCheck := strings.Compare(params.Cluster, "") != 0
 	// projectCheck := strings.Compare(params.Project, "") != 0
 
-	if !clusterCheck {
-		return ErrClusterInvalid
+	Method := params.Method
+	// Body := responseBody(params.Body)
+	Body := params.Body
+	BodyCheck := strings.Compare(Body, "") != 0
+
+	if Method == "POST" {
+		if !BodyCheck {
+			return ErrBodyEmpty
+		}
+		if !clusterCheck {
+			return ErrClusterInvalid
+		}
+	} else {
+		if !clusterCheck {
+			return ErrClusterInvalid
+		}
+		// if !projectCheck {
+		// 	return ErrProjectInvalid
+		// }
+		if !workspaceCheck {
+			return ErrWorkspaceInvalid
+		}
 	}
-	// if !projectCheck {
-	// 	return ErrProjectInvalid
-	// }
-	if !workspaceCheck {
-		return ErrWorkspaceInvalid
-	}
+
 	return nil
 }

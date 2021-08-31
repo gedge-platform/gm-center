@@ -26,7 +26,7 @@ func GetJobs(c echo.Context) error {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 
 	getData, err := common.DataRequest(params)
@@ -94,7 +94,7 @@ func GetAllJobs(c echo.Context) error {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
 	fmt.Printf("####data confirm : %s", data)

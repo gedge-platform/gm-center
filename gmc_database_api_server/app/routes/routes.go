@@ -93,12 +93,6 @@ func GEdgeRoute(e *echo.Echo) {
 	// r.PUT("/services/:name", api.UpdateService)
 	r.DELETE("/services/:name", api.DeleteService)
 
-	// r.GET("/projects", api.GetAllProjects)
-	// r.POST("/projects", api.CreateProject)
-	// r.GET("/projects/:name", api.GetProject)
-	// r.PUT("/projects/:name", api.UpdateProject)
-	// r.DELETE("/projects/:name", api.DeleteProject)
-
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		return api.AuthenticateUser(id, password), nil
 	}))

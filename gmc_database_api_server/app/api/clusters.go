@@ -172,13 +172,13 @@ func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Clu
 
 func GetCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
-		Kind:      "nodes",
-		Name:      c.Param("name"),
-		Cluster:   c.Param("name"),
-		Workspace: c.Param("name"),
-		Project:   c.QueryParam("project"),
-		Method:    c.Request().Method,
-		Body:      responseBody(c.Request().Body),
+		Kind:    "nodes",
+		Name:    c.Param("name"),
+		Cluster: c.Param("name"),
+		// Workspace: c.Param("name"),
+		// Project: c.QueryParam("project"),
+		Method: c.Request().Method,
+		Body:   responseBody(c.Request().Body),
 	}
 	getData, err := common.DataRequest(params)
 	if err != nil {
@@ -240,8 +240,8 @@ func GetClusters(c echo.Context) (err error) {
 			fmt.Printf("value : %+v\n", clusters[k].Name)
 			params.Name = clusters[k].Name
 			params.Cluster = clusters[k].Name
-			params.Workspace = clusters[k].Name
-			params.Project = clusters[k].Name
+			// params.Workspace = clusters[k].Name
+			// params.Project = clusters[k].Name
 			// params.Name = value.Name
 			getData, err := common.DataRequest(params)
 			if err != nil {
@@ -283,7 +283,7 @@ func GetClusters(c echo.Context) (err error) {
 		for i, _ := range slice {
 			params.Name = slice[i]
 			params.Cluster = slice[i]
-			params.Project = slice[i]
+			// params.Project = slice[i]
 			cluster := GetDBCluster(params)
 			if cluster == nil {
 				common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)

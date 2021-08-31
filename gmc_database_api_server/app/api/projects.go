@@ -77,7 +77,7 @@ func GetDBProject(params model.PARAMS) *model.Project {
 		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		var model model.Project
 		model.Type = "system"
-		model.WorkspaceName = "system"
+		// model.WorkspaceName = "system"
 		model.SelectCluster = params.Cluster
 		return &model
 	}
@@ -249,14 +249,15 @@ func FindProjectDB(db *gorm.DB, select_val string, search_val string) *model.Pro
 }
 func GetProject(c echo.Context) (err error) {
 	params := model.PARAMS{
-		Kind:    "namespaces",
-		Name:    c.Param("name"),
-		Cluster: c.QueryParam("cluster"),
-		Project: c.QueryParam("project"),
-		Method:  c.Request().Method,
-		Body:    responseBody(c.Request().Body),
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
 	}
-	params.Workspace = c.Param("name")
+	// params.Workspace = c.Param("name")
 	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
@@ -316,8 +317,8 @@ func GetProjects(c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	if c.QueryParam("workspace") == "" && c.QueryParam("cluster") != "" {
-		params.Workspace = c.QueryParam("cluster")
-		params.Project = c.QueryParam("cluster")
+		// params.Workspace = c.QueryParam("cluster")
+		// params.Project = c.QueryParam("cluster")
 		getData, err := common.DataRequest(params)
 		if err != nil {
 			common.ErrorMsg(c, http.StatusNotFound, err)
@@ -341,9 +342,9 @@ func GetProjects(c echo.Context) (err error) {
 			Projects = append(Projects, Project)
 		}
 	} else if c.QueryParam("workspace") != "" && c.QueryParam("cluster") == "" {
-		params.Workspace = c.QueryParam("workspace")
-		params.Cluster = c.QueryParam("workspace")
-		params.Project = c.QueryParam("workspace")
+		// params.Workspace = c.QueryParam("workspace")
+		// params.Cluster = c.QueryParam("workspace")
+		// params.Project = c.QueryParam("workspace")
 		workspace := GetDBWorkspace(params)
 		if workspace == nil {
 			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
@@ -381,7 +382,7 @@ func GetProjects(c echo.Context) (err error) {
 		Clusters := GetAllDBClusters(params)
 		for i, _ := range Clusters {
 			params.Cluster = Clusters[i].Name
-			params.Workspace = Clusters[i].Name
+			// params.Workspace = Clusters[i].Name
 			params.Name = ""
 			getData, err := common.DataRequest(params)
 			if err != nil {

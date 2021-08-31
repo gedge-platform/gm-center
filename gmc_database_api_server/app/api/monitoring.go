@@ -318,7 +318,7 @@ func validateFilter(k string, c echo.Context) bool {
 	case "namespace":
 		cluster := c.QueryParam("cluster_filter")
 		namespace := c.QueryParam("namespace_filter")
-		fmt.Println(cluster)
+		// fmt.Println(cluster)
 		if check := strings.Compare(cluster, "")*strings.Compare(namespace, "") == 0; check {
 			return false
 		}

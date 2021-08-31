@@ -31,7 +31,9 @@ func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
 	// /gmcapi/v1
-	r := e.Group("/gmcapi/v1")
+	r := e.Group("/gmcapi/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
+		return api.AuthenticateUser(id, password), nil
+	}))
 	r.GET("/members", api.GetAllMembers)
 	r.POST("/members", api.CreateMember)
 	r.GET("/members/:id", api.GetMember)
@@ -45,10 +47,10 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/apps/:name", api.DeleteApp)
 
 	r.GET("/clusters", api.GetClusters)
-	// r.POST("/clusters", api.Create_Cluster)
+	r.POST("/clusters", api.CreateCluster)
 	r.GET("/clusters/:name", api.GetCluster)
-	// r.PUT("/clusters/:name", api.Update_Cluster)
-	// r.DELETE("/clusters/:name", api.Delete_Cluster)
+	// r.PUT("/clusters/:name", api.UpdateCluster)
+	r.DELETE("/clusters/:name", api.DeleteCluster)
 
 	r.GET("/projects", api.GetProjects)
 	r.GET("/projects/:name", api.GetProject)
@@ -93,18 +95,6 @@ func GEdgeRoute(e *echo.Echo) {
 	// r.PUT("/services/:name", api.UpdateService)
 	r.DELETE("/services/:name", api.DeleteService)
 
-	// r.GET("/clusters", api.GetAllClusters)
-	// r.POST("/clusters", api.CreateCluster)
-	// r.GET("/clusters/:name", api.GetCluster)
-	// r.PUT("/clusters/:name", api.UpdateCluster)
-	// r.DELETE("/clusters/:name", api.DeleteCluster)
-
-	// r.GET("/projects", api.GetAllProjects)
-	// r.POST("/projects", api.CreateProject)
-	// r.GET("/projects/:name", api.GetProject)
-	// r.PUT("/projects/:name", api.UpdateProject)
-	// r.DELETE("/projects/:name", api.DeleteProject)
-
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		return api.AuthenticateUser(id, password), nil
 	}))
@@ -116,6 +106,6 @@ func GEdgeRoute(e *echo.Echo) {
 	r2.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 	r2.GET("/monitoring", echo.WrapHandler(promhttp.Handler()))
 	r2.Any("/monitoring/:kind", api.Monit)
-	r2.Any("/monitoring/:kind/:name", api.Monit)
+	// r2.Any("/monitoring/:kind/:name", api.Monit)
 	r2.Any("/monitoring/realtime/:kind", api.RealMetrics)
 }

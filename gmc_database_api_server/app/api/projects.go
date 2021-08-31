@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -131,7 +130,7 @@ func CreateProject(c echo.Context) (err error) {
 
 		var jsonStr = []byte(fmt.Sprint(string(data)))
 
-		code, _ := RequsetKube(url, "POST", jsonStr, Token)
+		code := RequsetKube(url, "POST", jsonStr, Token)
 
 		switch code {
 		case 200:
@@ -180,7 +179,7 @@ func UpdateProject(c echo.Context) (err error) {
 
 		var jsonStr = []byte(fmt.Sprint(string(data)))
 
-		code, _ := RequsetKube(url, "PATCH", jsonStr, Token)
+		code := RequsetKube(url, "PATCH", jsonStr, Token)
 
 		switch code {
 		case 200:
@@ -221,7 +220,7 @@ func DeleteProject(c echo.Context) (err error) {
 			return err
 		}
 
-		code := RequsetKubeDelete(url, "DELETE", Token)
+		code := RequsetKube(url, "DELETE", nil, Token)
 
 		switch code {
 		case 200:
@@ -429,50 +428,74 @@ func ResourceCnt(params model.PARAMS, kind string) int {
 	return deployment_cnt
 }
 
-func RequsetKube(url string, method string, reqdata []byte, token string) (int, string) {
+func RequsetKube(url string, method string, reqdata []byte, token string) int {
 
-	client := &http.Client{}
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer(reqdata))
+	switch method {
+	case "POST":
+		client := &http.Client{}
+		req, _ := http.NewRequest(method, url, bytes.NewBuffer(reqdata))
 
-	req.Header.Add("Authorization", "Bearer "+token)
-	req.Header.Add("Content-Type", "application/json")
+		req.Header.Add("Authorization", "Bearer "+token)
+		req.Header.Add("Content-Type", "application/json")
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return 0, ""
+		res, err := client.Do(req)
+		if err != nil {
+			fmt.Println(err)
+			return 0
+		}
+		defer res.Body.Close()
+
+		// body, err := ioutil.ReadAll(res.Body)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	return 0
+		// }
+
+		// return res.StatusCode, string(body)
+		return res.StatusCode
+	case "DELETE":
+		client := &http.Client{}
+		req, _ := http.NewRequest(method, url, nil)
+
+		req.Header.Add("Authorization", "Bearer "+token)
+		req.Header.Add("Content-Type", "application/json")
+
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+		res, err := client.Do(req)
+		if err != nil {
+			fmt.Println(err)
+			return 500
+		}
+
+		return res.StatusCode
+	case "PUT":
+	case "PATCH":
 	}
-	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return 0, ""
-	}
-
-	return res.StatusCode, string(body)
+	return 404
 }
 
-func RequsetKubeDelete(url string, method string, token string) int {
+// func RequsetKubeDelete(url string, method string, token string) int {
 
-	client := &http.Client{}
-	req, _ := http.NewRequest(method, url, nil)
+// 	client := &http.Client{}
+// 	req, _ := http.NewRequest(method, url, nil)
 
-	req.Header.Add("Authorization", "Bearer "+token)
-	req.Header.Add("Content-Type", "application/json")
+// 	req.Header.Add("Authorization", "Bearer "+token)
+// 	req.Header.Add("Content-Type", "application/json")
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+// 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	res, err := client.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return 500
-	}
+// 	res, err := client.Do(req)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return 500
+// 	}
 
-	return res.StatusCode
-}
+// 	return res.StatusCode
+// }
 
 func GetClusterDB(str string) *model.Cluster {
 	search_val := str

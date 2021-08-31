@@ -4,24 +4,21 @@ import (
 	"net/http"
 	"strings"
 
-	"gmc_api_gateway/app/db"
-	"gmc_api_gateway/app/model"
-	
+	"gmc_database_api_server/app/common"
+	"gmc_database_api_server/app/db"
+	"gmc_database_api_server/app/model"
+
 	"github.com/jinzhu/gorm"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func GetAllWorkspaces(c echo.Context) (err error) {
-	var msgError messageFormat
 	db := db.DbManager()
 	models := []model.Workspace{}
 	db.Find(&models)
 
 	if db.Find(&models).RowsAffected == 0 {
-		msgError.StatusCode = http.StatusOK
-		msgError.Message = "No Data"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
@@ -33,34 +30,32 @@ func GetWorkspace(c echo.Context) (err error) {
 	models := FindWorkspaceDB(db, "Name", search_val)
 
 	if models == nil {
-		var msgError messageFormat
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})
+}
+func GetDBWorkspace(params model.PARAMS) *model.Workspace {
+	db := db.DbManager()
+	search_val := params.Workspace
+	models := FindWorkspaceDB(db, "Name", search_val)
+	if models == nil {
+		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
+	}
+
+	return models
 }
 
 func CreateWorkspace(c echo.Context) (err error) {
 	db := db.DbManager()
 	models := new(model.Workspace)
-	var msgError messageFormat
 
 	if err = c.Bind(models); err != nil {
-		msgError.StatusCode = http.StatusBadRequest
-		msgError.Message = "Bad Request"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusBadRequest, err)
 	}
 	if err = c.Validate(models); err != nil {
-		msgError.StatusCode = http.StatusUnprocessableEntity
-		msgError.Message = "The given data was invalid."
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 	}
 
 	if err != nil {
@@ -68,11 +63,7 @@ func CreateWorkspace(c echo.Context) (err error) {
 	}
 
 	if err := db.Create(&models).Error; err != nil {
-		msgError.StatusCode = http.StatusExpectationFailed
-		msgError.Message = "Expectation Failed"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusExpectationFailed, err)
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{"data": models})
@@ -82,63 +73,51 @@ func UpdateWorkspace(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")
 	models := model.Workspace{}
-	var msgError messageFormat
 
 	if err := c.Bind(&models); err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
 	if err := FindWorkspaceDB(db, "Name", search_val); err == nil {
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
-	}  else {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+	} else {
 		models.Name = search_val
 	}
 
-
 	models2 := FindWorkspaceDB(db, "Name", search_val)
 
-	if models.Description != "" { models2.Description = models.Description	} 
-	if models.SelectCluster != "" { models2.SelectCluster = models.SelectCluster }
-	if models.Owner != "" { models2.Owner = models.Owner } 
-	if models.Creator != "" { models2.Creator = models.Creator }
-
+	if models.Description != "" {
+		models2.Description = models.Description
+	}
+	if models.SelectCluster != "" {
+		models2.SelectCluster = models.SelectCluster
+	}
+	if models.Owner != "" {
+		models2.Owner = models.Owner
+	}
+	if models.Creator != "" {
+		models2.Creator = models.Creator
+	}
 
 	if err := db.Save(&models2).Error; err != nil {
-		msgError.StatusCode = http.StatusExpectationFailed
-		msgError.Message = "Expectation Failed"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(http.StatusExpectationFailed, messageError)
+		common.ErrorMsg(c, http.StatusExpectationFailed, err)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models2})
 }
 
-
 func DeleteWorkspace(c echo.Context) (err error) {
 	db := db.DbManager()
 	search_val := c.Param("name")
-	// models := model.Workspace{}
-	var msgError messageFormat
 
 	if err := FindWorkspaceDB(db, "Name", search_val); err == nil {
-		msgError.StatusCode = http.StatusNotFound
-		msgError.Message = "Not Found"
-		messageError.Errors = msgError
-		return c.JSON(msgError.StatusCode, messageError)
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 	}
-	
+
 	models := FindWorkspaceDB(db, "Name", search_val)
 
 	if err := db.Delete(&models).Error; err != nil {
-		msgError.StatusCode = http.StatusInternalServerError
-		msgError.Message = "Internal Server Error"
-		msgError.Error = err.Error()
-		messageError.Errors = msgError
-		return c.JSON(http.StatusInternalServerError, messageError)
+		common.ErrorMsg(c, http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"data": models})

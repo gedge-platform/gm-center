@@ -31,7 +31,9 @@ func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
 	// /gmcapi/v1
-	r := e.Group("/gmcapi/v1")
+	r := e.Group("/gmcapi/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
+		return api.AuthenticateUser(id, password), nil
+	}))
 	r.GET("/members", api.GetAllMembers)
 	r.POST("/members", api.CreateMember)
 	r.GET("/members/:id", api.GetMember)

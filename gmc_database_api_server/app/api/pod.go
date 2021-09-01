@@ -82,7 +82,7 @@ func GetPods(c echo.Context) (err error) {
 		// VolumeMounts:      volumeMountsInfo,
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"pod":          pod,
+		"data":         pod,
 		"involvesData": involvesData,
 	})
 }
@@ -126,7 +126,7 @@ func GetAllPods(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"pods": pods,
+		"data": pods,
 	})
 }
 

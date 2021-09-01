@@ -212,7 +212,7 @@ func GetCluster(c echo.Context) (err error) {
 	// common.Transcode(getData0, &clusterModel)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"cluster": clusterModel,
+		"data": clusterModel,
 		// "getData":  getData98,
 	})
 
@@ -269,7 +269,7 @@ func GetClusters(c echo.Context) (err error) {
 			// clusterModel[k].Kernel = "123"
 		}
 		return c.JSON(http.StatusOK, echo.Map{
-			"clusters": clusterList,
+			"data": clusterList,
 		})
 	} else {
 		params.Workspace = c.QueryParam("workspace")
@@ -318,7 +318,7 @@ func GetClusters(c echo.Context) (err error) {
 
 		}
 		return c.JSON(http.StatusOK, echo.Map{
-			"clusters": clusterList,
+			"data": clusterList,
 		})
 	}
 

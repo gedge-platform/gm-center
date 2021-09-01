@@ -302,7 +302,7 @@ func GetProject(c echo.Context) (err error) {
 
 	projectModel.Resource = ResourceCnt
 	return c.JSON(http.StatusOK, echo.Map{
-		"project": projectModel,
+		"data": projectModel,
 	})
 }
 func GetProjects(c echo.Context) (err error) {

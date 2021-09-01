@@ -44,7 +44,7 @@ func GetService(c echo.Context) error {
 	log.Printf("#####involvesData ", involvesData)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"service":      service,
+		"data":         service,
 		"involvesData": involvesData,
 	})
 }
@@ -75,7 +75,7 @@ func GetServices(c echo.Context) (err error) {
 		services = append(services, service)
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"services": services,
+		"data": services,
 	})
 }
 

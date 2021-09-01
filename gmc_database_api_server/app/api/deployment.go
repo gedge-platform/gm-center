@@ -59,7 +59,7 @@ func GetDeployment(c echo.Context) (err error) {
 	involvesData, _ := common.GetModelRelatedList(params)
 	// fmt.Printf("[####]data : %+v\n", testData)
 	return c.JSON(http.StatusOK, echo.Map{
-		"deployment":   deployment,
+		"data":         deployment,
 		"involvesData": involvesData,
 	})
 }
@@ -96,7 +96,7 @@ func GetDeployments(c echo.Context) (err error) {
 		deployments = append(deployments, deployment)
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"deployments": deployments,
+		"data": deployments,
 	})
 }
 

@@ -63,7 +63,7 @@ func GetCronJobs(c echo.Context) (err error) {
 		Active:                     activeInfo,
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"cronjob":      cronjob,
+		"data":         cronjob,
 		"involvesData": involvesData,
 	})
 }
@@ -104,7 +104,7 @@ func GetCronAllJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"cronjobs": cronjobs,
+		"data": cronjobs,
 	})
 }
 

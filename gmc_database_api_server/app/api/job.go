@@ -71,7 +71,7 @@ func GetJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"jobs":     jobinfos,
+		"data":     jobinfos,
 		"involves": involvesData,
 	})
 }
@@ -111,7 +111,7 @@ func GetAllJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"jobs": jobs,
+		"data": jobs,
 	})
 }
 

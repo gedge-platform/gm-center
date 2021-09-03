@@ -31,7 +31,7 @@ var clusterMetric = map[string]string{
 	"pod_util":     "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
 
 	"apiserver_request_rate": "round(sum(irate(apiserver_request_total{$1}[5m]))by(cluster),0.001)",
-	// latency 보완 필요 (느림)
+	// latency 보완 필요 (응답속도 느림)
 	"apiserver_latency": "histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{verb!~'CONNECT|WATCH',$1}[1m])) by (le,cluster))",
 
 	"scheduler_attempts":       "sum(increase(scheduler_schedule_attempts_total{$1}[1m]))by(result,cluster)",

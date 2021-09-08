@@ -11,6 +11,7 @@ type DEPLOYMENT struct {
 	Replica       REPLICA     `json:"replica"`
 	Strategy      interface{} `json:"strategy,omitempty"`
 	Containers    interface{} `json:"containers,omitempty"`
+	// Workspace     string      `json:"workspace,omitempty"`
 	// PodInfo     []model.Pod     `json:"pods"`
 	// ServiceInfo []model.Service `json:"services"`
 	Label      interface{} `json:"labels,omitempty"`

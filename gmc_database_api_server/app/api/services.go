@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"gmc_database_api_server/app/common"
 	"gmc_database_api_server/app/model"
 	"log"
@@ -24,7 +25,8 @@ func GetService(c echo.Context) error {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-
+	fmt.Println("[###########service]", getData)
+	fmt.Println("[###########ingress]", common.InterfaceToString(common.FindDataStr(getData, "status.loadBalancer.ingress.0", "ip")))
 	service := model.SERVICE{
 		Name:            common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Workspace:       params.Workspace,
@@ -37,6 +39,7 @@ func GetService(c echo.Context) error {
 		SessionAffinity: common.InterfaceToString(common.FindData(getData, "spec", "type")),
 		Events:          getCallEvent(params),
 		CreateAt:        common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+		ExternalIp:      common.InterfaceToString(common.FindData(getData, "status.loadBalancer.ingress.0", "ip")),
 		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
 	}
 
@@ -64,13 +67,15 @@ func GetServices(c echo.Context) (err error) {
 	// fmt.Printf("#################dataerr : %s", data)
 	for i, _ := range data {
 		service := model.SERVICE{
-			Name:      common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			Cluster:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-			Project:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			Type:      common.InterfaceToString(common.FindData(data[i], "spec", "type")),
-			ClusterIp: common.InterfaceToString(common.FindData(data[i], "spec", "clusterIP")),
-			Ports:     common.FindData(data[i], "spec", "ports"),
-			CreateAt:  common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+			Name:       common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Cluster:    common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Project:    common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Type:       common.InterfaceToString(common.FindData(data[i], "spec", "type")),
+			ClusterIp:  common.InterfaceToString(common.FindData(data[i], "spec", "clusterIP")),
+			Workspace:  common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
+			Ports:      common.FindData(data[i], "spec", "ports"),
+			ExternalIp: common.InterfaceToString(common.FindData(data[i], "status.loadBalancer.ingress.0", "ip")),
+			CreateAt:   common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 		}
 		services = append(services, service)
 	}

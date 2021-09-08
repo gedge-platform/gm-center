@@ -713,7 +713,6 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
 		log.Printf("[###123]deployData", repliData)
 		log.Println("DeployRefer Data12 : ", repliRefer)
-
 		if err != nil {
 			return nil, err
 		}

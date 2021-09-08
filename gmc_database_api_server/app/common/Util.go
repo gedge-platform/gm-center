@@ -710,6 +710,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
 		log.Printf("[###123]deployData", repliData)
 		log.Println("DeployRefer Data12 : ", repliRefer)
@@ -717,6 +718,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
 
 		log.Println("[#4]deplyName ", repliuid)
@@ -728,6 +730,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		log.Println("deploydata Data132 : ", deployData)
 		deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
 		if err != nil {
@@ -775,7 +778,6 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			Event:       EventInfo,
 		}
 		return ReferData, nil
-
 	}
 
 	return nil, errors.New("")

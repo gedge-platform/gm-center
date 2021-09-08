@@ -63,6 +63,7 @@ func GetPods(c echo.Context) (err error) {
 	pod := model.POD{
 		Workspace: project.WorkspaceName,
 		Cluster:   params.Cluster,
+
 		// Project:           params.Project,
 		Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Namespace:         common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),

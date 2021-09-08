@@ -283,9 +283,9 @@ func validate(params model.PARAMS) error {
 			return ErrDetailNameInvalid
 		}
 	} else if Method == "GET" {
-		if !clusterCheck {
-			return ErrClusterInvalid
-		}
+		// if !clusterCheck {
+		// 	return ErrClusterInvalid
+		// }
 	} else {
 		if !clusterCheck {
 			return ErrClusterInvalid

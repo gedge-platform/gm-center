@@ -206,7 +206,7 @@ func GetCluster(c echo.Context) (err error) {
 	clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
 	clusterModel.Created_at = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
 	clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
-	clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
+	clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "osImage"))
 	clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
 	clusterModel.Events = getCallEvent(params)
 	// common.Transcode(getData0, &clusterModel)

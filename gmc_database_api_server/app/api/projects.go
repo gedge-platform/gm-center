@@ -77,7 +77,7 @@ func GetDBProject(params model.PARAMS) *model.Project {
 		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		var model model.Project
 		model.Type = "system"
-		// model.WorkspaceName = "system"
+		model.WorkspaceName = "system"
 		model.SelectCluster = params.Cluster
 		return &model
 	}
@@ -342,9 +342,6 @@ func GetProjects(c echo.Context) (err error) {
 			Projects = append(Projects, Project)
 		}
 	} else if c.QueryParam("workspace") != "" && c.QueryParam("cluster") == "" {
-		// params.Workspace = c.QueryParam("workspace")
-		// params.Cluster = c.QueryParam("workspace")
-		// params.Project = c.QueryParam("workspace")
 		workspace := GetDBWorkspace(params)
 		if workspace == nil {
 			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
@@ -402,7 +399,7 @@ func GetProjects(c echo.Context) (err error) {
 				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
 				Project.ClusterName = params.Cluster
 				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+				tempresult := NowMonit("namespace", Project.ClusterName, Project.Name, tempMetric)
 				Project.ResourceUsage = tempresult
 				Projects = append(Projects, Project)
 			}
@@ -558,6 +555,7 @@ func CreateProjectDB(c echo.Context) (err error, st *model.Project) {
 
 	if err := db.Create(&models).Error; err != nil {
 		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+
 		return err, models
 	}
 

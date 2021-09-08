@@ -694,45 +694,49 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 		return &ReferData, nil
 	case "pods":
-		params.Kind = "replicasets"
-		params.Name = ""
 		labelApp := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name"))
 		selectLable := InterfaceToString(FindData(data, "metadata", "labels"))
 		uid := InterfaceToString(FindData(data, "metadata", "uid"))
 		podName := InterfaceToString(FindData(data, "metadata", "name"))
+		kind := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "kind"))
 		log.Println("PARAMS.NAEMData12 : ", params.Name)
 		log.Println("labels Data12 : ", labelApp)
 		log.Println("#44podName: ", podName)
 		log.Println("##55selectLable : ", selectLable)
 		log.Println("uid data : ", uid)
+		log.Println("kind data : ", kind)
 
-		repliData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-		repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
-		log.Printf("[###123]deployData", repliData)
-		log.Println("DeployRefer Data12 : ", repliRefer)
-		if err != nil {
-			return nil, err
-		}
-		repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
+		// params.Kind = "replicasets"
+		// params.Name = ""
 
-		log.Println("[#4]deplyName ", repliuid)
+		// repliData, err := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
+		// log.Printf("[###123]deployData", repliData)
+		// log.Println("DeployRefer Data12 : ", repliRefer)
 
-		params.Kind = "deployments"
-		params.Name = ""
+		// repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
 
-		deployData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-		log.Println("deploydata Data132 : ", deployData)
-		deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
-		if err != nil {
-			return nil, err
-		}
-		log.Println("deploy refer Data132 : ", deployRefer)
+		// if err != nil {
+		// 	return nil, err
+		// }
+
+		// log.Println("[#4]deplyName ", repliuid)
+
+		// params.Kind = "deployments"
+		// params.Name = ""
+		// deployData, err := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// log.Println("deploydata Data132 : ", deployData)
+		// deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// log.Println("deploy refer Data132 : ", deployRefer)
 
 		params.Kind = "events"
 		eventsData, err := DataRequest(params)
@@ -764,12 +768,10 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		log.Printf("# 확인 ", EventData)
 		Transcode(EventData, &EventInfo)
 
-		var DeployInfo []model.DeployInfo
-		DeployData := deployRefer
-		Transcode(DeployData, &DeployInfo)
+		log.Printf("[#222]", serviceData)
 
 		ReferData := model.ReferDataDeploy{
-			DeployInfo:  DeployInfo,
+			// DeployInfo:  DeployInfo,
 			ServiceInfo: ServiceInfo,
 			Event:       EventInfo,
 		}

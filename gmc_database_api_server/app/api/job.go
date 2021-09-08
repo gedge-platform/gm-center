@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Success 200 {object} model.JOB
 // @Header 200 {string} Token "qwerty"
-// @Router /jobs/:name [get]
+// @Router /job/:name [get]
 func GetJobs(c echo.Context) error {
 	params := model.PARAMS{
 		Kind:      "jobs",

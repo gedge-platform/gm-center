@@ -59,9 +59,9 @@ func GetPods(c echo.Context) (err error) {
 	// common.Transcode(volumeMountsData, &volumeMountsInfo)
 	involvesData, _ := common.GetModelRelatedList(params)
 	log.Printf("#####getdata99 ", involvesData)
-
+	project := GetDBProject(params)
 	pod := model.POD{
-		Workspace: params.Workspace,
+		Workspace: project.WorkspaceName,
 		Cluster:   params.Cluster,
 		// Project:           params.Project,
 		Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),

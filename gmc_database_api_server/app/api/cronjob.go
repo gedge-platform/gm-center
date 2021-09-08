@@ -27,9 +27,9 @@ func GetCronJobs(c echo.Context) (err error) {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
-	getData, err := common.GetModel(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -55,15 +55,15 @@ func GetCronJobs(c echo.Context) (err error) {
 		Annotations:                common.FindData(getData, "metadata", "annotations"),
 		Schedule:                   common.InterfaceToString(common.FindData(getData, "spec", "schedule")),
 		ConcurrencyPolicy:          common.InterfaceToString(common.FindData(getData, "spec", "concurrencyPolicy")),
-		SuccessfulJobsHistoryLimit: StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "successfulJobsHistoryLimit"))),
-		FailedJobsHistoryLimit:     StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "failedJobsHistoryLimits"))),
+		SuccessfulJobsHistoryLimit: common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "successfulJobsHistoryLimit"))),
+		FailedJobsHistoryLimit:     common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "failedJobsHistoryLimits"))),
 		LastScheduleTime:           common.InterfaceToTime(common.FindData(getData, "status", "lastScheduleTime")),
 		CreationTimestamp:          common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Containers:                 containerInfo,
 		Active:                     activeInfo,
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"cronjob":      cronjob,
+		"data":         cronjob,
 		"involvesData": involvesData,
 	})
 }
@@ -86,7 +86,7 @@ func GetCronAllJobs(c echo.Context) error {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
 	fmt.Printf("####data confirm : %s", data)
@@ -104,6 +104,47 @@ func GetCronAllJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"cronjobs": cronjobs,
+		"data": cronjobs,
+	})
+}
+
+func CreateCronJob(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "cronjobs",
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
+	})
+}
+
+func DeleteCronJob(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "cronjobs",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
 	})
 }

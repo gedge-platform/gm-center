@@ -172,15 +172,15 @@ func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Clu
 
 func GetCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
-		Kind:      "nodes",
-		Name:      c.Param("name"),
-		Cluster:   c.Param("name"),
-		Workspace: c.Param("name"),
-		Project:   c.QueryParam("project"),
-		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Kind:    "nodes",
+		Name:    c.Param("name"),
+		Cluster: c.Param("name"),
+		// Workspace: c.Param("name"),
+		// Project: c.QueryParam("project"),
+		Method: c.Request().Method,
+		Body:   responseBody(c.Request().Body),
 	}
-	getData, err := common.GetModel(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -206,13 +206,13 @@ func GetCluster(c echo.Context) (err error) {
 	clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
 	clusterModel.Created_at = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
 	clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
-	clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem"))
+	clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "osImage"))
 	clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
 	clusterModel.Events = getCallEvent(params)
 	// common.Transcode(getData0, &clusterModel)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"cluster": clusterModel,
+		"data": clusterModel,
 		// "getData":  getData98,
 	})
 
@@ -228,7 +228,7 @@ func GetClusters(c echo.Context) (err error) {
 		// Workspace: clusterModel[k].Name,
 		// Project:   clusterModel[k].Name,
 		Method: c.Request().Method,
-		Body:   c.Request().Body,
+		Body:   responseBody(c.Request().Body),
 	}
 	if c.QueryParam("workspace") == "" {
 		clusters := GetAllDBClusters(params)
@@ -240,10 +240,10 @@ func GetClusters(c echo.Context) (err error) {
 			fmt.Printf("value : %+v\n", clusters[k].Name)
 			params.Name = clusters[k].Name
 			params.Cluster = clusters[k].Name
-			params.Workspace = clusters[k].Name
-			params.Project = clusters[k].Name
+			// params.Workspace = clusters[k].Name
+			// params.Project = clusters[k].Name
 			// params.Name = value.Name
-			getData, err := common.GetModel(params)
+			getData, err := common.DataRequest(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
@@ -269,7 +269,7 @@ func GetClusters(c echo.Context) (err error) {
 			// clusterModel[k].Kernel = "123"
 		}
 		return c.JSON(http.StatusOK, echo.Map{
-			"clusters": clusterList,
+			"data": clusterList,
 		})
 	} else {
 		params.Workspace = c.QueryParam("workspace")
@@ -283,7 +283,7 @@ func GetClusters(c echo.Context) (err error) {
 		for i, _ := range slice {
 			params.Name = slice[i]
 			params.Cluster = slice[i]
-			params.Project = slice[i]
+			// params.Project = slice[i]
 			cluster := GetDBCluster(params)
 			if cluster == nil {
 				common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
@@ -293,7 +293,7 @@ func GetClusters(c echo.Context) (err error) {
 			var clusterModel model.CLUSTER
 			common.Transcode(cluster, &tsCluster)
 			common.Transcode(tsCluster, &clusterModel)
-			getData, err := common.GetModel(params)
+			getData, err := common.DataRequest(params)
 			if err != nil {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
@@ -318,7 +318,7 @@ func GetClusters(c echo.Context) (err error) {
 
 		}
 		return c.JSON(http.StatusOK, echo.Map{
-			"clusters": clusterList,
+			"data": clusterList,
 		})
 	}
 

@@ -38,11 +38,11 @@ func ClusterTest(c echo.Context) (err error) {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 
 	// data, err := common.GetModel(c, "serviceaccounts")
-	getData, err := common.GetModel(params)
+	getData, err := common.DataRequest(params)
 
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)

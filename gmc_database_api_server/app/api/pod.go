@@ -26,9 +26,9 @@ func GetPods(c echo.Context) (err error) {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
-	getData, err := common.GetModel(params)
+	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -82,7 +82,7 @@ func GetPods(c echo.Context) (err error) {
 		// VolumeMounts:      volumeMountsInfo,
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"pod":          pod,
+		"data":         pod,
 		"involvesData": involvesData,
 	})
 }
@@ -105,7 +105,7 @@ func GetAllPods(c echo.Context) error {
 		Workspace: c.QueryParam("workspace"),
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
-		Body:      c.Request().Body,
+		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
 	fmt.Printf("####Pod data confirm : %s", data)
@@ -126,6 +126,47 @@ func GetAllPods(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"pods": pods,
+		"data": pods,
+	})
+}
+
+func CreatePod(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "pods",
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
+	})
+}
+
+func DeletePod(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "pods",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
 	})
 }

@@ -706,37 +706,37 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		log.Println("uid data : ", uid)
 		log.Println("kind data : ", kind)
 
-		params.Kind = "replicasets"
-		params.Name = ""
+		// params.Kind = "replicasets"
+		// params.Name = ""
 
-		repliData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-		repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
-		log.Printf("[###123]deployData", repliData)
-		log.Println("DeployRefer Data12 : ", repliRefer)
+		// repliData, err := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
+		// log.Printf("[###123]deployData", repliData)
+		// log.Println("DeployRefer Data12 : ", repliRefer)
 
-		repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
+		// repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
 
-		if err != nil {
-			return nil, err
-		}
+		// if err != nil {
+		// 	return nil, err
+		// }
 
-		log.Println("[#4]deplyName ", repliuid)
+		// log.Println("[#4]deplyName ", repliuid)
 
-		params.Kind = "deployments"
-		params.Name = ""
-		deployData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-		log.Println("deploydata Data132 : ", deployData)
-		deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
-		if err != nil {
-			return nil, err
-		}
-		log.Println("deploy refer Data132 : ", deployRefer)
+		// params.Kind = "deployments"
+		// params.Name = ""
+		// deployData, err := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// log.Println("deploydata Data132 : ", deployData)
+		// deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// log.Println("deploy refer Data132 : ", deployRefer)
 
 		params.Kind = "events"
 		eventsData, err := DataRequest(params)
@@ -767,6 +767,8 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		EventData := eventRefer
 		log.Printf("# 확인 ", EventData)
 		Transcode(EventData, &EventInfo)
+
+		log.Printf("[#222]", serviceData)
 
 		ReferData := model.ReferDataDeploy{
 			// DeployInfo:  DeployInfo,

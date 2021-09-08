@@ -810,3 +810,62 @@ func StringToInt(i string) int {
 	v, _ := strconv.Atoi(i)
 	return v
 }
+
+func FindDataLabelKey(i interface{}, p, f, u string) ([]string, []string, error) {
+	log.Println("[In #FindDataArr]")
+	log.Println("[#1] Data is ", i)
+	log.Println("[#2] find path string is ", p)
+	log.Println("[#2] find key string is ", f)
+	log.Println("[#3] uniq string is ", u)
+
+	// var itemCheck bool
+	var parse, data gjson.Result
+	var arr []gjson.Result
+	// var result interface{}
+	var result1 []string
+	var result2 []string
+	ia := InterfaceToString(i)
+
+	parse = gjson.Parse(ia)
+	log.Println("[#4] Parse is ", parse)
+
+	pathCheck := strings.Compare(p, "") != 0
+	// itemCheck = len(parse.Get("items").Array()) > 0
+	// log.Println("[#4] itemCheck is ", itemCheck)
+
+	if pathCheck {
+		data = parse.Get(p)
+		log.Println("[#5] filter data is ", data)
+	} else {
+		data = parse
+		log.Println("[#5] filter data is ", data)
+	}
+
+	len := len(data.Array())
+	log.Println("[#6] len(data) is ", len)
+
+	if len > 0 {
+		// list
+		arr = data.Array()
+		log.Println("[#7-1] len > 0, list")
+		for t, _ := range arr {
+			masterCheck := strings.Contains(arr[t].String(), "node-role.kubernetes.io/master")
+			if masterCheck {
+				result1 = append(result1, arr[t].String())
+			} else {
+				result2 = append(result2, arr[t].String())
+			}
+		}
+	} else if len == 1 {
+		masterCheck := strings.Contains(data.String(), "node-role.kubernetes.io/master")
+		if masterCheck {
+			result1 = append(result1, data.String())
+		} else {
+			result2 = append(result2, data.String())
+		}
+	}
+	// list 출력
+	return result1, result2, nil
+	// return strings.Join(results, ","), nil
+
+}

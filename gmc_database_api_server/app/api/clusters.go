@@ -58,8 +58,9 @@ func GetDBCluster(params model.PARAMS) *model.Cluster {
 	models := FindClusterDB(db, "Name", search_val)
 
 	if models == nil {
-		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return nil
+		var model model.Cluster
+		model.Name = params.Name
+		return &model
 	}
 
 	return models
@@ -169,51 +170,146 @@ func FindClusterDB(db *gorm.DB, select_val string, search_val string) *model.Clu
 	}
 	return &models
 }
-
+func ClusterResourceCnt(params model.PARAMS, kind string) int {
+	fmt.Printf("[##]params : %+v\n", params)
+	params.Kind = kind
+	params.Project = ""
+	params.Name = ""
+	deployments, _ := common.DataRequest(params)
+	deployment := common.FindingArray(common.Finding(deployments, "items"))
+	// for i, _ := range deployment {
+	// 	fmt.Printf("[##]names : %s\n", (gjson.Get(deployment[i].String(), "metadata.name")).String())
+	// 	fmt.Printf("[##]index : %d\n", i)
+	// }
+	deployment_cnt := common.FindingLen2(deployment)
+	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
+	return deployment_cnt
+}
 func GetCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
-		Kind:    "nodes",
-		Name:    c.Param("name"),
-		Cluster: c.Param("name"),
-		// Workspace: c.Param("name"),
-		// Project: c.QueryParam("project"),
-		Method: c.Request().Method,
-		Body:   responseBody(c.Request().Body),
+		Kind:      "nodes",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
 	}
+	params.Cluster = params.Name
+	params.Name = ""
+
 	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
+	Master, Worker, _ := common.FindDataLabelKey(getData, "items", "labels", "node-role.kubernetes.io/master")
+	var MasterList []model.CLUSTER
+	var WorkerList []model.CLUSTER
+	for m, _ := range Master {
+		params.Name = params.Cluster
+		cluster := GetDBCluster(params)
+		if cluster == nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return nil
+		}
+		var tsCluster model.Cluster
+		var clusterModel model.CLUSTER
+		common.Transcode(cluster, &tsCluster)
+		common.Transcode(tsCluster, &clusterModel)
 
-	cluster := GetDBCluster(params)
-	if cluster == nil {
-		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-		return nil
+		gpuList, check := GpuCheck(params.Name)
+		if check != false {
+			clusterModel.Gpu = gpuList
+		} else {
+			clusterModel.Gpu = nil
+		}
+		ResourceCnt := model.PROJECT_RESOURCE{
+			DeploymentCount: ClusterResourceCnt(params, "deployments"),
+			PodCount:        ClusterResourceCnt(params, "pods"),
+			ServiceCount:    ClusterResourceCnt(params, "services"),
+			CronjobCount:    ClusterResourceCnt(params, "cronjobs"),
+			JobCount:        ClusterResourceCnt(params, "jobs"),
+			// VolumeCount:     ResourceCnt(params, "deployments"),
+		}
+		clusterModel.Label = common.FindData(Master[m], "metadata", "labels")
+		clusterModel.Annotation = common.FindData(Master[m], "metadata", "annotations")
+		clusterModel.Allocatable = common.FindData(Master[m], "status", "allocatable")
+		clusterModel.Capacity = common.FindData(Master[m], "status", "capacity")
+		clusterModel.Created_at = common.InterfaceToTime(common.FindData(Master[m], "metadata", "creationTimestamp"))
+		clusterModel.Version = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "kubeletVersion"))
+		clusterModel.Os = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "osImage"))
+		clusterModel.Kernel = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "kernelVersion"))
+		clusterModel.Events = getCallEvent(params)
+		clusterModel.Resource = ResourceCnt
+		// common.Transcode(Master[m], &clusterModel)
+		MasterList = append(MasterList, clusterModel)
 	}
-	var tsCluster model.Cluster
-	var clusterModel model.CLUSTER
-	common.Transcode(cluster, &tsCluster)
-	common.Transcode(tsCluster, &clusterModel)
+	if Worker != nil {
+		for m, _ := range Worker {
+			params.Name = params.Cluster
+			cluster := GetDBCluster(params)
+			if cluster == nil {
+				common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+				return nil
+			}
+			var tsCluster model.Cluster
+			var clusterModel model.CLUSTER
+			common.Transcode(cluster, &tsCluster)
+			common.Transcode(tsCluster, &clusterModel)
 
-	gpuList, check := GpuCheck(params.Name)
-	if check != false {
-		clusterModel.Gpu = gpuList
-	} else {
-		clusterModel.Gpu = nil
+			gpuList, check := GpuCheck(params.Name)
+			if check != false {
+				clusterModel.Gpu = gpuList
+			} else {
+				clusterModel.Gpu = nil
+			}
+			clusterModel.Allocatable = common.FindData(Worker[m], "status", "allocatable")
+			clusterModel.Capacity = common.FindData(Worker[m], "status", "capacity")
+			clusterModel.Label = common.FindData(Worker[m], "metadata", "labels")
+			clusterModel.Annotation = common.FindData(Worker[m], "metadata", "annotations")
+			clusterModel.Created_at = common.InterfaceToTime(common.FindData(Worker[m], "metadata", "creationTimestamp"))
+			clusterModel.Version = common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "kubeletVersion"))
+			clusterModel.Os = common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "osImage"))
+			clusterModel.Kernel = common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "kernelVersion"))
+			clusterModel.Events = getCallEvent(params)
+			// common.Transcode(Master[m], &clusterModel)
+			WorkerList = append(WorkerList, clusterModel)
+		}
 	}
-	clusterModel.Label = common.FindData(getData, "metadata", "labels")
-	clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
-	clusterModel.Created_at = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
-	clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
-	clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "osImage"))
-	clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
-	clusterModel.Events = getCallEvent(params)
+	// getData0 := gjson.Get(getData, "items").Array()
+	// for k, _ := range getData0 {
+	// 	fmt.Println("clusters!!!!!!!!!!!!!", getData0[k])
+
+	// }
+	// cluster := GetDBCluster(params)
+	// if cluster == nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+	// 	return nil
+	// }
+	// var tsCluster model.Cluster
+	// var clusterModel model.CLUSTER
+	// common.Transcode(cluster, &tsCluster)
+	// common.Transcode(tsCluster, &clusterModel)
+
+	// gpuList, check := GpuCheck(params.Name)
+	// if check != false {
+	// 	clusterModel.Gpu = gpuList
+	// } else {
+	// 	clusterModel.Gpu = nil
+	// }
+	// clusterModel.Label = common.FindData(getData, "metadata", "labels")
+	// clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
+	// clusterModel.Created_at = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+	// clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
+	// clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "osImage"))
+	// clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+	// clusterModel.Events = getCallEvent(params)
 	// common.Transcode(getData0, &clusterModel)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": clusterModel,
-		// "getData":  getData98,
+		"master": MasterList,
+		"worker": WorkerList,
 	})
 
 	// return nil

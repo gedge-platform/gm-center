@@ -108,4 +108,5 @@ func GEdgeRoute(e *echo.Echo) {
 	r2.Any("/monitoring/:kind", api.Monit)
 	// r2.Any("/monitoring/:kind/:name", api.Monit)
 	r2.Any("/monitoring/realtime/:kind", api.RealMetrics)
+	r2.Any("/monitoring/realtime", api.RealMetrics)
 }

@@ -59,7 +59,7 @@ func GetDeployment(c echo.Context) (err error) {
 	involvesData, _ := common.GetModelRelatedList(params)
 	// fmt.Printf("[####]data : %+v\n", testData)
 	return c.JSON(http.StatusOK, echo.Map{
-		"deployment":   deployment,
+		"data":         deployment,
 		"involvesData": involvesData,
 	})
 }
@@ -85,18 +85,19 @@ func GetDeployments(c echo.Context) (err error) {
 			UnavailableReplicas: common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "unavailableReplicas"))),
 		}
 		deployment := model.DEPLOYMENT{
-			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			Namespace:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			Replica:     replicas,
-			ClusterName: common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
-			UpdateAt:    common.InterfaceToTime(common.FindData(data[i], "status.conditions", "lastUpdateTime")),
-			Stauts:      common.InterfaceToString(common.FindData(data[i], "status.conditions", "status")),
+			Name:          common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Namespace:     common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Replica:       replicas,
+			ClusterName:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			CreateAt:      common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+			UpdateAt:      common.InterfaceToTime(common.FindData(data[i], "status.conditions", "lastUpdateTime")),
+			Stauts:        common.InterfaceToString(common.FindData(data[i], "status.conditions", "status")),
+			WorkspaceName: common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
 		}
 		deployments = append(deployments, deployment)
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"deployments": deployments,
+		"data": deployments,
 	})
 }
 

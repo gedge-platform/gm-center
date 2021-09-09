@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Success 200 {object} model.JOB
 // @Header 200 {string} Token "qwerty"
-// @Router /jobs/:name [get]
+// @Router /job/:name [get]
 func GetJobs(c echo.Context) error {
 	params := model.PARAMS{
 		Kind:      "jobs",
@@ -68,10 +68,11 @@ func GetJobs(c echo.Context) error {
 		CompletionTime: common.InterfaceToTime(common.FindData(getData, "status", "completionTime")),
 		Conditions:     conditionInfo,
 		Containers:     containerInfo,
+		Events:         getCallEvent(params),
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"jobs":     jobinfos,
+		"data":     jobinfos,
 		"involves": involvesData,
 	})
 }
@@ -111,7 +112,7 @@ func GetAllJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"jobs": jobs,
+		"data": jobs,
 	})
 }
 

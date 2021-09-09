@@ -17,6 +17,7 @@ type CRONJOB struct {
 	Active                     []Active     `json:"active,omitempty"`
 	Lable                      interface{}  `json:"label,omitempty"`
 	Annotations                interface{}  `json:"annotations,omitempty"`
+	Events                     []EVENT      `json:"events,omitempty"`
 }
 type Active struct {
 	Name      string `json:"name"`
@@ -25,7 +26,6 @@ type Active struct {
 }
 type ReferCronJob struct {
 	JOBList []JOBList `json:"jobs"`
-	Event   []EVENT1  `json:"events"`
 }
 type JOBList struct {
 	Metadata struct {

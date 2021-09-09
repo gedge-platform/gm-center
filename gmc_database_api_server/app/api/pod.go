@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Success 200 {object} model.POD
 // @Header 200 {string} Token "qwerty"
-// @Router /pods/:name [get]
+// @Router /pod/:name [get]
 func GetPods(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "pods",
@@ -59,10 +59,11 @@ func GetPods(c echo.Context) (err error) {
 	// common.Transcode(volumeMountsData, &volumeMountsInfo)
 	involvesData, _ := common.GetModelRelatedList(params)
 	log.Printf("#####getdata99 ", involvesData)
-
+	project := GetDBProject(params)
 	pod := model.POD{
-		Workspace: params.Workspace,
+		Workspace: project.WorkspaceName,
 		Cluster:   params.Cluster,
+
 		// Project:           params.Project,
 		Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Namespace:         common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
@@ -80,9 +81,10 @@ func GetPods(c echo.Context) (err error) {
 		ContainerStatuses: containerStatusesInfo,
 		Podcontainers:     podcontainersDataInfo,
 		// VolumeMounts:      volumeMountsInfo,
+		Events: getCallEvent(params),
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"pod":          pod,
+		"data":         pod,
 		"involvesData": involvesData,
 	})
 }
@@ -126,7 +128,7 @@ func GetAllPods(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"pods": pods,
+		"data": pods,
 	})
 }
 

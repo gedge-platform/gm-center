@@ -21,6 +21,7 @@ type POD struct {
 	StatusConditions  []StatusConditions `json:"statusConditions,omitempty"`
 	// VolumeMounts      []VolumeMounts      `json:"volumemounts"`
 	ContainerStatuses []ContainerStatuses `json:"containerStatuses,omitempty"`
+	Events            []EVENT             `json:"events,omitempty"`
 }
 
 type VolumeMounts struct {
@@ -126,7 +127,6 @@ type DeployInfo struct {
 type ReferDataDeploy struct {
 	DeployInfo  []DeployInfo  `json:"deployList"`
 	ServiceInfo []ServiceInfo `json:"serviceList"`
-	Event       []EVENT1      `json:"event"`
 }
 type ServiceInfo struct {
 	Metadata struct {

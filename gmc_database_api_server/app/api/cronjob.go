@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Success 200 {object} model.CRONJOB
 // @Header 200 {string} Token "qwerty"
-// @Router /cronjobs/:name [get]
+// @Router /cronjob/:name [get]
 func GetCronJobs(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -61,9 +61,10 @@ func GetCronJobs(c echo.Context) (err error) {
 		CreationTimestamp:          common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Containers:                 containerInfo,
 		Active:                     activeInfo,
+		Events:                     getCallEvent(params),
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"cronjob":      cronjob,
+		"data":         cronjob,
 		"involvesData": involvesData,
 	})
 }
@@ -104,7 +105,7 @@ func GetCronAllJobs(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"cronjobs": cronjobs,
+		"data": cronjobs,
 	})
 }
 

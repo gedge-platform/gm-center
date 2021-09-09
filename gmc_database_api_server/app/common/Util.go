@@ -648,7 +648,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Name = ""
 		cronjobName := InterfaceToString(FindData(data, "metadata", "name"))
 		uid := InterfaceToString(FindData(data, "metadata", "uid"))
-
+		log.Println("uid : ", uid)
 		log.Println("PARAMS.NAEMData12 : ", params.Name)
 		log.Println("jobName Data12 : ", cronjobName)
 		jobData, err := DataRequest(params)
@@ -666,20 +666,20 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Name = ""
 		test := InterfaceToString(FindData(jobData, "metadata", "name"))
 		log.Println("[#11test Data12 : ", test)
-		eventsData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
+		// eventsData, err := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
 
-		eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
-		log.Println("[#11eventRefer Data12 : ", eventRefer)
-		if err != nil {
-			return nil, err
-		}
-		var EventInfo []model.EVENT1
-		EventData := eventRefer
-		log.Printf("# 확인 ", EventData)
-		Transcode(EventData, &EventInfo)
+		// eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
+		// log.Println("[#11eventRefer Data12 : ", eventRefer)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// var EventInfo []model.EVENT1
+		// EventData := eventRefer
+		// log.Printf("# 확인 ", EventData)
+		// Transcode(EventData, &EventInfo)
 
 		var JobsInfo []model.JOBList
 		JobData := jobRefer
@@ -689,59 +689,54 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 		ReferData := model.ReferCronJob{
 			JOBList: JobsInfo,
-			Event:   EventInfo,
 		}
 
 		return &ReferData, nil
 	case "pods":
-		params.Kind = "replicasets"
-		params.Name = ""
 		labelApp := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name"))
 		selectLable := InterfaceToString(FindData(data, "metadata", "labels"))
 		uid := InterfaceToString(FindData(data, "metadata", "uid"))
 		podName := InterfaceToString(FindData(data, "metadata", "name"))
+		kind := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "kind"))
 		log.Println("PARAMS.NAEMData12 : ", params.Name)
 		log.Println("labels Data12 : ", labelApp)
 		log.Println("#44podName: ", podName)
 		log.Println("##55selectLable : ", selectLable)
 		log.Println("uid data : ", uid)
+		log.Println("kind data : ", kind)
 
-		repliData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-		repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
-		log.Printf("[###123]deployData", repliData)
-		log.Println("DeployRefer Data12 : ", repliRefer)
+		// params.Kind = "replicasets"
+		// params.Name = ""
 
-		if err != nil {
-			return nil, err
-		}
-		repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
+		// repliData, err := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
+		// log.Printf("[###123]deployData", repliData)
+		// log.Println("DeployRefer Data12 : ", repliRefer)
 
-		log.Println("[#4]deplyName ", repliuid)
+		// repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
 
-		params.Kind = "deployments"
-		params.Name = ""
+		// if err != nil {
+		// 	return nil, err
+		// }
 
-		deployData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-		log.Println("deploydata Data132 : ", deployData)
-		deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
-		if err != nil {
-			return nil, err
-		}
-		log.Println("deploy refer Data132 : ", deployRefer)
+		// log.Println("[#4]deplyName ", repliuid)
 
-		params.Kind = "events"
-		eventsData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-		eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
-		log.Println("[#11eventRefer Data12 : ", eventRefer)
+		// params.Kind = "deployments"
+		// params.Name = ""
+		// deployData, err := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// log.Println("deploydata Data132 : ", deployData)
+		// deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// log.Println("deploy refer Data132 : ", deployRefer)
+
 		if err != nil {
 			return nil, err
 		}
@@ -760,19 +755,14 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		var ServiceInfo []model.ServiceInfo
 		ServiceData := serviceRefer
 		Transcode(ServiceData, &ServiceInfo)
-		var EventInfo []model.EVENT1
-		EventData := eventRefer
-		log.Printf("# 확인 ", EventData)
-		Transcode(EventData, &EventInfo)
 
-		var DeployInfo []model.DeployInfo
-		DeployData := deployRefer
-		Transcode(DeployData, &DeployInfo)
+		log.Printf("[#222]", serviceData)
+
+		log.Printf("[#222]", serviceData)
 
 		ReferData := model.ReferDataDeploy{
-			DeployInfo:  DeployInfo,
+			// DeployInfo:  DeployInfo,
 			ServiceInfo: ServiceInfo,
-			Event:       EventInfo,
 		}
 		return ReferData, nil
 
@@ -808,4 +798,63 @@ func InterfaceToInt(i interface{}) int {
 func StringToInt(i string) int {
 	v, _ := strconv.Atoi(i)
 	return v
+}
+
+func FindDataLabelKey(i interface{}, p, f, u string) ([]string, []string, error) {
+	log.Println("[In #FindDataArr]")
+	log.Println("[#1] Data is ", i)
+	log.Println("[#2] find path string is ", p)
+	log.Println("[#2] find key string is ", f)
+	log.Println("[#3] uniq string is ", u)
+
+	// var itemCheck bool
+	var parse, data gjson.Result
+	var arr []gjson.Result
+	// var result interface{}
+	var result1 []string
+	var result2 []string
+	ia := InterfaceToString(i)
+
+	parse = gjson.Parse(ia)
+	log.Println("[#4] Parse is ", parse)
+
+	pathCheck := strings.Compare(p, "") != 0
+	// itemCheck = len(parse.Get("items").Array()) > 0
+	// log.Println("[#4] itemCheck is ", itemCheck)
+
+	if pathCheck {
+		data = parse.Get(p)
+		log.Println("[#5] filter data is ", data)
+	} else {
+		data = parse
+		log.Println("[#5] filter data is ", data)
+	}
+
+	len := len(data.Array())
+	log.Println("[#6] len(data) is ", len)
+
+	if len > 0 {
+		// list
+		arr = data.Array()
+		log.Println("[#7-1] len > 0, list")
+		for t, _ := range arr {
+			masterCheck := strings.Contains(arr[t].String(), "node-role.kubernetes.io/master")
+			if masterCheck {
+				result1 = append(result1, arr[t].String())
+			} else {
+				result2 = append(result2, arr[t].String())
+			}
+		}
+	} else if len == 1 {
+		masterCheck := strings.Contains(data.String(), "node-role.kubernetes.io/master")
+		if masterCheck {
+			result1 = append(result1, data.String())
+		} else {
+			result2 = append(result2, data.String())
+		}
+	}
+	// list 출력
+	return result1, result2, nil
+	// return strings.Join(results, ","), nil
+
 }

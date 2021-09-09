@@ -68,6 +68,7 @@ func GetJobs(c echo.Context) error {
 		CompletionTime: common.InterfaceToTime(common.FindData(getData, "status", "completionTime")),
 		Conditions:     conditionInfo,
 		Containers:     containerInfo,
+		Events:         getCallEvent(params),
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{

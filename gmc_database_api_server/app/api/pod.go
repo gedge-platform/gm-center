@@ -81,6 +81,7 @@ func GetPods(c echo.Context) (err error) {
 		ContainerStatuses: containerStatusesInfo,
 		Podcontainers:     podcontainersDataInfo,
 		// VolumeMounts:      volumeMountsInfo,
+		Events: getCallEvent(params),
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"data":         pod,

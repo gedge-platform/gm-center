@@ -765,7 +765,6 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			ServiceInfo: ServiceInfo,
 		}
 		return ReferData, nil
-
 	}
 
 	return nil, errors.New("")

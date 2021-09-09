@@ -30,6 +30,8 @@ func (dv *DataValidator) Validate(i interface{}) error {
 func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
+	r0 := e.Group("gmcapi/v1/auth")
+	r0.POST("", api.LoginUser)
 	// /gmcapi/v1
 	r := e.Group("/gmcapi/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		return api.AuthenticateUser(id, password), nil

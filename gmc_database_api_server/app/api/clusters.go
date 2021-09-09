@@ -240,6 +240,7 @@ func GetCluster(c echo.Context) (err error) {
 		clusterModel.Version = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "kubeletVersion"))
 		clusterModel.Os = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "osImage"))
 		clusterModel.Kernel = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "kernelVersion"))
+		clusterModel.ContainerRuntimeVersion = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "containerRuntimeVersion"))
 		clusterModel.Events = getCallEvent(params)
 		clusterModel.Resource = ResourceCnt
 		// common.Transcode(Master[m], &clusterModel)
@@ -247,73 +248,89 @@ func GetCluster(c echo.Context) (err error) {
 	}
 	if Worker != nil {
 		for m, _ := range Worker {
-			params.Name = params.Cluster
-			cluster := GetDBCluster(params)
-			if cluster == nil {
-				common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-				return nil
-			}
-			var tsCluster model.Cluster
-			var clusterModel model.CLUSTER
-			common.Transcode(cluster, &tsCluster)
-			common.Transcode(tsCluster, &clusterModel)
+			// params.Name = params.Cluster
+			// cluster := GetDBCluster(params)
+			// if cluster == nil {
+			// 	common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			// 	return nil
+			// }
+			// var tsCluster model.Cluster
+			// var clusterModel model.CLUSTER
 
-			gpuList, check := GpuCheck(params.Name)
-			if check != false {
-				clusterModel.Gpu = gpuList
-			} else {
-				clusterModel.Gpu = nil
+			addressesData := common.FindData(Worker[m], "status", "addresses")
+			var addressesList []model.ADDRESSES
+			common.Transcode(addressesData, &addressesList)
+			clusterInfo := model.Cluster{
+				Name:       common.InterfaceToString(common.FindData(Worker[m], "metadata", "name")),
+				Created_at: common.InterfaceToTime(common.FindData(Worker[m], "metadata", "creationTimestamp")),
 			}
-			clusterModel.Allocatable = common.FindData(Worker[m], "status", "allocatable")
-			clusterModel.Capacity = common.FindData(Worker[m], "status", "capacity")
-			clusterModel.Label = common.FindData(Worker[m], "metadata", "labels")
-			clusterModel.Annotation = common.FindData(Worker[m], "metadata", "annotations")
-			clusterModel.Created_at = common.InterfaceToTime(common.FindData(Worker[m], "metadata", "creationTimestamp"))
-			clusterModel.Version = common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "kubeletVersion"))
-			clusterModel.Os = common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "osImage"))
-			clusterModel.Kernel = common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "kernelVersion"))
-			clusterModel.Events = getCallEvent(params)
+			// common.Transcode(clusterInfo, &clusterModel)
+			var GPUList []map[string]interface{}
+			gpuCheck, check := GpuCheck(params.Name)
+			if check != false {
+				GPUList = gpuCheck
+			} else {
+				GPUList = nil
+			}
+			clusterModel := model.CLUSTER{
+				Cluster: clusterInfo,
+				// clusterModel.ipAddr = common.InterfaceToString(common.FindData(Worker[m], "metadata", "name"))
+				Gpu:                     GPUList,
+				Addresses:               addressesList,
+				Allocatable:             common.FindData(Worker[m], "status", "allocatable"),
+				Capacity:                common.FindData(Worker[m], "status", "capacity"),
+				Label:                   common.FindData(Worker[m], "metadata", "labels"),
+				Annotation:              common.FindData(Worker[m], "metadata", "annotations"),
+				Version:                 common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "kubeletVersion")),
+				Os:                      common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "osImage")),
+				Kernel:                  common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "kernelVersion")),
+				ContainerRuntimeVersion: common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "containerRuntimeVersion")),
+				Events:                  getCallEvent(params),
+				// Resource:                nil,
+			}
+			// fmt.Println("[###############nodeip]", common.FindDataStr(Worker[m], "status", "addresses"))
+
 			// common.Transcode(Master[m], &clusterModel)
 			WorkerList = append(WorkerList, clusterModel)
 		}
 	}
-	// getData0 := gjson.Get(getData, "items").Array()
-	// for k, _ := range getData0 {
-	// 	fmt.Println("clusters!!!!!!!!!!!!!", getData0[k])
-
-	// }
-	// cluster := GetDBCluster(params)
-	// if cluster == nil {
-	// 	common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-	// 	return nil
-	// }
-	// var tsCluster model.Cluster
-	// var clusterModel model.CLUSTER
-	// common.Transcode(cluster, &tsCluster)
-	// common.Transcode(tsCluster, &clusterModel)
-
-	// gpuList, check := GpuCheck(params.Name)
-	// if check != false {
-	// 	clusterModel.Gpu = gpuList
-	// } else {
-	// 	clusterModel.Gpu = nil
-	// }
-	// clusterModel.Label = common.FindData(getData, "metadata", "labels")
-	// clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
-	// clusterModel.Created_at = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
-	// clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
-	// clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "osImage"))
-	// clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
-	// clusterModel.Events = getCallEvent(params)
-	// common.Transcode(getData0, &clusterModel)
-
 	return c.JSON(http.StatusOK, echo.Map{
 		"master": MasterList,
 		"worker": WorkerList,
 	})
-
-	// return nil
 }
+
+// getData0 := gjson.Get(getData, "items").Array()
+// for k, _ := range getData0 {
+// 	fmt.Println("clusters!!!!!!!!!!!!!", getData0[k])
+
+// }
+// cluster := GetDBCluster(params)
+// if cluster == nil {
+// 	common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+// 	return nil
+// }
+// var tsCluster model.Cluster
+// var clusterModel model.CLUSTER
+// common.Transcode(cluster, &tsCluster)
+// common.Transcode(tsCluster, &clusterModel)
+
+// gpuList, check := GpuCheck(params.Name)
+// if check != false {
+// 	clusterModel.Gpu = gpuList
+// } else {
+// 	clusterModel.Gpu = nil
+// }
+// clusterModel.Label = common.FindData(getData, "metadata", "labels")
+// clusterModel.Annotation = common.FindData(getData, "metadata", "annotations")
+// clusterModel.Created_at = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+// clusterModel.Version = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kubeletVersion"))
+// clusterModel.Os = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "osImage"))
+// clusterModel.Kernel = common.InterfaceToString(common.FindData(getData, "status.nodeInfo", "kernelVersion"))
+// clusterModel.Events = getCallEvent(params)
+// common.Transcode(getData0, &clusterModel)
+
+// return nil
 
 func GetClusters(c echo.Context) (err error) {
 	var clusterList []model.CLUSTER

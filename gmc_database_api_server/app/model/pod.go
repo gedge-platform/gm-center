@@ -91,7 +91,7 @@ type ContainerStatuses struct {
 	ContainerID  string `json:"containerID,omitempty"`
 	Name         string `json:"name,omitempty"`
 	Ready        bool   `json:"ready,omitempty"`
-	RestartCount int    `json:"restartCount,omitempty"`
+	RestartCount int    `json:"restartCount"`
 	Image        string `json:"image,omitempty"`
 	Started      bool   `json:"started,omitempty"`
 }

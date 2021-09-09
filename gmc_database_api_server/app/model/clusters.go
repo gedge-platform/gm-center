@@ -28,6 +28,9 @@ type CLUSTER struct {
 	Annotation    interface{}              `json:"annotations"`
 	CreateAt      time.Time                `json:"created_at"`
 	ResourceUsage interface{}              `json:"resourceUsage"`
+	Allocatable   interface{}              `json:"allocatable"`
+	Capacity      interface{}              `json:"capacity"`
+	Resource      PROJECT_RESOURCE         `json:"resource"`
 	Events        []EVENT                  `json:"events"`
 }
 type GPU struct {

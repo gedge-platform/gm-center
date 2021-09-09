@@ -411,7 +411,7 @@ func GetProjects(c echo.Context) (err error) {
 	// return nil
 }
 func ResourceCnt(params model.PARAMS, kind string) int {
-	// fmt.Printf("[##]params : %+v\n", params)
+	fmt.Printf("[##]params : %+v\n", params)
 	params.Kind = kind
 	params.Project = params.Name
 	params.Name = ""

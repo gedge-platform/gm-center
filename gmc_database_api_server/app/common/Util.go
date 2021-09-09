@@ -648,7 +648,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Name = ""
 		cronjobName := InterfaceToString(FindData(data, "metadata", "name"))
 		uid := InterfaceToString(FindData(data, "metadata", "uid"))
-
+		log.Println("uid : ", uid)
 		log.Println("PARAMS.NAEMData12 : ", params.Name)
 		log.Println("jobName Data12 : ", cronjobName)
 		jobData, err := DataRequest(params)
@@ -666,20 +666,20 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Name = ""
 		test := InterfaceToString(FindData(jobData, "metadata", "name"))
 		log.Println("[#11test Data12 : ", test)
-		eventsData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
+		// eventsData, err := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
 
-		eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
-		log.Println("[#11eventRefer Data12 : ", eventRefer)
-		if err != nil {
-			return nil, err
-		}
-		var EventInfo []model.EVENT1
-		EventData := eventRefer
-		log.Printf("# 확인 ", EventData)
-		Transcode(EventData, &EventInfo)
+		// eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
+		// log.Println("[#11eventRefer Data12 : ", eventRefer)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// var EventInfo []model.EVENT1
+		// EventData := eventRefer
+		// log.Printf("# 확인 ", EventData)
+		// Transcode(EventData, &EventInfo)
 
 		var JobsInfo []model.JOBList
 		JobData := jobRefer
@@ -689,7 +689,6 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 		ReferData := model.ReferCronJob{
 			JOBList: JobsInfo,
-			Event:   EventInfo,
 		}
 
 		return &ReferData, nil
@@ -738,13 +737,6 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		// }
 		// log.Println("deploy refer Data132 : ", deployRefer)
 
-		params.Kind = "events"
-		eventsData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-		eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
-		log.Println("[#11eventRefer Data12 : ", eventRefer)
 		if err != nil {
 			return nil, err
 		}
@@ -763,17 +755,12 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		var ServiceInfo []model.ServiceInfo
 		ServiceData := serviceRefer
 		Transcode(ServiceData, &ServiceInfo)
-		var EventInfo []model.EVENT1
-		EventData := eventRefer
-		log.Printf("# 확인 ", EventData)
-		Transcode(EventData, &EventInfo)
 
 		log.Printf("[#222]", serviceData)
 
 		ReferData := model.ReferDataDeploy{
 			// DeployInfo:  DeployInfo,
 			ServiceInfo: ServiceInfo,
-			Event:       EventInfo,
 		}
 		return ReferData, nil
 

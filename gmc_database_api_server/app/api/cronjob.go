@@ -61,6 +61,7 @@ func GetCronJobs(c echo.Context) (err error) {
 		CreationTimestamp:          common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Containers:                 containerInfo,
 		Active:                     activeInfo,
+		Events:                     getCallEvent(params),
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"data":         cronjob,

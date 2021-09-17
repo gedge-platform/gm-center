@@ -32,7 +32,7 @@ type CLUSTER struct {
 	Capacity                interface{}              `json:"capacity"`
 	Resource                PROJECT_RESOURCE         `json:"resource"`
 	ContainerRuntimeVersion interface{}              `json:"containerRuntimeVersion"`
-	Events                  []EVENT                  `json:"events,omitempty"`
+	Events                  []EVENT                  `json:"events"`
 	Addresses               []ADDRESSES              `json:"addresses,omitempty"`
 }
 type GPU struct {

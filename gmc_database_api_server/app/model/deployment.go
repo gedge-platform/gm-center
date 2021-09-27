@@ -65,7 +65,9 @@ type DEPLOYMENTPOD struct {
 }
 
 type DEPLOYMENTSVC struct {
-	Name string      `json:"name"`
+	Name string `json:"name"`
+	// ClusterIP string      `json:"clusterIP"`
+	// Type      string      `json:"type"`
 	Port interface{} `json:"port"`
 }
 

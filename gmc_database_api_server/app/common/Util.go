@@ -592,8 +592,9 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			Svcs = svcList
 		}
 		deployments := model.DEPLOYMENTLISTS{
-			Pods:     Pods,
-			Services: Svcs,
+			Pods:        Pods,
+			Services:    Svcs,
+			ReplicaName: replicaName,
 		}
 		return deployments, nil
 	case "jobs":

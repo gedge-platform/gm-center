@@ -52,8 +52,9 @@ type REPLICA struct {
 
 type DEPLOYMENTLISTS struct {
 	// Pods     []DEPLOYMENTPOD `json:"pods"`
-	Pods     interface{} `json:"pods"`
-	Services interface{} `json:"services"`
+	Pods        interface{} `json:"pods"`
+	Services    interface{} `json:"services"`
+	ReplicaName string      `json:"replicaName"`
 }
 type DEPLOYMENTPOD struct {
 	Name         string `json:"name"`

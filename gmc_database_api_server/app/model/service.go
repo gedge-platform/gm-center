@@ -23,11 +23,17 @@ type SERVICE struct {
 }
 
 type SERVICELISTS struct {
-	Pods        interface{}       `json:"pods"`
+	Pods        []SERVICEPOD      `json:"pods"`
 	Deployments SERVICEDEPLOYMENT `json:"deployments"`
 }
 
 type SERVICEDEPLOYMENT struct {
 	Name     string    `json:"name"`
 	UpdateAt time.Time `json:"updateAt"`
+}
+
+type SERVICEPOD struct {
+	Ip       string `json:"ip"`
+	NodeName string `json:"nodeName"`
+	Name     string `json:"name"`
 }

@@ -30,8 +30,13 @@ func GetModelList(params model.PARAMS) []string {
 			// getData0 := common.FindingArray(common.Finding(getData, "items"))
 			for k, _ := range getData0 {
 				str := getData0[k].String()
+				namespace := gjson.Get(str, "metadata.namespace")
+				params.Name = namespace.String()
+				projectCheck := GetDBProject(params)
+				params.Name = ""
 				strVal, _ := sjson.Set(str, "clusterName", Clusters[c].Name)
-				DataList = append(DataList, strVal)
+				strVal2, _ := sjson.Set(strVal, "workspaceName", projectCheck.WorkspaceName)
+				DataList = append(DataList, strVal2)
 			}
 		}
 		// t2 := time.Now()
@@ -45,8 +50,13 @@ func GetModelList(params model.PARAMS) []string {
 		getData0 := gjson.Get(getData, "items").Array()
 		for k, _ := range getData0 {
 			str := getData0[k].String()
+			namespace := gjson.Get(str, "metadata.namespace")
+			params.Name = namespace.String()
+			projectCheck := GetDBProject(params)
+			params.Name = ""
 			strVal, _ := sjson.Set(str, "clusterName", params.Cluster)
-			DataList = append(DataList, strVal)
+			strVal2, _ := sjson.Set(strVal, "workspaceName", projectCheck.WorkspaceName)
+			DataList = append(DataList, strVal2)
 		}
 		return DataList
 	} else if params.Workspace != "" && params.Cluster == "" && params.Project == "" {
@@ -108,7 +118,8 @@ func GetModelList(params model.PARAMS) []string {
 				for k, _ := range getData0 {
 					str := getData0[k].String()
 					strVal, _ := sjson.Set(str, "clusterName", params.Cluster)
-					DataList = append(DataList, strVal)
+					strVal2, _ := sjson.Set(strVal, "clusterName", params.Workspace)
+					DataList = append(DataList, strVal2)
 				}
 
 			}
@@ -129,7 +140,8 @@ func GetModelList(params model.PARAMS) []string {
 					for k, _ := range getData0 {
 						str := getData0[k].String()
 						strVal, _ := sjson.Set(str, "clusterName", slice[w])
-						DataList = append(DataList, strVal)
+						strVal2, _ := sjson.Set(strVal, "clusterName", params.Workspace)
+						DataList = append(DataList, strVal2)
 					}
 				}
 				return DataList

@@ -7,7 +7,7 @@ type DEPLOYMENT struct {
 	Namespace     string      `json:"project"`
 	ClusterName   string      `json:"cluster"`
 	WorkspaceName string      `json:"workspace,omitempty"`
-	Stauts        string      `json:"stauts"`
+	Stauts        string      `json:"status"`
 	Replica       REPLICA     `json:"replica"`
 	Strategy      interface{} `json:"strategy,omitempty"`
 	Containers    interface{} `json:"containers,omitempty"`

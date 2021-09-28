@@ -456,26 +456,35 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "endpoints"
 		params.Name = origName
 
-		endPointData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
+		endPointData, _ := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		fmt.Println("########################endPointData", endPointData)
+
+		fmt.Println("sdfsdfdsfdfs", Filter(endPointData, "subsets.#.addresses"))
+
 		var Pods []model.SERVICEPOD
-		PodData := FindingArray(Filter(endPointData, "subsets.#.addresses"))[0].Array()
-		for i, _ := range PodData {
-			Pod := model.SERVICEPOD{
-				Ip:       (gjson.Get(PodData[i].String(), "ip")).String(),
-				NodeName: (gjson.Get(PodData[i].String(), "nodeName")).String(),
-				Name:     (gjson.Get(PodData[i].String(), "targetRef.name")).String(),
+
+		if Filter(endPointData, "subsets.#.addresses") != "" {
+			PodData := FindingArray(Filter(endPointData, "subsets.#.addresses"))[0].Array()
+			fmt.Println("########################PodData", PodData)
+			for i, _ := range PodData {
+				Pod := model.SERVICEPOD{
+					Ip:       (gjson.Get(PodData[i].String(), "ip")).String(),
+					NodeName: (gjson.Get(PodData[i].String(), "nodeName")).String(),
+					Name:     (gjson.Get(PodData[i].String(), "targetRef.name")).String(),
+				}
+				Pods = append(Pods, Pod)
 			}
-			Pods = append(Pods, Pod)
 		}
+
 		// log.Printf("# pod list확인 ", podRefer)
 
 		// for i, _ := range PodData {
 
 		// }
-		log.Println("endPoints 뿌려주기 : ", PodData)
+		// log.Println("endPoints 뿌려주기 : ", PodData)
 
 		testData := FindData(endPointData, "subsets.#.addresses.0", "targetRef.name")
 		log.Println("testData 뿌려주기 : ", testData)

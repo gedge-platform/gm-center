@@ -415,22 +415,22 @@ func ResourceCnt(params model.PARAMS, kind string) int {
 	params.Kind = kind
 	params.Project = params.Name
 	params.Name = ""
-	cnt := 0
+	// cnt := 0
 	deployment_cnt := 0
 	deployments, _ := common.DataRequest(params)
 	deployment := common.FindingArray(common.Finding(deployments, "items"))
-	if kind == "pods" {
-		for i, _ := range deployment {
-			phase := gjson.Get(deployment[i].String(), "status.phase").String()
-			if phase == "Running" {
-				cnt++
-			}
-		}
-		deployment_cnt = cnt
-	} else {
-		deployment_cnt = common.FindingLen2(deployment)
-	}
-
+	// if kind == "pods" {
+	// 	for i, _ := range deployment {
+	// 		phase := gjson.Get(deployment[i].String(), "status.phase").String()
+	// 		if phase == "Running" {
+	// 			cnt++
+	// 		}
+	// 	}
+	// 	deployment_cnt = cnt
+	// } else {
+	// 	deployment_cnt = common.FindingLen2(deployment)
+	// }
+	deployment_cnt = common.FindingLen2(deployment)
 	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
 	return deployment_cnt
 }

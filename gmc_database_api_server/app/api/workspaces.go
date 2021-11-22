@@ -52,18 +52,21 @@ func CreateWorkspace(c echo.Context) (err error) {
 	models := new(model.Workspace)
 
 	if err = c.Bind(models); err != nil {
-		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, err)
+		// common.ErrorMsg(c, http.StatusBadRequest, err)
+
+		// return nil
 	}
 	if err = c.Validate(models); err != nil {
-		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return c.JSON(http.StatusUnprocessableEntity, err)
 	}
-
-	if err != nil {
-		panic(err)
-	}
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	if err := db.Create(&models).Error; err != nil {
-		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+		return c.JSON(http.StatusUnprocessableEntity, err)
+		// return nil
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{"data": models})

@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -130,7 +131,7 @@ func CreateProject(c echo.Context) (err error) {
 
 		var jsonStr = []byte(fmt.Sprint(string(data)))
 
-		code := RequsetKube(url, "POST", jsonStr, Token)
+		code, _ := RequsetKube(url, "POST", jsonStr, Token)
 
 		switch code {
 		case 200:
@@ -179,7 +180,7 @@ func UpdateProject(c echo.Context) (err error) {
 
 		var jsonStr = []byte(fmt.Sprint(string(data)))
 
-		code := RequsetKube(url, "PATCH", jsonStr, Token)
+		code, _ := RequsetKube(url, "PATCH", jsonStr, Token)
 
 		switch code {
 		case 200:
@@ -220,7 +221,7 @@ func DeleteProject(c echo.Context) (err error) {
 			return err
 		}
 
-		code := RequsetKube(url, "DELETE", nil, Token)
+		code := RequsetKubeDelete(url, "DELETE", Token)
 
 		switch code {
 		case 200:
@@ -249,15 +250,14 @@ func FindProjectDB(db *gorm.DB, select_val string, search_val string) *model.Pro
 }
 func GetProject(c echo.Context) (err error) {
 	params := model.PARAMS{
-		Kind:      "namespaces",
-		Name:      c.Param("name"),
-		Cluster:   c.QueryParam("cluster"),
-		Workspace: c.QueryParam("workspace"),
-		Project:   c.QueryParam("project"),
-		Method:    c.Request().Method,
-		Body:      responseBody(c.Request().Body),
+		Kind:    "namespaces",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
 	}
-	// params.Workspace = c.Param("name")
+	params.Workspace = c.Param("name")
 	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
@@ -302,7 +302,7 @@ func GetProject(c echo.Context) (err error) {
 
 	projectModel.Resource = ResourceCnt
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": projectModel,
+		"project": projectModel,
 	})
 }
 func GetProjects(c echo.Context) (err error) {
@@ -317,8 +317,8 @@ func GetProjects(c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	if c.QueryParam("workspace") == "" && c.QueryParam("cluster") != "" {
-		// params.Workspace = c.QueryParam("cluster")
-		// params.Project = c.QueryParam("cluster")
+		params.Workspace = c.QueryParam("cluster")
+		params.Project = c.QueryParam("cluster")
 		getData, err := common.DataRequest(params)
 		if err != nil {
 			common.ErrorMsg(c, http.StatusNotFound, err)
@@ -342,6 +342,9 @@ func GetProjects(c echo.Context) (err error) {
 			Projects = append(Projects, Project)
 		}
 	} else if c.QueryParam("workspace") != "" && c.QueryParam("cluster") == "" {
+		params.Workspace = c.QueryParam("workspace")
+		params.Cluster = c.QueryParam("workspace")
+		params.Project = c.QueryParam("workspace")
 		workspace := GetDBWorkspace(params)
 		if workspace == nil {
 			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
@@ -379,7 +382,7 @@ func GetProjects(c echo.Context) (err error) {
 		Clusters := GetAllDBClusters(params)
 		for i, _ := range Clusters {
 			params.Cluster = Clusters[i].Name
-			// params.Workspace = Clusters[i].Name
+			params.Workspace = Clusters[i].Name
 			params.Name = ""
 			getData, err := common.DataRequest(params)
 			if err != nil {
@@ -399,7 +402,7 @@ func GetProjects(c echo.Context) (err error) {
 				Project.CreateAt = (gjson.Get(getData0[k].String(), "metadata.creationTimestamp")).Time()
 				Project.ClusterName = params.Cluster
 				tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-				tempresult := NowMonit("namespace", Project.ClusterName, Project.Name, tempMetric)
+				tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
 				Project.ResourceUsage = tempresult
 				Projects = append(Projects, Project)
 			}
@@ -411,98 +414,65 @@ func GetProjects(c echo.Context) (err error) {
 	// return nil
 }
 func ResourceCnt(params model.PARAMS, kind string) int {
-	fmt.Printf("[##]params : %+v\n", params)
+	// fmt.Printf("[##]params : %+v\n", params)
 	params.Kind = kind
 	params.Project = params.Name
 	params.Name = ""
-	// cnt := 0
-	deployment_cnt := 0
 	deployments, _ := common.DataRequest(params)
 	deployment := common.FindingArray(common.Finding(deployments, "items"))
-	// if kind == "pods" {
-	// 	for i, _ := range deployment {
-	// 		phase := gjson.Get(deployment[i].String(), "status.phase").String()
-	// 		if phase == "Running" {
-	// 			cnt++
-	// 		}
-	// 	}
-	// 	deployment_cnt = cnt
-	// } else {
-	// 	deployment_cnt = common.FindingLen2(deployment)
+	// for i, _ := range deployment {
+	// 	fmt.Printf("[##]names : %s\n", (gjson.Get(deployment[i].String(), "metadata.name")).String())
+	// 	fmt.Printf("[##]index : %d\n", i)
 	// }
-	deployment_cnt = common.FindingLen2(deployment)
+	deployment_cnt := common.FindingLen2(deployment)
 	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
 	return deployment_cnt
 }
 
-func RequsetKube(url string, method string, reqdata []byte, token string) int {
+func RequsetKube(url string, method string, reqdata []byte, token string) (int, string) {
 
-	switch method {
-	case "POST":
-		client := &http.Client{}
-		req, _ := http.NewRequest(method, url, bytes.NewBuffer(reqdata))
+	client := &http.Client{}
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer(reqdata))
 
-		req.Header.Add("Authorization", "Bearer "+token)
-		req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
 
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-		res, err := client.Do(req)
-		if err != nil {
-			fmt.Println(err)
-			return 0
-		}
-		defer res.Body.Close()
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return 0, ""
+	}
+	defer res.Body.Close()
 
-		// body, err := ioutil.ReadAll(res.Body)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return 0
-		// }
-
-		// return res.StatusCode, string(body)
-		return res.StatusCode
-	case "DELETE":
-		client := &http.Client{}
-		req, _ := http.NewRequest(method, url, nil)
-
-		req.Header.Add("Authorization", "Bearer "+token)
-		req.Header.Add("Content-Type", "application/json")
-
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-		res, err := client.Do(req)
-		if err != nil {
-			fmt.Println(err)
-			return 500
-		}
-
-		return res.StatusCode
-	case "PUT":
-	case "PATCH":
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return 0, ""
 	}
 
-	return 404
+	return res.StatusCode, string(body)
 }
 
-// func RequsetKubeDelete(url string, method string, token string) int {
+func RequsetKubeDelete(url string, method string, token string) int {
 
-// 	client := &http.Client{}
-// 	req, _ := http.NewRequest(method, url, nil)
+	client := &http.Client{}
+	req, _ := http.NewRequest(method, url, nil)
 
-// 	req.Header.Add("Authorization", "Bearer "+token)
-// 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
 
-// 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-// 	res, err := client.Do(req)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return 500
-// 	}
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return 500
+	}
 
-// 	return res.StatusCode
-// }
+	return res.StatusCode
+}
 
 func GetClusterDB(str string) *model.Cluster {
 	search_val := str
@@ -564,7 +534,6 @@ func CreateProjectDB(c echo.Context) (err error, st *model.Project) {
 
 	if err := db.Create(&models).Error; err != nil {
 		common.ErrorMsg(c, http.StatusExpectationFailed, err)
-
 		return err, models
 	}
 

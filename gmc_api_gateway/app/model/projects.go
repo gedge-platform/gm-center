@@ -24,7 +24,7 @@ type PROJECT struct {
 	Label         interface{}      `json:"labels,omitempty",`
 	Annotation    interface{}      `json:"annotations,omitempty"`
 	ResourceUsage interface{}      `json:"resourceUsage,omitempty"`
-	Events        []EVENT          `json:"events"`
+	Events        []EVENT          `json:"events,omitempty"`
 }
 
 // type PROJECT_DETAIL struct {

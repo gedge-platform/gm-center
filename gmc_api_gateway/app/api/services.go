@@ -1,14 +1,8 @@
 package api
 
 import (
-<<<<<<< HEAD:gmc_database_api_server/app/api/services.go
-	"fmt"
-	"gmc_database_api_server/app/common"
-	"gmc_database_api_server/app/model"
-=======
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
->>>>>>> db7616b752fca0d659b0b0bd1f8bf862f3c64e6c:gmc_api_gateway/app/api/services.go
 	"log"
 	"net/http"
 
@@ -30,8 +24,7 @@ func GetService(c echo.Context) error {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	fmt.Println("[###########service]", getData)
-	fmt.Println("[###########ingress]", common.InterfaceToString(common.FindDataStr(getData, "status.loadBalancer.ingress.0", "ip")))
+
 	service := model.SERVICE{
 		Name:            common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Workspace:       params.Workspace,
@@ -44,7 +37,6 @@ func GetService(c echo.Context) error {
 		SessionAffinity: common.InterfaceToString(common.FindData(getData, "spec", "type")),
 		Events:          getCallEvent(params),
 		CreateAt:        common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
-		ExternalIp:      common.InterfaceToString(common.FindData(getData, "status.loadBalancer.ingress.0", "ip")),
 		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
 	}
 
@@ -52,7 +44,7 @@ func GetService(c echo.Context) error {
 	log.Printf("#####involvesData ", involvesData)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data":         service,
+		"service":      service,
 		"involvesData": involvesData,
 	})
 }
@@ -72,47 +64,24 @@ func GetServices(c echo.Context) (err error) {
 	// fmt.Printf("#################dataerr : %s", data)
 	for i, _ := range data {
 		service := model.SERVICE{
-			Name:       common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			Cluster:    common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-			Project:    common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			Type:       common.InterfaceToString(common.FindData(data[i], "spec", "type")),
-			ClusterIp:  common.InterfaceToString(common.FindData(data[i], "spec", "clusterIP")),
-			Workspace:  common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
-			Ports:      common.FindData(data[i], "spec", "ports"),
-			ExternalIp: common.InterfaceToString(common.FindData(data[i], "status.loadBalancer.ingress.0", "ip")),
-			CreateAt:   common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+			Name:      common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Cluster:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Project:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Type:      common.InterfaceToString(common.FindData(data[i], "spec", "type")),
+			ClusterIp: common.InterfaceToString(common.FindData(data[i], "spec", "clusterIP")),
+			Ports:     common.FindData(data[i], "spec", "ports"),
+			CreateAt:  common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 		}
 		services = append(services, service)
 	}
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": services,
+		"services": services,
 	})
 }
 
 func CreateService(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "services",
-		Cluster: c.QueryParam("cluster"),
-		Project: c.QueryParam("project"),
-		Method:  c.Request().Method,
-		Body:    responseBody(c.Request().Body),
-	}
-
-	postData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
-	})
-}
-
-func DeleteService(c echo.Context) (err error) {
-	params := model.PARAMS{
-		Kind:    "services",
-		Name:    c.Param("name"),
 		Cluster: c.QueryParam("cluster"),
 		Project: c.QueryParam("project"),
 		Method:  c.Request().Method,

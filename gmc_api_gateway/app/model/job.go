@@ -20,7 +20,6 @@ type JOB struct {
 	Conditions     []Conditions     `json:"conditions,omitempty"`
 	StartTime      time.Time        `json:"startTime,omitempty"`
 	CompletionTime time.Time        `json:"completionTime,omitempty"`
-	Events         []EVENT          `json:"events,omitempty"`
 }
 
 // type JOBALL struct {

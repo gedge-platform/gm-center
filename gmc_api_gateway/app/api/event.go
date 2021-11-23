@@ -13,7 +13,6 @@ func getCallEvent(params model.PARAMS) []model.EVENT {
 	var List []model.EVENT
 	searchName := params.Name
 	params.Name = ""
-	clusterName := params.Cluster
 	params.Kind = "events"
 	fmt.Printf("[#]staticKind : %s\n", staticKind)
 	getData, _ := common.DataRequest(params)
@@ -29,7 +28,6 @@ func getCallEvent(params model.PARAMS) []model.EVENT {
 				Message:   (gjson.Get(events[e].String(), "note")).String(),
 				Reason:    (gjson.Get(events[e].String(), "reason")).String(),
 				Type:      (gjson.Get(events[e].String(), "type")).String(),
-				Cluster:   clusterName,
 				EventTime: (gjson.Get(events[e].String(), "metadata.creationTimestamp")).Time(),
 			}
 			List = append(List, event)

@@ -32,7 +32,7 @@ GSE API Server는 초저지연 데이터 처리 프레임워크의 사용 편의
 
 - 구조
 
-![GM-Center-architecture](https://github.com/gedge-platform/gm-center/blob/develop/docs/01_architecture.png)
+![GM-Center-architecture](https://github.com/gedge-platform/gm-center/blob/develop/imgs/01_architecture.png)
 
 
 - 구성요소

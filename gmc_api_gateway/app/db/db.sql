@@ -91,13 +91,15 @@ create table PROJECT_INFO
 (
     projectNum         int unsigned auto_increment comment '프로젝트 고유번호'
         primary key,
-    projectName        varchar(45)                           not null comment '프로젝트 이름',
-    projectDescription varchar(2048)                         null comment '프로젝트 설명',
-    projectType        varchar(45)                           not null comment '유저 프로젝트 / 시스템 프로젝트 구분',
-    projectOwner       varchar(45)                           not null comment '프로젝트 소유자',
-    projectCreator     varchar(45)                           not null comment '프로젝트 생성자',
-    created_at         timestamp default current_timestamp() not null on update current_timestamp() comment '프로젝트 생성 일시',
-    workspaceName      varchar(45)                           not null comment '워크스페이스 이름',
+    projectName        varchar(45)                               not null comment '프로젝트 이름',
+    projectDescription varchar(2048)                             null comment '프로젝트 설명',
+    projectType        varchar(45)                               not null comment '유저 프로젝트 / 시스템 프로젝트 구분',
+    projectOwner       varchar(45)                               not null comment '프로젝트 소유자',
+    projectCreator     varchar(45)                               not null comment '프로젝트 생성자',
+    created_at         timestamp     default current_timestamp() not null on update current_timestamp() comment '프로젝트 생성 일시',
+    workspaceName      varchar(45)                               not null comment '워크스페이스 이름',
+    selectCluster      varchar(2048) default ''                  not null comment '선택한 클러스터
+',
     constraint PROJECT_INFO_projectName_uindex
         unique (projectName),
     constraint PROJECT_INFO_MEMBER_INFO_memberName_fk

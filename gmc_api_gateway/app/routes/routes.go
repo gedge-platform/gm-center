@@ -30,8 +30,12 @@ func (dv *DataValidator) Validate(i interface{}) error {
 func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
+	r0 := e.Group("gmcapi/v1/auth")
+	r0.POST("", api.LoginUser)
 	// /gmcapi/v1
-	r := e.Group("/gmcapi/v1")
+	r := e.Group("/gmcapi/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
+		return api.AuthenticateUser(id, password), nil
+	}))
 	r.GET("/members", api.GetAllMembers)
 	r.POST("/members", api.CreateMember)
 	r.GET("/members/:id", api.GetMember)
@@ -45,13 +49,14 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/apps/:name", api.DeleteApp)
 
 	r.GET("/clusters", api.GetClusters)
-	// r.POST("/clusters", api.Create_Cluster)
+	r.POST("/clusters", api.CreateCluster)
 	r.GET("/clusters/:name", api.GetCluster)
-	// r.PUT("/clusters/:name", api.Update_Cluster)
-	// r.DELETE("/clusters/:name", api.Delete_Cluster)
+	// r.PUT("/clusters/:name", api.UpdateCluster)
+	r.DELETE("/clusters/:name", api.DeleteCluster)
 
 	r.GET("/projects", api.GetProjects)
 	r.GET("/projects/:name", api.GetProject)
+	r.GET("/userprojects", api.GetAllProjects)
 	r.POST("/projects", api.CreateProject)
 	// r.PUT("/projects/:name", api.ReplaceProject)
 	// r.PATCH("/projects/:name", api.UpdateProject)
@@ -60,8 +65,8 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/deployments", api.GetDeployments)
 	r.POST("/deployments", api.CreateDeployment)
 	r.GET("/deployments/:name", api.GetDeployment)
-	// r.PUT("/deployments/:name", api.Update_Deployment)
-	// r.DELETE("/deployments/:name", api.Delete_Deployment)
+	// r.PUT("/deployments/:name", api.UpdateDeployment)
+	r.DELETE("/deployments/:name", api.DeleteDeployment)
 
 	r.GET("/workspaces", api.GetAllWorkspaces)
 	r.POST("/workspaces", api.CreateWorkspace)
@@ -73,37 +78,25 @@ func GEdgeRoute(e *echo.Echo) {
 	r.POST("/pods", api.CreatePod)
 	r.GET("/pods/:name", api.GetPods)
 	// r.PUT("/pods/:name", api.UpdatePods)
-	// r.DELETE("/pods/:name", api.DeletePods)
+	r.DELETE("/pods/:name", api.DeletePod)
 
 	r.GET("/jobs", api.GetAllJobs)
 	r.POST("/jobs", api.CreateJob)
 	r.GET("/jobs/:name", api.GetJobs)
 	// r.PUT("/jobs/:name", api.UpdateJob)
-	// r.DELETE("/jobs/:name", api.DeleteJob)
+	r.DELETE("/jobs/:name", api.DeleteJob)
 
 	r.GET("/cronjobs", api.GetCronAllJobs)
 	r.POST("/cronjobs", api.CreateCronJob)
 	r.GET("/cronjobs/:name", api.GetCronJobs)
 	// r.PUT("/cronjobs/:name", api.UpdateCronJobs)
-	// r.DELETE("/cronjobs/:name", api.DeleteCronJobs)
+	r.DELETE("/cronjobs/:name", api.DeleteCronJob)
 
 	r.GET("/services", api.GetServices)
 	r.POST("/services", api.CreateService)
 	r.GET("/services/:name", api.GetService)
 	// r.PUT("/services/:name", api.UpdateService)
-	// r.DELETE("/services/:name", api.DeleteService)
-
-	// r.GET("/clusters", api.GetAllClusters)
-	// r.POST("/clusters", api.CreateCluster)
-	// r.GET("/clusters/:name", api.GetCluster)
-	// r.PUT("/clusters/:name", api.UpdateCluster)
-	// r.DELETE("/clusters/:name", api.DeleteCluster)
-
-	// r.GET("/projects", api.GetAllProjects)
-	// r.POST("/projects", api.CreateProject)
-	// r.GET("/projects/:name", api.GetProject)
-	// r.PUT("/projects/:name", api.UpdateProject)
-	// r.DELETE("/projects/:name", api.DeleteProject)
+	r.DELETE("/services/:name", api.DeleteService)
 
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		return api.AuthenticateUser(id, password), nil
@@ -116,6 +109,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r2.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 	r2.GET("/monitoring", echo.WrapHandler(promhttp.Handler()))
 	r2.Any("/monitoring/:kind", api.Monit)
-	r2.Any("/monitoring/:kind/:name", api.Monit)
+	// r2.Any("/monitoring/:kind/:name", api.Monit)
 	r2.Any("/monitoring/realtime/:kind", api.RealMetrics)
+	r2.Any("/monitoring/realtime", api.RealMetrics)
 }

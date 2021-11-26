@@ -17,8 +17,8 @@ import (
 
 //memory -> GI / Disk -> GB / CPU -> Core / Net -> Kbps
 var clusterMetric = map[string]string{
-	"cpu_util":     "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster)*100),0.1)",
-	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[5m]))by(cluster),0.01)",
+	"cpu_util":     "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[1m]))by(cluster)*100),0.1)",
+	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[1m]))by(cluster),0.01)",
 	"cpu_total":    "sum(machine_cpu_cores{$1})by(cluster)",
 	"memory_util":  "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)",
 	"memory_usage": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
@@ -31,7 +31,7 @@ var clusterMetric = map[string]string{
 	"pod_util":     "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
 
 	"apiserver_request_rate": "round(sum(irate(apiserver_request_total{$1}[5m]))by(cluster),0.001)",
-	// latency 보완 필요 (느림)
+	// latency 보완 필요 (응답속도 느림)
 	"apiserver_latency": "histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{verb!~'CONNECT|WATCH',$1}[1m])) by (le,cluster))",
 
 	"scheduler_attempts":       "sum(increase(scheduler_schedule_attempts_total{$1}[1m]))by(result,cluster)",
@@ -45,7 +45,7 @@ var clusterMetric = map[string]string{
 
 var namespaceMetric = map[string]string{
 	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
-	"namespace_memory":    "sum(sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)",
+	"namespace_memory":    "round(sum(sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)/1024/1024/1024,0.1)",
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 
@@ -55,6 +55,11 @@ var podMetric = map[string]string{
 	//1bytes -> 8bps / 1bps -> 0.125bytes / 현재 단위 1kbps -> 125bytes
 	"pod_net_bytes_transmitted": "round(sum(irate(container_network_transmit_bytes_total{pod!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster)/125,0.01)",
 	"pod_net_bytes_received":    "round(sum(irate(container_network_receive_bytes_total{pod!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster)/125,0.01)",
+	//container 쿼리문 검증 필요
+	"container_cpu":    "round(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',container!='',image!='', $1}[5m]))by(namespace,pod,cluster,container),0.001)",
+	"container_memory": "sum(container_memory_rss{job='kubelet',pod!='',container!='',image!='', $1})by(cluster,pod,namespace,container)",
+	// "container_net_bytes_transmitted": "round(sum(irate(container_network_transmit_bytes_total{pod!='',container!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster,container)/125,0.01)",
+	// "container_net_bytes_received":    "round(sum(irate(container_network_receive_bytes_total{pod!='',container!='',interface!~'^(cali.+|tunl.+|dummy.+|kube.+|flannel.+|cni.+|docker.+|veth.+|lo.*)',job='kubelet', $1}[5m]))by(namespace,pod,cluster,container)/125,0.01)",
 }
 
 var nodeMetric = map[string]string{ //쿼리 수정 필요
@@ -150,7 +155,7 @@ func Monit(c echo.Context) (err error) {
 
 func mericResult(c echo.Context, kind string, a []string) error {
 
-	addr := "http://192.168.150.115:31298/"
+	addr := "http://192.168.150.197:32548/"
 
 	cluster := c.QueryParam("cluster_filter")
 
@@ -318,7 +323,7 @@ func validateFilter(k string, c echo.Context) bool {
 	case "namespace":
 		cluster := c.QueryParam("cluster_filter")
 		namespace := c.QueryParam("namespace_filter")
-		fmt.Println(cluster)
+		// fmt.Println(cluster)
 		if check := strings.Compare(cluster, "")*strings.Compare(namespace, "") == 0; check {
 			return false
 		}

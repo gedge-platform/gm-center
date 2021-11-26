@@ -21,7 +21,7 @@ var nowClusterMetric = map[string]string{
 
 var nowNamespaceMetric = map[string]string{
 	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
-	"namespace_memory":    "sum(sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)",
+	"namespace_memory":    "round(sum(sum(container_memory_rss{job='kubelet',pod!='',image!='',$1})by(namespace,pod,cluster))by(namespace,cluster)/1024/1024/1024,0.001)",
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
 }
 
@@ -31,7 +31,7 @@ var nowGpuMetric = map[string]string{
 
 func NowMonit(k string, c string, n string, m []string) interface{} {
 
-	// fmt.Println(c, n)
+	// fmt.Println("==================", c, n)
 
 	switch k {
 	case "namespace":
@@ -66,7 +66,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 	}
 
 	//Prometheus call
-	addr := "http://192.168.150.115:31298/"
+	addr := "http://192.168.150.197:32548/"
 	// result := map[string]model.Value{}
 
 	result := map[string]interface{}{}
@@ -110,6 +110,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 
 		result[m[i]] = value
 	}
+	// fmt.Println("=====result=====", result)
 	return result
 }
 
@@ -187,7 +188,7 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 		return gpuList, false
 	}
 
-	addr := "http://192.168.150.115:31298/"
+	addr := "http://192.168.150.197:32548/"
 
 	temp_filter := map[string]string{
 		"cluster": c,

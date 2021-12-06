@@ -24,7 +24,7 @@ type CLUSTER struct {
 	Network                 string                   `json:"network"`
 	Os                      string                   `json:"os"`
 	Kernel                  string                   `json:"kernel"`
-	Label                   interface{}              `json:"lables"`
+	Label                   interface{}              `json:"labels"`
 	Annotation              interface{}              `json:"annotations"`
 	CreateAt                time.Time                `json:"created_at"`
 	ResourceUsage           interface{}              `json:"resourceUsage"`

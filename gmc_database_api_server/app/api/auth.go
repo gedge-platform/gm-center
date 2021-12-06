@@ -77,7 +77,7 @@ func LoginUser(c echo.Context) (err error) {
 			"access-token": accessToken,
 		})
 	}
-	return c.JSON(http.StatusOK, false)
+	return c.JSON(http.StatusUnauthorized, false)
 }
 
 func generateAccessToken(userid string) (string, time.Time, error) {

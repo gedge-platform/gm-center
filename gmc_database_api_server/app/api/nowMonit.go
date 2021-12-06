@@ -66,7 +66,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 	}
 
 	//Prometheus call
-	addr := "http://192.168.150.115:31298/"
+	addr := "http://101.79.4.15:32548/"
 	// result := map[string]model.Value{}
 
 	result := map[string]interface{}{}
@@ -188,7 +188,7 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 		return gpuList, false
 	}
 
-	addr := "http://192.168.150.115:31298/"
+	addr := "http://101.79.4.15:32548//"
 
 	temp_filter := map[string]string{
 		"cluster": c,

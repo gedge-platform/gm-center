@@ -64,6 +64,7 @@ func CreateWorkspace(c echo.Context) (err error) {
 
 	if err := db.Create(&models).Error; err != nil {
 		common.ErrorMsg(c, http.StatusExpectationFailed, err)
+		return nil
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{"data": models})

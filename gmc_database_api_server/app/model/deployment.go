@@ -7,7 +7,7 @@ type DEPLOYMENT struct {
 	Namespace     string      `json:"project"`
 	ClusterName   string      `json:"cluster"`
 	WorkspaceName string      `json:"workspace,omitempty"`
-	Stauts        string      `json:"stauts"`
+	Stauts        string      `json:"status"`
 	Replica       REPLICA     `json:"replica"`
 	Strategy      interface{} `json:"strategy,omitempty"`
 	Containers    interface{} `json:"containers,omitempty"`
@@ -52,8 +52,9 @@ type REPLICA struct {
 
 type DEPLOYMENTLISTS struct {
 	// Pods     []DEPLOYMENTPOD `json:"pods"`
-	Pods     interface{} `json:"pods"`
-	Services interface{} `json:"services"`
+	Pods        interface{} `json:"pods"`
+	Services    interface{} `json:"services"`
+	ReplicaName string      `json:"replicaName"`
 }
 type DEPLOYMENTPOD struct {
 	Name         string `json:"name"`
@@ -64,7 +65,9 @@ type DEPLOYMENTPOD struct {
 }
 
 type DEPLOYMENTSVC struct {
-	Name string      `json:"name"`
+	Name string `json:"name"`
+	// ClusterIP string      `json:"clusterIP"`
+	// Type      string      `json:"type"`
 	Port interface{} `json:"port"`
 }
 

@@ -456,13 +456,35 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Kind = "endpoints"
 		params.Name = origName
 
-		endPointData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
+		endPointData, _ := DataRequest(params)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		fmt.Println("########################endPointData", endPointData)
+
+		fmt.Println("sdfsdfdsfdfs", Filter(endPointData, "subsets.#.addresses"))
+
+		var Pods []model.SERVICEPOD
+
+		if Filter(endPointData, "subsets.#.addresses") != "" {
+			PodData := FindingArray(Filter(endPointData, "subsets.#.addresses"))[0].Array()
+			fmt.Println("########################PodData", PodData)
+			for i, _ := range PodData {
+				Pod := model.SERVICEPOD{
+					Ip:       (gjson.Get(PodData[i].String(), "ip")).String(),
+					NodeName: (gjson.Get(PodData[i].String(), "nodeName")).String(),
+					Name:     (gjson.Get(PodData[i].String(), "targetRef.name")).String(),
+				}
+				Pods = append(Pods, Pod)
+			}
 		}
 
-		PodData := FindData(endPointData, "subsets.#.addresses", "")
-		log.Println("endPoints 뿌려주기 : ", PodData)
+		// log.Printf("# pod list확인 ", podRefer)
+
+		// for i, _ := range PodData {
+
+		// }
+		// log.Println("endPoints 뿌려주기 : ", PodData)
 
 		testData := FindData(endPointData, "subsets.#.addresses.0", "targetRef.name")
 		log.Println("testData 뿌려주기 : ", testData)
@@ -509,7 +531,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		// Transcode(DeployData, &deployModel)
 
 		services := model.SERVICELISTS{
-			Pods: PodData,
+			Pods: Pods,
 			Deployments: model.SERVICEDEPLOYMENT{
 				Name:     InterfaceToString(FindData(DeployData, "metadata", "name")),
 				UpdateAt: InterfaceToTime(FindData(DeployData, "status.conditions", "lastUpdateTime")),
@@ -588,12 +610,15 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			svcList := model.DEPLOYMENTSVC{
 				Name: InterfaceToString(FindData(svcData[0], "metadata", "name")),
 				Port: FindData(svcData[0], "subsets", "ports"),
+				// ClusterIP: InterfaceToString(FindData(svcData[0], "spec", "clusterIP")),
+				// Type:      InterfaceToString(FindData(svcData[0], "spec", "type")),
 			}
 			Svcs = svcList
 		}
 		deployments := model.DEPLOYMENTLISTS{
-			Pods:     Pods,
-			Services: Svcs,
+			Pods:        Pods,
+			Services:    Svcs,
+			ReplicaName: replicaName,
 		}
 		return deployments, nil
 	case "jobs":

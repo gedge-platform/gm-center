@@ -23,6 +23,7 @@ type EVENT struct {
 	Kind      string    `json:"kind"`
 	Name      string    `json:"name"`
 	Namespace string    `json:"namespace"`
+	Cluster   string    `json:"cluster"`
 	Message   string    `json:"message"`
 	Reason    string    `json:"reason"`
 	Type      string    `json:"type"`

@@ -14,10 +14,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var (
-	signingkey = os.Getenv("SIGNINGKEY")
-)
-
 type jwtCustomClaims struct {
 	Name string `json:"name"`
 	Role string `json:"role"`
@@ -25,7 +21,7 @@ type jwtCustomClaims struct {
 }
 
 func GetJWTSecret() string {
-	return signingkey
+	return os.Getenv("SIGNINGKEY")
 }
 
 func AuthenticateUser(id, password string) (bool, string) {

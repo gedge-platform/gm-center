@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"encoding/base64"
-	"fmt"
 	"os"
 
 	"gmc_api_gateway/app/api"
@@ -12,10 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-)
-
-var (
-	signingkey = os.Getenv("SIGNINGKEY")
 )
 
 type jwtCustomClaims struct {
@@ -45,14 +39,14 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r0 := e.Group("/gmcapi/v1/restricted")
 
-	decoded, err := base64.URLEncoding.DecodeString(signingkey)
-	if err != nil {
-		fmt.Println("signingkey base64 decoded Error")
-	}
+	// decoded, err := base64.URLEncoding.DecodeString(os.Getenv("SIGNINGKEY"))
+	// if err != nil {
+	// 	fmt.Println("signingkey base64 decoded Error")
+	// }
 
 	config := middleware.JWTConfig{
 		Claims:     &jwtCustomClaims{},
-		SigningKey: decoded,
+		SigningKey: []byte(os.Getenv("SIGNINGKEY")),
 	}
 
 	r0.Use(middleware.JWTWithConfig(config))

@@ -155,7 +155,7 @@ func Monit(c echo.Context) (err error) {
 
 func mericResult(c echo.Context, kind string, a []string) error {
 
-	addr := "http://192.168.150.197:32548/"
+	addr := "http://101.79.4.15:32548/"
 
 	cluster := c.QueryParam("cluster_filter")
 

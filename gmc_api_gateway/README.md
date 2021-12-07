@@ -18,13 +18,16 @@ DB_PASSWORD=password
 DB_NAME=gedge
 DB_CHARSET=utf8
 
-PORT=:8008
+PORT=:8010
 CORS=CORS_ORIGIN
+
+SIGNINGKEY=YOUR_SIGNINGKEY
 ```
 
 ```bash
 # Build and Run
 cd gmc_api_gateway
+go mod tidy
 go build && ./main
 # or
 go run main.go
@@ -35,28 +38,59 @@ go run main.go
 ## Structure
 ```
 ├── app
-│   ├── app.go
-│   ├── api          // Our API core handlers
-│   │   ├── common.go    // Common response functions
-│   │   ├── members.go  // APIs for Member model
-│   │   ├── clusters.go  // APIs for clusters model
-│   │   ├── projects.go  // APIs for clusters model
-│   │   ├── workspaces.go  // APIs for clusters model
-│   │   ├── apps.go  // APIs for clusters model
-│   │   ├── custom.go // APIs for kubernetes model
+│   ├── api
+│   │   ├── account.go
+│   │   ├── apps.go
+│   │   ├── auth.go
+│   │   ├── callListModel.go
+│   │   ├── clusters.go
+│   │   ├── cronjob.go
+│   │   ├── custom.go
+│   │   ├── deployment.go
+│   │   ├── event.go
+│   │   ├── job.go
+│   │   ├── members.go
+│   │   ├── monitoring.go
+│   │   ├── namespace.go
+│   │   ├── nowMonit.go
+│   │   ├── pod.go
+│   │   ├── projects.go
+│   │   ├── realMonitoring.go
+│   │   ├── service.go
+│   │   ├── workspaces.go
+│   └── common
+│       └── error.go
+│       └── httpUtil.go
+│       └── Util.go
 │   └── db
 │       └── db.go
+│       └── db.sql
 │   └── model
 │       └── apps.go
+│       └── auth.go
+│       └── authorize.go
 │       └── clusters.go
-│       └── members.go
-│       └── projects.go
-│       └── workspaces.go
+│       └── cronjob.go
+│       └── deployment.go
+│       └── event.go
+│       └── job.go
 │       └── kubernetes.go
+│       └── members.go
+│       └── monitoring.go
+│       └── ownerReferences.go
+│       └── params.go
+│       └── pod.go
+│       └── projects.go
+│       └── service.go
+│       └── workspaces.go
 │   └── routes
 │       └── routes.go
 ├── config
-│   └── config.go        // Configuration
+│   └── config.go
+├── docs
+│   └── docs.go
+│   └── swagger.json
+│   └── swagger.yaml
 └── .env.sample
 └── main.go
 └── go.mod
@@ -67,17 +101,22 @@ go run main.go
 
 #### Lists
 - members
+- apps
 - clusters
 - projects
+- deployments
 - workspaces
-- apps
-- kubernetes
+- pods
+- jobs
+- cronjobs
+- services
+- monitoring
 
 <br />
 
-### members, clusters, projects, workspaces, apps
+### members, apps, clusters, projects, deployments, workspaces, pods, jobs, cronjobs, services
 ---
-#### /api/v1/{lists_name}
+#### /gmcapi/v1/{lists_name}
 * `GET` : Get all {lists_name}
 * `POST` : Create a new {lists_name}
 
@@ -89,29 +128,20 @@ go run main.go
 
 <br />
 
-### kubernetes
+### monitoring
 ---
 
-#### /api/v2/:cluster_name/:namespace_name
-* `GET` : Get a {lists_name}/:namespace_name
-* `CREATE` : Create a {lists_name}/:namespace_name
-* `PUT` : Update a {lists_name}/:namespace_name
-* `PATCH` : Patch a {lists_name}/:namespace_name
-* `DELETE` : Delete a {lists_name}/:namespace_name
+#### /kube/v1/monitoring
+* `GET` : Get a /monitoring/
 
-#### /api/v2/:cluster_name/:namespace_name/:kind_name
-* `GET` : Get a {lists_name}/:namespace_name/:kind_name
-* `CREATE` : Create a {lists_name}/:namespace_name/:kind_name
-* `PUT` : Update a {lists_name}/:namespace_name/:kind_name
-* `PATCH` : Patch a {lists_name}/:namespace_name/:kind_name
-* `DELETE` : Delete a {lists_name}/:namespace_name/:kind_name
+#### /kube/v1/monitoring/:kind
+* `GET` : Get a /monitoring/:{kind}
 
-#### /api/v2/:cluster_name/:namespace_name/:kind_name/*
-* `GET` : Get a {lists_name}/:namespace_name/:kind_name/*
-* `CREATE` : Create a {lists_name}/:namespace_name/:kind_name/*
-* `PUT` : Update a {lists_name}/:namespace_name/:kind_name/*
-* `PATCH` : Patch a {lists_name}/:namespace_name/:kind_name/*
-* `DELETE` : Delete a {lists_name}/:namespace_name/:kind_name/*
+#### /kube/v1/monitoring/realtime
+* `GET` : Get a /monitoring/realtime
+
+#### /kube/v1/monitoring/realtime/:kind
+* `GET` : Get a /monitoring/realtime/:{kind}
 
 ---
 
@@ -131,134 +161,5 @@ go run main.go
 
 ### Done ✓
 - [x] First Commit
-- [x] MEMBER_INFO
-  - [x] GetAllMembers(GET, "/api/v2/db/members")
-  - [x] CreateMember(POST, "/api/v2/db/members")
-```
-{
-    "memberId": "memberId",
-    "memberName": "memberName",
-    "memberEmail": "member@gedge.com",
-    "memberPassword": "memberPassword"
-}
-```
-  - [x] GetMember(GET, "/api/v2/db/members/{id}")
-  - [x] UpdateMember(PUT, "/api/v2/db/members/{id}")
-```
-{
-    "memberId": "memberId",
-    "memberName": "memberName",
-    "memberEmail": "member@gedge.com",
-    "memberPassword": "memberPassword"
-}
-```
-  - [x] DeleteMember(DELETE, "/api/v2/db/members/{id}")
-
-- [x] CLUSTER_INFO
-  - [x] GetAllClusters(GET, "/api/v2/db/clusters")
-  - [x] CreateCluster(POST, "/api/v2/db/clusters")
-```
-{
-	"ipAddr": "127.0.0.1",
-	"clusterName": "value",
-	"clusterRole": "value",
-	"clusterType": "value",
-	"clusterEndpoint": "10.10.10.10",
-	"clusterCreator": "value",
-}
-```
-  - [x] GetCluster(GET, "/api/v2/db/clusters/{name}")
-  - [x] UpdateCluster(PUT, "/api/v2/db/clusters/{name}")
-```
-{
-	"ipAddr": "127.0.0.1",
-	"clusterName": "value",
-	"clusterRole": "value",
-	"clusterType": "value",
-	"clusterEndpoint": "10.10.10.10",
-	"clusterCreator": "value",
-}
-```
-  - [x] DeleteCluster(DELETE, "/api/v2/db/clusters/{name}")
-
-
-- [x] WORKSPACE_INFO
-  - [x] GetAllWorkspaces(GET, "/api/v2/db/workspaces")
-  - [x] CreateWorkspace(POST, "/api/v2/db/workspaces")
-```
-{
-	"clusterName": "value",
-	"workspaceName": "value",
-	"workspaceDescription": "value",
-	"selectCluster": "1,3",
-	"workspaceOwner": "value",
-	"workspaceCreator": "value"
-}
-```
-  - [x] GetWorkspace(GET, "/api/v2/db/workspaces/{name}")
-  - [x] UpdateWorkspace(PUT, "/api/v2/db/workspaces/{name}")
-```
-{
-	"clusterName": "value",
-	"workspaceName": "value",
-	"workspaceDescription": "value",
-	"selectCluster": "1,3",
-	"workspaceOwner": "value",
-	"workspaceCreator": "value"
-}
-```
-  - [x] DeleteWorkspace(DELETE, "/api/v2/db/workspaces/{name}")
-
-
-- [x] PROJECT_INFO
-  - [x] GetAllProjects(GET, "/api/v2/db/projects")
-  - [x] CreateProject(POST, "/api/v2/db/projects")
-```
-{
-	"projectName": "value",
-	"projectPostfix": "value",
-	"projectDescription": "value",
-	"projectType": "value",
-	"projectOwner": "value",
-	"projectCreator": "value",
-	"workspaceName": "value"
-}
-```
-  - [x] GetProject(GET, "/api/v2/db/projects/{name}")
-  - [x] UpdateProject(PUT, "/api/v2/db/projects/{name}")
-```
-{
-	"projectName": "value",
-	"projectPostfix": "value",
-	"projectDescription": "value",
-	"projectType": "value",
-	"projectOwner": "value",
-	"projectCreator": "value",
-	"workspaceName": "value"
-}
-```
-  - [x] DeleteProject(DELETE, "/api/v2/db/projects/{name}")
-
-- [x] APPSTORE_INFO
-  - [x] GetAllApps(GET, "/api/v2/db/apps")
-  - [x] CreateApp(POST, "/api/v2/db/apps")
-```
-{
-	"appName": "value",
-	"appDescription": "value",
-	"appCategory": "value",
-	"appInstalled": 0
-}
-```
-  - [x] GetApp(GET, "/api/v2/db/apps/{name}")
-  - [x] UpdateApp(PUT, "/api/v2/db/apps/{name}")
-```
-{
-	"appName": "value",
-	"appDescription": "value",
-	"appCategory": "value",
-	"appInstalled": 0
-}
-```
-  - [x] DeleteApp(DELETE, "/api/v2/db/apps/{name}")
-
+- [x] DATABASE API
+- [x] KUBERNETES API

@@ -98,7 +98,8 @@ create table PROJECT_INFO
     projectCreator     varchar(45)                               not null comment '프로젝트 생성자',
     created_at         timestamp     default current_timestamp() not null on update current_timestamp() comment '프로젝트 생성 일시',
     workspaceName      varchar(45)                               not null comment '워크스페이스 이름',
-    selectCluster      varchar(2048) default ''                  not null comment '선택한 클러스터
+    selectCluster      varchar(2048) default ''                  not null comment '선택한 클러스터',
+    istioCheck varchar(45)                             null comment 'istio injection check'
 ',
     constraint PROJECT_INFO_projectName_uindex
         unique (projectName),

@@ -33,11 +33,14 @@ var realMetricTemplate = map[string]string{
   |> filter(fn: (r) => r["_measurement"] == "disk")
   |> filter(fn: (r) => r["_field"] == "$2")
   |> filter(fn: (r) => r["cluter"] == "$3")
-  |> filter(fn: (r) => r["device"] == "vda1")
-  |> filter(fn: (r) => r["fstype"] == "ext4")
-  |> filter(fn: (r) => r["mode"] == "ro")
 //   |> timeShift(duration: 9h)
   |> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
+  	"gpu": `from(bucket:"monitoring")
+	|> range(start: -$1)
+	|> filter(fn: (r) => r["_measurement"] == "nvidia_smi")
+	|> filter(fn: (r) => r["_field"] == "$2") 
+	|> filter(fn: (r) => r["cluter"] == "$3") 
+	|> aggregateWindow(every: 500ms, fn: mean, createEmpty: false)`,
 }
 
 var realCpuMetric = map[string]string{
@@ -99,6 +102,28 @@ var realDiskMetric = map[string]string{
 	"disk_used_percent": "used_percent",
 }
 
+var realGpuMetric = map[string]string{
+	"gpu_clocks_graphics":"clocks_current_graphics",
+	"gpu_clocks_memory":"clocks_current_memory",
+	"gpu_clocks_sm":"clocks_current_sm",
+	"gpu_clocks_video":"clocks_current_video",
+	"gpu_encoder_stats_average_fps":"encoder_stats_average_fps",
+	"gpu_encoder_stats_average_latency":"encoder_stats_average_latency",
+	"gpu_encoder_stats_session_count":"encoder_stats_session_count",
+	"gpu_fan_speed":"fan_speed",
+	"gpu_memory_total":"memory_total",
+	"gpu_memory_free":"memory_free",
+	"gpu_memory_used":"memory_used",
+	"gpu_pcie_link_gen_current":"pcie_link_gen_current",
+	"gpu_pcie_link_width_current":"pcie_link_width_current",
+	"gpu_power_draw":"power_draw",
+	"gpu_temperature":"temperature_gpu",
+	"gpu_utilization_decoder":"utilization_decoder",
+	"gpu_utilization_encoder":"utilization_encoder",
+	"gpu_utilization_gpu":"utilization_gpu",
+	"gpu_utilization_memory":"utilization_memory",
+}
+
 var allMetric = map[string]string{
 	"cpu_idle":                 "usage_idle",
 	"cpu_guest":                "usage_guest",
@@ -150,6 +175,25 @@ var allMetric = map[string]string{
 	"disk_total":               "total",
 	"disk_used":                "used",
 	"disk_used_percent":        "used_percent",
+	"gpu_clocks_graphics":      "clocks_current_graphics",
+	"gpu_clocks_memory":        "clocks_current_memory",
+	"gpu_clocks_sm":            "clocks_current_sm",
+	"gpu_clocks_video":         "clocks_current_video",
+	"gpu_encoder_stats_average_fps":"encoder_stats_average_fps",
+	"gpu_encoder_stats_average_latency":"encoder_stats_average_latency",
+	"gpu_encoder_stats_session_count":"encoder_stats_session_count",
+	"gpu_fan_speed":            "fan_speed",
+	"gpu_memory_total":         "memory_total",
+	"gpu_memory_free":          "memory_free",
+	"gpu_memory_used":          "memory_used",
+	"gpu_pcie_link_gen_current":"pcie_link_gen_current",
+	"gpu_pcie_link_width_current":"pcie_link_width_current",
+	"gpu_power_draw":           "power_draw",
+	"gpu_temperature":          "temperature_gpu",
+	"gpu_utilization_decoder":  "utilization_decoder",
+	"gpu_utilization_encoder":  "utilization_encoder",
+	"gpu_utilization_gpu":      "utilization_gpu",
+	"gpu_utilization_memory":   "utilization_memory",
 }
 
 type InfluxDBModel struct {
@@ -191,6 +235,8 @@ func RealMetrics(c echo.Context) (err error) {
 		kind = findKind(metrics)
 	}
 
+	fmt.Println(kind,"-kind check-")
+
 	var result []interface{}
 	for _, v := range metrics {
 		switch kind {
@@ -215,6 +261,13 @@ func RealMetrics(c echo.Context) (err error) {
 			}
 			data := realQueryMetric(v, realMetricExpr(realDiskMetric[v], realMetricTemplate[kind], temp_filter), kind)
 			result = append(result, data)
+		case "gpu":
+			temp_filter := map[string]string{
+				"cluster": c.QueryParam("cluster_filter"),
+				"time":    c.QueryParam("time"),
+			}
+			data := realQueryMetric(v, realMetricExpr(realGpuMetric[v], realMetricTemplate[kind], temp_filter), kind)
+			result = append(result, data)
 		default:
 		}
 	}
@@ -236,6 +289,9 @@ func findKind(m []string) string {
 		}
 		if realDiskMetric[v] != "" {
 			return "disk"
+		}
+		if realGpuMetric[v] != "" {
+			return "gpu"
 		}
 	}
 	return ""
@@ -345,10 +401,12 @@ func realValidateParam(c echo.Context) bool {
 }
 
 func realQueryMetric(m string, q string, k string) map[string]interface{} {
-	client := influxdb2.NewClient("http://192.168.150.197:31577", "TEb3k8D0IjefpDpaRbZCBWTXeTNXQE5W")
+	client := influxdb2.NewClient("http://101.79.4.15:31577", "TEb3k8D0IjefpDpaRbZCBWTXeTNXQE5W")
 	queryAPI := client.QueryAPI("influxdata")
 
 	var valueResult []InfluxDBModel
+
+	// fmt.Println(m,q,k)
 	switch k {
 	case "disk":
 		result, err := queryAPI.Query(context.Background(), q)
@@ -365,13 +423,10 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 			var prevValues [][]string
 
 			for result.Next() {
-				// Observe when there is new grouping key producing new table
-				// if result.TableChanged() {
-				// 	fmt.Printf("table")
-				// }
 				var value []string
 				tempMetric, value = rowModel(result.Record().String())
 				tempValues = append(tempValues, value)
+				// fmt.Println(tempMetric,"==disk test=")
 				if prevHost != tempMetric["host"] {
 					if prevHost != "" {
 						t.Metric = prevMetric
@@ -392,8 +447,51 @@ func realQueryMetric(m string, q string, k string) map[string]interface{} {
 				fmt.Printf("Query error: %s\n", result.Err().Error())
 			}
 
+		}else{
+			fmt.Println(err)
 		}
 		// Ensures background processes finishes
+		client.Close()
+	case "gpu":
+		result, err := queryAPI.Query(context.Background(), q)
+
+		if err == nil {
+			// Use Next() to iterate over query result lines
+			var tempMetric map[string]string
+			var tempValues [][]string
+			var t InfluxDBModel
+			var init [][]string
+
+			prevHost := ""
+			var prevMetric map[string]string
+			var prevValues [][]string
+
+			for result.Next() {
+				var value []string
+				tempMetric, value = rowModel(result.Record().String())
+				tempValues = append(tempValues, value)
+				// fmt.Println(tempMetric)
+				if prevHost != tempMetric["uuid"] {
+					if prevHost != "" {
+						t.Metric = prevMetric
+						t.Values = prevValues
+						valueResult = append(valueResult, t)
+						tempValues = init
+					}
+				}
+				prevHost = tempMetric["uuid"]
+				prevMetric = tempMetric
+				prevValues = tempValues
+			}
+			t.Metric = tempMetric
+			t.Values = tempValues
+			valueResult = append(valueResult, t)
+
+			if result.Err() != nil {
+				fmt.Printf("Query error: %s\n", result.Err().Error())
+			}
+
+		}
 		client.Close()
 	default:
 		result, err := queryAPI.Query(context.Background(), q)

@@ -1,17 +1,22 @@
 package routes
 
 import (
-	// "fmt"
-	// "os"
+	"os"
 
 	"gmc_api_gateway/app/api"
 
-	// "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
+
+type jwtCustomClaims struct {
+	Name string `json:"name"`
+	Role string `json:"role"`
+	jwt.StandardClaims
+}
 
 type DataValidator struct {
 	validator *validator.Validate
@@ -30,11 +35,27 @@ func (dv *DataValidator) Validate(i interface{}) error {
 func GEdgeRoute(e *echo.Echo) {
 	e.Validator = NewValidator()
 
-	r0 := e.Group("gmcapi/v1/auth")
-	r0.POST("", api.LoginUser)
+	e.POST("/gmcapi/v1/auth", api.LoginUser)
+
+	r0 := e.Group("/gmcapi/v1/restricted")
+
+	// decoded, err := base64.URLEncoding.DecodeString(os.Getenv("SIGNINGKEY"))
+	// if err != nil {
+	// 	fmt.Println("signingkey base64 decoded Error")
+	// }
+
+	config := middleware.JWTConfig{
+		Claims:     &jwtCustomClaims{},
+		SigningKey: []byte(os.Getenv("SIGNINGKEY")),
+	}
+
+	r0.Use(middleware.JWTWithConfig(config))
+	r0.GET("/test", api.GetAllMembers)
+
 	// /gmcapi/v1
 	r := e.Group("/gmcapi/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
-		return api.AuthenticateUser(id, password), nil
+		userChk, _ := api.AuthenticateUser(id, password)
+		return userChk, nil
 	}))
 	r.GET("/members", api.GetAllMembers)
 	r.POST("/members", api.CreateMember)
@@ -99,7 +120,8 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/services/:name", api.DeleteService)
 
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
-		return api.AuthenticateUser(id, password), nil
+		userChk, _ := api.AuthenticateUser(id, password)
+		return userChk, nil
 	}))
 	r2.Any("/:cluster_name", api.Kubernetes)
 	r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)

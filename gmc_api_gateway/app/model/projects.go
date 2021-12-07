@@ -14,6 +14,7 @@ type Project struct {
 	CreateAt      time.Time `gorm:"column:created_at" json:"created_at"`
 	WorkspaceName string    `gorm:"column:workspaceName; not null; default:null" json:"workspaceName"`
 	SelectCluster string    `gorm:"column:selectCluster; not null; default:null" json:"selectCluster"`
+	IstioCheck string  `gorm:"column:istioCheck; not null; default:null" json:"istioCheck"`
 }
 
 type PROJECT struct {

@@ -22,6 +22,9 @@ type Namespace struct {
 	Kind       string `json:"kind"`
 	Metadata   struct {
 		Name string `json:"name"`
+		Labels struct{
+			IstioCheck string `json:"istio-injection"`
+		} `json:"labels"`
 	} `json:"metadata"`
 	Spec struct {
 	} `json:"spec"`
@@ -112,17 +115,16 @@ func CreateProject(c echo.Context) (err error) {
 	for _, cluster := range slice {
 
 		clusters := GetClusterDB(cluster)
-
 		namesapce := Namespace{}
 		namesapce.APIVersion = "v1"
 		namesapce.Kind = "Namespace"
 		namesapce.Metadata.Name = models.Name
-
+		namesapce.Metadata.Labels.IstioCheck = models.IstioCheck
 		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/"
 		Token := clusters.Token
 
 		data, err := json.Marshal(namesapce)
-
+		fmt.Printf("// %s",data)
 		if err != nil {
 			common.ErrorMsg(c, http.StatusBadRequest, err)
 			return err

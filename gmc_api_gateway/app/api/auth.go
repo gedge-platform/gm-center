@@ -57,9 +57,9 @@ func LoginUser(c echo.Context) (err error) {
 		c.String(http.StatusInternalServerError, "Invalid json provided")
 		return
 	}
-	// fmt.Println("Body Value is : ", user)
-	// fmt.Println("user email is : ", user.Id)
-	// fmt.Println("user password is : ", user.Password)
+	fmt.Println("Body Value is : ", user)
+	fmt.Println("user email is : ", user.Id)
+	fmt.Println("user password is : ", user.Password)
 
 	loginResult, userRole := AuthenticateUser(user.Id, user.Password)
 

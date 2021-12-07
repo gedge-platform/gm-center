@@ -19,8 +19,8 @@ var (
 )
 
 type jwtCustomClaims struct {
-	Name  string `json:"name"`
-	Admin bool   `json:"admin"`
+	Name string `json:"name"`
+	Role string `json:"role"`
 	jwt.StandardClaims
 }
 
@@ -141,4 +141,3 @@ func GEdgeRoute(e *echo.Echo) {
 	r2.Any("/monitoring/realtime/:kind", api.RealMetrics)
 	r2.Any("/monitoring/realtime", api.RealMetrics)
 }
-

@@ -29,11 +29,20 @@ func (a *DB) Initialize(config *config.Config) {
 		config.DB.Name,
 		config.DB.Charset)
 
+	log.Println("Database Connecting..")
+
 	db, err := gorm.Open(config.DB.Dialect, dbURI)
 	if err != nil {
 		log.Fatal("Could not connect database %d", err)
-		panic(err.Error())
 	}
+
+	err = db.DB().Ping()
+	if err != nil {
+		log.Fatal("Could not connect database ping %d", err)
+	}
+
+	db.LogMode(true)
+	// db.Set("gorm:table_options", "ENGINE=InnoDB")
 	log.Println("DB Connection was successful!!")
 
 	a.DB = db.AutoMigrate()

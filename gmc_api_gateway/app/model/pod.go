@@ -21,7 +21,7 @@ type POD struct {
 	StatusConditions  []StatusConditions `json:"statusConditions,omitempty"`
 	// VolumeMounts      []VolumeMounts      `json:"volumemounts"`
 	ContainerStatuses []ContainerStatuses `json:"containerStatuses,omitempty"`
-	Events            []EVENT             `json:"events,omitempty"`
+	Events            []EVENT             `json:"events"`
 }
 
 type VolumeMounts struct {

@@ -208,6 +208,7 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 			// value = val.Value
 			fmt.Println(val.Metric["name"])
 			gpu["name"] = val.Metric["name"]
+			gpu["node"] = val.Metric["node"]
 			gpu["uuid"] = val.Metric["uuid"]
 			gpu["container"] = val.Metric["container"]
 			gpu["vbios_version"] = val.Metric["vbios_version"]

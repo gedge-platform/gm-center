@@ -19,7 +19,7 @@ type SERVICE struct {
 	SessionAffinity string      `json:"sessionAffinity,omitempty"`
 	Events          []EVENT     `json:"events,omitempty"`
 	CreateAt        time.Time   `json:"createAt"`
-	UpdateAt        time.Time   `json:"updateAt"`
+	// UpdateAt        time.Time   `json:"updateAt"`
 }
 
 type SERVICELISTS struct {

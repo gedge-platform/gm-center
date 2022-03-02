@@ -32,6 +32,11 @@ var listTemplates = map[string]string{
 	"namespaces":          "/api/v1/namespaces",
 	"nodes":               "/api/v1/nodes",
 	"events":              "/apis/events.k8s.io/v1/events",
+	"storageclasses":"/apis/storage.k8s.io/v1/storageclasses",
+	"persistentvolumes":               "/api/v1/persistentvolumes",
+	"persistentvolumeclaims":               "/api/v1/persistentvolumeclaims",
+	"secret":"/api/v1/secrets",
+
 }
 
 var nsTemplates = map[string]string{
@@ -51,6 +56,10 @@ var nsTemplates = map[string]string{
 	"namespaces":          "/api/v1/namespaces/$2",
 	"nodes":               "/api/v1/nodes/$2",
 	"events":              "/apis/events.k8s.io/v1/namespaces/$1/events/$2",
+	"storageclasses":"/apis/storage.k8s.io/v1/namespaces/$1/storageclasses/$2",
+	"persistentvolumes":               "/api/v1/persistentvolumes/$2",
+	"persistentvolumeclaims":               "/api/v1/namespaces/$1/persistentvolumeclaims/$2",
+	"secret":"/api/v1/namespaces/$1/secret/$2",
 }
 
 var (
@@ -70,6 +79,9 @@ var (
 	SetNamespace          = new(model.Namespace)
 	SetNode               = new(model.Node)
 	SetEvent              = new(model.Event)
+	SetPersistentvolume=new(model.PersistentVolume)
+	SetPersistentvolumeClaim = new(model.PersistentVolumeClaim)
+	SetSecret = new(model.Secret)
 
 	SetPods                = new(model.PodList)
 	SetServices            = new(model.ServiceList)
@@ -87,6 +99,9 @@ var (
 	SetNamespaces          = new(model.NamespaceList)
 	SetNodes               = new(model.NodeList)
 	SetEvents              = new(model.EventList)
+	SetPersistentvolumes=new(model.PersistentVolumeList)
+	SetPersistentvolumeClaims = new(model.PersistentVolumeClaimList)
+	SetSecrets = new(model.SecretList)
 )
 
 func DataRequest(params model.PARAMS) (data string, err error) {

@@ -19,7 +19,7 @@ type DBConfig struct {
 	Username string
 	Password string
 	Name     string
-	Charset  string
+	Option   string
 }
 
 type CommonConfig struct {
@@ -36,7 +36,7 @@ func GetConfig() *Config {
 			Username: os.Getenv("DB_USERNAME"),
 			Password: os.Getenv("DB_PASSWORD"),
 			Name:     os.Getenv("DB_NAME"),
-			Charset:  os.Getenv("DB_CHARSET"),
+			Option:   os.Getenv("DB_OPTION"),
 		},
 		COMMON: &CommonConfig{
 			Port:       os.Getenv("PORT"),

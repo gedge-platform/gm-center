@@ -39,7 +39,6 @@ go run main.go
 ```
 ├── app
 │   ├── api
-│   │   ├── account.go
 │   │   ├── apps.go
 │   │   ├── auth.go
 │   │   ├── callListModel.go
@@ -51,7 +50,6 @@ go run main.go
 │   │   ├── job.go
 │   │   ├── members.go
 │   │   ├── monitoring.go
-│   │   ├── namespace.go
 │   │   ├── nowMonit.go
 │   │   ├── pod.go
 │   │   ├── projects.go
@@ -68,7 +66,6 @@ go run main.go
 │   └── model
 │       └── apps.go
 │       └── auth.go
-│       └── authorize.go
 │       └── clusters.go
 │       └── cronjob.go
 │       └── deployment.go

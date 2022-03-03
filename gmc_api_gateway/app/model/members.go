@@ -1,36 +1,27 @@
 package model
 
 import (
-	"time"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Member struct {
-	Num         int       `gorm:"column:memberNum; primary_key" json:"memberNum"`
-	Id          string    `gorm:"column:memberId; not null" json:"memberId" validate:"required"`
-	Name        string    `gorm:"column:memberName; not null" json:"memberName" validate:"required"`
-	Email       string    `gorm:"column:memberEmail; not null" json:"memberEmail" validate:"required"`
-	Contact     string    `gorm:"column:memberContact; not null" json:"memberContact,omitempty"`
-	Description string    `gorm:"column:memberDescription" json:"memberDescription,omitempty"`
-	Enabled     int       `gorm:"column:memberEnabled; DEFAULT:0" json:"memberEnabled,omitempty"`
-	RoleName    string    `gorm:"column:memberRole; DEFAULT:''" json:"memberRole"`
-	Created_at  time.Time `gorm:"column:created_at; DEFAULT:''" json:"created_at"`
-	Logined_at  time.Time `gorm:"column:logined_at" json:"logined_at,omitempty"`
+	_id         primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
+	Id          string             `json:"id,omitempty" bson:"memberId" validate:"required"`
+	Name        string             `json:"name,omitempty" bson:"memberName"`
+	Password    string             `json:"password,omitempty" bson:"password" validate:"required"`
+	Email       string             `json:"email,omitempty" bson:"email"`
+	Contact     string             `json:"contact,omitempty" bson:"contact"`
+	Description string             `json:"description,omitempty" bson:"description"`
+	Enabled     int                `json:"enabled,omitempty" bson:"enabled"`
+	RoleName    string             `json:"role,omitempty" bson:"memberRole"`
+	Created_at  string             `json:"created_at,omitempty"`
+	Logined_at  string             `json:"logined_at,omitempty"`
 }
 
-type MemberWithPassword struct {
-	Member
-	Password string `gorm:"column:memberPassword" json:"memberPassword" validate:"required"`
-}
-
-// Set Member table name to be `MEMBER_INFO`
-func (Member) TableName() string {
-	return "MEMBER_INFO"
-}
-
-// Set Member table name to be `MEMBER_INFO`
-func (MemberWithPassword) TableName() string {
-	return "MEMBER_INFO"
-}
+// type MemberWithPassword struct {
+// 	Member
+// 	Password string `json:"password" bson:"password, omitempty"`
+// }
 
 func (m *Member) Enable() {
 	m.Enabled = 1

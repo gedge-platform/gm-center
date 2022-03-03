@@ -17,6 +17,8 @@ type PV struct {
 	Cluster string  `json:"cluster"`
 	// Workspace string `json:"workspace"`
 	CreateAt time.Time          `json:"createAt"`
+	Lable             interface{}        `json:"label,omitempty"`
+	Annotations       interface{}        `json:"annotations,omitempty"`
 	Events  []EVENT          `json:"events"`
 }
 

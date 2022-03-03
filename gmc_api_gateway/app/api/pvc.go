@@ -11,18 +11,18 @@ import (
 )
 
 // GetPvs godoc
-// @Summary Show app PVs
-// @Description get pv List
+// @Summary Show app PVCs
+// @Description get pvc List
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.PV
+// @Success 200 {object} model.PVC
 // @Header 200 {string} Token "qwerty"
-// @Router /pvs [get]
-func GetAllPVs(c echo.Context) error {
-	var pvs []model.PV
-	fmt.Printf("## PVs", pvs)
+// @Router /pvcs [get]
+func GetAllPVCs(c echo.Context) error {
+	var pvcs []model.PVC
+	fmt.Printf("## PVCs", pvcs)
 	params := model.PARAMS{
-		Kind:      "persistentvolumes",
+		Kind:      "persistentvolumeclaims",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -32,25 +32,31 @@ func GetAllPVs(c echo.Context) error {
 	}
 	data := GetModelList(params)
 	fmt.Printf("####Pod data confirm : %s", data)
-
+	// Name        string           `json:"name"`
+	// Capacity   string           `json:"capacity"`
+	// AccessMode      []string `json:"accessMode"`
+	// Status    interface{}      `json:"status"`
+	// Volume   interface{}        `json:"volume"`
+	// StorageClass       string           `json:"storageClass"`
+	// // Reason        []EVENT          `json:"events"`
+	// CreateAt time.Time          `json:"createAt"`
+	// Events  []EVENT          `json:"events"`
 	for i, _ := range data {
-		pv := model.PV{
+		pvc := model.PVC{
 			Name:              common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			Capacity:         common.InterfaceToString(common.FindData(data[i], "spec", "capacity.storage")),
+			Capacity:         common.InterfaceToString(common.FindData(data[i], "spec.resources", "requests.storage")),
 			AccessMode:           common.InterfaceToArray(common.FindData(data[i], "spec", "accessModes")),
-			ReclaimPolicy: common.InterfaceToString(common.FindData(data[i], "spec", "persistentVolumeReclaimPolicy")),
 			Status:            common.InterfaceToString(common.FindData(data[i], "status", "phase")),
-			Claim:          common.FindData(data[i], "spec", "claimRef"),
 			StorageClass:             common.InterfaceToString(common.FindData(data[i], "spec", "storageClassName")),
-			VolumeMode :            common.InterfaceToString(common.FindData(data[i], "spec", "volumeMode")),
+			Volume :            common.InterfaceToString(common.FindData(data[i], "spec", "volumeName")),
 			Cluster: common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 			CreateAt : common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 		}
-		pvs = append(pvs, pv)
+		pvcs = append(pvcs, pvc)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": pvs,
+		"data": pvcs,
 	})
 }
 
@@ -62,7 +68,7 @@ func GetAllPVs(c echo.Context) error {
 // @Success 200 {object} model.POD
 // @Header 200 {string} Token "qwerty"
 // @Router /pvs/:name [get]
-func GetPV(c echo.Context) error {
+func GetPVC(c echo.Context) error {
 	var pvs []model.PV
 	fmt.Printf("## PVs", pvs)
 	params := model.PARAMS{
@@ -93,8 +99,6 @@ func GetPV(c echo.Context) error {
 				VolumeMode :            common.InterfaceToString(common.FindData(getData, "spec", "volumeMode")),
 				Cluster: c.QueryParam("cluster"),
 				CreateAt : common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
-				Lable:             common.FindData(getData, "metadata", "labels"),
-		Annotations:       common.FindData(getData, "metadata", "annotations"),
 				Events: getCallEvent(params),
 			}
 

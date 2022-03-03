@@ -87,12 +87,20 @@ func GetModelList(params model.PARAMS) []string {
 			workspace := GetDBWorkspace(params)
 			selectCluster := workspace.SelectCluster
 			slice := strings.Split(selectCluster, ",")
+			fmt.Println("#############slice : %s", slice)
 			for w, _ := range slice {
 				params.Cluster = slice[w]
 				getData, _ := common.DataRequest(params)
 				getData0 := gjson.Get(getData, "items").Array()
+				
+				
 				for k, _ := range getData0 {
 					str := getData0[k].String()
+					if params.Kind =="persistentvolumes" || params.Kind =="persistentvolumeclaims" {
+						strVal, _ := sjson.Set(str, "clusterName", params.Cluster)
+						strVal2, _ := sjson.Set(strVal, "workspaceName", params.Workspace)
+						DataList = append(DataList, strVal2)
+					}else{
 					params.Name = gjson.Get(str, "metadata.namespace").String()
 					projectType := common.InterfaceToString(GetDBProject(params).Type)
 					// fmt.Println("[#####projectType]", projectType)
@@ -102,6 +110,7 @@ func GetModelList(params model.PARAMS) []string {
 						strVal2, _ := sjson.Set(strVal, "workspaceName", params.Workspace)
 						DataList = append(DataList, strVal2)
 					}
+				}
 				}
 			}
 			return DataList

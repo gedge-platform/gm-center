@@ -18,18 +18,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetWorkspaceDB(name string) *mongo.Collection {
+func GetProjectDB(name string) *mongo.Collection {
 	db := db.DbManager()
 	cdb := db.Collection(name)
 
 	return cdb
 }
 
-func CreateWorkspace(c echo.Context) (err error) {
-	cdb := GetWorkspaceDB("workspace")
+func CreateProject(c echo.Context) (err error) {
+	cdb := GetProjectDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-	models := new(model.Workspace)
+	models := new(model.Project)
 
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
@@ -54,9 +54,9 @@ func CreateWorkspace(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, result)
 }
 
-func ListWorkspace(c echo.Context) (err error) {
-	var results []model.Workspace
-	cdb := GetWorkspaceDB("workspace")
+func ListProject(c echo.Context) (err error) {
+	var results []model.Project
+	cdb := GetProjectDB("project")
 
 	findOptions := options.Find()
 
@@ -66,7 +66,7 @@ func ListWorkspace(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		var elem model.Workspace
+		var elem model.Project
 		if err := cur.Decode(&elem); err != nil {
 			log.Fatal(err)
 		}
@@ -82,32 +82,32 @@ func ListWorkspace(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, results)
 }
 
-func FindWorkspace(c echo.Context) (err error) {
-	var workspace model.Workspace
-	cdb := GetWorkspaceDB("workspace")
+func FindProject(c echo.Context) (err error) {
+	var project model.Project
+	cdb := GetProjectDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("workspaceName")
+	search_val := c.Param("projectName")
 
-	if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&workspace); err != nil {
+	if err := cdb.FindOne(ctx, bson.M{"projectName": search_val}).Decode(&project); err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	} else {
-		return c.JSON(http.StatusOK, &workspace)
+		return c.JSON(http.StatusOK, &project)
 	}
 }
 
-func DeleteWorkspace(c echo.Context) (err error) {
-	cdb := GetWorkspaceDB("workspace")
+func DeleteProject(c echo.Context) (err error) {
+	cdb := GetProjectDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("workspaceName")
+	search_val := c.Param("projectName")
 
-	result, err := cdb.DeleteOne(ctx, bson.M{"workspaceName": search_val})
+	result, err := cdb.DeleteOne(ctx, bson.M{"projectName": search_val})
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
 		return
 	}
 	if result.DeletedCount == 0 {
-		common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Project not found."))
 		return
 	} else {
 		return c.JSON(http.StatusOK, echo.Map{
@@ -117,11 +117,11 @@ func DeleteWorkspace(c echo.Context) (err error) {
 	}
 }
 
-// func UpdateWorkspace(c echo.Context) (err error) {
-// 	cdb := GetWorkspaceDB("workspace")
+// func UpdateProject(c echo.Context) (err error) {
+// 	cdb := GetProjectDB("project")
 // 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-// 	models := new(model.Workspace)
+// 	models := new(model.Project)
 
 // 	if err = c.Bind(models); err != nil {
 // 		common.ErrorMsg(c, http.StatusBadRequest, err)
@@ -139,13 +139,13 @@ func DeleteWorkspace(c echo.Context) (err error) {
 
 // 	search_val := c.Param("id")
 
-// 	result, err := cdb.UpdateOne(ctx, bson.M{"workspaceId": search_val})
+// 	result, err := cdb.UpdateOne(ctx, bson.M{"projectId": search_val})
 // 	if err != nil {
 // 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
 // 		return
 // 	}
 // 	if result.DeletedCount == 0 {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
+// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Project not found."))
 // 		return
 // 	} else {
 // 		return c.JSON(http.StatusOK, echo.Map{

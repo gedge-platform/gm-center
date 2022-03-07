@@ -7,13 +7,22 @@ require (
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
+<<<<<<< HEAD
+=======
 	github.com/go-playground/validator/v10 v10.10.0
+>>>>>>> b4c9ba4f5b1e44699ba57bdf1d02d450d2e1ba84
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/joho/godotenv v1.3.0
+	github.com/kr/pretty v0.3.0 // indirect
 	github.com/labstack/echo/v4 v4.5.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
+<<<<<<< HEAD
+	github.com/rogpeppe/go-internal v1.8.0 // indirect
+	github.com/stretchr/testify v1.7.0 // indirect
+=======
+>>>>>>> b4c9ba4f5b1e44699ba57bdf1d02d450d2e1ba84
 	github.com/swaggo/echo-swagger v1.1.0
 	github.com/swaggo/swag v1.7.0
 	github.com/tidwall/pretty v1.2.0 // indirect
@@ -24,4 +33,9 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	golang.org/x/tools v0.1.5 // indirect
+<<<<<<< HEAD
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+=======
+>>>>>>> b4c9ba4f5b1e44699ba57bdf1d02d450d2e1ba84
 )

@@ -18,18 +18,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetDB(name string) *mongo.Collection {
+func GetWorkspaceDB(name string) *mongo.Collection {
 	db := db.DbManager()
 	cdb := db.Collection(name)
 
 	return cdb
 }
 
-func CreateMember(c echo.Context) (err error) {
-	cdb := GetDB("member")
+func CreateWorkspace(c echo.Context) (err error) {
+	cdb := GetWorkspaceDB("workspace")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-	models := new(model.Member)
+	models := new(model.Workspace)
 
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
@@ -54,9 +54,9 @@ func CreateMember(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, result)
 }
 
-func ListMember(c echo.Context) (err error) {
-	var results []model.Member
-	cdb := GetDB("member")
+func ListWorkspace(c echo.Context) (err error) {
+	var results []model.Workspace
+	cdb := GetWorkspaceDB("workspace")
 
 	findOptions := options.Find()
 	// findOptions.SetLimit(5)
@@ -67,11 +67,10 @@ func ListMember(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		var elem model.Member
+		var elem model.Workspace
 		if err := cur.Decode(&elem); err != nil {
 			log.Fatal(err)
 		}
-		elem.Password = "[hidden]"
 		results = append(results, elem)
 	}
 
@@ -84,33 +83,32 @@ func ListMember(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, results)
 }
 
-func FindMember(c echo.Context) (err error) {
-	var member model.Member
-	cdb := GetDB("member")
+func FindWorkspace(c echo.Context) (err error) {
+	var workspace model.Workspace
+	cdb := GetWorkspaceDB("workspace")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("id")
+	search_val := c.Param("workspaceName")
 
-	if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&member); err != nil {
+	if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&workspace); err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	} else {
-		member.Password = "[hidden]"
-		return c.JSON(http.StatusOK, &member)
+		return c.JSON(http.StatusOK, &workspace)
 	}
 }
 
-func DeleteMember(c echo.Context) (err error) {
-	cdb := GetDB("member")
+func DeleteWorkspace(c echo.Context) (err error) {
+	cdb := GetWorkspaceDB("workspace")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("id")
+	search_val := c.Param("workspaceName")
 
-	result, err := cdb.DeleteOne(ctx, bson.M{"memberId": search_val})
+	result, err := cdb.DeleteOne(ctx, bson.M{"workspaceName": search_val})
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
 		return
 	}
 	if result.DeletedCount == 0 {
-		common.ErrorMsg(c, http.StatusNotFound, errors.New("Member not found."))
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
 		return
 	} else {
 		return c.JSON(http.StatusOK, echo.Map{
@@ -120,11 +118,11 @@ func DeleteMember(c echo.Context) (err error) {
 	}
 }
 
-// func UpdateMember(c echo.Context) (err error) {
-// 	cdb := GetDB("member")
+// func UpdateWorkspace(c echo.Context) (err error) {
+// 	cdb := GetWorkspaceDB("workspace")
 // 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-// 	models := new(model.Member)
+// 	models := new(model.Workspace)
 
 // 	if err = c.Bind(models); err != nil {
 // 		common.ErrorMsg(c, http.StatusBadRequest, err)
@@ -142,13 +140,13 @@ func DeleteMember(c echo.Context) (err error) {
 
 // 	search_val := c.Param("id")
 
-// 	result, err := cdb.UpdateOne(ctx, bson.M{"memberId": search_val})
+// 	result, err := cdb.UpdateOne(ctx, bson.M{"workspaceId": search_val})
 // 	if err != nil {
 // 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
 // 		return
 // 	}
 // 	if result.DeletedCount == 0 {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Member not found."))
+// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
 // 		return
 // 	} else {
 // 		return c.JSON(http.StatusOK, echo.Map{

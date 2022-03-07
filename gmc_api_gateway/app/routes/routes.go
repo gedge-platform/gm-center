@@ -58,9 +58,13 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/members/:id", c.FindMember)
 	r.DELETE("/members/:id", c.DeleteMember)
 	r.POST("/members", c.CreateMember)
-<<<<<<< HEAD
 	// r.PUT("/members/:id", c.UpdateMember)
-=======
-	r.PUT("/members/:id", c.UpdateMember)
->>>>>>> b4c9ba4f5b1e44699ba57bdf1d02d450d2e1ba84
+	r.POST("/workspace", c.CreateWorkspace)
+	r.GET("/workspace", c.ListWorkspace)
+	r.GET("/workspace/:workspaceName", c.FindWorkspace)
+	r.DELETE("/workspace/:workspaceName", c.DeleteWorkspace)
+	r.POST("/cluster", c.CreateCluster)
+	r.GET("/cluster", c.ListCluster)
+	r.GET("/cluster/:clusterName", c.FindCluster)
+	r.DELETE("/cluster/:clusterName", c.DeleteCluster)
 }

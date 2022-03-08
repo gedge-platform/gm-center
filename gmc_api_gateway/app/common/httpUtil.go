@@ -24,6 +24,8 @@ var listTemplates = map[string]string{
 	"resourcequota":       "/api/v1/resourcequotas",
 	"deployments":         "/apis/apps/v1/deployments",
 	"replicasets":         "/apis/apps/v1/replicasets",
+	"daemonsets":    	   "/apis/apps/v1/daemonsets",
+	"statefulsets":    	   "/apis/apps/v1/statefulsets",
 	"jobs":                "/apis/batch/v1/jobs",
 	"cronjobs":            "/apis/batch/v1/cronjobs",
 	"clusterroles":        "/apis/rbac.authorization.k8s.io/v1/clusterroles",
@@ -35,7 +37,7 @@ var listTemplates = map[string]string{
 	"storageclasses":"/apis/storage.k8s.io/v1/storageclasses",
 	"persistentvolumes":               "/api/v1/persistentvolumes",
 	"persistentvolumeclaims":               "/api/v1/persistentvolumeclaims",
-	"secret":"/api/v1/secrets",
+	"secrets":				"/api/v1/secrets",
 
 }
 
@@ -48,6 +50,8 @@ var nsTemplates = map[string]string{
 	"resourcequota":       "/api/v1/namespaces/$1/resourcequotas/$2",
 	"deployments":         "/apis/apps/v1/namespaces/$1/deployments/$2",
 	"replicasets":         "/apis/apps/v1/namespaces/$1/replicasets/$2",
+	"daemonsets":         "/apis/apps/v1/namespaces/$1/daemonsets/$2",
+	"statefulsets":         "/apis/apps/v1/namespaces/$1/statefulsets/$2",
 	"jobs":                "/apis/batch/v1/namespaces/$1/jobs/$2",
 	"cronjobs":            "/apis/batch/v1/namespaces/$1/cronjobs/$2",
 	"clusterroles":        "/apis/rbac.authorization.k8s.io/v1/clusterroles/$2",
@@ -59,7 +63,7 @@ var nsTemplates = map[string]string{
 	"storageclasses":"/apis/storage.k8s.io/v1/namespaces/$1/storageclasses/$2",
 	"persistentvolumes":               "/api/v1/persistentvolumes/$2",
 	"persistentvolumeclaims":               "/api/v1/namespaces/$1/persistentvolumeclaims/$2",
-	"secret":"/api/v1/namespaces/$1/secret/$2",
+	"secrets":"/api/v1/namespaces/$1/secrets/$2",
 }
 
 var (
@@ -71,6 +75,8 @@ var (
 	SetResourcequota      = new(model.ResourceQuota)
 	SetDeployment         = new(model.Deployment)
 	SetReplicaset         = new(model.ReplicaSet)
+	SetDaemonset = new(model.DaemonSet)
+	SetStatefulset = new(model.StatefulSet)
 	SetJob                = new(model.Job)
 	SetCronjob            = new(model.CronJob)
 	SetClusterrole        = new(model.ClusterRole)
@@ -91,6 +97,8 @@ var (
 	SetResourcequotas      = new(model.ResourceQuotaList)
 	SetDeployments         = new(model.DeploymentList)
 	SetReplicasets         = new(model.ReplicaSetList)
+	SetDaemonsets = new(model.DaemonSetList)
+	SetStatefulsets = new(model.StatefulSetList)
 	SetJobs                = new(model.JobList)
 	SetCronjobs            = new(model.CronJobList)
 	SetClusterroles        = new(model.ClusterRoleList)

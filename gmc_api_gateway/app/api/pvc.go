@@ -44,6 +44,7 @@ func GetAllPVCs(c echo.Context) error {
 	for i, _ := range data {
 		pvc := model.PVC{
 			Name:              common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Namespace:              common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
 			Capacity:         common.InterfaceToString(common.FindData(data[i], "spec.resources", "requests.storage")),
 			AccessMode:           common.InterfaceToArray(common.FindData(data[i], "spec", "accessModes")),
 			Status:            common.InterfaceToString(common.FindData(data[i], "status", "phase")),
@@ -69,10 +70,10 @@ func GetAllPVCs(c echo.Context) error {
 // @Header 200 {string} Token "qwerty"
 // @Router /pvs/:name [get]
 func GetPVC(c echo.Context) error {
-	var pvs []model.PV
-	fmt.Printf("## PVs", pvs)
+	var pvcs []model.PVC
+	fmt.Printf("## PVCs", pvcs)
 	params := model.PARAMS{
-		Kind:      "persistentvolumes",
+		Kind:      "persistentvolumeclaims",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -80,7 +81,6 @@ func GetPVC(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-
 	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
@@ -88,22 +88,24 @@ func GetPVC(c echo.Context) error {
 	}
 
 	fmt.Printf("####PV data confirm : %s", getData)
-	pv := model.PV{
+	pvc := model.PVC{
 				Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-				Capacity:         common.InterfaceToString(common.FindData(getData, "spec", "capacity.storage")),
+				Namespace:              common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
+				Capacity:         common.InterfaceToString(common.FindData(getData, "spec.resources", "requests.storage")),
 				AccessMode:           common.InterfaceToArray(common.FindData(getData, "spec", "accessModes")),
-				ReclaimPolicy: common.InterfaceToString(common.FindData(getData, "spec", "persistentVolumeReclaimPolicy")),
 				Status:            common.InterfaceToString(common.FindData(getData, "status", "phase")),
-				Claim:          common.FindData(getData, "spec", "claimRef"),
 				StorageClass:             common.InterfaceToString(common.FindData(getData, "spec", "storageClassName")),
-				VolumeMode :            common.InterfaceToString(common.FindData(getData, "spec", "volumeMode")),
+				Volume :            common.InterfaceToString(common.FindData(getData, "spec", "volumeName")),
 				Cluster: c.QueryParam("cluster"),
 				CreateAt : common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+				Finalizers : common.InterfaceToArray(common.FindData(getData, "metadata", "finalizers")),
+				Lable:             common.FindData(getData, "metadata", "labels"),
+				Annotations:       common.FindData(getData, "metadata", "annotations"),
 				Events: getCallEvent(params),
 			}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": pv,
+		"data": pvc,
 	})
 }
 

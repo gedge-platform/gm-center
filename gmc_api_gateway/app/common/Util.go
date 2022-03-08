@@ -452,6 +452,13 @@ func InterfaceToArray(i interface{}) []string{
 	return x
 }
 
+func InterfaceOfLen(t interface{}) int{
+	
+
+	
+	return reflect.ValueOf(t).Len()
+}
+
 func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 	data, err := DataRequest(params)

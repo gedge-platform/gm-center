@@ -196,7 +196,7 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 
 	data := nowQueryRange(addr, nowMetricExpr(nowGpuMetric["gpu_info"], temp_filter))
 
-	fmt.Println(data)
+	fmt.Println("#####data",data)
 	fmt.Println("======value======")
 	if check := len(data.(model.Matrix)) != 0; check {
 		// for _, val := range data.(model.Matrix)[0].Values {
@@ -208,6 +208,8 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 			// value = val.Value
 			fmt.Println(val.Metric["name"])
 			gpu["name"] = val.Metric["name"]
+			gpu["node"] = val.Metric["node"]
+			gpu["uuid"] = val.Metric["uuid"]
 			gpu["container"] = val.Metric["container"]
 			gpu["vbios_version"] = val.Metric["vbios_version"]
 			gpuList = append(gpuList, gpu)

@@ -127,7 +127,13 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/pvcs", api.GetAllPVCs)
 	// r.POST("/pvs", api.CreateService)
-	// r.GET("/pvs/:name", api.GetPV)
+	r.GET("/pvcs/:name", api.GetPVC)
+	// // r.PUT("/services/:name", api.UpdateService)
+	// r.DELETE("/pvs/:name", api.DeleteService)
+
+	r.GET("/secrets", api.GetAllSecrets)
+	// r.POST("/pvs", api.CreateService)
+	r.GET("/secrets/:name", api.GetSecret)
 	// // r.PUT("/services/:name", api.UpdateService)
 	// r.DELETE("/pvs/:name", api.DeleteService)
 

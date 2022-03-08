@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -55,8 +56,9 @@ func CreateWorkspace(c echo.Context) (err error) {
 }
 
 func ListWorkspace(c echo.Context) (err error) {
-	var results []model.Workspace
+	var showsLoaded []bson.M
 	cdb := GetWorkspaceDB("workspace")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	findOptions := options.Find()
 
@@ -66,11 +68,15 @@ func ListWorkspace(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		var elem model.Workspace
-		if err := cur.Decode(&elem); err != nil {
-			log.Fatal(err)
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "ID"}, {"as", "selectCluster"}}}}
+		// unwindCluster := bson.D{{"$unwind", bson.D{{"path", "$cluster"}, {"preserveNullAndEmptyArrays", false}}}}
+
+		showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster})
+
+		if err = showLoadedCursor.All(ctx, &showsLoaded); err != nil {
+			panic(err)
 		}
-		results = append(results, elem)
+		fmt.Println(showsLoaded)
 	}
 
 	if err := cur.Err(); err != nil {
@@ -79,21 +85,46 @@ func ListWorkspace(c echo.Context) (err error) {
 
 	cur.Close(context.TODO())
 
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, showsLoaded)
 }
 
 func FindWorkspace(c echo.Context) (err error) {
-	var workspace model.Workspace
+	var showsLoaded []bson.M
 	cdb := GetWorkspaceDB("workspace")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("workspaceName")
 
-	if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&workspace); err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	} else {
-		return c.JSON(http.StatusOK, &workspace)
+	findOptions := options.Find()
+
+	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	for cur.Next(context.TODO()) {
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "ID"}, {"as", "selectCluster"}}}}
+		// unwindCluster := bson.D{{"$unwind", bson.D{{"path", "$cluster"}, {"preserveNullAndEmptyArrays", false}}}}
+		matchCluster := bson.D{
+			{Key: "$match", Value: bson.D{
+				{Key: "workspaceName", Value: search_val},
+			}},
+		}
+
+		showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, matchCluster})
+
+		if err = showLoadedCursor.All(ctx, &showsLoaded); err != nil {
+			panic(err)
+		}
+		fmt.Println(showsLoaded)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	cur.Close(context.TODO())
+
+	return c.JSON(http.StatusOK, showsLoaded)
 }
 
 func DeleteWorkspace(c echo.Context) (err error) {

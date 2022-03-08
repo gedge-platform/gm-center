@@ -59,7 +59,6 @@ func ListCluster(c echo.Context) (err error) {
 	cdb := GetClusterDB("cluster")
 
 	findOptions := options.Find()
-	// findOptions.SetLimit(5)
 
 	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
 	if err != nil {

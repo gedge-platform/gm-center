@@ -5,7 +5,7 @@ import (
 )
 
 type Cluster struct {
-	_id      primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
+	ID       primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
 	Endpoint string             `json:"clusterEndpoint,omitempty" bson:"clusterEndpoint"`
 	Type     string             `json:"clusterType,omitempty" bson:"clusterType"`
 	Name     string             `json:"clusterName,omitempty" bson:"clusterName"`

@@ -89,7 +89,8 @@ func FindCluster(c echo.Context) (err error) {
 	search_val := c.Param("clusterName")
 
 	if err := cdb.FindOne(ctx, bson.M{"clusterName": search_val}).Decode(&cluster); err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
+		// common.ErrorMsg(c, http.StatusNotFound, err)
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
 		return nil
 	} else {
 		return c.JSON(http.StatusOK, &cluster)

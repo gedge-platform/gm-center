@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -87,17 +88,48 @@ func ListProject(c echo.Context) (err error) {
 }
 
 func FindProject(c echo.Context) (err error) {
-	var project model.Project
-	cdb := GetProjectDB("project")
+	var showsProject []bson.M
+	cdb := GetWorkspaceDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("projectName")
 
-	if err := cdb.FindOne(ctx, bson.M{"projectName": search_val}).Decode(&project); err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	} else {
-		return c.JSON(http.StatusOK, &project)
+	findOptions := options.Find()
+
+	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	for cur.Next(context.TODO()) {
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster.cluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
+		matchCluster := bson.D{
+			{Key: "$match", Value: bson.D{
+				{Key: "projectName", Value: search_val},
+			}},
+		}
+
+		showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace, matchCluster})
+
+		if err = showLoadedCursor.All(ctx, &showsProject); err != nil {
+			panic(err)
+		}
+		fmt.Println(showsProject)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	cur.Close(context.TODO())
+
+	if showsProject == nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Project not found."))
+		return
+	} else {
+		return c.JSON(http.StatusOK, showsProject)
+	}
+	// return c.JSON(http.StatusOK, showsProject)
 }
 
 func DeleteProject(c echo.Context) (err error) {

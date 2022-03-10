@@ -55,8 +55,9 @@ func CreateProject(c echo.Context) (err error) {
 }
 
 func ListProject(c echo.Context) (err error) {
-	var results []model.Project
+	var showsProject []bson.M
 	cdb := GetProjectDB("project")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	findOptions := options.Find()
 
@@ -66,20 +67,23 @@ func ListProject(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		var elem model.Project
-		if err := cur.Decode(&elem); err != nil {
-			log.Fatal(err)
-		}
-		results = append(results, elem)
-	}
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "ID"}, {"as", "selectCluster"}}}}
+		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace2"}, {"foreignField", "ID"}, {"as", "workspacess"}}}}
 
+		showProjectCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace})
+
+		if err = showProjectCursor.All(ctx, &showsProject); err != nil {
+			panic(err)
+		}
+		// fmt.Println(showsProject)
+	}
 	if err := cur.Err(); err != nil {
 		log.Fatal(err)
 	}
 
 	cur.Close(context.TODO())
 
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, showsProject)
 }
 
 func FindProject(c echo.Context) (err error) {

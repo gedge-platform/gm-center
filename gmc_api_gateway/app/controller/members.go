@@ -71,7 +71,7 @@ func ListMember(c echo.Context) (err error) {
 		if err := cur.Decode(&elem); err != nil {
 			log.Fatal(err)
 		}
-		elem.Password = "[hidden]"
+		elem.Password = "******"
 		results = append(results, elem)
 	}
 
@@ -95,7 +95,7 @@ func FindMember(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Member not found."))
 		return nil
 	} else {
-		member.Password = "[hidden]"
+		member.Password = "******"
 		return c.JSON(http.StatusOK, &member)
 	}
 }
@@ -116,7 +116,7 @@ func DeleteMember(c echo.Context) (err error) {
 	} else {
 		return c.JSON(http.StatusOK, echo.Map{
 			"status": http.StatusOK,
-			"data":   search_val + " Deleted",
+			"data":   search_val + " Member Deleted Complete",
 		})
 	}
 }

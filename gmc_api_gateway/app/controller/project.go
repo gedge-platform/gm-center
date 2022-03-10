@@ -148,7 +148,7 @@ func DeleteProject(c echo.Context) (err error) {
 	} else {
 		return c.JSON(http.StatusOK, echo.Map{
 			"status": http.StatusOK,
-			"data":   search_val + " Deleted",
+			"data":   search_val + " Project Deleted Complete",
 		})
 	}
 }

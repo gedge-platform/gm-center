@@ -67,8 +67,8 @@ func ListProject(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "ID"}, {"as", "selectCluster"}}}}
-		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace2"}, {"foreignField", "ID"}, {"as", "workspacess"}}}}
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster.cluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
 
 		showProjectCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace})
 

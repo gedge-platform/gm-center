@@ -129,7 +129,13 @@ func FindWorkspace(c echo.Context) (err error) {
 
 	cur.Close(context.TODO())
 
-	return c.JSON(http.StatusOK, showsWorkspace)
+	if showsWorkspace == nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
+		return
+	} else {
+		return c.JSON(http.StatusOK, showsWorkspace)
+	}
+	// return c.JSON(http.StatusOK, showsWorkspace)
 }
 
 func DeleteWorkspace(c echo.Context) (err error) {

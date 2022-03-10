@@ -71,7 +71,7 @@ func ListMember(c echo.Context) (err error) {
 		if err := cur.Decode(&elem); err != nil {
 			log.Fatal(err)
 		}
-		elem.Password = "[hidden]"
+		elem.Password = "******"
 		results = append(results, elem)
 	}
 

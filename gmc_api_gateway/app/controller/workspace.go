@@ -94,35 +94,6 @@ func ListWorkspace(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, showsWorkspace)
 }
 
-func ListWorkspace2(c echo.Context) (err error) {
-	var results []model.Workspace
-	cdb := GetWorkspaceDB("workspace")
-
-	findOptions := options.Find()
-	// findOptions.SetLimit(5)
-
-	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for cur.Next(context.TODO()) {
-		var elem model.Workspace
-		if err := cur.Decode(&elem); err != nil {
-			log.Fatal(err)
-		}
-		results = append(results, elem)
-	}
-
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	cur.Close(context.TODO())
-
-	return c.JSON(http.StatusOK, results)
-}
-
 func FindWorkspace(c echo.Context) (err error) {
 	var showsWorkspace []bson.M
 	cdb := GetWorkspaceDB("workspace")
@@ -137,7 +108,7 @@ func FindWorkspace(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "ID"}, {"as", "selectCluster"}}}}
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster.cluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
 		matchCluster := bson.D{
 			{Key: "$match", Value: bson.D{
 				{Key: "workspaceName", Value: search_val},

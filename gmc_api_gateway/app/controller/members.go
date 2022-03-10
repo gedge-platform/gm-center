@@ -91,7 +91,8 @@ func FindMember(c echo.Context) (err error) {
 	search_val := c.Param("id")
 
 	if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&member); err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
+		// common.ErrorMsg(c, http.StatusNotFound, err)
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Member not found."))
 		return nil
 	} else {
 		member.Password = "[hidden]"

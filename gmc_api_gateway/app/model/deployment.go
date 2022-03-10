@@ -15,7 +15,7 @@ type DEPLOYMENT struct {
 	// PodInfo     []model.Pod     `json:"pods"`
 	// ServiceInfo []model.Service `json:"services"`
 	Label      interface{} `json:"labels,omitempty"`
-	Events     []EVENT     `json:"events,omitempty"`
+	Events     []EVENT     `json:"events"`
 	Annotation interface{} `json:"annotations,omitempty"`
 	CreateAt   time.Time   `json:"createAt,omitempty"`
 	UpdateAt   time.Time   `json:"updateAt"`

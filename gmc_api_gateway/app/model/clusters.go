@@ -18,7 +18,7 @@ type Cluster struct {
 
 type CLUSTER struct {
 	Cluster
-	Gpu                     []map[string]interface{} `json:"gpu,omitempty"`
+	Gpu                     []map[string]interface{} `json:"gpu"`
 	Version                 string                   `json:"kubeVersion"`
 	Status                  string                   `json:"status"`
 	Network                 string                   `json:"network"`

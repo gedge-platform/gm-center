@@ -441,6 +441,24 @@ func InterfaceToTime(i interface{}) time.Time {
 	return timer
 }
 
+
+func InterfaceToArray(i interface{}) []string{
+	str := reflect.ValueOf(i)
+	var x []string
+	for j := 0; j < str.Len(); j++ {
+		data :=InterfaceToString(str.Index(j))
+		x = append(x, data)
+	}
+	return x
+}
+
+func InterfaceOfLen(t interface{}) int{
+	
+
+	
+	return reflect.ValueOf(t).Len()
+}
+
 func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 	data, err := DataRequest(params)

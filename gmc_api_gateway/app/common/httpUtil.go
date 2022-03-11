@@ -88,6 +88,7 @@ var (
 	SetPersistentvolume=new(model.PersistentVolume)
 	SetPersistentvolumeClaim = new(model.PersistentVolumeClaim)
 	SetSecret = new(model.Secret)
+	SetStorageclass = new(model.StorageClass)
 
 	SetPods                = new(model.PodList)
 	SetServices            = new(model.ServiceList)
@@ -110,6 +111,7 @@ var (
 	SetPersistentvolumes=new(model.PersistentVolumeList)
 	SetPersistentvolumeClaims = new(model.PersistentVolumeClaimList)
 	SetSecrets = new(model.SecretList)
+	SetStorageclasses = new(model.StorageClassList)
 )
 
 func DataRequest(params model.PARAMS) (data string, err error) {

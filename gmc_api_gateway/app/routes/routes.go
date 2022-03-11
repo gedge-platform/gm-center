@@ -114,6 +114,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/cronjobs/:name", api.DeleteCronJob)
 
 	r.GET("/services", api.GetServices)
+	r.GET("/daemonsets", api.GetDaemonsets)
 	r.POST("/services", api.CreateService)
 	r.GET("/services/:name", api.GetService)
 	// r.PUT("/services/:name", api.UpdateService)
@@ -136,6 +137,12 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/secrets/:name", api.GetSecret)
 	// // r.PUT("/services/:name", api.UpdateService)
 	// r.DELETE("/pvs/:name", api.DeleteService)
+
+	// r.GET("/secrets", api.GetAllSecrets)
+	// // r.POST("/pvs", api.CreateService)
+	// r.GET("/secrets/:name", api.GetSecret)
+	// // // r.PUT("/services/:name", api.UpdateService)
+	// // r.DELETE("/pvs/:name", api.DeleteService)
 
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		userChk, _ := api.AuthenticateUser(id, password)

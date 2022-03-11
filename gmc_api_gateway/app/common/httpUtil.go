@@ -16,100 +16,99 @@ import (
 )
 
 var listTemplates = map[string]string{
-	"pods":                "/api/v1/pods",
-	"services":            "/api/v1/services",
-	"endpoints":           "/api/v1/endpoints",
-	"configmaps":          "/api/v1/configmaps",
-	"serviceaccounts":     "/api/v1/serviceaccounts",
-	"resourcequota":       "/api/v1/resourcequotas",
-	"deployments":         "/apis/apps/v1/deployments",
-	"replicasets":         "/apis/apps/v1/replicasets",
-	"daemonsets":    	   "/apis/apps/v1/daemonsets",
-	"statefulsets":    	   "/apis/apps/v1/statefulsets",
-	"jobs":                "/apis/batch/v1/jobs",
-	"cronjobs":            "/apis/batch/v1/cronjobs",
-	"clusterroles":        "/apis/rbac.authorization.k8s.io/v1/clusterroles",
-	"roles":               "/apis/rbac.authorization.k8s.io/v1/roles",
-	"clusterrolebindings": "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings",
-	"namespaces":          "/api/v1/namespaces",
-	"nodes":               "/api/v1/nodes",
-	"events":              "/apis/events.k8s.io/v1/events",
-	"storageclasses":"/apis/storage.k8s.io/v1/storageclasses",
-	"persistentvolumes":               "/api/v1/persistentvolumes",
-	"persistentvolumeclaims":               "/api/v1/persistentvolumeclaims",
-	"secrets":				"/api/v1/secrets",
-
+	"pods":                   "/api/v1/pods",
+	"services":               "/api/v1/services",
+	"endpoints":              "/api/v1/endpoints",
+	"configmaps":             "/api/v1/configmaps",
+	"serviceaccounts":        "/api/v1/serviceaccounts",
+	"resourcequota":          "/api/v1/resourcequotas",
+	"deployments":            "/apis/apps/v1/deployments",
+	"replicasets":            "/apis/apps/v1/replicasets",
+	"daemonsets":             "/apis/apps/v1/daemonsets",
+	"statefulsets":           "/apis/apps/v1/statefulsets",
+	"jobs":                   "/apis/batch/v1/jobs",
+	"cronjobs":               "/apis/batch/v1/cronjobs",
+	"clusterroles":           "/apis/rbac.authorization.k8s.io/v1/clusterroles",
+	"roles":                  "/apis/rbac.authorization.k8s.io/v1/roles",
+	"clusterrolebindings":    "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings",
+	"namespaces":             "/api/v1/namespaces",
+	"nodes":                  "/api/v1/nodes",
+	"events":                 "/apis/events.k8s.io/v1/events",
+	"storageclasses":         "/apis/storage.k8s.io/v1/storageclasses",
+	"persistentvolumes":      "/api/v1/persistentvolumes",
+	"persistentvolumeclaims": "/api/v1/persistentvolumeclaims",
+	"secrets":                "/api/v1/secrets",
 }
 
 var nsTemplates = map[string]string{
-	"pods":                "/api/v1/namespaces/$1/pods/$2",
-	"services":            "/api/v1/namespaces/$1/services/$2",
-	"endpoints":           "/api/v1/namespaces/$1/endpoints/$2",
-	"configmaps":          "/api/v1/namespaces/$1/configmaps/$2",
-	"serviceaccounts":     "/api/v1/namespaces/$1/serviceaccounts/$2",
-	"resourcequota":       "/api/v1/namespaces/$1/resourcequotas/$2",
-	"deployments":         "/apis/apps/v1/namespaces/$1/deployments/$2",
-	"replicasets":         "/apis/apps/v1/namespaces/$1/replicasets/$2",
-	"daemonsets":         "/apis/apps/v1/namespaces/$1/daemonsets/$2",
-	"statefulsets":         "/apis/apps/v1/namespaces/$1/statefulsets/$2",
-	"jobs":                "/apis/batch/v1/namespaces/$1/jobs/$2",
-	"cronjobs":            "/apis/batch/v1/namespaces/$1/cronjobs/$2",
-	"clusterroles":        "/apis/rbac.authorization.k8s.io/v1/clusterroles/$2",
-	"roles":               "/apis/rbac.authorization.k8s.io/v1/namespaces/$1/roles/$2",
-	"clusterrolebindings": "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/$2",
-	"namespaces":          "/api/v1/namespaces/$2",
-	"nodes":               "/api/v1/nodes/$2",
-	"events":              "/apis/events.k8s.io/v1/namespaces/$1/events/$2",
-	"storageclasses":"/apis/storage.k8s.io/v1/namespaces/$1/storageclasses/$2",
-	"persistentvolumes":               "/api/v1/persistentvolumes/$2",
-	"persistentvolumeclaims":               "/api/v1/namespaces/$1/persistentvolumeclaims/$2",
-	"secrets":"/api/v1/namespaces/$1/secrets/$2",
+	"pods":                   "/api/v1/namespaces/$1/pods/$2",
+	"services":               "/api/v1/namespaces/$1/services/$2",
+	"endpoints":              "/api/v1/namespaces/$1/endpoints/$2",
+	"configmaps":             "/api/v1/namespaces/$1/configmaps/$2",
+	"serviceaccounts":        "/api/v1/namespaces/$1/serviceaccounts/$2",
+	"resourcequota":          "/api/v1/namespaces/$1/resourcequotas/$2",
+	"deployments":            "/apis/apps/v1/namespaces/$1/deployments/$2",
+	"replicasets":            "/apis/apps/v1/namespaces/$1/replicasets/$2",
+	"daemonsets":             "/apis/apps/v1/namespaces/$1/daemonsets/$2",
+	"statefulsets":           "/apis/apps/v1/namespaces/$1/statefulsets/$2",
+	"jobs":                   "/apis/batch/v1/namespaces/$1/jobs/$2",
+	"cronjobs":               "/apis/batch/v1/namespaces/$1/cronjobs/$2",
+	"clusterroles":           "/apis/rbac.authorization.k8s.io/v1/clusterroles/$2",
+	"roles":                  "/apis/rbac.authorization.k8s.io/v1/namespaces/$1/roles/$2",
+	"clusterrolebindings":    "/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/$2",
+	"namespaces":             "/api/v1/namespaces/$2",
+	"nodes":                  "/api/v1/nodes/$2",
+	"events":                 "/apis/events.k8s.io/v1/namespaces/$1/events/$2",
+	"storageclasses":         "/apis/storage.k8s.io/v1/namespaces/$1/storageclasses/$2",
+	"persistentvolumes":      "/api/v1/persistentvolumes/$2",
+	"persistentvolumeclaims": "/api/v1/namespaces/$1/persistentvolumeclaims/$2",
+	"secrets":                "/api/v1/namespaces/$1/secrets/$2",
 }
 
 var (
-	SetPod                = new(model.Pod)
-	SetService            = new(model.Service)
-	SetEndpoint           = new(model.Endpoints)
-	SetConfigmap          = new(model.ConfigMap)
-	SetServiceaccount     = new(model.ServiceAccount)
-	SetResourcequota      = new(model.ResourceQuota)
-	SetDeployment         = new(model.Deployment)
-	SetReplicaset         = new(model.ReplicaSet)
-	SetDaemonset = new(model.DaemonSet)
-	SetStatefulset = new(model.StatefulSet)
-	SetJob                = new(model.Job)
-	SetCronjob            = new(model.CronJob)
-	SetClusterrole        = new(model.ClusterRole)
-	SetRole               = new(model.Role)
-	SetClusterrolebinding = new(model.ClusterRoleBinding)
-	SetNamespace          = new(model.Namespace)
-	SetNode               = new(model.Node)
-	SetEvent              = new(model.Event)
-	SetPersistentvolume=new(model.PersistentVolume)
+	SetPod                   = new(model.Pod)
+	SetService               = new(model.Service)
+	SetEndpoint              = new(model.Endpoints)
+	SetConfigmap             = new(model.ConfigMap)
+	SetServiceaccount        = new(model.ServiceAccount)
+	SetResourcequota         = new(model.ResourceQuota)
+	SetDeployment            = new(model.Deployment)
+	SetReplicaset            = new(model.ReplicaSet)
+	SetDaemonset             = new(model.DaemonSet)
+	SetStatefulset           = new(model.StatefulSet)
+	SetJob                   = new(model.Job)
+	SetCronjob               = new(model.CronJob)
+	SetClusterrole           = new(model.ClusterRole)
+	SetRole                  = new(model.Role)
+	SetClusterrolebinding    = new(model.ClusterRoleBinding)
+	SetNamespace             = new(model.Namespace)
+	SetNode                  = new(model.Node)
+	SetEvent                 = new(model.Event)
+	SetPersistentvolume      = new(model.PersistentVolume)
 	SetPersistentvolumeClaim = new(model.PersistentVolumeClaim)
-	SetSecret = new(model.Secret)
+	SetSecret                = new(model.Secret)
 
-	SetPods                = new(model.PodList)
-	SetServices            = new(model.ServiceList)
-	SetEndpoints           = new(model.EndpointsList)
-	SetConfigmaps          = new(model.ConfigMapList)
-	SetServiceaccounts     = new(model.ServiceAccountList)
-	SetResourcequotas      = new(model.ResourceQuotaList)
-	SetDeployments         = new(model.DeploymentList)
-	SetReplicasets         = new(model.ReplicaSetList)
-	SetDaemonsets = new(model.DaemonSetList)
-	SetStatefulsets = new(model.StatefulSetList)
-	SetJobs                = new(model.JobList)
-	SetCronjobs            = new(model.CronJobList)
-	SetClusterroles        = new(model.ClusterRoleList)
-	SetRoles               = new(model.RoleList)
-	SetClusterrolebindings = new(model.ClusterRoleBindingList)
-	SetNamespaces          = new(model.NamespaceList)
-	SetNodes               = new(model.NodeList)
-	SetEvents              = new(model.EventList)
-	SetPersistentvolumes=new(model.PersistentVolumeList)
+	SetPods                   = new(model.PodList)
+	SetServices               = new(model.ServiceList)
+	SetEndpoints              = new(model.EndpointsList)
+	SetConfigmaps             = new(model.ConfigMapList)
+	SetServiceaccounts        = new(model.ServiceAccountList)
+	SetResourcequotas         = new(model.ResourceQuotaList)
+	SetDeployments            = new(model.DeploymentList)
+	SetReplicasets            = new(model.ReplicaSetList)
+	SetDaemonsets             = new(model.DaemonSetList)
+	SetStatefulsets           = new(model.StatefulSetList)
+	SetJobs                   = new(model.JobList)
+	SetCronjobs               = new(model.CronJobList)
+	SetClusterroles           = new(model.ClusterRoleList)
+	SetRoles                  = new(model.RoleList)
+	SetClusterrolebindings    = new(model.ClusterRoleBindingList)
+	SetNamespaces             = new(model.NamespaceList)
+	SetNodes                  = new(model.NodeList)
+	SetEvents                 = new(model.EventList)
+	SetPersistentvolumes      = new(model.PersistentVolumeList)
 	SetPersistentvolumeClaims = new(model.PersistentVolumeClaimList)
-	SetSecrets = new(model.SecretList)
+	SetSecrets                = new(model.SecretList)
 )
 
 func DataRequest(params model.PARAMS) (data string, err error) {

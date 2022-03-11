@@ -6,23 +6,25 @@ import (
 
 type DAEMONSET struct {
 	Name          string      `json:"name"`
-	Namespace     string      `json:"namespace"`
-	AccessMode    []string    `json:"accessMode"`
-	ReclaimPolicy string      `json:"reclaimPolicy",`
-	Status        interface{} `json:"status"`
-	Claim         interface{} `json:"claim"`
-	StorageClass  string      `json:"storageClass"`
-	// Reason        []EVENT          `json:"events"`
-	VolumeMode  string      `json:"volumeMode"`
-	Cluster     string      `json:"cluster"`
-	Workspace   string      `json:"workspace"`
-	CreateAt    time.Time   `json:"createAt"`
-	Selector    interface{} `json:"selector,omitempty"`
-	Annotations interface{} `json:"annotations,omitempty"`
-	Events      []EVENT     `json:"events"`
+	Namespace     string      `json:"project"`
+	ClusterName   string      `json:"cluster"`
+	WorkspaceName string      `json:"workspace,omitempty"`
+	Stauts        interface{} `json:"status"`
+	Strategy      interface{} `json:"strategy,omitempty"`
+	Containers    interface{} `json:"containers,omitempty"`
+	// Workspace     string      `json:"workspace,omitempty"`
+	// PodInfo     []model.Pod     `json:"pods"`
+	// ServiceInfo []model.Service `json:"services"`
+	Labels     interface{} `json:"label,omitempty"`
+	Events     []EVENT     `json:"events"`
+	Annotation interface{} `json:"annotations,omitempty"`
+	CreateAt   time.Time   `json:"createAt,omitempty"`
+	// UpdateAt   time.Time   `json:"updateAt"`
+	// Resource   []DEPLOYMENT_RESOURCE `json:"resource"`
+	// jwt.StandardClaim
 }
 
-type DAEMONSETs []DAEMONSETs
+type DAEMONSETS []DAEMONSET
 
 func (DAEMONSET) TableName() string {
 	return "DAEMONSET_INFO"

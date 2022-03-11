@@ -42,7 +42,6 @@ func CreateWorkspace(c echo.Context) (err error) {
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			fmt.Println(err)
-			fmt.Println(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return

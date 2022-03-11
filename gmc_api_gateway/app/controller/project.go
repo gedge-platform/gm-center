@@ -12,6 +12,7 @@ import (
 	db "gmc_api_gateway/app/database"
 	"gmc_api_gateway/app/model"
 
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,15 +32,19 @@ func CreateProject(c echo.Context) (err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := new(model.Project)
+	validate := validator.New()
 
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
 
-	if err = c.Validate(models); err != nil {
+	if err = validate.Struct(models); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Println(err)
+		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
-		return nil
+		return
 	}
 
 	if err != nil {

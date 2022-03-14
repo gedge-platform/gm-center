@@ -5,62 +5,45 @@ import (
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 	"net/http"
-
+	"log"
 	"github.com/labstack/echo/v4"
 )
 
 func GetDaemonset(c echo.Context) (err error) {
-	// var ServicePorts []model.PORT
-	// params := model.PARAMS{
-	// 	Kind:      "daemonsets",
-	// 	Name:      c.Param("name"),
-	// 	Cluster:   c.QueryParam("cluster"),
-	// 	Workspace: c.QueryParam("workspace"),
-	// 	Project:   c.QueryParam("project"),
-	// 	Method:    c.Request().Method,
-	// 	Body:      responseBody(c.Request().Body),
-	// }
+	params := model.PARAMS{
+		Kind:      "daemonsets",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
 
-	// deploymentName := params.Name
-	// params.Name = params.Project
-	// project := GetDBProject(params)
-	// params.Name = deploymentName
-	// getData, err := common.DataRequest(params)
-	// if err != nil {
-	// 	common.ErrorMsg(c, http.StatusNotFound, err)
-	// 	return nil
-	// }
-	// getData0 := common.FindData(getData, "", "")
-	// var Deployment model.DAEMONSET
-	// common.Transcode(getData0, &Deployment)
-	// replicas := model.REPLICA{
-	// 	Replicas:            common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
-	// 	ReadyReplicas:       common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "readyReplicas"))),
-	// 	UpdatedReplicas:     common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "updatedReplicas"))),
-	// 	AvailableReplicas:   common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "availableReplicas"))),
-	// 	UnavailableReplicas: common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "unavailableReplicas"))),
-	// }
+	getData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	// fmt.Println("[###########ingress]", common.InterfaceToString(common.FindDataStr(getData, "status.loadBalancer.ingress.0", "ip")))
+	daemonset := model.DAEMONSET{
+		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+		Namespace:     common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
+		// Replica:       replicas,
+		ClusterName:   common.InterfaceToString(common.FindData(getData, "clusterName", "")),
+		CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+		// UpdateAt:      common.InterfaceToTime(common.FindData(data[i], "status.conditions", "lastUpdateTime")),
+		Stauts:        common.FindData(getData, "status", ""),
+		WorkspaceName: common.InterfaceToString(common.FindData(getData, "workspaceName", "")),
+		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
+	}
 
-	// deployment := model.DAEMONSET{
-	// 	Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-	// 	WorkspaceName: project.WorkspaceName,
-	// 	ClusterName:   params.Cluster,
-	// 	Namespace:     params.Project,
-	// 	Label:         common.FindData(getData, "metadata", "labels"),
-	// 	Annotation:    common.FindData(getData, "metadata", "annotations"),
-	// 	CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
-	// 	UpdateAt:      common.InterfaceToTime(common.FindData(getData, "status.conditions", "lastUpdateTime")),
-	// 	Replica:       replicas,
-	// 	Stauts:        common.InterfaceToString(common.FindData(getData, "status.conditions", "status")),
-	// 	Strategy:      common.FindData(getData, "spec", "strategy"),
-	// 	Containers:    common.FindData(getData, "spec.template.spec", "containers"),
-	// 	Events:        getCallEvent(params),
-	// }
-	// involvesData, _ := common.GetModelRelatedList(params)
-	// // fmt.Printf("[####]data : %+v\n", testData)
+	involvesData, _ := common.GetModelRelatedList(params) // Pods, Deployments
+	log.Printf("#####involvesData ", involvesData)
+
 	return c.JSON(http.StatusOK, echo.Map{
-		"data":         "deployment",
-		"involvesData": "involvesData",
+		"data":         daemonset,
+		"involvesData": involvesData,
 	})
 }
 func GetAllDaemonsets(c echo.Context) (err error) {

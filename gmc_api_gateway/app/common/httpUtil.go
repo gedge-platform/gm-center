@@ -27,6 +27,7 @@ var listTemplates = map[string]string{
 	"daemonsets":    	   "/apis/apps/v1/daemonsets",
 	"statefulsets":    	   "/apis/apps/v1/statefulsets",
 	"jobs":                "/apis/batch/v1/jobs",
+	
 	"cronjobs":            "/apis/batch/v1/cronjobs",
 	"clusterroles":        "/apis/rbac.authorization.k8s.io/v1/clusterroles",
 	"roles":               "/apis/rbac.authorization.k8s.io/v1/roles",

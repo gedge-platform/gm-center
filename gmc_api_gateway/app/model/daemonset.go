@@ -1,8 +1,6 @@
 package model
 
-import (
-	"time"
-)
+import "time"
 
 type DAEMONSET struct {
 	Name          string      `json:"name"`

@@ -11,7 +11,6 @@ require (
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
-	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/influxdata/influxdb-client-go/v2 v2.4.0
 	github.com/jinzhu/gorm v1.9.16

@@ -59,7 +59,7 @@ var nsTemplates = map[string]string{
 	"namespaces":             "/api/v1/namespaces/$2",
 	"nodes":                  "/api/v1/nodes/$2",
 	"events":                 "/apis/events.k8s.io/v1/namespaces/$1/events/$2",
-	"storageclasses":         "/apis/storage.k8s.io/v1/namespaces/$1/storageclasses/$2",
+	"storageclasses":         "/apis/storage.k8s.io/v1/storageclasses/$2",
 	"persistentvolumes":      "/api/v1/persistentvolumes/$2",
 	"persistentvolumeclaims": "/api/v1/namespaces/$1/persistentvolumeclaims/$2",
 	"secrets":                "/api/v1/namespaces/$1/secrets/$2",

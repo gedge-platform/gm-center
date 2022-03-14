@@ -12,7 +12,7 @@ type SERVICEACCOUNT struct {
 	CreateAt    string      `json:"createAt"`
 }
 
-type SERVICEs []SERVICEs
+type SERVICEACCOUNTs []SERVICEACCOUNTs
 
 func (SERVICEACCOUNT) TableName() string {
 	return "SERVICEACCOUNT_INFO"

@@ -10,9 +10,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetConfigmap(c echo.Context) error {
+func GetServiceaccount(c echo.Context) error {
 	params := model.PARAMS{
-		Kind:      "configmaps",
+		Kind:      "serviceaccounts",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -25,13 +25,14 @@ func GetConfigmap(c echo.Context) error {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	fmt.Println("[##########configmap", getData)
-	configmap := model.CONFIGMAP{
+	fmt.Println("[##########serviceaccount", getData)
+	serviceaccount := model.SERVICEACCOUNT{
 		Name:        common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		NameSpace:   common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
-		Data:        common.FindData(getData, "data", ""),
-		DataCnt:     common.InterfaceOfLen(common.FindData(getData, "data", "")),
+		Secrets:     common.FindData(getData, "secrets", ""),
+		SecretCnt:   common.InterfaceOfLen(common.FindData(getData, "secrets", "")),
 		Annotations: common.FindData(getData, "metadata", "annotations"),
+		Label:       common.FindData(getData, "metadata", "labels"),
 		CreateAt:    common.InterfaceToString(common.FindData(getData, "metadata", "creationTimestamp")),
 		Cluster:     params.Cluster,
 	}
@@ -39,17 +40,15 @@ func GetConfigmap(c echo.Context) error {
 	involvesData, _ := common.GetModelRelatedList(params)
 	log.Printf("#####involvesData", involvesData)
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": configmap,
-		// "involvesData": "involvesData",
+		"data": serviceaccount,
 	})
-
 }
 
-func GetAllConfigmaps(c echo.Context) error {
-	var configmaps []model.CONFIGMAP
-	fmt.Printf("## Configmaps", configmaps)
+func GetAllServiceaccounts(c echo.Context) error {
+	var serviceaccounts []model.SERVICEACCOUNT
+	fmt.Printf("## Serviceaccounts", serviceaccounts)
 	params := model.PARAMS{
-		Kind:      "configmaps",
+		Kind:      "serviceaccounts",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -67,39 +66,21 @@ func GetAllConfigmaps(c echo.Context) error {
 	fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
-		configmap := model.CONFIGMAP{
+		serviceaccount := model.SERVICEACCOUNT{
 			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			NameSpace:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			DataCnt:     common.InterfaceOfLen(common.FindData(data[i], "data", "")),
+			Secrets:     common.FindData(data[i], "secrets", ""),
+			SecretCnt:   common.InterfaceOfLen(common.FindData(data[i], "secrets", "")),
 			Annotations: common.FindData(getData, "metadata", "annotations"),
+			Label:       common.FindData(data[i], "metadata", "labels"),
 			CreateAt:    common.InterfaceToString(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 		}
-		configmaps = append(configmaps, configmap)
+		serviceaccounts = append(serviceaccounts, serviceaccount)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": configmaps,
+		"data": serviceaccounts,
 	})
 
-}
-
-func CreateConfigmap(c echo.Context) (err error) {
-	params := model.PARAMS{
-		Kind:    "services",
-		Cluster: c.QueryParam("cluster"),
-		Project: c.QueryParam("project"),
-		Method:  c.Request().Method,
-		Body:    responseBody(c.Request().Body),
-	}
-
-	postData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
-	})
 }

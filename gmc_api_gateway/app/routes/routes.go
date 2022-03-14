@@ -145,6 +145,9 @@ func GEdgeRoute(e *echo.Echo) {
 	// // r.PUT("/services/:name", api.UpdateService)
 	// r.DELETE("/pvs/:name", api.DeleteService)
 
+	r.GET("/serviceaccounts", api.GetAllServiceaccounts)
+	r.GET("/serviceaccounts/:name", api.GetServiceaccount)
+
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		userChk, _ := api.AuthenticateUser(id, password)
 		return userChk, nil

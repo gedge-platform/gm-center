@@ -138,6 +138,9 @@ func GEdgeRoute(e *echo.Echo) {
 	// // r.PUT("/services/:name", api.UpdateService)
 	// r.DELETE("/pvs/:name", api.DeleteService)
 
+	r.GET("/storageclasses/:name", api.GetStorageclass)
+	r.GET("/storageclasses", api.GetStorageclasses)
+
 	r.GET("/daemonsets", api.GetAllDaemonsets)
 	// r.POST("/pvs", api.CreateService)
 	r.GET("/daemonsets/:name", api.GetDaemonset)

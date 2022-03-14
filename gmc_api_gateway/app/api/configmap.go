@@ -32,7 +32,7 @@ func GetConfigmap(c echo.Context) error {
 		Data:        common.FindData(getData, "data", ""),
 		DataCnt:     common.InterfaceOfLen(common.FindData(getData, "data", "")),
 		Annotations: common.FindData(getData, "metadata", "annotations"),
-		CreateAt:    common.InterfaceToString(common.FindData(getData, "metadata", "creationTimestamp")),
+		CreateAt:    common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Cluster:     params.Cluster,
 	}
 
@@ -72,7 +72,7 @@ func GetAllConfigmaps(c echo.Context) error {
 			NameSpace:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
 			DataCnt:     common.InterfaceOfLen(common.FindData(data[i], "data", "")),
 			Annotations: common.FindData(getData, "metadata", "annotations"),
-			CreateAt:    common.InterfaceToString(common.FindData(data[i], "metadata", "creationTimestamp")),
+			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 		}
 		configmaps = append(configmaps, configmap)

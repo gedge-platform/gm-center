@@ -1,5 +1,9 @@
 package model
 
+import (
+	"time"
+)
+
 type SERVICEACCOUNT struct {
 	Name      string `json:"name"`
 	NameSpace string `json:"namespace"`
@@ -9,7 +13,7 @@ type SERVICEACCOUNT struct {
 	SecretCnt   int         `json:"secretCnt"`
 	Label       interface{} `json:"label,omitempty"`
 	Annotations interface{} `json:"annotations, omitempty"`
-	CreateAt    string      `json:"createAt"`
+	CreateAt    time.Time   `json:"createAt"`
 }
 
 type SERVICEACCOUNTs []SERVICEACCOUNTs

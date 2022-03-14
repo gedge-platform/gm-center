@@ -10,9 +10,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetServiceaccount(c echo.Context) error {
+func GetClusterrolebinding(c echo.Context) error {
 	params := model.PARAMS{
-		Kind:      "serviceaccounts",
+		Kind:      "clusterrolebindings",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -25,30 +25,29 @@ func GetServiceaccount(c echo.Context) error {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	fmt.Println("[##########serviceaccount", getData)
-	serviceaccount := model.SERVICEACCOUNT{
+	fmt.Println("[##########clusterrolebindings", getData)
+	clusterrolebinding := model.CLUSTERROLEBINDING{
 		Name:        common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-		NameSpace:   common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
-		Secrets:     common.FindData(getData, "secrets", ""),
-		SecretCnt:   common.InterfaceOfLen(common.FindData(getData, "secrets", "")),
-		Annotations: common.FindData(getData, "metadata", "annotations"),
-		Label:       common.FindData(getData, "metadata", "labels"),
-		CreateAt:    common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+		NameSpace:   common.InterfaceToString(common.FindData(getData, "subject", "namespace")),
+		Labels:      common.FindData(getData, "metadata", "labels"),
+		Subjects:    common.FindData(getData, "subjects", ""),
+		RoleRef:     common.FindData(getData, "roleRef", ""),
+		Annotations: common.FindData(getData, "data", "annotations"),
+		CreateAt:    common.InterfaceToString(common.FindData(getData, "metadata", "creationTimestamp")),
 		Cluster:     params.Cluster,
 	}
-
 	involvesData, _ := common.GetModelRelatedList(params)
 	log.Printf("#####involvesData", involvesData)
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": serviceaccount,
+		"data": clusterrolebinding,
 	})
 }
 
-func GetAllServiceaccounts(c echo.Context) error {
-	var serviceaccounts []model.SERVICEACCOUNT
-	fmt.Printf("## Serviceaccounts", serviceaccounts)
+func GetAllClusterrolebindings(c echo.Context) error {
+	var clusterrolebindings []model.CLUSTERROLEBINDING
+	fmt.Printf("## clusterrolebings", clusterrolebindings)
 	params := model.PARAMS{
-		Kind:      "serviceaccounts",
+		Kind:      "clusterrolebindings",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -66,21 +65,20 @@ func GetAllServiceaccounts(c echo.Context) error {
 	fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
-		serviceaccount := model.SERVICEACCOUNT{
+		clusterrolebinding := model.CLUSTERROLEBINDING{
 			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			NameSpace:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			Secrets:     common.FindData(data[i], "secrets", ""),
-			SecretCnt:   common.InterfaceOfLen(common.FindData(data[i], "secrets", "")),
+			NameSpace:   common.InterfaceToString(common.FindData(data[i], "subjects", "namespace")),
+			Subjects:    common.FindData(data[i], "subjects", ""),
+			RoleRef:     common.FindData(data[i], "roleRef", ""),
+			Labels:      common.FindData(data[i], "metadata", "labels"),
 			Annotations: common.FindData(getData, "metadata", "annotations"),
-			Label:       common.FindData(data[i], "metadata", "labels"),
-			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+			CreateAt:    common.InterfaceToString(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 		}
-		serviceaccounts = append(serviceaccounts, serviceaccount)
+		clusterrolebindings = append(clusterrolebindings, clusterrolebinding)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": serviceaccounts,
+		"data": clusterrolebindings,
 	})
-
 }

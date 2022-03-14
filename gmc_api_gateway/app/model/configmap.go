@@ -1,5 +1,9 @@
 package model
 
+import (
+	"time"
+)
+
 type CONFIGMAP struct {
 	Name        string      `json:"name"`
 	NameSpace   string      `json:"namespace"`
@@ -7,7 +11,7 @@ type CONFIGMAP struct {
 	Data        interface{} `json:"data ,omitempty"`
 	Annotations interface{} `json:"annotations,omitempty"`
 	DataCnt     int         `json:"dataCnt"`
-	CreateAt    string      `json:"createAt"`
+	CreateAt    time.Time   `json:"createAt"`
 }
 
 type CONFIGMAPs []CONFIGMAPs

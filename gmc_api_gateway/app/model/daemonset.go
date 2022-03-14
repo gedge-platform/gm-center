@@ -23,3 +23,7 @@ type DAEMONSET struct {
 }
 
 type DAEMONSETS []DAEMONSET
+
+func (DAEMONSET) TableName() string {
+	return "DAEMONSET_INFO"
+}

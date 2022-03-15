@@ -28,12 +28,11 @@ func GetClusterrolebinding(c echo.Context) error {
 	fmt.Println("[##########clusterrolebindings", getData)
 	clusterrolebinding := model.CLUSTERROLEBINDING{
 		Name:        common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-		NameSpace:   common.InterfaceToString(common.FindData(getData, "subject", "namespace")),
 		Labels:      common.FindData(getData, "metadata", "labels"),
 		Subjects:    common.FindData(getData, "subjects", ""),
 		RoleRef:     common.FindData(getData, "roleRef", ""),
 		Annotations: common.FindData(getData, "data", "annotations"),
-		CreateAt:    common.InterfaceToString(common.FindData(getData, "metadata", "creationTimestamp")),
+		CreateAt:    common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Cluster:     params.Cluster,
 	}
 	involvesData, _ := common.GetModelRelatedList(params)
@@ -67,12 +66,11 @@ func GetAllClusterrolebindings(c echo.Context) error {
 	for i, _ := range data {
 		clusterrolebinding := model.CLUSTERROLEBINDING{
 			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			NameSpace:   common.InterfaceToString(common.FindData(data[i], "subjects", "namespace")),
 			Subjects:    common.FindData(data[i], "subjects", ""),
 			RoleRef:     common.FindData(data[i], "roleRef", ""),
 			Labels:      common.FindData(data[i], "metadata", "labels"),
 			Annotations: common.FindData(getData, "metadata", "annotations"),
-			CreateAt:    common.InterfaceToString(common.FindData(data[i], "metadata", "creationTimestamp")),
+			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 		}
 		clusterrolebindings = append(clusterrolebindings, clusterrolebinding)

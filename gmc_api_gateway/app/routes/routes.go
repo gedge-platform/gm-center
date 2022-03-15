@@ -141,6 +141,12 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/storageclasses/:name", api.GetStorageclass)
 	r.GET("/storageclasses", api.GetStorageclasses)
 
+	r.GET("/clusterroles/:name", api.GetClusterRole)
+	r.GET("/clusterroles", api.GetClusterRoles)
+
+	r.GET("/roles/:name", api.GetRole)
+	r.GET("/roles", api.GetRoles)
+
 	r.GET("/configmaps", api.GetAllConfigmaps)
 	r.GET("/configmap/:name", api.GetConfigmap)
 	r.GET("/daemonsets", api.GetAllDaemonsets)

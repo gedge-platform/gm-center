@@ -6,7 +6,6 @@ import (
 	"gmc_api_gateway/app/model"
 	"log"
 	"net/http"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -63,8 +62,6 @@ func GetPods(c echo.Context) (err error) {
 	pod := model.POD{
 		Workspace: project.WorkspaceName,
 		Cluster:   params.Cluster,
-
-		// Project:           params.Project,
 		Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Namespace:         common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
 		CreationTimestamp: common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
@@ -113,7 +110,8 @@ func GetAllPods(c echo.Context) error {
 	fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
-
+		containerStatusesData :=common.FindData(data[i], "status", "containerStatuses.0.restartCount")
+		fmt.Printf("####containerStatusesData : %+v", containerStatusesData)
 		pod := model.POD{
 			Name:              common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:         common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
@@ -123,7 +121,9 @@ func GetAllPods(c echo.Context) error {
 			NodeName:          common.InterfaceToString(common.FindData(data[i], "spec", "nodeName")),
 			PodIP:             common.InterfaceToString(common.FindData(data[i], "status", "podIP")),
 			HostIP:            common.InterfaceToString(common.FindData(data[i], "status", "hostIP")),
+			Restart : common.InterfaceToInt(containerStatusesData),	
 		}
+	
 		pods = append(pods, pod)
 	}
 

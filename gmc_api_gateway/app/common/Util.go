@@ -590,13 +590,13 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 		// splits := strings.Split(podData, ",")
 		var Pods []model.DEPLOYMENTPOD
-		var RestartCnt int
 		var PodNames []string
+		
+		
 		for x, _ := range podData {
-			containerStatuses := FindData(podData[x], "status.containerStatuses.#", "restartCount")
-			fmt.Printf("[##]containerStatuses :%+v\n", containerStatuses)
-
-			fmt.Printf("##restartCnt :%d\n", RestartCnt)
+			containerStatusesData := FindData(podData[x], "status", "containerStatuses.0.restartCount")
+		fmt.Printf("##containerStatusesData :%+v\n", containerStatusesData)
+			
 			if InterfaceToString(FindData(podData[x], "status", "phase")) == "Running" {
 				PodNames = append(PodNames, InterfaceToString(FindData(podData[x], "metadata", "name")))
 			}
@@ -605,7 +605,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 				Status:       InterfaceToString(FindData(podData[x], "status", "phase")),
 				Node:         InterfaceToString(FindData(podData[x], "status", "hostIP")),
 				PodIP:        InterfaceToString(FindData(podData[x], "status", "podIP")),
-				RestartCount: 1,
+				RestartCount: InterfaceToInt(containerStatusesData),
 			}
 			Pods = append(Pods, podList)
 		}
@@ -624,14 +624,16 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 				return nil, err
 			}
 			fmt.Printf("[##]svcData :%+v\n", svcData)
-			fmt.Printf("[##]svcDataName :%s\n", InterfaceToString(FindData(svcData[0], "metadata", "name")))
-			svcList := model.DEPLOYMENTSVC{
+			// fmt.Printf("[##]svcDataName :%s\n", InterfaceToString(FindData(svcData[0], "metadata", "name")))
+			if len(svcData) > 0{
+				svcList := model.DEPLOYMENTSVC{
 				Name: InterfaceToString(FindData(svcData[0], "metadata", "name")),
 				Port: FindData(svcData[0], "subsets", "ports"),
 				// ClusterIP: InterfaceToString(FindData(svcData[0], "spec", "clusterIP")),
 				// Type:      InterfaceToString(FindData(svcData[0], "spec", "type")),
 			}
 			Svcs = svcList
+		}
 		}
 		deployments := model.DEPLOYMENTLISTS{
 			Pods:        Pods,
@@ -807,9 +809,90 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 			// DeployInfo:  DeployInfo,
 			ServiceInfo: ServiceInfo,
 		}
-		return ReferData, nil
-	}
+		return &ReferData, nil
+	
 
+	case "daemonsets" : 
+		daemonsetName := params.Name
+		params.Kind = "pods"
+		params.Name = ""
+		podsData, err := DataRequest(params)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Printf("[##]podsData :%s\n", podsData)
+		podData, err := FindDataArrStr2(podsData, "items", "name",daemonsetName)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Printf("[##]podData :%s\n", podData)
+
+		// splits := strings.Split(podData, ",")
+		var Pods []model.DEPLOYMENTPOD
+		// var RestartCnt int
+		var PodNames []string
+		// if podData != [] {
+		for x, _ := range podData {
+			// containerStatuses := FindData(podData[x], "status.containerStatuses.#", "restartCount")
+			
+			// fmt.Printf("##restartCnt :%d\n", RestartCnt)
+
+
+			containerStatusesData := FindData(podData[x], "status", "containerStatuses.0.restartCount")
+			
+			fmt.Printf("##containerStatusesData :%+v\n", containerStatusesData)
+			
+			
+			if InterfaceToString(FindData(podData[x], "status", "phase")) == "Running" {
+				PodNames = append(PodNames, InterfaceToString(FindData(podData[x], "metadata", "name")))
+			}
+
+			podList := model.DEPLOYMENTPOD{
+				Name:         InterfaceToString(FindData(podData[x], "metadata", "name")),
+				Status:       InterfaceToString(FindData(podData[x], "status", "phase")),
+				Node:         InterfaceToString(FindData(podData[x], "status", "hostIP")),
+				PodIP:        InterfaceToString(FindData(podData[x], "status", "podIP")),
+				RestartCount: InterfaceToInt(containerStatusesData),
+			}
+			Pods = append(Pods, podList)
+		}
+	// }
+
+		params.Kind = "endpoints"
+		params.Name = ""
+
+		svcsData, err := DataRequest(params)
+		var Svcs model.DEPLOYMENTSVC
+		if err != nil {
+			return nil, err
+		}
+		for p, _ := range PodNames {
+			svcData, err := FindDataArrStr2(svcsData, "items", "name", PodNames[p])
+			if err != nil {
+				return nil, err
+			}
+			fmt.Printf("[##]svcData :%+v\n", svcData)
+			// fmt.Printf("[##]svcDataName :%s\n", InterfaceToString(FindData(svcData[0], "metadata", "name")))
+			if len(svcData) > 0{
+			svcList := model.DEPLOYMENTSVC{
+				Name: InterfaceToString(FindData(svcData[0], "metadata", "name")),
+				Port: FindData(svcData[0], "subsets", "ports"),
+				// ClusterIP: InterfaceToString(FindData(svcData[0], "spec", "clusterIP")),
+				// Type:      InterfaceToString(FindData(svcData[0], "spec", "type")),
+			
+			
+			}
+			Svcs = svcList
+
+		}
+	}
+		deployments := model.DEPLOYMENTLISTS{
+			Pods:        Pods,
+			Services:    Svcs,
+			// ReplicaName: replicaName,
+		}
+		return deployments, nil
+	}
 	return nil, errors.New("")
 
 }

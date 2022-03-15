@@ -10,9 +10,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetConfigmap(c echo.Context) error {
+func GetClusterrolebinding(c echo.Context) error {
 	params := model.PARAMS{
-		Kind:      "configmaps",
+		Kind:      "clusterrolebindings",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -25,31 +25,28 @@ func GetConfigmap(c echo.Context) error {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	fmt.Println("[##########configmap", getData)
-	configmap := model.CONFIGMAP{
+	fmt.Println("[##########clusterrolebindings", getData)
+	clusterrolebinding := model.CLUSTERROLEBINDING{
 		Name:        common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-		NameSpace:   common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
-		Data:        common.FindData(getData, "data", ""),
-		DataCnt:     common.InterfaceOfLen(common.FindData(getData, "data", "")),
-		Annotations: common.FindData(getData, "metadata", "annotations"),
+		Labels:      common.FindData(getData, "metadata", "labels"),
+		Subjects:    common.FindData(getData, "subjects", ""),
+		RoleRef:     common.FindData(getData, "roleRef", ""),
+		Annotations: common.FindData(getData, "data", "annotations"),
 		CreateAt:    common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Cluster:     params.Cluster,
 	}
-
 	involvesData, _ := common.GetModelRelatedList(params)
 	log.Printf("#####involvesData", involvesData)
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": configmap,
-		// "involvesData": "involvesData",
+		"data": clusterrolebinding,
 	})
-
 }
 
-func GetAllConfigmaps(c echo.Context) error {
-	var configmaps []model.CONFIGMAP
-	fmt.Printf("## Configmaps", configmaps)
+func GetAllClusterrolebindings(c echo.Context) error {
+	var clusterrolebindings []model.CLUSTERROLEBINDING
+	fmt.Printf("## clusterrolebings", clusterrolebindings)
 	params := model.PARAMS{
-		Kind:      "configmaps",
+		Kind:      "clusterrolebindings",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -67,39 +64,19 @@ func GetAllConfigmaps(c echo.Context) error {
 	fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
-		configmap := model.CONFIGMAP{
+		clusterrolebinding := model.CLUSTERROLEBINDING{
 			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			NameSpace:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			DataCnt:     common.InterfaceOfLen(common.FindData(data[i], "data", "")),
+			Subjects:    common.FindData(data[i], "subjects", ""),
+			RoleRef:     common.FindData(data[i], "roleRef", ""),
+			Labels:      common.FindData(data[i], "metadata", "labels"),
 			Annotations: common.FindData(getData, "metadata", "annotations"),
 			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 		}
-		configmaps = append(configmaps, configmap)
+		clusterrolebindings = append(clusterrolebindings, clusterrolebinding)
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": configmaps,
-	})
-
-}
-
-func CreateConfigmap(c echo.Context) (err error) {
-	params := model.PARAMS{
-		Kind:    "services",
-		Cluster: c.QueryParam("cluster"),
-		Project: c.QueryParam("project"),
-		Method:  c.Request().Method,
-		Body:    responseBody(c.Request().Body),
-	}
-
-	postData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
+		"data": clusterrolebindings,
 	})
 }

@@ -33,7 +33,7 @@ func GetServiceaccount(c echo.Context) error {
 		SecretCnt:   common.InterfaceOfLen(common.FindData(getData, "secrets", "")),
 		Annotations: common.FindData(getData, "metadata", "annotations"),
 		Label:       common.FindData(getData, "metadata", "labels"),
-		CreateAt:    common.InterfaceToString(common.FindData(getData, "metadata", "creationTimestamp")),
+		CreateAt:    common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Cluster:     params.Cluster,
 	}
 
@@ -73,7 +73,7 @@ func GetAllServiceaccounts(c echo.Context) error {
 			SecretCnt:   common.InterfaceOfLen(common.FindData(data[i], "secrets", "")),
 			Annotations: common.FindData(getData, "metadata", "annotations"),
 			Label:       common.FindData(data[i], "metadata", "labels"),
-			CreateAt:    common.InterfaceToString(common.FindData(data[i], "metadata", "creationTimestamp")),
+			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 		}
 		serviceaccounts = append(serviceaccounts, serviceaccount)

@@ -147,12 +147,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/roles", api.GetRoles)
 
 	r.GET("/configmaps", api.GetAllConfigmaps)
-<<<<<<< HEAD
 	r.GET("/configmaps/:name", api.GetConfigmap)
-=======
-	r.GET("/configmap/:name", api.GetConfigmap)
-
->>>>>>> c76e8df3844f22ff74fe4b08bedc814eb5415804
 	r.GET("/daemonsets", api.GetAllDaemonsets)
 	// r.POST("/pvs", api.CreateService)
 	r.GET("/daemonsets/:name", api.GetDaemonset)
@@ -161,7 +156,6 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/serviceaccounts", api.GetAllServiceaccounts)
 	r.GET("/serviceaccounts/:name", api.GetServiceaccount)
-	
 
 	r.GET("/clusterrolebindings", api.GetAllClusterrolebindings)
 	r.GET("/clusterrolebindings/:name", api.GetClusterrolebinding)
@@ -181,7 +175,6 @@ func GEdgeRoute(e *echo.Echo) {
 	// r2.Any("/monitoring/:kind/:name", api.Monit)
 	r2.Any("/monitoring/realtime/:kind", api.RealMetrics)
 	r2.Any("/monitoring/realtime", api.RealMetrics)
-
 
 	e.GET("/clusterInfo", api.GetClusterInfo)
 }

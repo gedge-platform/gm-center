@@ -19,6 +19,7 @@ type POD struct {
 	Podcontainers     []PODCONTAINERS    `json:"Podcontainers,omitempty"`
 	QosClass          string             `json:"qosClass,omitempty"`
 	StatusConditions  []StatusConditions `json:"statusConditions,omitempty"`
+	Restart		  int   `json:"restart"`
 	// VolumeMounts      []VolumeMounts      `json:"volumemounts"`
 	ContainerStatuses []ContainerStatuses `json:"containerStatuses,omitempty"`
 	Events            []EVENT             `json:"events"`

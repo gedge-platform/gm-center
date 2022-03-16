@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+ 	"github.com/tidwall/sjson"
 	"github.com/tidwall/gjson"
 )
 
@@ -925,7 +925,7 @@ func StringToInt(i string) int {
 	return v
 }
 
-func FindDataLabelKey(i interface{}, p, f, u string) ([]string, []string, error) {
+func FindDataLabelKey(i interface{}, p, f, u string) ([]string,  error) {
 	log.Println("[In #FindDataArr]")
 	log.Println("[#1] Data is ", i)
 	log.Println("[#2] find path string is ", p)
@@ -937,7 +937,7 @@ func FindDataLabelKey(i interface{}, p, f, u string) ([]string, []string, error)
 	var arr []gjson.Result
 	// var result interface{}
 	var result1 []string
-	var result2 []string
+	// var result2 []string
 	ia := InterfaceToString(i)
 
 	parse = gjson.Parse(ia)
@@ -965,21 +965,25 @@ func FindDataLabelKey(i interface{}, p, f, u string) ([]string, []string, error)
 		for t, _ := range arr {
 			masterCheck := strings.Contains(arr[t].String(), "node-role.kubernetes.io/master")
 			if masterCheck {
-				result1 = append(result1, arr[t].String())
+				strVal, _ := sjson.Set(arr[t].String(), "nodeType", "master")
+				result1 = append(result1, strVal)
 			} else {
-				result2 = append(result2, arr[t].String())
+				strVal, _ := sjson.Set(arr[t].String(), "nodeType", "worker")
+				result1 = append(result1, strVal)
 			}
 		}
 	} else if len == 1 {
 		masterCheck := strings.Contains(data.String(), "node-role.kubernetes.io/master")
 		if masterCheck {
-			result1 = append(result1, data.String())
-		} else {
-			result2 = append(result2, data.String())
-		}
+				strVal, _ := sjson.Set(data.String(), "nodeType", "master")
+				result1 = append(result1, strVal)
+			} else {
+				strVal, _ := sjson.Set(data.String(), "nodeType", "worker")
+				result1 = append(result1, strVal)
+			}
 	}
 	// list 출력
-	return result1, result2, nil
+	return result1,  nil
 	// return strings.Join(results, ","), nil
 
 }

@@ -13,26 +13,39 @@ type Cluster struct {
 	Creator    string    `gorm:"column:clusterCreator; not null; default:null" json:"clusterCreator,omitempty"`
 	Created_at time.Time `gorm:"column:created_at" json:"created_at,omitempty"`
 	Token      string    `gorm:"column:token; not null; default:null" json:"token,omitempty"`
-	// Monitoring []MONITOR `json:"monitoring"`
 }
-
 type CLUSTER struct {
 	Cluster
+		// Status                  string                   `json:"status"`
+	// Network                 string                   `json:"network"`
 	Gpu                     []map[string]interface{} `json:"gpu"`
-	Version                 string                   `json:"kubeVersion"`
-	Status                  string                   `json:"status"`
-	Network                 string                   `json:"network"`
-	Os                      string                   `json:"os"`
-	Kernel                  string                   `json:"kernel"`
-	Label                   interface{}              `json:"labels"`
-	Annotation              interface{}              `json:"annotations"`
-	CreateAt                time.Time                `json:"created_at"`
 	ResourceUsage           interface{}              `json:"resourceUsage"`
-	Allocatable             interface{}              `json:"allocatable"`
-	Capacity                interface{}              `json:"capacity"`
+	NodeCnt  int `json:"nodeCnt"`
+}
+
+type CLUSTER_DETAIL struct {
+	Cluster
+	Gpu                     []map[string]interface{} `json:"gpu"`
 	Resource                PROJECT_RESOURCE         `json:"resource"`
-	ContainerRuntimeVersion interface{}              `json:"containerRuntimeVersion"`
+	Nodes []NODE `json:"nodes"`
 	Events                  []EVENT                  `json:"events"`
+}
+
+
+type NODE struct {
+	Name  string                   `json:"name"`
+	NodeType  string                   `json:"type"`
+	IP string `json:"nodeIP"`
+	Version                 string                   `json:"kubeVersion"`
+	Os                      string                   `json:"os,omitempty"`
+	Kernel                  string                   `json:"kernel,omitempty"`
+	Label                   interface{}              `json:"labels,omitempty"`
+	Annotation              interface{}              `json:"annotations,omitempty"`
+	CreateAt                time.Time                `json:"created_at"`
+	Allocatable             interface{}              `json:"allocatable,omitempty"`
+	Capacity                interface{}              `json:"capacity,omitempty"`
+	ContainerRuntimeVersion interface{}              `json:"containerRuntimeVersion"`
+	
 	Addresses               []ADDRESSES              `json:"addresses,omitempty"`
 }
 type GPU struct {

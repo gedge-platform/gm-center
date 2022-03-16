@@ -39,23 +39,16 @@ func GetClusterInfo(c echo.Context) (err error) {
 				common.ErrorMsg(c, http.StatusNotFound, err)
 				return nil
 		}
-		Master, Worker, _ := common.FindDataLabelKey(getData, "items", "labels", "node-role.kubernetes.io/master")
-		for m, _ := range Master {
-			Masternode := model.NodeInfo {
-				Name : common.InterfaceToString(common.FindData(Master[m], "metadata", "name")),
-				Type : "master",
-				Ip :  common.InterfaceToString(common.FindData(Master[m], "status", "addresses.0.address")),
+		Nodes,  _ := common.FindDataLabelKey(getData, "items", "labels", "node-role.kubernetes.io/master")
+ 		for n, _ := range Nodes {
+			Node := model.NodeInfo {
+				Name : common.InterfaceToString(common.FindData(Nodes[n], "metadata", "name")),
+				Type : common.InterfaceToString(common.FindData(Nodes[n], "nodeType", "")),
+				Ip :  common.InterfaceToString(common.FindData(Nodes[n], "status", "addresses.0.address")),
 			}
-			NodeInfoList = append(NodeInfoList, Masternode)
+			NodeInfoList = append(NodeInfoList, Node)
 		}
-		for w, _ := range Worker {
-			Workernode := model.NodeInfo {
-				Name : common.InterfaceToString(common.FindData(Worker[w], "metadata", "name")),
-				Type : "worker",
-				Ip :  common.InterfaceToString(common.FindData(Worker[w], "status", "addresses.0.address")),
-			}
-			NodeInfoList = append(NodeInfoList, Workernode)
-		}
+
 		clusterInfo := model.ClusterInfo {
 			ClusterName : clusters[k].Name,
 			Type  : clusters[k].Type,

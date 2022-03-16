@@ -213,7 +213,7 @@ func GetCluster(c echo.Context) (err error) {
 		common.Transcode(tsCluster, &clusterModel)
 		fmt.Printf("[##]cluster : %+v\n", clusterModel)
 		params.Name=""
-		 getData, err := common.DataRequest(params)
+		getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -262,70 +262,6 @@ fmt.Printf("[##]NODES : %+v\n", Nodes)
 	clusterModel.Events =getCallEvent(params)
 	clusterModel.Nodes = NodeList
 	
-		
-	// 	
-	// 	clusterModel.Label = common.FindData(Master[m], "metadata", "labels")
-	// 	clusterModel.Annotation = common.FindData(Master[m], "metadata", "annotations")
-	// 	clusterModel.Allocatable = common.FindData(Master[m], "status", "allocatable")
-	// 	clusterModel.Capacity = common.FindData(Master[m], "status", "capacity")
-	// 	clusterModel.Created_at = common.InterfaceToTime(common.FindData(Master[m], "metadata", "creationTimestamp"))
-	// 	clusterModel.Version = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "kubeletVersion"))
-	// 	clusterModel.Os = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "osImage"))
-	// 	clusterModel.Kernel = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "kernelVersion"))
-	// 	clusterModel.ContainerRuntimeVersion = common.InterfaceToString(common.FindData(Master[m], "status.nodeInfo", "containerRuntimeVersion"))
-	// 	clusterModel.Events = getCallEvent(params)
-	// 	clusterModel.Resource = ResourceCnt
-	// 	// common.Transcode(Master[m], &clusterModel)
-	// 	MasterList = append(MasterList, clusterModel)
-	// }
-	// if Worker != nil {
-	// 	for m, _ := range Worker {
-	// 		// params.Name = params.Cluster
-	// 		// cluster := GetDBCluster(params)
-	// 		// if cluster == nil {
-	// 		// 	common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
-	// 		// 	return nil
-	// 		// }
-	// 		// var tsCluster model.Cluster
-	// 		// var clusterModel model.CLUSTER
-
-	// 		addressesData := common.FindData(Worker[m], "status", "addresses")
-	// 		var addressesList []model.ADDRESSES
-	// 		common.Transcode(addressesData, &addressesList)
-	// 		clusterInfo := model.Cluster{
-	// 			Name:       common.InterfaceToString(common.FindData(Worker[m], "metadata", "name")),
-	// 			Created_at: common.InterfaceToTime(common.FindData(Worker[m], "metadata", "creationTimestamp")),
-	// 		}
-	// 		// common.Transcode(clusterInfo, &clusterModel)
-	// 		var GPUList []map[string]interface{}
-	// 		gpuCheck, check := GpuCheck(params.Name)
-	// 		if check != false {
-	// 			GPUList = gpuCheck
-	// 		} else {
-	// 			GPUList = nil
-	// 		}
-	// 		clusterModel := model.CLUSTER{
-	// 			Cluster: clusterInfo,
-	// 			// clusterModel.ipAddr = common.InterfaceToString(common.FindData(Worker[m], "metadata", "name"))
-	// 			Gpu:                     GPUList,
-	// 			Addresses:               addressesList,
-	// 			Allocatable:             common.FindData(Worker[m], "status", "allocatable"),
-	// 			Capacity:                common.FindData(Worker[m], "status", "capacity"),
-	// 			Label:                   common.FindData(Worker[m], "metadata", "labels"),
-	// 			Annotation:              common.FindData(Worker[m], "metadata", "annotations"),
-	// 			Version:                 common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "kubeletVersion")),
-	// 			Os:                      common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "osImage")),
-	// 			Kernel:                  common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "kernelVersion")),
-	// 			ContainerRuntimeVersion: common.InterfaceToString(common.FindData(Worker[m], "status.nodeInfo", "containerRuntimeVersion")),
-	// 			Events:                  getCallEvent(params),
-	// 			// Resource:                nil,
-	// 		}
-	// 		// fmt.Println("[###############nodeip]", common.FindDataStr(Worker[m], "status", "addresses"))
-
-	// 		// common.Transcode(Master[m], &clusterModel)
-	// 		WorkerList = append(WorkerList, clusterModel)
-	// 	}
-	// }
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": clusterModel,
 	})

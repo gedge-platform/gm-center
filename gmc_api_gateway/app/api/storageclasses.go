@@ -32,12 +32,14 @@ func GetStorageclass(c echo.Context) error {
 	fmt.Println("[###########storageclass]", getData)
 	storageclass := model.STORAGECLASS{
 		Name:                 common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-		ResourceVersion:      common.InterfaceToString(common.FindData(getData, "metadata", "resourceVersion")),
+		Cluster:  common.InterfaceToString(common.FindData(getData, "clusterName", "")),
 		ReclaimPolicy:        common.InterfaceToString(common.FindData(getData, "reclaimPolicy", "")),
 		Provisioner:          common.InterfaceToString(common.FindData(getData, "provisioner", "")),
 		VolumeBindingMode:    common.InterfaceToString(common.FindData(getData, "volumeBindingMode", "")),
 		AllowVolumeExpansion: common.InterfaceToString(common.FindData(getData, "allowVolumeExpansion", "")),
+		Parameters : common.FindData(getData, "parameters", ""),
 		CreateAt:             common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+		Labels :    common.FindData(getData, "metadata", "labels"),
 		Annotations:          common.FindData(getData, "metadata", "annotations"),
 		//Age:                  common.InterfaceToString(common.FindData(getData, "age", "")),
 	}
@@ -63,15 +65,20 @@ func GetStorageclasses(c echo.Context) (err error) {
 	fmt.Printf("####storageclass data confirm : %s", data)
 
 	for i, _ := range data {
+		var allowVolumeExpansion string
+		if common.InterfaceToString(common.FindData(data[i], "allowVolumeExpansion", "")) != "" {
+			allowVolumeExpansion = common.InterfaceToString(common.FindData(data[i], "allowVolumeExpansion", ""))
+		}else {
+			allowVolumeExpansion = "false"
+		}
 		storageclass := model.STORAGECLASS{
 			Name:                 common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			ResourceVersion:      common.InterfaceToString(common.FindData(data[i], "metadata", "resourceVersion")),
+			Cluster:  common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 			ReclaimPolicy:        common.InterfaceToString(common.FindData(data[i], "reclaimPolicy", "")),
 			Provisioner:          common.InterfaceToString(common.FindData(data[i], "provisioner", "")),
 			VolumeBindingMode:    common.InterfaceToString(common.FindData(data[i], "volumeBindingMode", "")),
-			AllowVolumeExpansion: common.InterfaceToString(common.FindData(data[i], "allowVolumeExpansion", "")),
+			AllowVolumeExpansion: allowVolumeExpansion,
 			CreateAt:             common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
-			Annotations:          common.FindData(data[i], "metadata", "annotations"),
 		}
 		storageclasses = append(storageclasses, storageclass)
 	}

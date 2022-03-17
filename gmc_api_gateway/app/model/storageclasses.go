@@ -6,12 +6,14 @@ import (
 
 type STORAGECLASS struct {
 	Name                 string      `json:"name"`
-	ResourceVersion      string      `json:"resourceVersion "`
-	ReclaimPolicy        string      `json:"reclaimPolicy",`
-	Provisioner          string      `json:"provisioner",`
-	VolumeBindingMode    string      `json:"volumeBindingMode",`
-	AllowVolumeExpansion string      `json:"allowVolumeExpansion",`
+	Cluster string      `json:"cluster"`
+	ReclaimPolicy        string      `json:"reclaimPolicy"`
+	Provisioner          string      `json:"provisioner"`
+	VolumeBindingMode    string      `json:"volumeBindingMode"`
+	AllowVolumeExpansion string      `json:"allowVolumeExpansion"`
 	CreateAt             time.Time   `json:"createAt"`
+	Parameters interface{}       `json:"parameters,omitempty"`
+	Labels interface{} `json:"labels,omitempty"`
 	Annotations          interface{} `json:"annotations,omitempty"`
 	//Age                  string      `json:"age"`
 }

@@ -9,9 +9,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetDaemonset(c echo.Context) (err error) {
+func GetStatefulset(c echo.Context) (err error) {
 	params := model.PARAMS{
-		Kind:      "daemonsets",
+		Kind:      "statefulsets",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -29,37 +29,27 @@ func GetDaemonset(c echo.Context) (err error) {
 	daemonset := model.WORKLOAD{
 		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Namespace:     common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
-		NodeSelector: common.FindData(getData, "spec.template.spec", "nodeSelector"),
 		// Replica:       replicas,
-		ClusterName:   params.Cluster,
+		ClusterName:   common.InterfaceToString(common.FindData(getData, "clusterName", "")),
 		CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		// UpdateAt:      common.InterfaceToTime(common.FindData(data[i], "status.conditions", "lastUpdateTime")),
 		// Stauts:        common.FindData(getData, "status", ""),
 		WorkspaceName: common.InterfaceToString(common.FindData(getData, "workspaceName", "")),
 		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
 	}
-	daemonset_detail := model.DAEMONSET_DETAIL {
-		WORKLOAD : daemonset,
-	Status        : common.FindData(getData, "status", ""),
-	Strategy      : common.FindData(getData, "spec", "updateStrategy"),
-	Containers    : common.FindData(getData, "spec.template.spec", "containers"),
-	Labels    : common.FindData(getData, "metadata", "labels"),
-	Events     :getCallEvent(params),
-	Annotation : common.FindData(getData, "metadata", "annotations"),
-	CreateAt  : common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
-	}
+
 	involvesData, _ := common.GetModelRelatedList(params) // Pods, Deployments
 	log.Printf("#####involvesData ", involvesData)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data":         daemonset_detail,
+		"data":         daemonset,
 		"involvesData": involvesData,
 	})
 }
-func GetAllDaemonsets(c echo.Context) (err error) {
+func GetAllStatefulset(c echo.Context) (err error) {
 	var daemonsets []model.WORKLOAD
 	params := model.PARAMS{
-		Kind:      "daemonsets",
+		Kind:      "statefulsets",
 		Name:      c.Param("name"),
 		Cluster:   c.QueryParam("cluster"),
 		Workspace: c.QueryParam("workspace"),
@@ -73,7 +63,7 @@ func GetAllDaemonsets(c echo.Context) (err error) {
 		daemonset := model.WORKLOAD{
 			Name:          common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:     common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			NodeSelector: common.FindData(data[i], "spec.template.spec", "nodeSelector"), // Replica:       replicas,
+			// Replica:       replicas,
 			ClusterName:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 			CreateAt:      common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 			// UpdateAt:      common.InterfaceToTime(common.FindData(data[i], "status.conditions", "lastUpdateTime")),

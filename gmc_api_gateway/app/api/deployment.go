@@ -40,18 +40,20 @@ func GetDeployment(c echo.Context) (err error) {
 		AvailableReplicas:   common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "availableReplicas"))),
 		UnavailableReplicas: common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "unavailableReplicas"))),
 	}
-
-	deployment := model.DEPLOYMENT{
+	deployment := model.WORKLOAD{
 		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		WorkspaceName: project.WorkspaceName,
 		ClusterName:   params.Cluster,
 		Namespace:     params.Project,
+		READY: common.InterfaceToString(common.FindData(getData, "spec.status", "readyReplicas"))+"/"+common.InterfaceToString(common.FindData(getData, "spec", "replicas")),
+		CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+	}
+	deployment_detail:= model.DEPLOYMENT_DETAIL{
+		WORKLOAD : deployment,
 		Label:         common.FindData(getData, "metadata", "labels"),
 		Annotation:    common.FindData(getData, "metadata", "annotations"),
-		CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		UpdateAt:      common.InterfaceToTime(common.FindData(getData, "status.conditions", "lastUpdateTime")),
 		Replica:       replicas,
-		Stauts:        common.InterfaceToString(common.FindData(getData, "status.conditions", "status")),
 		Strategy:      common.FindData(getData, "spec", "strategy"),
 		Containers:    common.FindData(getData, "spec.template.spec", "containers"),
 		Events:        getCallEvent(params),
@@ -59,12 +61,12 @@ func GetDeployment(c echo.Context) (err error) {
 	involvesData, _ := common.GetModelRelatedList(params)
 	// fmt.Printf("[####]data : %+v\n", testData)
 	return c.JSON(http.StatusOK, echo.Map{
-		"data":         deployment,
+		"data":         deployment_detail,
 		"involvesData": involvesData,
 	})
 }
 func GetDeployments(c echo.Context) (err error) {
-	var deployments []model.DEPLOYMENT
+	var deployments []model.WORKLOAD
 	params := model.PARAMS{
 		Kind:      "deployments",
 		Name:      c.Param("name"),
@@ -77,21 +79,18 @@ func GetDeployments(c echo.Context) (err error) {
 	data := GetModelList(params)
 	fmt.Printf("#################dataerr : %s", data)
 	for i, _ := range data {
-		replicas := model.REPLICA{
-			Replicas:            common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "replicas"))),
-			ReadyReplicas:       common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))),
-			UpdatedReplicas:     common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "updatedReplicas"))),
-			AvailableReplicas:   common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "availableReplicas"))),
-			UnavailableReplicas: common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "unavailableReplicas"))),
+		var ReadyReplica string
+		if common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas")) != "" {
+			ReadyReplica = common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))
+		}else {
+			ReadyReplica = "0"
 		}
-		deployment := model.DEPLOYMENT{
+		deployment := model.WORKLOAD{
 			Name:          common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:     common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			Replica:       replicas,
 			ClusterName:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 			CreateAt:      common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
-			UpdateAt:      common.InterfaceToTime(common.FindData(data[i], "status.conditions", "lastUpdateTime")),
-			Stauts:        common.InterfaceToString(common.FindData(data[i], "status.conditions", "status")),
+			READY: ReadyReplica+"/"+common.InterfaceToString(common.FindData(data[i], "spec", "replicas")),
 			WorkspaceName: common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
 		}
 		deployments = append(deployments, deployment)

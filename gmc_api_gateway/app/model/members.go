@@ -13,8 +13,8 @@ type Member struct {
 	Contact    string             `json:"contact,omitempty" bson:"contact"`
 	Enabled    int                `json:"enabled,omitempty" bson:"enabled" validate:"gte=0,lte=1"`
 	RoleName   string             `json:"role,omitempty" bson:"memberRole"`
-	Created_at string             `json:"created_at,omitempty"`
-	Logined_at string             `json:"logined_at,omitempty"`
+	Created_at primitive.DateTime `json:"created_at,omitempty"`
+	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
 }
 
 // type MemberWithPassword struct {

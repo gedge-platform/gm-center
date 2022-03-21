@@ -73,15 +73,9 @@ func ListWorkspace(c echo.Context) (err error) {
 
 	for cur.Next(context.TODO()) {
 		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster.cluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
-		// unwindCluster := bson.D{{"$unwind", bson.D{{"path", "$selectCluster2"}, {"preserveNullAndEmptyArrays", false}}}}
-		// matchCluster := bson.D{
-		// 	{Key: "$match", Value: bson.D{
-		// 		{Key: "cluster", Value: "$ID"},
-		// 	}},
-		// }
+		
 		fmt.Println("ttt : ", mongo.Pipeline{lookupCluster})
 		showWorkspaceCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster})
-		// showWorkspaceCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, unwindCluster})
 
 		if err = showWorkspaceCursor.All(ctx, &showsWorkspace); err != nil {
 			panic(err)

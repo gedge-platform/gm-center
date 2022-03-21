@@ -134,7 +134,6 @@ func FindProject(c echo.Context) (err error) {
 	} else {
 		return c.JSON(http.StatusOK, showsProject)
 	}
-	// return c.JSON(http.StatusOK, showsProject)
 }
 
 func DeleteProject(c echo.Context) (err error) {

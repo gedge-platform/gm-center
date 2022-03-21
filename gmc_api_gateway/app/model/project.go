@@ -13,9 +13,10 @@ type Project struct {
 	Creator       primitive.ObjectID `json:"projectCreator,omitempty" bson:"projectCreator" validate:"required"`
 	Workspace     primitive.ObjectID `json:"workspace,omitempty" bson:"workspace" validate:"required"`
 	Selectcluster []ProjectClusters  `json:"selectCluster,omitempty" bson:"selectCluster" validate:"required"`
-	Created_at    string             `json:"created_at,omitempty"`
+	Created_at    primitive.DateTime `json:"created_at,omitempty"`
 }
 
 type ProjectClusters struct {
 	Cluster primitive.ObjectID `json:"cluster,omitempty" bson:"cluster"`
 }
+        

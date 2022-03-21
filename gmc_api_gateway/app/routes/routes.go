@@ -74,10 +74,13 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/clusters/:name", api.GetCluster)
 	// r.PUT("/clusters/:name", api.UpdateCluster)
 	r.DELETE("/clusters/:name", api.DeleteCluster)
+	
+	// r.GET("/userProjects", api.GetUserProjects)
+	r.GET("/systemProjects", api.GetSystemProjects)
+	// r.GET("/projects", api.GetProjects)
+	// r.GET("/projects/:name", api.GetProject)
+	r.GET("/userProjects", api.GetUserProjects)
 
-	r.GET("/projects", api.GetProjects)
-	r.GET("/projects/:name", api.GetProject)
-	r.GET("/userprojects", api.GetAllProjects)
 	r.POST("/projects", api.CreateProject)
 	// r.PUT("/projects/:name", api.ReplaceProject)
 	// r.PATCH("/projects/:name", api.UpdateProject)

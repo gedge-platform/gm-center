@@ -32,7 +32,7 @@ func GetStorageclass(c echo.Context) error {
 	fmt.Println("[###########storageclass]", getData)
 	storageclass := model.STORAGECLASS{
 		Name:                 common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-		Cluster:  common.InterfaceToString(common.FindData(getData, "clusterName", "")),
+		Cluster:  	c.QueryParam("cluster"),
 		ReclaimPolicy:        common.InterfaceToString(common.FindData(getData, "reclaimPolicy", "")),
 		Provisioner:          common.InterfaceToString(common.FindData(getData, "provisioner", "")),
 		VolumeBindingMode:    common.InterfaceToString(common.FindData(getData, "volumeBindingMode", "")),

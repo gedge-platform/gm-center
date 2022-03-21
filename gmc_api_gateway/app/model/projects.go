@@ -17,8 +17,25 @@ type Project struct {
 	IstioCheck string  `gorm:"column:istioCheck; not null; default:null" json:"istioCheck"`
 }
 
-type PROJECT struct {
+type USERPROJECT struct {
 	Project
+	// Status        string           `json:"status,omitempty"`
+	ClusterName   string           `json:"clusterName,omitempty"`
+	// Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
+	// Label         interface{}      `json:"labels,omitempty",`
+	// Annotation    interface{}      `json:"annotations,omitempty"`
+	// ResourceUsage interface{}      `json:"resourceUsage,omitempty"`
+	// Events        []EVENT          `json:"events"`
+}
+type SYSTEMPROJECT struct { 
+	Name          string    `json:"projectName"`
+	ClusterName   string           `json:"clusterName,omitempty"`
+	CreateAt      time.Time `json:"created_at"`
+	Status 	 string    `json:"status"`
+	
+}
+type PROJECT_DETAIL struct {
+	// Project
 	Status        string           `json:"status,omitempty"`
 	ClusterName   string           `json:"clusterName,omitempty"`
 	Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
@@ -51,7 +68,7 @@ type PROJECT_RESOURCE struct {
 	VolumeCount     int `json:"volume_count"`
 }
 
-type PROJECTS []PROJECT
+// type USPROJECTS []PROJECT
 
 func (Project) TableName() string {
 	return "PROJECT_INFO"

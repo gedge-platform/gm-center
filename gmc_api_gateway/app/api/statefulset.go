@@ -25,24 +25,36 @@ func GetStatefulset(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
+
+
+
 	// fmt.Println("[###########ingress]", common.InterfaceToString(common.FindDataStr(getData, "status.loadBalancer.ingress.0", "ip")))
-	daemonset := model.WORKLOAD{
+	statefulset := model.WORKLOAD{
 		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Namespace:     common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
-		// Replica:       replicas,
 		ClusterName:   common.InterfaceToString(common.FindData(getData, "clusterName", "")),
 		CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		// UpdateAt:      common.InterfaceToTime(common.FindData(data[i], "status.conditions", "lastUpdateTime")),
-		// Stauts:        common.FindData(getData, "status", ""),
+		// Stauts:        c common.FindData(data[i], "status", ""),
 		WorkspaceName: common.InterfaceToString(common.FindData(getData, "workspaceName", "")),
 		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
+	}
+	statefulset_detail :=model.STATEFULSET_DETAIL{
+		WORKLOAD: statefulset,
+		Status:      common.FindData(getData, "status", ""),
+		Containers : common.FindData(getData, "spec.template.spec", "containers"),
+		OwnerReferences :   common.FindData(getData, "metadata", "ownerReferences"),
+		Labels     :common.FindData(getData, "metadata", "labels"),
+		Events     :getCallEvent(params),
+		Annotation : common.FindData(getData, "metadata", "annotations"),
+		CreateAt :common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 	}
 
 	involvesData, _ := common.GetModelRelatedList(params) // Pods, Deployments
 	log.Printf("#####involvesData ", involvesData)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data":         daemonset,
+		"data":         statefulset_detail,
 		"involvesData": involvesData,
 	})
 }
@@ -60,9 +72,16 @@ func GetAllStatefulset(c echo.Context) (err error) {
 	data := GetModelList(params)
 	fmt.Printf("#################dataerr : %s", data)
 	for i, _ := range data {
+			var ReadyReplica string
+		if common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas")) != "" {
+			ReadyReplica = common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))
+		}else {
+			ReadyReplica = "0"
+		}
 		daemonset := model.WORKLOAD{
 			Name:          common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:     common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			READY : ReadyReplica+"/"+common.InterfaceToString(common.FindData(data[i], "spec", "replicas")),
 			// Replica:       replicas,
 			ClusterName:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 			CreateAt:      common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),

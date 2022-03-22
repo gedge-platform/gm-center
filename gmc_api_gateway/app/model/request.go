@@ -12,9 +12,10 @@ type Request struct {
 	Workspace   primitive.ObjectID `json:"workspace,omitempty" bson:"workspace" validate:"required"`
 	Project     primitive.ObjectID `json:"project,omitempty" bson:"project" validate:"required"`
 	Date        primitive.DateTime `json:"date,omitempty" bson:"date" validate:"required"`
-	Cluster     primitive.ObjectID `json:"cluster,omitempty" bson:"cluster" validate:"required"`
+	ClusterName string `json:"clusterName,omitempty" bson:"clusterName" validate:"required"`
+	Cluster     primitive.ObjectID `json:"cluster,omitempty" bson:"cluster"`
 	Name        string             `json:"name,omitempty" bson:"name" validate:"required"`
-	Reason      string             `json:"reason,omitempty" bson:"reason" validate:"required"`
+	Reason      string             `json:"reason,omitempty" bson:"reason"`
 	Type        string             `json:"type,omitempty" bson:"type"`
 }
 

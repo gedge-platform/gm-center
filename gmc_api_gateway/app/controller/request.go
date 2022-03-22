@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
+	"strings"
 	"time"
 
+	"encoding/json"
 	"gmc_api_gateway/app/common"
 	db "gmc_api_gateway/app/database"
 	"gmc_api_gateway/app/model"
@@ -29,16 +32,46 @@ func GetRequestDB(name string) *mongo.Collection {
 
 func CreateRequest(c echo.Context) (err error) {
 	cdb := GetRequestDB("request")
+	cdb2 := GetClusterDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := new(model.Request)
+	// clustermodels := new(model.Cluster)
 	validate := validator.New()
 
+	fmt.Println("1")
+	fmt.Printf("test: %s",c.Get("date"))
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-
+	fmt.Println("2")
+	fmt.Println(models)
+	fmt.Println(models.ClusterName)
+	fmt.Println("3")
+	// var result2 map[string]interface{}
+	test,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
+	// test3 := cdb2.FindOne(ctx, bson.D{{Key:"clusterName", Value:models.ClusterName}}).Decode(&cdb2)
+	// if err := cdb2.FindOne(ctx, bson.M{"clusterName": models.ClusterName}).Decode(&cdb2); err != nil {
+	// 	fmt.Printf("testeste: %s" ,err )
+	// 	// common.ErrorMsg(c, http.StatusInternalServerError, err)
+	// 	return nil
+	// }
+	fmt.Println(test)
+	var test2 []bson.M
+	
+	if err = test.All(ctx, &test2); err != nil{
+		log.Fatal(err)
+	}
+	fmt.Println("4")
+	fmt.Println(test2)
+	fmt.Println("5")
+	fmt.Println(reflect.ValueOf(test2))
+	test3 := fmt.Sprint(test2)
+	fmt.Println(test3)
+	fmt.Println(strings.Split(test3, "clusterEndpoint"))
+	fmt.Println("6")
+	fmt.Println(StringToInterface(test3))
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			fmt.Println(err)
@@ -51,7 +84,19 @@ func CreateRequest(c echo.Context) (err error) {
 		log.Fatal(err)
 	}
 
-	result, err := cdb.InsertOne(ctx, models)
+	newRequest := model.Request{
+		Id : models.Id,
+		Status : models.Status,
+		Message : models.Message,
+		Name : models.Name,
+		Reason : models.Reason,
+		Type : models.Type,
+		Date : models.Date,
+		// Cluster: cdb2.FindOne(ctx, bson.M{"clusterName": models.ClusterName}),		
+	}
+
+	// result, err := cdb.InsertOne(ctx, models)
+	result, err := cdb.InsertOne(ctx, newRequest)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil
@@ -203,4 +248,11 @@ func UpdateRequest(c echo.Context) (err error) {
 		"status": http.StatusOK,
 		"data":   search_val + " Updated Complete",
 	})	
+}
+func StringToInterface(i string) interface{} {
+	var x interface{}
+	if err := json.Unmarshal([]byte(i), &x); err != nil {
+		fmt.Printf("Error : %s\n", err)
+	}
+	return x
 }

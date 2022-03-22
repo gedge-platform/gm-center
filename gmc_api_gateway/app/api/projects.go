@@ -330,10 +330,8 @@ func GetSystemProjects(c echo.Context) (err error) {
 			
 		}
 	}else {
-		// Clusters := GetDBCluster(params)
 		getData:= GetModelList(params)
 		for k, _ := range getData {
-				// var project_tmp model.SYSTEMPROJECT
 				project := model.SYSTEMPROJECT{
 				Name : common.InterfaceToString(common.FindData(getData[k], "metadata", "name")),
 				Status :common.InterfaceToString(common.FindData(getData[k], "status", "phase")),
@@ -345,7 +343,6 @@ func GetSystemProjects(c echo.Context) (err error) {
 			}
 	}
 		var projectFilterList []model.SYSTEMPROJECT
-
 			for p := range projects{
 				for i := range Projects {
 				if  strings.Contains(Projects[i].Name, projects[p].Name){
@@ -357,7 +354,57 @@ func GetSystemProjects(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, echo.Map{
 			"data": projectFilterList,
 		})
+}
+func GetUserProject(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	project := GetDBProject(params)
+	var tsProject model.Project
+	var projectModel model.USERPROJECT
+	common.Transcode(project, &tsProject)
+	common.Transcode(tsProject, &projectModel)
 	
+	selectCluster := project.SelectCluster
+	var detailList []model.PROJECT_DETAIL
+		slice := strings.Split(selectCluster, ",")
+		for i, _ := range slice {
+			params.Cluster=slice[i]
+			getData, err := common.DataRequest(params)
+			if err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, err)
+			return nil
+			}
+			tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+			tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+			projectDetail :=model.PROJECT_DETAIL{
+				Status        : common.InterfaceToString(common.FindData(getData, "status", "phase")),
+				ClusterName   : slice[i],
+				// Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
+				Label         : common.FindData(getData, "metadata", "labels"),
+				Annotation    : common.FindData(getData, "metadata", "annotations"),
+				ResourceUsage : tempresult,
+				// Events        []EVENT          `json:"events"`
+			}
+			detailList = append(detailList,projectDetail)
+		}
+		projectModel.Detail = detailList
+		// var project_info model.USERPROJECT
+		// project_info.Project=projectModel
+		// project_info.Detail=detailList
+	// projectDetail := model.USERPROJECT{
+    // Project : project,
+
+	// }
+	return c.JSON(http.StatusOK, echo.Map{
+			"data": projectModel,
+	})
 }
 	
 // func GetProject(c echo.Context) (err error) {

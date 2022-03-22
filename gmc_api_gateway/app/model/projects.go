@@ -21,6 +21,7 @@ type USERPROJECT struct {
 	Project
 	// Status        string           `json:"status,omitempty"`
 	ClusterName   string           `json:"clusterName,omitempty"`
+	Detail []PROJECT_DETAIL  `json:"DetailInfo,omitempty"`
 	// Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
 	// Label         interface{}      `json:"labels,omitempty",`
 	// Annotation    interface{}      `json:"annotations,omitempty"`
@@ -32,15 +33,16 @@ type SYSTEMPROJECT struct {
 	ClusterName   string           `json:"clusterName,omitempty"`
 	CreateAt      time.Time `json:"created_at"`
 	Status 	 string    `json:"status"`
+	Detail []PROJECT_DETAIL  `json:"DetailInfo,omitempty"`
 	
 }
 type PROJECT_DETAIL struct {
 	// Project
-	Status        string           `json:"status,omitempty"`
 	ClusterName   string           `json:"clusterName,omitempty"`
-	Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
-	Label         interface{}      `json:"labels,omitempty",`
+	Status        string           `json:"status,omitempty"`
+	Label         interface{}      `json:"labels,omitempty"`
 	Annotation    interface{}      `json:"annotations,omitempty"`
+	Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
 	ResourceUsage interface{}      `json:"resourceUsage,omitempty"`
 	Events        []EVENT          `json:"events"`
 }

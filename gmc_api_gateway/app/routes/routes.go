@@ -49,7 +49,7 @@ func GEdgeRoute(e *echo.Echo) {
 	// r0.GET("/test", api.GetAllMembers)
 
 	// /gmcapi/v1
-	r := e.Group("/gmcapi/v1")
+	r := e.Group("/gmcapi/v2")
 	// r := e.Group("/gmcapi/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 	// 	userChk, _ := api.AuthenticateUser(id, password)
 	// 	return userChk, nil
@@ -74,4 +74,13 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/project", c.ListProject)
 	r.GET("/project/:projectName", c.FindProject)
 	r.DELETE("/project/:projectName", c.DeleteProject)
+
+	
+	r.POST("/request", c.CreateRequest)
+	r.POST("/request2", c.UpdateRequest2)
+	r.GET("/request", c.ListRequest)
+	r.GET("/request/:requestId", c.FindRequest)
+	r.DELETE("/request/:requestId", c.DeleteRequest)
+	r.PUT("/request/:requestId", c.UpdateRequest)
+	r.PUT("/request2", c.UpdateRequest2)
 }

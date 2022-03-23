@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"reflect"
-	"strings"
 	"time"
 
 	"encoding/json"
@@ -19,6 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -32,46 +31,39 @@ func GetRequestDB(name string) *mongo.Collection {
 
 func CreateRequest(c echo.Context) (err error) {
 	cdb := GetRequestDB("request")
-	cdb2 := GetClusterDB("cluster")
+	// cdb2 := GetClusterDB("cluster")
+	cdb3 := GetClusterDB("workspace")
+	cdb4 := GetClusterDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := new(model.Request)
-	// clustermodels := new(model.Cluster)
 	validate := validator.New()
 
-	fmt.Println("1")
-	fmt.Printf("test: %s",c.Get("date"))
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-	fmt.Println("2")
-	fmt.Println(models)
-	fmt.Println(models.ClusterName)
-	fmt.Println("3")
-	// var result2 map[string]interface{}
-	test,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
-	// test3 := cdb2.FindOne(ctx, bson.D{{Key:"clusterName", Value:models.ClusterName}}).Decode(&cdb2)
-	// if err := cdb2.FindOne(ctx, bson.M{"clusterName": models.ClusterName}).Decode(&cdb2); err != nil {
-	// 	fmt.Printf("testeste: %s" ,err )
-	// 	// common.ErrorMsg(c, http.StatusInternalServerError, err)
-	// 	return nil
-	// }
-	fmt.Println(test)
-	var test2 []bson.M
 	
-	if err = test.All(ctx, &test2); err != nil{
+	// clusterObjectId,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
+	workspaceObjectId,err:= cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
+	projectObjectId,err:= cdb4.Find(ctx, bson.M{"projectName": models.ProjectName})
+	// var clusterObjectId2 []bson.D
+	var workspaceObjectId2 []bson.D
+	var projectObjectId2 []bson.D
+	
+	// if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
+	// 	log.Fatal(err)
+	// }
+	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
 		log.Fatal(err)
 	}
-	fmt.Println("4")
-	fmt.Println(test2)
-	fmt.Println("5")
-	fmt.Println(reflect.ValueOf(test2))
-	test3 := fmt.Sprint(test2)
-	fmt.Println(test3)
-	fmt.Println(strings.Split(test3, "clusterEndpoint"))
-	fmt.Println("6")
-	fmt.Println(StringToInterface(test3))
+	if err = projectObjectId.All(ctx, &projectObjectId2); err != nil{
+		log.Fatal(err)
+	}
+	// fmt.Println(clusterObjectId2[0][0].Value)
+	// fmt.Println(workspaceObjectId2[0][0].Value)
+	// fmt.Println(projectObjectId2[0][0].Value)	
+
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			fmt.Println(err)
@@ -83,8 +75,7 @@ func CreateRequest(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	newRequest := model.Request{
+	newRequest := model.NewRequest{
 		Id : models.Id,
 		Status : models.Status,
 		Message : models.Message,
@@ -92,8 +83,13 @@ func CreateRequest(c echo.Context) (err error) {
 		Reason : models.Reason,
 		Type : models.Type,
 		Date : models.Date,
-		// Cluster: cdb2.FindOne(ctx, bson.M{"clusterName": models.ClusterName}),		
+		// Cluster: clusterObjectId2[0][0].Value.(primitive.ObjectID),
+		Workspace: workspaceObjectId2[0][0].Value.(primitive.ObjectID),
+		Project: projectObjectId2[0][0].Value.(primitive.ObjectID),
 	}
+
+	fmt.Println("★★★★★★★★★★★★★★★")
+	fmt.Println(newRequest)
 
 	// result, err := cdb.InsertOne(ctx, models)
 	result, err := cdb.InsertOne(ctx, newRequest)
@@ -249,6 +245,24 @@ func UpdateRequest(c echo.Context) (err error) {
 		"data":   search_val + " Updated Complete",
 	})	
 }
+
+func UpdateRequest2(c echo.Context) (err error) {
+	// fmt.Println(c)
+	// return c.JSON(http.StatusOK, echo.Map{
+	// 	"status": http.StatusOK,
+	// 	"data": c,
+	// })	
+	 params2 := make(map[string]interface{})
+	 if err = c.Bind(&params2); err != nil {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		fmt.Println(err)
+		return nil
+	}
+	fmt.Println("★  ★  ★  ★  ★  ★  ★  ★  ")
+	fmt.Println(params2)
+    return c.JSON(http.StatusOK, params2)
+}
+
 func StringToInterface(i string) interface{} {
 	var x interface{}
 	if err := json.Unmarshal([]byte(i), &x); err != nil {

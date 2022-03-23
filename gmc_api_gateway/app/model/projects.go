@@ -39,6 +39,8 @@ type SYSTEMPROJECT struct {
 type PROJECT_DETAIL struct {
 	// Project
 	ClusterName   string           `json:"clusterName,omitempty"`
+	ProjectName   string           `json:"Name,omitempty"`
+	CreateAt      time.Time `json:"created_at"`
 	Status        string           `json:"status,omitempty"`
 	Label         interface{}      `json:"labels,omitempty"`
 	Annotation    interface{}      `json:"annotations,omitempty"`
@@ -63,6 +65,8 @@ type PROJECT_DETAIL struct {
 
 type PROJECT_RESOURCE struct {
 	DeploymentCount int `json:"deployment_count"`
+	DaemonsetCount  int `json:"daemonset_count"`
+	StatefulsetCount  int `json:"Statefulset_count"`
 	PodCount        int `json:"pod_count"`
 	ServiceCount    int `json:"service_count"`
 	CronjobCount    int `json:"cronjob_count"`

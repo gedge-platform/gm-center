@@ -559,9 +559,6 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 	case "deployments":
 		fmt.Printf("[#####]origUid : %s\n", origUid)
-		// log.Println("[#5] data is ", data)
-		// selectorName := InterfaceToString(FindData(data, "spec.selector.matchLabels", "run"))
-
 		params.Kind = "replicasets"
 		params.Name = ""
 
@@ -749,39 +746,58 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		log.Println("##55selectLable : ", selectLable)
 		log.Println("uid data : ", uid)
 		log.Println("kind data : ", kind)
+		var WorkloadInfo interface{}
+		// tmpWorkloadInfo := FindData(data, "metadata", "ownerReferences.0")
+		
+		var repliuid string
+		if kind == "ReplicaSet"{
+			params.Kind = "replicasets"
+			params.Name = ""
 
-		// params.Kind = "replicasets"
-		// params.Name = ""
+		repliData, err := DataRequest(params)
+		if err != nil {
+			return nil, err
+		}
+		repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
+		log.Printf("[###123]deployData", repliData)
+		log.Println("DeployRefer Data12 : ", repliRefer)
+		repliuid = InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
 
-		// repliData, err := DataRequest(params)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
-		// log.Printf("[###123]deployData", repliData)
-		// log.Println("DeployRefer Data12 : ", repliRefer)
+		if err != nil {
+			return nil, err
+		}
 
-		// repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
+		log.Println("[#4]deplyName ", repliuid)
 
-		// if err != nil {
-		// 	return nil, err
-		// }
+		params.Kind = "deployments"
+	
+		params.Name = ""
+		workloadData, err := DataRequest(params)
+		if err != nil {
+			return nil, err
+		}
+		log.Println("deploydata Data132 : ", workloadData)
+		workloadRefer, err := FindDataArrStr2(workloadData, "items", "uid", repliuid)
+		if err != nil {
+			return nil, err
+		}
 
-		// log.Println("[#4]deplyName ", repliuid)
-
-		// params.Kind = "deployments"
-		// params.Name = ""
-		// deployData, err := DataRequest(params)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// log.Println("deploydata Data132 : ", deployData)
-		// deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// log.Println("deploy refer Data132 : ", deployRefer)
-
+		workloadInfo := model.WorkloadInfo{
+			Name: InterfaceToString(FindData(workloadRefer[0], "metadata", "name")),
+			Kind: "Deployment",
+			ReplicaName: InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name")),
+		}
+		
+	
+			WorkloadInfo=workloadInfo
+	}else {
+		// WorkloadInfo = FindData(data, "metadata", "ownerReferences")
+		workloadInfo := model.WorkloadInfo{
+			Name: InterfaceToString(FindData(data, "metadata.ownerReferences", "name")),
+			Kind: InterfaceToString(FindData(data, "metadata.ownerReferences", "kind")),
+		}
+		WorkloadInfo=workloadInfo
+	}
 		if err != nil {
 			return nil, err
 		}
@@ -801,12 +817,11 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		ServiceData := serviceRefer
 		Transcode(ServiceData, &ServiceInfo)
 
-		log.Printf("[#222]", serviceData)
 
 		log.Printf("[#222]", serviceData)
 
 		ReferData := model.ReferDataDeploy{
-			// DeployInfo:  DeployInfo,
+			WorkloadInfo:  WorkloadInfo,
 			ServiceInfo: ServiceInfo,
 		}
 		return &ReferData, nil

@@ -112,21 +112,14 @@ type ConfigMapKeyRef struct {
 type PodIPs struct {
 	Ip string `json:"ip,omitempty"`
 }
-type DeployInfo struct {
-	Metadata struct {
+type WorkloadInfo struct {
 		Name              string           `json:"name,omitempty"`
-		Namespace         string           `json:"namespace,omitempty"`
-		CreationTimestamp time.Time        `json:"creationTimestamp,omitempty"`
-		OwnerReference    []OwnerReference `json:"ownerReferences,omitempty"`
-	} `json:"metadata"`
-	Status struct {
-		ReadyReplicas   int `json:"readyReplicas,omitempty"`
-		Replicas        int `json:"replicas,omitempty"`
-		UpdatedReplicas int `json:"updatedReplicas,omitempty"`
-	} `json:"status"`
+		Kind 	 string           `json:"kind,omitempty"`
+		ReplicaName   string           `json:"replicaName,omitempty"`
+		
 }
 type ReferDataDeploy struct {
-	DeployInfo  []DeployInfo  `json:"deployList"`
+	WorkloadInfo  interface{}  `json:"workloadList"`
 	ServiceInfo []ServiceInfo `json:"serviceList"`
 }
 type ServiceInfo struct {

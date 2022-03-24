@@ -29,6 +29,7 @@ func GetProjectDB(name string) *mongo.Collection {
 
 func CreateProject(c echo.Context) (err error) {
 	cdb := GetProjectDB("project")
+	cdb2 := GetProjectDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := new(model.Project)
@@ -38,6 +39,15 @@ func CreateProject(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
+
+	memberObjectId,err:= cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+	var memberObjectId2 []bson.D
+
+
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+		log.Fatal(err)
+	}
+	fmt.Println(memberObjectId2[0][0].Value)
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {

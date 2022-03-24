@@ -11,6 +11,7 @@ type Project struct {
 	Type          string             `json:"projectType,omitempty" bson:"projectType" validate:"required"`
 	Owner         primitive.ObjectID `json:"projectOwner,omitempty" bson:"projectOwner" validate:"required"`
 	Creator       primitive.ObjectID `json:"projectCreator,omitempty" bson:"projectCreator" validate:"required"`
+	MemberName    string			 `json:"memberName,omitempty" bson:"memberName" validate:"required"`
 	Workspace     primitive.ObjectID `json:"workspace,omitempty" bson:"workspace" validate:"required"`
 	Selectcluster []ProjectClusters  `json:"selectCluster,omitempty" bson:"selectCluster" validate:"required"`
 	Created_at    primitive.DateTime `json:"created_at,omitempty"`

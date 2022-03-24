@@ -88,9 +88,6 @@ func CreateRequest(c echo.Context) (err error) {
 		Project: projectObjectId2[0][0].Value.(primitive.ObjectID),
 	}
 
-	fmt.Println("★★★★★★★★★★★★★★★")
-	fmt.Println(newRequest)
-
 	// result, err := cdb.InsertOne(ctx, models)
 	result, err := cdb.InsertOne(ctx, newRequest)
 	if err != nil {

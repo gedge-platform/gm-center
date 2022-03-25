@@ -149,7 +149,8 @@ func GetModelList(params model.PARAMS) []string {
 					for k, _ := range getData0 {
 						str := getData0[k].String()
 						strVal, _ := sjson.Set(str, "clusterName", slice[w])
-						strVal2, _ := sjson.Set(strVal, "clusterName", params.Workspace)
+						strVal1, _ := sjson.Set(strVal, "workspaceName", params.Workspace)
+						strVal2, _ := sjson.Set(strVal1, "clusterName", params.Cluster)
 						DataList = append(DataList, strVal2)
 					}
 				}

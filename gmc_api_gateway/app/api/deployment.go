@@ -33,6 +33,12 @@ func GetDeployment(c echo.Context) (err error) {
 	getData0 := common.FindData(getData, "", "")
 	var Deployment model.Deployment
 	common.Transcode(getData0, &Deployment)
+	var ReadyReplica string
+		if common.InterfaceToString(common.FindData(getData, "status", "readyReplicas")) != "" {
+			ReadyReplica = common.InterfaceToString(common.FindData(getData, "status", "readyReplicas"))
+		}else {
+			ReadyReplica = "0"
+		}
 	replicas := model.REPLICA{
 		Replicas:            common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "replicas"))),
 		ReadyReplicas:       common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "readyReplicas"))),
@@ -45,7 +51,7 @@ func GetDeployment(c echo.Context) (err error) {
 		WorkspaceName: project.WorkspaceName,
 		ClusterName:   params.Cluster,
 		Namespace:     params.Project,
-		READY: common.InterfaceToString(common.FindData(getData, "spec.status", "readyReplicas"))+"/"+common.InterfaceToString(common.FindData(getData, "spec", "replicas")),
+		READY: ReadyReplica+"/"+common.InterfaceToString(common.FindData(getData, "spec", "replicas")),
 		CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 	}
 	deployment_detail:= model.DEPLOYMENT_DETAIL{

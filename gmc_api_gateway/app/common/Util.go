@@ -483,10 +483,9 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		fmt.Println("sdfsdfdsfdfs", Filter(endPointData, "subsets.#.addresses"))
 
 		var Pods []model.SERVICEPOD
-
+		var PodNameList []string
 		if Filter(endPointData, "subsets.#.addresses") != "" {
 			PodData := FindingArray(Filter(endPointData, "subsets.#.addresses"))[0].Array()
-			fmt.Println("########################PodData", PodData)
 			for i, _ := range PodData {
 				Pod := model.SERVICEPOD{
 					Ip:       (gjson.Get(PodData[i].String(), "ip")).String(),
@@ -494,74 +493,55 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 					Name:     (gjson.Get(PodData[i].String(), "targetRef.name")).String(),
 				}
 				Pods = append(Pods, Pod)
+				PodNameList = append(PodNameList,(gjson.Get(PodData[i].String(), "targetRef.name")).String())
 			}
 		}
-
+		fmt.Println("########################PodNameList", PodNameList)
 		// log.Printf("# pod list확인 ", podRefer)
-
-		// for i, _ := range PodData {
-
-		// }
-		// log.Println("endPoints 뿌려주기 : ", PodData)
-
-		testData := FindData(endPointData, "subsets.#.addresses.0", "targetRef.name")
-		log.Println("testData 뿌려주기 : ", testData)
-
-		splits := InterfaceToString(FindData(endPointData, "subsets.#.addresses.0", "targetRef.name"))
-		log.Printf("Endpoints [%s] \nData is %s \n", params.Name, endPointData)
-		log.Printf("splits %s \n", splits)
-
-		slices := strings.Split(splits, "-")
-		lenSlices := len(slices)
-		log.Printf("slices is %s \n", slices)
-		log.Printf("lenSlices %d \n", lenSlices)
-
-		var slice string
-		for i := 0; i < lenSlices-1; i++ {
-			if i == 0 {
-				slice = slices[i]
-			} else {
-				slice = slice + "-" + slices[i]
+		params.Kind = "pods"
+		params.Name = ""
+		podsData, err := DataRequest(params)
+		if err != nil {
+			return nil, err
+		}
+		var workloadList []model.WorkloadInfo
+		for i := range PodNameList{
+			podData, err := FindDataArrStr2(podsData, "items", "name", PodNameList[i])
+			if err != nil {
+			return nil, err
 			}
+
+			if InterfaceToString(FindData(podData[0], "metadata.ownerReferences", "kind")) == "ReplicaSet"{
+				params.Kind = "replicasets"
+				params.Name = InterfaceToString(FindData(podData[0], "metadata.ownerReferences", "name"))
+
+			repliData, err := DataRequest(params)
+			if err != nil {
+				return nil, err
+			}
+				workloadInfo := model.WorkloadInfo{
+				Name: InterfaceToString(FindData(repliData, "metadata.ownerReferences", "name")),
+				Kind: InterfaceToString(FindData(repliData, "metadata.ownerReferences", "kind")),
+				ReplicaName: InterfaceToString(FindData(podData[0], "metadata.ownerReferences", "name")),
+				}
+			workloadList = append(workloadList,workloadInfo)
+		}else{
+			workloadInfo := model.WorkloadInfo{
+			Name: InterfaceToString(FindData(podData[0], "metadata.ownerReferences", "name")),
+			Kind: InterfaceToString(FindData(podData[0], "metadata.ownerReferences", "kind")),
+			}
+			workloadList = append(workloadList,workloadInfo)
 		}
-
-		// TODO: splits 가 여러개 일 수 있으니, 수정 필요(맨 마지막 - 이후로 제거)
-		podName := slice
-		log.Println("PodName is ", podName)
-
-		params.Kind = "replicasets"
-		params.Name = podName
-
-		replData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
+			
 		}
-		log.Printf("replicasets [%s] Data is %s \n", params.Name, replData)
-		params.Kind = "deployments"
-		params.Name = FindDataStr(replData, "metadata.ownerReferences.0", "name")
-
-		DeployData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-
-		// var deployModel model.Deployment
-		// Transcode(DeployData, &deployModel)
-
 		services := model.SERVICELISTS{
 			Pods: Pods,
-			Deployments: model.SERVICEDEPLOYMENT{
-				Name:     InterfaceToString(FindData(DeployData, "metadata", "name")),
-				UpdateAt: InterfaceToTime(FindData(DeployData, "status.conditions", "lastUpdateTime")),
-			},
+			Workloads: workloadList,
 		}
 		return services, nil
 
 	case "deployments":
 		fmt.Printf("[#####]origUid : %s\n", origUid)
-		// log.Println("[#5] data is ", data)
-		// selectorName := InterfaceToString(FindData(data, "spec.selector.matchLabels", "run"))
-
 		params.Kind = "replicasets"
 		params.Name = ""
 
@@ -711,21 +691,6 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		params.Name = ""
 		test := InterfaceToString(FindData(jobData, "metadata", "name"))
 		log.Println("[#11test Data12 : ", test)
-		// eventsData, err := DataRequest(params)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
-		// log.Println("[#11eventRefer Data12 : ", eventRefer)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// var EventInfo []model.EVENT1
-		// EventData := eventRefer
-		// log.Printf("# 확인 ", EventData)
-		// Transcode(EventData, &EventInfo)
-
 		var JobsInfo []model.JOBList
 		JobData := jobRefer
 		log.Printf("# job list확인 ", jobRefer)
@@ -738,30 +703,35 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 
 		return &ReferData, nil
 	case "pods":
-		labelApp := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name"))
-		selectLable := InterfaceToString(FindData(data, "metadata", "labels"))
+		// labelApp := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name"))
+		// selectLable := InterfaceToString(FindData(data, "metadata", "labels"))
 		uid := InterfaceToString(FindData(data, "metadata", "uid"))
-		podName := InterfaceToString(FindData(data, "metadata", "name"))
+		// podName := InterfaceToString(FindData(data, "metadata", "name"))
 		kind := InterfaceToString(FindData(data, "metadata.ownerReferences.0", "kind"))
-		log.Println("PARAMS.NAEMData12 : ", params.Name)
-		log.Println("labels Data12 : ", labelApp)
-		log.Println("#44podName: ", podName)
-		log.Println("##55selectLable : ", selectLable)
-		log.Println("uid data : ", uid)
-		log.Println("kind data : ", kind)
 
-		// params.Kind = "replicasets"
-		// params.Name = ""
+		// log.Println("PARAMS.NAEMData12 : ", params.Name)
+		// log.Println("labels Data12 : ", labelApp)
+		// log.Println("#44podName: ", podName)
+		// log.Println("##55selectLable : ", selectLable)
+		// log.Println("uid data : ", uid)
+		// log.Println("kind data : ", kind)
+		var WorkloadInfo interface{}
+		// tmpWorkloadInfo := FindData(data, "metadata", "ownerReferences.0")
+		
+		// var repliuid string
+		if kind == "ReplicaSet"{
+			params.Kind = "replicasets"
+			params.Name = InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name"))
 
-		// repliData, err := DataRequest(params)
-		// if err != nil {
-		// 	return nil, err
-		// }
+		repliData, err := DataRequest(params)
+		if err != nil {
+			return nil, err
+		}
+
 		// repliRefer, err := FindDataArrStr2(repliData, "items", "name", labelApp)
 		// log.Printf("[###123]deployData", repliData)
 		// log.Println("DeployRefer Data12 : ", repliRefer)
-
-		// repliuid := InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
+		// repliuid = InterfaceToString(FindDataStr(repliRefer[0], "metadata.ownerReferences.0", "uid"))
 
 		// if err != nil {
 		// 	return nil, err
@@ -770,18 +740,34 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		// log.Println("[#4]deplyName ", repliuid)
 
 		// params.Kind = "deployments"
+	
 		// params.Name = ""
-		// deployData, err := DataRequest(params)
+		// workloadData, err := DataRequest(params)
 		// if err != nil {
 		// 	return nil, err
 		// }
-		// log.Println("deploydata Data132 : ", deployData)
-		// deployRefer, err := FindDataArr(deployData, "items", "uid", repliuid)
+		// log.Println("deploydata Data132 : ", workloadData)
+		// workloadRefer, err := FindDataArrStr2(workloadData, "items", "uid", repliuid)
 		// if err != nil {
 		// 	return nil, err
 		// }
-		// log.Println("deploy refer Data132 : ", deployRefer)
 
+		workloadInfo := model.WorkloadInfo{
+			Name: InterfaceToString(FindData(repliData, "metadata.ownerReferences.0", "name")),
+			Kind: InterfaceToString(FindData(repliData, "metadata.ownerReferences.0", "kind")),
+			ReplicaName: InterfaceToString(FindData(data, "metadata.ownerReferences.0", "name")),
+		}
+		
+	
+			WorkloadInfo=workloadInfo
+	}else {
+		// WorkloadInfo = FindData(data, "metadata", "ownerReferences")
+		workloadInfo := model.WorkloadInfo{
+			Name: InterfaceToString(FindData(data, "metadata.ownerReferences", "name")),
+			Kind: InterfaceToString(FindData(data, "metadata.ownerReferences", "kind")),
+		}
+		WorkloadInfo=workloadInfo
+	}
 		if err != nil {
 			return nil, err
 		}
@@ -801,12 +787,11 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		ServiceData := serviceRefer
 		Transcode(ServiceData, &ServiceInfo)
 
-		log.Printf("[#222]", serviceData)
 
 		log.Printf("[#222]", serviceData)
 
 		ReferData := model.ReferDataDeploy{
-			// DeployInfo:  DeployInfo,
+			WorkloadInfo:  WorkloadInfo,
 			ServiceInfo: ServiceInfo,
 		}
 		return &ReferData, nil

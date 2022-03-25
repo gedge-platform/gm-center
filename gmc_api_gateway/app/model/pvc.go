@@ -13,6 +13,7 @@ type PVC struct {
 	Volume   interface{}        `json:"volume"`
 	StorageClass       string           `json:"storageClass"`
 	Cluster string  `json:"clusterName"`
+	Workspace string `json:"workspaceName,omitempty"` 
 	// Reason        []EVENT          `json:"events"`
 	Lable             interface{}        `json:"label,omitempty"`
 	Annotations       interface{}        `json:"annotations,omitempty"`

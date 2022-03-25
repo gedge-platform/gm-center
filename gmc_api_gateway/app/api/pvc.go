@@ -51,6 +51,7 @@ func GetAllPVCs(c echo.Context) error {
 			StorageClass:             common.InterfaceToString(common.FindData(data[i], "spec", "storageClassName")),
 			Volume :            common.InterfaceToString(common.FindData(data[i], "spec", "volumeName")),
 			Cluster: common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Workspace:  common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
 			CreateAt : common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 		}
 		pvcs = append(pvcs, pvc)
@@ -100,6 +101,7 @@ func GetPVC(c echo.Context) error {
 				CreateAt : common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 				Finalizers : common.InterfaceToArray(common.FindData(getData, "metadata", "finalizers")),
 				Lable:             common.FindData(getData, "metadata", "labels"),
+				
 				Annotations:       common.FindData(getData, "metadata", "annotations"),
 				Events: getCallEvent(params),
 			}

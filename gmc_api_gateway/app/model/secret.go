@@ -11,6 +11,7 @@ type SECRET struct {
 	DataCnt int  `json:"dataCnt,omitempty"`
 	Data             interface{}        `json:"data,omitempty"`
 	Cluster string  `json:"clusterName"`
+	Workspace string `json:"workspaceName"`
 	OwnerReferences interface{}  `json:"ownerReferences,omitempty"`
 	Lable             interface{}        `json:"label,omitempty"`
 	Annotations       interface{}        `json:"annotations,omitempty"`

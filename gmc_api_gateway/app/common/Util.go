@@ -554,7 +554,12 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		replicaName := InterfaceToString(FindData(replData[0], "metadata", "name"))
+		var replicaNameList []string
+		for n := range replData{
+			replicaName := InterfaceToString(FindData(replData[n], "metadata", "name"))
+			replicaNameList = append(replicaNameList,replicaName)
+		}
+		// replicaName := InterfaceToString(FindData(replData[0], "metadata", "name"))
 		// fmt.Printf("[####replicaName : %s\n", replicaName)
 		params.Kind = "pods"
 		params.Name = ""
@@ -562,29 +567,36 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		podData, err := FindDataArrStr2(podsData, "items", "name", replicaName)
+		var podDataList []string
+		for r :=range replicaNameList{
+			podData, err := FindDataArrStr2(podsData, "items", "name", replicaNameList[r])
 		if err != nil {
 			return nil, err
+		}	
+		for p := range podData{
+			// fmt.Printf("[##]podData :%s\n", podData)
+			podDataList = append(podDataList,podData[p])
+			}
 		}
-		// fmt.Printf("[##]podData :%s\n", podData)
+		
 
 		// splits := strings.Split(podData, ",")
 		var Pods []model.DEPLOYMENTPOD
 		var PodNames []string
 		
 		
-		for x, _ := range podData {
-			containerStatusesData := FindData(podData[x], "status", "containerStatuses.0.restartCount")
+		for x, _ := range podDataList {
+			containerStatusesData := FindData(podDataList[x], "status", "containerStatuses.0.restartCount")
 		fmt.Printf("##containerStatusesData :%+v\n", containerStatusesData)
 			
-			if InterfaceToString(FindData(podData[x], "status", "phase")) == "Running" {
-				PodNames = append(PodNames, InterfaceToString(FindData(podData[x], "metadata", "name")))
+			if InterfaceToString(FindData(podDataList[x], "status", "phase")) == "Running" {
+				PodNames = append(PodNames, InterfaceToString(FindData(podDataList[x], "metadata", "name")))
 			}
 			podList := model.DEPLOYMENTPOD{
-				Name:         InterfaceToString(FindData(podData[x], "metadata", "name")),
-				Status:       InterfaceToString(FindData(podData[x], "status", "phase")),
-				Node:         InterfaceToString(FindData(podData[x], "status", "hostIP")),
-				PodIP:        InterfaceToString(FindData(podData[x], "status", "podIP")),
+				Name:         InterfaceToString(FindData(podDataList[x], "metadata", "name")),
+				Status:       InterfaceToString(FindData(podDataList[x], "status", "phase")),
+				Node:         InterfaceToString(FindData(podDataList[x], "status", "hostIP")),
+				PodIP:        InterfaceToString(FindData(podDataList[x], "status", "podIP")),
 				RestartCount: InterfaceToInt(containerStatusesData),
 			}
 			Pods = append(Pods, podList)
@@ -618,7 +630,7 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		deployments := model.DEPLOYMENTLISTS{
 			Pods:        Pods,
 			Services:    Svcs,
-			ReplicaName: replicaName,
+			// ReplicaName: replicaNameList,
 		}
 		return deployments, nil
 	case "jobs":

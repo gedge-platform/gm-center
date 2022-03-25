@@ -79,14 +79,30 @@ func GetDBProject(params model.PARAMS) *model.Project {
 	if models == nil {
 		// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		var model model.Project
-		model.Type = "system"
-		model.WorkspaceName = "system"
+		// model.Type = "system"
+		// model.WorkspaceName = "system"
 		model.SelectCluster = params.Cluster
 		return &model
 	}
 
 	return models
 }
+
+func FindWorkspacebyProject(params model.PARAMS) string {
+	db := db.DbManager()
+	search_val := params.Name
+	models := FindProjectDB(db, "Name", search_val)
+	workspaceName := models.WorkspaceName
+
+	if models == nil {
+		var model model.Project
+		model.WorkspaceName = "system"
+		return model.WorkspaceName
+	}
+	fmt.Printf("#######workspaceName : %s", workspaceName)
+	return workspaceName
+}
+
 
 // func GetProject(c echo.Context) (err error) {
 // 	db := db.DbManager()

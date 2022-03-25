@@ -97,6 +97,7 @@ func GetCronAllJobs(c echo.Context) error {
 			Name:              common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:         common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
 			Cluster:           common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Workspace:  common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
 			Schedule:          common.InterfaceToString(common.FindData(data[i], "spec", "schedule")),
 			LastScheduleTime:  common.InterfaceToTime(common.FindData(data[i], "status", "lastScheduleTime")),
 			CreationTimestamp: common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp"))}

@@ -99,11 +99,12 @@ func GetAllJobs(c echo.Context) error {
 	}
 	data := GetModelList(params)
 	fmt.Printf("####data confirm : %s", data)
+	
 	for i, _ := range data {
-
 		job := model.JOB{
 			Name:           common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:      common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Workspace:  common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
 			Cluster:        common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 			Status:         common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "succeeded"))),
 			CompletionTime: common.InterfaceToTime(common.FindData(data[i], "status", "completionTime")),

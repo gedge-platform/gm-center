@@ -38,6 +38,7 @@ func GetAllSecrets(c echo.Context) error {
 			Type: common.InterfaceToString(common.FindData(data[i], "type", "")),
 			DataCnt : common.InterfaceOfLen(common.FindData(data[i], "data", "")),
 			Cluster: common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Workspace:  common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
 			CreateAt : common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 		}
 		secrets = append(secrets, secret)

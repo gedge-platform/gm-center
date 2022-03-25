@@ -51,6 +51,7 @@ func getCallEvent(params model.PARAMS) []model.EVENT {
 				Message:   common.InterfaceToString(common.FindData(events[e], "note", "")),
 				Reason:    common.InterfaceToString(common.FindData(events[e], "reason", "")),
 				Type:      common.InterfaceToString(common.FindData(events[e], "type", "")),
+				Cluster:   clusterName,
 				EventTime: common.InterfaceToTime(common.FindData(events[e], "metadata", "creationTimestamp")),
 			}
 			List = append(List, event)

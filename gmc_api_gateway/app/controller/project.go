@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -30,9 +31,12 @@ func GetProjectDB(name string) *mongo.Collection {
 func CreateProject(c echo.Context) (err error) {
 	cdb := GetProjectDB("project")
 	cdb2 := GetProjectDB("member")
+	cdb3 := GetProjectDB("workspace")
+	cdb4 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := new(model.Project)
+	models2 := new(model.ProjectClusters)
 	validate := validator.New()
 
 	if err = c.Bind(models); err != nil {
@@ -41,13 +45,31 @@ func CreateProject(c echo.Context) (err error) {
 	}
 
 	memberObjectId,err:= cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+	workspaceObjectId,err:= cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
+	clusterObjectId,err:= cdb4.Find(ctx, bson.M{"clusterName": models2.ClusterName})
+
 	var memberObjectId2 []bson.D
+	var workspaceObjectId2 []bson.D
+	var clusterObjectId2 []bson.A
 
 
 	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
 		log.Fatal(err)
 	}
-	fmt.Println(memberObjectId2[0][0].Value)
+	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
+		log.Fatal(err)
+	}
+	if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
+		log.Fatal(err)
+	}
+	// fmt.Println(memberObjectId2[0][0].Value)
+	// fmt.Println(workspaceObjectId2[0][0].Value)
+	// fmt.Println(clusterObjectId2)
+	// fmt.Println("ㅅㄴㄷㅅㄴㄴㅅㄴㅅ")
+	// fmt.Println(models.MemberName)
+	// fmt.Println(models.Selectcluster)
+	// fmt.Println(models2.ClusterName)
+	// fmt.Println("ㅅㄴㄷㅅㄴㄴㅅㄴㅅ")
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -61,7 +83,25 @@ func CreateProject(c echo.Context) (err error) {
 		log.Fatal(err)
 	}
 
-	result, err := cdb.InsertOne(ctx, models)
+	// tstst := model.ProjectClusters{
+	// 	Cluster: clusterObjectId2[0].(primitive.ObjectID),
+	// }
+	// fmt.Println(tstst)
+
+	newRequest := model.NewProject{
+		Name : models.Name,
+		Description : models.Description,
+		Type : models.Type,
+		Owner : memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Creator : memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Created_at : models.Created_at,
+		Workspace: workspaceObjectId2[0][0].Value.(primitive.ObjectID),
+		// Selectcluster : tstst,
+		// .clusterObjectId2[0][0].Value.(primitive.ObjectID)
+	}
+
+	// result, err := cdb.InsertOne(ctx, models)
+	result, err := cdb.InsertOne(ctx, newRequest)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil

@@ -75,6 +75,7 @@ func CreateRequest(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	newRequest := model.NewRequest{
 		Id : models.Id,
 		Status : models.Status,
@@ -83,7 +84,7 @@ func CreateRequest(c echo.Context) (err error) {
 		Reason : models.Reason,
 		Type : models.Type,
 		Date : models.Date,
-		// Cluster: clusterObjectId2[0][0].Value.(primitive.ObjectID),
+		Cluster: primitive.NewObjectID(),
 		Workspace: workspaceObjectId2[0][0].Value.(primitive.ObjectID),
 		Project: projectObjectId2[0][0].Value.(primitive.ObjectID),
 	}
@@ -200,6 +201,7 @@ func DeleteRequest(c echo.Context) (err error) {
 
 func UpdateRequest(c echo.Context) (err error) {
 	cdb := GetRequestDB("request")
+	cdb2 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("requestId")
 
@@ -210,6 +212,14 @@ func UpdateRequest(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
+	var clusterObjectId2 []bson.D
+
+	clusterObjectId,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
+
+	if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
+		log.Fatal(err)
+	}
+	// fmt.Println(clusterObjectId2[0][0].Value)
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -223,16 +233,24 @@ func UpdateRequest(c echo.Context) (err error) {
 		log.Fatal(err)
 	}
 
-	update := bson.M{"status": models.Status, "name": models.Name, "reason": models.Reason, "message": models.Message, "cluster": models.Cluster, "date": models.Date}
+	var update primitive.M
+	switch models.ClusterName{
+	case "" :
+		update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date}
+	default :
+	    update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date, "code": models.Code, "cluster":clusterObjectId2[0][0].Value.(primitive.ObjectID)}
+	}
 
-	result, err := cdb.UpdateOne(ctx, bson.M{"requestId": search_val}, bson.M{"$set": update})
+	fmt.Println(update)
+
+	result, err := cdb.UpdateOne(ctx, bson.M{"request_id": search_val}, bson.M{"$set": update})
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to update."))
 		return
 	}
 	
 	if result.MatchedCount == 1 {
-		if err := cdb.FindOne(ctx, bson.M{"requestId": search_val}).Decode(&cdb); err != nil {
+		if err := cdb.FindOne(ctx, bson.M{"request_id": search_val}).Decode(&cdb); err != nil {
 			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match request."))
 			return nil
 		}

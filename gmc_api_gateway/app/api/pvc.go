@@ -83,10 +83,17 @@ func GetPVC(c echo.Context) error {
 		Body:      responseBody(c.Request().Body),
 	}
 	getData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
+	// if err != nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, err)
+	// 	return nil
+	// }
+	if err != nil ||  common.InterfaceToString(common.FindData(getData, "status", "")) =="Failure"{		
+				msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+			return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+			
+				})
+			}
 
 	fmt.Printf("####PV data confirm : %s", getData)
 	pvc := model.PVC{

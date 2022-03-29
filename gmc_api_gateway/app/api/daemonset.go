@@ -21,10 +21,18 @@ func GetDaemonset(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
+	// if err != nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, err)
+	// 	return nil
+	// }
+	if err != nil ||  common.InterfaceToString(common.FindData(getData, "status", "")) =="Failure"{		
+				msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+			return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+			
+				})
+			}
+
 	// fmt.Println("[###########ingress]", common.InterfaceToString(common.FindDataStr(getData, "status.loadBalancer.ingress.0", "ip")))
 	daemonset := model.WORKLOAD{
 		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),

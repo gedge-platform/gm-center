@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-"reflect"
+
+	// "reflect"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/db"
 	"gmc_api_gateway/app/model"
@@ -21,8 +22,8 @@ type Namespace struct {
 	APIVersion string `json:"apiVersion"`
 	Kind       string `json:"kind"`
 	Metadata   struct {
-		Name string `json:"name"`
-		Labels struct{
+		Name   string `json:"name"`
+		Labels struct {
 			IstioCheck string `json:"istio-injection"`
 		} `json:"labels"`
 	} `json:"metadata"`
@@ -57,6 +58,7 @@ func GetAllDBProjects(params model.PARAMS) []model.Project {
 	fmt.Printf("[3##]models : %+v\n", models)
 	return models
 }
+
 // func GetProject2(c echo.Context) *model.Project {
 // 	db := db.DbManager()
 // 	search_val := c.Param("name")
@@ -103,7 +105,6 @@ func FindWorkspacebyProject(params model.PARAMS) string {
 	return workspaceName
 }
 
-
 // func GetProject(c echo.Context) (err error) {
 // 	db := db.DbManager()
 // 	search_val := c.Param("name")
@@ -140,7 +141,7 @@ func CreateProject(c echo.Context) (err error) {
 		Token := clusters.Token
 
 		data, err := json.Marshal(namesapce)
-		fmt.Printf("// %s",data)
+		fmt.Printf("// %s", data)
 		if err != nil {
 			common.ErrorMsg(c, http.StatusBadRequest, err)
 			return err
@@ -266,7 +267,7 @@ func FindProjectDB(db *gorm.DB, select_val string, search_val string) *model.Pro
 	return &models
 }
 
- func GetUserProjects(c echo.Context) (err error) {
+func GetUserProjects(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
 		Name:      c.Param("name"),
@@ -276,41 +277,42 @@ func FindProjectDB(db *gorm.DB, select_val string, search_val string) *model.Pro
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	var  projectList []model.Project
+	var projectList []model.Project
 	projects := GetAllDBProjects(params)
 	if projects == nil {
 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		return nil
 	}
-		
+
 	if c.QueryParam("workspace") == "" {
 		return c.JSON(http.StatusOK, echo.Map{
 			"data": projects,
 		})
 	} else {
 		for i := range projects {
-			if projects[i].WorkspaceName == c.QueryParam("workspace"){
-				projectList = append(projectList,projects[i])
+			if projects[i].WorkspaceName == c.QueryParam("workspace") {
+				projectList = append(projectList, projects[i])
 			}
 		}
 		return c.JSON(http.StatusOK, echo.Map{
 			"data": projectList,
 		})
-	} 
-
-}
-func Filter(arr interface{}, cond func(interface{}) bool) interface{} {
-	contentType := reflect.TypeOf(arr)
-	contentValue := reflect.ValueOf(arr)
-
-	newContent := reflect.MakeSlice(contentType, 0, 0)
-	for i := 0; i < contentValue.Len(); i++ {
-		if content := contentValue.Index(i); cond(content.Interface()) {
-			newContent = reflect.Append(newContent, content)
-		}
 	}
-	return newContent.Interface()
+
 }
+
+// func Filter(arr interface{}, cond func(interface{}) bool) interface{} {
+// 	contentType := reflect.TypeOf(arr)
+// 	contentValue := reflect.ValueOf(arr)
+
+// 	newContent := reflect.MakeSlice(contentType, 0, 0)
+// 	for i := 0; i < contentValue.Len(); i++ {
+// 		if content := contentValue.Index(i); cond(content.Interface()) {
+// 			newContent = reflect.Append(newContent, content)
+// 		}
+// 	}
+// 	return newContent.Interface()
+// }
 
 func GetSystemProjects(c echo.Context) (err error) {
 	params := model.PARAMS{
@@ -324,53 +326,90 @@ func GetSystemProjects(c echo.Context) (err error) {
 	}
 	Projects := GetAllDBProjects(params)
 	var projects []model.SYSTEMPROJECT
-	if  c.QueryParam("cluster") == " "{
+	if c.QueryParam("cluster") == "" {
 		Clusters := GetAllDBClusters(params)
 		for i, _ := range Clusters {
+			// var temp_projects []model.SYSTEMPROJECT
 			params.Cluster = Clusters[i].Name
 			// params.Workspace = Clusters[i].Name
 			params.Name = ""
-			getData:= GetModelList(params)
+			getData := GetModelList(params)
 
 			for k, _ := range getData {
+				fmt.Println("######cluster : ", Clusters[i].Name)
+				fmt.Println("######project : ", common.FindData(getData[k], "metadata", "name"))
 				// var project_tmp model.SYSTEMPROJECT
 				project := model.SYSTEMPROJECT{
-				Name : common.InterfaceToString(common.FindData(getData[k], "metadata", "name")),
-				Status :common.InterfaceToString(common.FindData(getData[k], "status", "phase")),
-				ClusterName : Clusters[i].Name,
-				CreateAt :common.InterfaceToTime(common.FindData(getData[k], "metadata", "creationTimestamp")),
+					Name:        common.InterfaceToString(common.FindData(getData[k], "metadata", "name")),
+					Status:      common.InterfaceToString(common.FindData(getData[k], "status", "phase")),
+					ClusterName: Clusters[i].Name,
+					CreateAt:    common.InterfaceToTime(common.FindData(getData[k], "metadata", "creationTimestamp")),
 				}
-				
-				projects = append(projects ,project)
+
+				projects = append(projects, project)
 			}
-			
+
 		}
-	}else {
-		getData:= GetModelList(params)
+		// var projectList []model.SYSTEMPROJECT
+		// for k := range projects {
+		// 	for i := range Projects {
+		// 		if Projects[i].Name != projects[k].Name {
+		// 			projects = append(projects[:k], projects[k+1])
+		// 			fmt.Printf("####sdfsfsefse:%s", projects[k].Name)
+		// 		}
+		// 	// if strings.Compare(select_val, "Name") == 0 {
+		// 	db := db.DbManager()
+		// 	models := model.Project{}
+		// 	if err := db.First(&models, model.Project{Name: Projects[i].Name}).Error; err != nil {
+		// 		fmt.Printf("sdfasdftest : %+v", &models)
+		// 	}
+		// 	}
+		// }
+		// }
+		// projects
+		// db := db.DbManager()
+		// search_val := "default"
+		// models := FindProjectDB(db, "Name", search_val)
+		// projectList := FilterProjectDB(db, "Name", search_val, projects)
+		// return c.JSON(http.StatusOK, echo.Map{
+		// 	"data": projectList,
+		// })
+	} else {
+		getData := GetModelList(params)
 		for k, _ := range getData {
-				project := model.SYSTEMPROJECT{
-				Name : common.InterfaceToString(common.FindData(getData[k], "metadata", "name")),
-				Status :common.InterfaceToString(common.FindData(getData[k], "status", "phase")),
-				ClusterName :common.InterfaceToString(common.FindData(getData[k], "clusterName", "")),
-				CreateAt :common.InterfaceToTime(common.FindData(getData[k], "metadata", "creationTimestamp")),
-				}
-				
-				projects = append(projects ,project)
+			project := model.SYSTEMPROJECT{
+				Name:        common.InterfaceToString(common.FindData(getData[k], "metadata", "name")),
+				Status:      common.InterfaceToString(common.FindData(getData[k], "status", "phase")),
+				ClusterName: common.InterfaceToString(common.FindData(getData[k], "clusterName", "")),
+				CreateAt:    common.InterfaceToTime(common.FindData(getData[k], "metadata", "creationTimestamp")),
 			}
+
+			projects = append(projects, project)
+		}
 	}
-		var projectFilterList []model.SYSTEMPROJECT
-			for p := range projects{
-				for i := range Projects {
-				if  strings.Contains(Projects[i].Name, projects[p].Name){
-					projectFilterList = append(projects[:p],projects[p+1])
-				}
+	var projectsList []model.SYSTEMPROJECT
+	for p := range projects {
+		for i := range Projects {
+			if strings.Compare(Projects[i].Name, projects[p].Name) == 0 {
+				// projects = projects[:p+copy(projects[p:], projects[p+1:])]
+				projectsList = RemoveCopy(projects, p)
 			}
 		}
-	
-		return c.JSON(http.StatusOK, echo.Map{
-			"data": projectFilterList,
-		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": projectsList,
+	})
+
 }
+func RemoveCopy(slice []model.SYSTEMPROJECT, i int) []model.SYSTEMPROJECT {
+	copy(slice[i:], slice[i+1:])
+	return slice[:len(slice)-1]
+}
+
+// func remove(s []model.SYSTEMPROJECT, i int) []model.SYSTEMPROJECT {
+// 	s[i] = s[len(s)-1]
+// 	return s[:len(s)-1]
+// }
 func GetUserProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -386,48 +425,52 @@ func GetUserProject(c echo.Context) (err error) {
 	var projectModel model.USERPROJECT
 	common.Transcode(project, &tsProject)
 	common.Transcode(tsProject, &projectModel)
-	
+
 	selectCluster := project.SelectCluster
 	var detailList []model.PROJECT_DETAIL
-		slice := strings.Split(selectCluster, ",")
-		for i, _ := range slice {
-			params.Cluster=slice[i]
-			getData, err := common.DataRequest(params)
-			if err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, err)
-			return nil
-			}
-			tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-			tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-			ResourceCnt := model.PROJECT_RESOURCE{
-			DeploymentCount: ResourceCnt(params, "deployments"),
-			DaemonsetCount : ResourceCnt(params, "daemonsets"),
-			StatefulsetCount : ResourceCnt(params, "Statefulsets"),
-			PodCount:        ResourceCnt(params, "pods"),
-			ServiceCount:    ResourceCnt(params, "services"),
-			CronjobCount:    ResourceCnt(params, "cronjobs"),
-			JobCount:        ResourceCnt(params, "jobs"),
-			VolumeCount:     ResourceCnt(params, "persistentvolumeclaims"),
-	}
-			projectDetail :=model.PROJECT_DETAIL{
-				Status        : common.InterfaceToString(common.FindData(getData, "status", "phase")),
-				ClusterName   : slice[i],
-				Resource      :ResourceCnt,
-				Label         : common.FindData(getData, "metadata", "labels"),
-				Annotation    : common.FindData(getData, "metadata", "annotations"),
-				ResourceUsage : tempresult,
-				Events      :getCallEvent(params),
-			}
-			detailList = append(detailList,projectDetail)
+	slice := strings.Split(selectCluster, ",")
+	for i, _ := range slice {
+		params.Cluster = slice[i]
+		params.Project = params.Name
+		getData, err := common.DataRequest(params)
+		fmt.Printf("#######err : %+v", getData)
+		if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
+			msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+			return c.JSON(http.StatusNotFound, echo.Map{
+				"error": msg,
+			})
 		}
-		
-		projectModel.Detail = detailList
+		tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+		tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+		ResourceCnt := model.PROJECT_RESOURCE{
+			DeploymentCount:  ResourceCnt(params, "deployments"),
+			DaemonsetCount:   ResourceCnt(params, "daemonsets"),
+			StatefulsetCount: ResourceCnt(params, "Statefulsets"),
+			PodCount:         ResourceCnt(params, "pods"),
+			ServiceCount:     ResourceCnt(params, "services"),
+			CronjobCount:     ResourceCnt(params, "cronjobs"),
+			JobCount:         ResourceCnt(params, "jobs"),
+			VolumeCount:      ResourceCnt(params, "persistentvolumeclaims"),
+		}
+		projectDetail := model.PROJECT_DETAIL{
+			Status:        common.InterfaceToString(common.FindData(getData, "status", "phase")),
+			ClusterName:   slice[i],
+			Resource:      ResourceCnt,
+			Label:         common.FindData(getData, "metadata", "labels"),
+			Annotation:    common.FindData(getData, "metadata", "annotations"),
+			ResourceUsage: tempresult,
+			CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+			Events:        getCallEvent(params),
+		}
+		detailList = append(detailList, projectDetail)
+	}
+
+	projectModel.Detail = detailList
 	return c.JSON(http.StatusOK, echo.Map{
-			"data": projectModel,
-			
+		"data": projectModel,
 	})
 }
-func GetSystemProject (c echo.Context) (err error) {
+func GetSystemProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
 		Name:      c.Param("name"),
@@ -438,87 +481,95 @@ func GetSystemProject (c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	params.Project = c.Param("name")
-	if c.QueryParam("cluster") == ""{
+	if c.QueryParam("cluster") == "" {
 		var detailList []model.PROJECT_DETAIL
 		Clusters := GetAllDBClusters(params)
 		for i, _ := range Clusters {
 			params.Cluster = Clusters[i].Name
 			getData, err := common.DataRequest(params)
-			if err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, err)
-			return nil
-			}
+			// if err != nil {
+			// common.ErrorMsg(c, http.StatusNotFound, err)
+			// return nil
+			// }
 			// fmt.Printf("getData : %+v", getData)
-			
+			if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
+				msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+				return c.JSON(http.StatusNotFound, echo.Map{
+					"error": msg,
+				})
+			}
 			tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
 			tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
 			ResourceCnt := model.PROJECT_RESOURCE{
-			DeploymentCount: ResourceCnt(params, "deployments"),
-			DaemonsetCount : ResourceCnt(params, "daemonsets"),
-			StatefulsetCount : ResourceCnt(params, "Statefulsets"),
-			PodCount:        ResourceCnt(params, "pods"),
-			ServiceCount:    ResourceCnt(params, "services"),
-			CronjobCount:    ResourceCnt(params, "cronjobs"),
-			JobCount:        ResourceCnt(params, "jobs"),
-			VolumeCount:     ResourceCnt(params, "persistentvolumeclaims"),
+				DeploymentCount:  ResourceCnt(params, "deployments"),
+				DaemonsetCount:   ResourceCnt(params, "daemonsets"),
+				StatefulsetCount: ResourceCnt(params, "Statefulsets"),
+				PodCount:         ResourceCnt(params, "pods"),
+				ServiceCount:     ResourceCnt(params, "services"),
+				CronjobCount:     ResourceCnt(params, "cronjobs"),
+				JobCount:         ResourceCnt(params, "jobs"),
+				VolumeCount:      ResourceCnt(params, "persistentvolumeclaims"),
 			}
-			projectDetail :=model.PROJECT_DETAIL{
-				ProjectName : common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-				Status        : common.InterfaceToString(common.FindData(getData, "status", "phase")),
-				CreateAt : common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
-				ClusterName   : Clusters[i].Name,
-				Resource      :ResourceCnt,
-				Label         : common.FindData(getData, "metadata", "labels"),
-				Annotation    : common.FindData(getData, "metadata", "annotations"),
-				ResourceUsage : tempresult,
-				Events      :getCallEvent(params),
+			projectDetail := model.PROJECT_DETAIL{
+				ProjectName:   common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+				Status:        common.InterfaceToString(common.FindData(getData, "status", "phase")),
+				CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+				ClusterName:   Clusters[i].Name,
+				Resource:      ResourceCnt,
+				Label:         common.FindData(getData, "metadata", "labels"),
+				Annotation:    common.FindData(getData, "metadata", "annotations"),
+				ResourceUsage: tempresult,
+				Events:        getCallEvent(params),
 			}
-			if  common.InterfaceToString(common.FindData(getData, "status", "")) != "Failure" {
-			detailList = append(detailList,projectDetail)
+			if common.InterfaceToString(common.FindData(getData, "status", "")) != "Failure" {
+				detailList = append(detailList, projectDetail)
 			}
-			
 
-	}
-	return c.JSON(http.StatusOK, echo.Map{
+		}
+		return c.JSON(http.StatusOK, echo.Map{
 			"data": detailList,
-			
-	})
-} else{
-	getData, err := common.DataRequest(params)
-			if err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, err)
-			return nil
-			}
-			
-			
-			tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-			tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-			ResourceCnt := model.PROJECT_RESOURCE{
-			DeploymentCount: ResourceCnt(params, "deployments"),
-			DaemonsetCount : ResourceCnt(params, "daemonsets"),
-			StatefulsetCount : ResourceCnt(params, "Statefulsets"),
-			PodCount:        ResourceCnt(params, "pods"),
-			ServiceCount:    ResourceCnt(params, "services"),
-			CronjobCount:    ResourceCnt(params, "cronjobs"),
-			JobCount:        ResourceCnt(params, "jobs"),
-			VolumeCount:     ResourceCnt(params, "persistentvolumeclaims"),
-			}
-			projectDetail :=model.PROJECT_DETAIL{
-				ProjectName : common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-				Status        : common.InterfaceToString(common.FindData(getData, "status", "phase")),
-				CreateAt : common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
-				ClusterName   : c.QueryParam("cluster"),
-				Resource      :ResourceCnt,
-				Label         : common.FindData(getData, "metadata", "labels"),
-				Annotation    : common.FindData(getData, "metadata", "annotations"),
-				ResourceUsage : tempresult,
-				Events      :getCallEvent(params),
-			}
-	return c.JSON(http.StatusOK, echo.Map{
+		})
+	} else {
+		getData, err := common.DataRequest(params)
+		// if err != nil {
+		// common.ErrorMsg(c, http.StatusNotFound, err)
+		// return nil
+		// }
+		if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
+			msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+			return c.JSON(http.StatusNotFound, echo.Map{
+				"error": msg,
+			})
+		}
+
+		tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+		tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+		ResourceCnt := model.PROJECT_RESOURCE{
+			DeploymentCount:  ResourceCnt(params, "deployments"),
+			DaemonsetCount:   ResourceCnt(params, "daemonsets"),
+			StatefulsetCount: ResourceCnt(params, "Statefulsets"),
+			PodCount:         ResourceCnt(params, "pods"),
+			ServiceCount:     ResourceCnt(params, "services"),
+			CronjobCount:     ResourceCnt(params, "cronjobs"),
+			JobCount:         ResourceCnt(params, "jobs"),
+			VolumeCount:      ResourceCnt(params, "persistentvolumeclaims"),
+		}
+		projectDetail := model.PROJECT_DETAIL{
+			ProjectName:   common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+			Status:        common.InterfaceToString(common.FindData(getData, "status", "phase")),
+			CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+			ClusterName:   c.QueryParam("cluster"),
+			Resource:      ResourceCnt,
+			Label:         common.FindData(getData, "metadata", "labels"),
+			Annotation:    common.FindData(getData, "metadata", "annotations"),
+			ResourceUsage: tempresult,
+			Events:        getCallEvent(params),
+		}
+		return c.JSON(http.StatusOK, echo.Map{
 			"data": projectDetail,
-	})
-}
-	
+		})
+	}
+
 }
 
 func ResourceCnt(params model.PARAMS, kind string) int {

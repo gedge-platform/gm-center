@@ -1,22 +1,25 @@
 package model
 
 import "time"
-
 type JOB struct {
 	Workspace      string           `json:"workspace,omitempty"`
 	Cluster        string           `json:"cluster"`
 	Namespace      string           `json:"project"`
 	Name           string           `json:"name"`
-	Kind           string           `json:"kind,omitempty"`
-	Status         int              `json:"status,omitempty"`
+	Completions    string              `json:"completions,omitempty"`
+	Duration	  interface{}          `json:"duration"`
 	CreationTime   time.Time        `json:"created_at,omitempty"`
+}
+type JOB_DETAL struct {
+	JOB
+	Status         int              `json:"status,omitempty"`
 	Lable          interface{}      `json:"label,omitempty"`
 	Annotations    interface{}      `json:"annotations,omitempty"`
 	Containers     []Containers     `json:"containers,omitempty"`
 	BackoffLimit   int              `json:"backoffLimit,omitempty"`
-	Completions    int              `json:"completions,omitempty"`
+	
 	Parallelism    int              `json:"parallelism,omitempty"`
-	OwnerReference []OwnerReference `json:"ownerReferences,omitempty"`
+	// OwnerReference []OwnerReference `json:"ownerReferences,omitempty"`
 	Conditions     []Conditions     `json:"conditions,omitempty"`
 	StartTime      time.Time        `json:"startTime,omitempty"`
 	CompletionTime time.Time        `json:"completionTime,omitempty"`

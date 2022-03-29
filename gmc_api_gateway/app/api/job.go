@@ -6,6 +6,7 @@ import (
 	"gmc_api_gateway/app/model"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -30,9 +31,15 @@ func GetJobs(c echo.Context) error {
 	}
 
 	getData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
+	// if err != nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, err)
+	// 	return nil
+	// }
+	if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
+		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+		})
 	}
 	containerData := common.FindData(getData, "spec.template.spec", "containers")
 	var containerInfo []model.Containers
@@ -49,30 +56,44 @@ func GetJobs(c echo.Context) error {
 	involvesData, _ := common.GetModelRelatedList(params)
 	log.Printf("#####involvesData ", involvesData)
 
-	jobinfos := model.JOB{
-		Workspace: params.Workspace,
-		Cluster:   params.Cluster,
-		// Project:        params.Project,
-		Name:           common.InterfaceToString(common.FindData(getData, "metadata", "name")),
-		Namespace:      common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
-		Lable:          common.FindData(getData, "metadata", "labels"),
-		Annotations:    common.FindData(getData, "metadata", "annotations"),
-		Kind:           common.InterfaceToString(common.FindData(getData, "kind", "")),
-		OwnerReference: ownerReferencesInfo,
-		BackoffLimit:   common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "backoffLimit"))),
-		Completions:    common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "completions"))),
-		Parallelism:    common.StringToInt(common.InterfaceToString(common.FindData(getData, "spe", "parallelism"))),
-		Status:         common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "succeeded"))),
-		CreationTime:   common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+	var durationTime time.Duration
+
+	var succeeded string
+	if common.InterfaceToString(common.FindData(getData, "status", "succeeded")) != "" {
+		succeeded = common.InterfaceToString(common.FindData(getData, "status", "succeeded"))
+		durationTime = common.InterfaceToTime(common.FindData(getData, "status", "completionTime")).Sub(common.InterfaceToTime(common.FindData(getData, "status", "startTime")))
+	} else {
+		durationTime = time.Now().Sub(common.InterfaceToTime(common.FindData(getData, "status", "startTime")))
+		succeeded = "0"
+	}
+	jobInfo := model.JOB{
+		Name:         common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+		Namespace:    common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
+		Workspace:    common.InterfaceToString(common.FindData(getData, "workspaceName", "")),
+		Cluster:      common.InterfaceToString(common.FindData(getData, "clusterName", "")),
+		Completions:  succeeded + "/" + common.InterfaceToString(common.FindData(getData, "spec", "completions")),
+		Duration:     durationTime.Seconds(),
+		CreationTime: common.InterfaceToTime(common.FindData(getData, "status", "completionTime")),
+	}
+
+	jobDetail := model.JOB_DETAL{
+		Lable:       common.FindData(getData, "metadata", "labels"),
+		Annotations: common.FindData(getData, "metadata", "annotations"),
+		// Kind:           common.InterfaceToString(common.FindData(getData, "kind", "")),
+		BackoffLimit: common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "backoffLimit"))),
+		Parallelism:  common.StringToInt(common.InterfaceToString(common.FindData(getData, "spe", "parallelism"))),
+		Status:       common.StringToInt(common.InterfaceToString(common.FindData(getData, "status", "succeeded"))),
+		// CreationTime:   common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		StartTime:      common.InterfaceToTime(common.FindData(getData, "status", "startTime")),
 		CompletionTime: common.InterfaceToTime(common.FindData(getData, "status", "completionTime")),
 		Conditions:     conditionInfo,
 		Containers:     containerInfo,
 		Events:         getCallEvent(params),
 	}
+	jobDetail.JOB = jobInfo
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data":     jobinfos,
+		"data":     jobDetail,
 		"involves": involvesData,
 	})
 }
@@ -99,15 +120,27 @@ func GetAllJobs(c echo.Context) error {
 	}
 	data := GetModelList(params)
 	fmt.Printf("####data confirm : %s", data)
-	
+
 	for i, _ := range data {
+		var durationTime time.Duration
+
+		var succeeded string
+		if common.InterfaceToString(common.FindData(data[i], "status", "succeeded")) != "" {
+			succeeded = common.InterfaceToString(common.FindData(data[i], "status", "succeeded"))
+			durationTime = common.InterfaceToTime(common.FindData(data[i], "status", "completionTime")).Sub(common.InterfaceToTime(common.FindData(data[i], "status", "startTime")))
+		} else {
+			durationTime = time.Now().Sub(common.InterfaceToTime(common.FindData(data[i], "status", "startTime")))
+			succeeded = "0"
+		}
 		job := model.JOB{
-			Name:           common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			Namespace:      common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			Workspace:  common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
-			Cluster:        common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-			Status:         common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "succeeded"))),
-			CompletionTime: common.InterfaceToTime(common.FindData(data[i], "status", "completionTime")),
+			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			Namespace:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			Workspace:   common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
+			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Completions: succeeded + "/" + common.InterfaceToString(common.FindData(data[i], "spec", "completions")),
+			Duration:    durationTime.Seconds(),
+			// Status:         common.StringToInt(common.InterfaceToString(common.FindData(data[i], "status", "succeeded"))),
+			CreationTime: common.InterfaceToTime(common.FindData(data[i], "status", "completionTime")),
 		}
 		jobs = append(jobs, job)
 	}

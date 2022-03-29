@@ -26,10 +26,13 @@ func GetDeployment(c echo.Context) (err error) {
 	project := GetDBProject(params)
 	params.Name = deploymentName
 	getData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
+	if err != nil ||  common.InterfaceToString(common.FindData(getData, "status", "")) =="Failure"{		
+				msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+			return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+			
+				})
+			}
 	getData0 := common.FindData(getData, "", "")
 	var Deployment model.Deployment
 	common.Transcode(getData0, &Deployment)

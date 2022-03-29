@@ -28,10 +28,17 @@ func GetPods(c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	getData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
+	// if err != nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, err)
+	// 	return nil
+	// }
+if err != nil ||  common.InterfaceToString(common.FindData(getData, "status", "")) =="Failure"{		
+				msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+			return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+			
+				})
+			}
 
 	ownerReferencesData := common.FindData(getData, "metadata", "ownerReferences")
 	var ownerReferencesInfo []model.OwnerReference
@@ -116,6 +123,7 @@ func GetAllPods(c echo.Context) error {
 			Name:              common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:         common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
 			Cluster:           common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Workspace:           common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
 			CreationTimestamp: common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Status:            common.InterfaceToString(common.FindData(data[i], "status", "phase")),
 			NodeName:          common.InterfaceToString(common.FindData(data[i], "spec", "nodeName")),

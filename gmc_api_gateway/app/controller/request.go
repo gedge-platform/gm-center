@@ -261,23 +261,6 @@ func UpdateRequest(c echo.Context) (err error) {
 	})	
 }
 
-func UpdateRequest2(c echo.Context) (err error) {
-	// fmt.Println(c)
-	// return c.JSON(http.StatusOK, echo.Map{
-	// 	"status": http.StatusOK,
-	// 	"data": c,
-	// })	
-	 params2 := make(map[string]interface{})
-	 if err = c.Bind(&params2); err != nil {
-		common.ErrorMsg(c, http.StatusBadRequest, err)
-		fmt.Println(err)
-		return nil
-	}
-	fmt.Println("★  ★  ★  ★  ★  ★  ★  ★  ")
-	fmt.Println(params2)
-    return c.JSON(http.StatusOK, params2)
-}
-
 func StringToInterface(i string) interface{} {
 	var x interface{}
 	if err := json.Unmarshal([]byte(i), &x); err != nil {

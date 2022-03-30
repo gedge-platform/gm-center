@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -29,6 +30,9 @@ func GetProjectDB(name string) *mongo.Collection {
 
 func CreateProject(c echo.Context) (err error) {
 	cdb := GetProjectDB("project")
+	cdb2 := GetProjectDB("member")
+	cdb3 := GetProjectDB("workspace")
+	cdb4 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := new(model.Project)
@@ -37,6 +41,29 @@ func CreateProject(c echo.Context) (err error) {
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
+	}
+
+	memberObjectId,err:= cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+	workspaceObjectId,err:= cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
+
+	var clusterObjectId3 *mongo.Cursor
+	var clusterObjectId2 []bson.D
+	var slice []primitive.ObjectID
+	
+	for i := 0; i < len(models.ClusterName); i++ {
+		clusterObjectId3,_ = cdb4.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3.All(ctx, &clusterObjectId2)
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+	}
+
+	var memberObjectId2 []bson.D
+	var workspaceObjectId2 []bson.D
+
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+		log.Fatal(err)
+	}
+	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
+		log.Fatal(err)
 	}
 
 	if err = validate.Struct(models); err != nil {
@@ -51,7 +78,18 @@ func CreateProject(c echo.Context) (err error) {
 		log.Fatal(err)
 	}
 
-	result, err := cdb.InsertOne(ctx, models)
+	newRequest := model.NewProject{
+		Name : models.Name,
+		Description : models.Description,
+		Type : models.Type,
+		Owner : memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Creator : memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Created_at : models.Created_at,
+		Workspace: workspaceObjectId2[0][0].Value.(primitive.ObjectID),
+		Selectcluster : slice,
+	}
+
+	result, err := cdb.InsertOne(ctx, newRequest)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil
@@ -73,7 +111,7 @@ func ListProject(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster.cluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
 		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
 
 		showProjectCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace})
@@ -106,7 +144,7 @@ func FindProject(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster.cluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
 		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
 		matchCluster := bson.D{
 			{Key: "$match", Value: bson.D{

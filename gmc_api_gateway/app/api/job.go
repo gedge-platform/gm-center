@@ -87,7 +87,7 @@ func GetJobs(c echo.Context) error {
 		StartTime:      common.InterfaceToTime(common.FindData(getData, "status", "startTime")),
 		CompletionTime: common.InterfaceToTime(common.FindData(getData, "status", "completionTime")),
 		Conditions:     conditionInfo,
-		Containers:     containerInfo,
+		Containers:     common.FindData(getData, "spec.template.spec", "containers"),
 		Events:         getCallEvent(params),
 	}
 	jobDetail.JOB = jobInfo

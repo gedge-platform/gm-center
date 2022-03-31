@@ -350,6 +350,7 @@ func GetSystemProjects(c echo.Context) (err error) {
 			}
 
 		}
+		// fmt.Printf("####sdfsfsefse:%+v", Projects)
 		// var projectList []model.SYSTEMPROJECT
 		// for k := range projects {
 		// 	for i := range Projects {
@@ -387,29 +388,40 @@ func GetSystemProjects(c echo.Context) (err error) {
 			projects = append(projects, project)
 		}
 	}
-	var projectsList []model.SYSTEMPROJECT
-	for p := range projects {
-		for i := range Projects {
-			if strings.Compare(Projects[i].Name, projects[p].Name) == 0 {
-				// projects = projects[:p+copy(projects[p:], projects[p+1:])]
-				projectsList = RemoveCopy(projects, p)
-			}
-		}
-	}
+
+	projectList := difference(Projects, projects)
+	fmt.Printf("##################test : %+v\n", difference(Projects, projects))
+
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": projectsList,
+		"data": projectList,
 	})
 
 }
-func RemoveCopy(slice []model.SYSTEMPROJECT, i int) []model.SYSTEMPROJECT {
-	copy(slice[i:], slice[i+1:])
-	return slice[:len(slice)-1]
+func difference(slice1 []model.Project, slice2 []model.SYSTEMPROJECT) []model.SYSTEMPROJECT {
+	var diff []model.SYSTEMPROJECT
+
+	// Loop two times, first to find slice1 strings not in slice2,
+	// second loop to find slice2 strings not in slice1
+	// for i := 0; i < 2; i++ {
+	for _, s1 := range slice2 {
+		found := false
+		for _, s2 := range slice1 {
+			if s1.Name == s2.Name {
+				found = true
+				break
+			}
+		}
+		// String not found. We add it to return slice
+		if !found {
+			diff = append(diff, s1)
+		}
+	}
+	// Swap the slices, only if it was the first loop
+	// }
+
+	return diff
 }
 
-// func remove(s []model.SYSTEMPROJECT, i int) []model.SYSTEMPROJECT {
-// 	s[i] = s[len(s)-1]
-// 	return s[:len(s)-1]
-// }
 func GetUserProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",

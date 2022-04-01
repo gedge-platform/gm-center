@@ -31,7 +31,6 @@ func GetRequestDB(name string) *mongo.Collection {
 
 func CreateRequest(c echo.Context) (err error) {
 	cdb := GetRequestDB("request")
-	// cdb2 := GetClusterDB("cluster")
 	cdb3 := GetClusterDB("workspace")
 	cdb4 := GetClusterDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -44,25 +43,17 @@ func CreateRequest(c echo.Context) (err error) {
 		return nil
 	}
 	
-	// clusterObjectId,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
 	workspaceObjectId,err:= cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 	projectObjectId,err:= cdb4.Find(ctx, bson.M{"projectName": models.ProjectName})
-	// var clusterObjectId2 []bson.D
 	var workspaceObjectId2 []bson.D
 	var projectObjectId2 []bson.D
 	
-	// if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
-	// 	log.Fatal(err)
-	// }
 	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
 		log.Fatal(err)
 	}
 	if err = projectObjectId.All(ctx, &projectObjectId2); err != nil{
 		log.Fatal(err)
 	}
-	// fmt.Println(clusterObjectId2[0][0].Value)
-	// fmt.Println(workspaceObjectId2[0][0].Value)
-	// fmt.Println(projectObjectId2[0][0].Value)	
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -89,7 +80,6 @@ func CreateRequest(c echo.Context) (err error) {
 		Project: projectObjectId2[0][0].Value.(primitive.ObjectID),
 	}
 
-	// result, err := cdb.InsertOne(ctx, models)
 	result, err := cdb.InsertOne(ctx, newRequest)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
@@ -121,7 +111,6 @@ func ListRequest(c echo.Context) (err error) {
 		if err = showProjectCursor.All(ctx, &showsRequest); err != nil {
 			panic(err)
 		}
-		// fmt.Println(showsRequest)
 	}
 
 	if err := cur.Err(); err != nil {
@@ -221,11 +210,6 @@ func UpdateRequest(c echo.Context) (err error) {
 		clusterObjectId3.All(ctx, &clusterObjectId2)
 		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
 	}
-
-	// if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(clusterObjectId2[0][0].Value)
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {

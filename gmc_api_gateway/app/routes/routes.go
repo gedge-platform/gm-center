@@ -54,11 +54,11 @@ func GEdgeRoute(e *echo.Echo) {
 	// 	userChk, _ := api.AuthenticateUser(id, password)
 	// 	return userChk, nil
 	// }))
-	r.GET("/members", c.ListMember)
-	r.GET("/members/:id", c.FindMember)
-	r.DELETE("/members/:id", c.DeleteMember)
 	r.POST("/members", c.CreateMember)
-	// r.PUT("/members/:id", c.UpdateMember)
+	r.GET("/members", c.ListMember)
+	r.GET("/members/:memberId", c.FindMember)
+	r.DELETE("/members/:memberId", c.DeleteMember)
+	r.PUT("/members/:memberId", c.UpdateMember)
 
 	r.POST("/workspace", c.CreateWorkspace)
 	r.GET("/workspace", c.ListWorkspace)
@@ -66,11 +66,11 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/workspace/:workspaceName", c.DeleteWorkspace)
 	r.PUT("/workspace/:workspaceName", c.UpdateWorkspace)
 
-
 	r.POST("/cluster", c.CreateCluster)
 	r.GET("/cluster", c.ListCluster)
 	r.GET("/cluster/:clusterName", c.FindCluster)
 	r.DELETE("/cluster/:clusterName", c.DeleteCluster)
+	r.PUT("/cluster/:clusterName", c.UpdateCluster)
 
 	r.POST("/project", c.CreateProject)
 	r.GET("/project", c.ListProject)

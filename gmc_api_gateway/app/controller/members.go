@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -93,7 +94,7 @@ func FindMember(c echo.Context) (err error) {
 	var member model.Member
 	cdb := GetDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("id")
+	search_val := c.Param("memberId")
 
 	if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&member); err != nil {
 		// common.ErrorMsg(c, http.StatusNotFound, err)
@@ -108,7 +109,7 @@ func FindMember(c echo.Context) (err error) {
 func DeleteMember(c echo.Context) (err error) {
 	cdb := GetDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("id")
+	search_val := c.Param("memberId")
 
 	result, err := cdb.DeleteOne(ctx, bson.M{"memberId": search_val})
 	if err != nil {
@@ -126,40 +127,53 @@ func DeleteMember(c echo.Context) (err error) {
 	}
 }
 
-// func UpdateMember(c echo.Context) (err error) {
-// 	cdb := GetDB("member")
-// 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+func UpdateMember(c echo.Context) (err error) {
+	cdb := GetDB("member")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := c.Param("memberId")
 
-// 	models := new(model.Member)
+	models := new(model.RequestMember)
+	validate := validator.New()
 
-// 	if err = c.Bind(models); err != nil {
-// 		common.ErrorMsg(c, http.StatusBadRequest, err)
-// 		return nil
-// 	}
+	if err = c.Bind(models); err != nil {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return nil
+	}
 
-// 	if err = c.Validate(models); err != nil {
-// 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
-// 		return nil
-// 	}
+	if err = validate.Struct(models); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Println(err)
+		}
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return
+	}
 
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	search_val := c.Param("id")
+	var update primitive.M
+	// switch models.조건{
+	// case nil :
+		// update = bson.M{"memberName": models.Name, "email": models.Email, "password":models.Password, "contact": models.Contact, "memberRole": models.RoleName}
+	// default :
+	    update = bson.M{"memberName": models.Name, "email": models.Email, "password":models.Password, "contact": models.Contact, "memberRole": models.RoleName}
+	// }
 
-// 	result, err := cdb.UpdateOne(ctx, bson.M{"memberId": search_val})
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
-// 		return
-// 	}
-// 	if result.DeletedCount == 0 {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Member not found."))
-// 		return
-// 	} else {
-// 		return c.JSON(http.StatusOK, echo.Map{
-// 			"status": http.StatusOK,
-// 			"data":   search_val + " Deleted",
-// 		})
-// 	}
-// }
+	result, err := cdb.UpdateOne(ctx, bson.M{"memberId": search_val}, bson.M{"$set": update})
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to update."))
+		return
+	}
+
+	if result.MatchedCount == 1 {
+		if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&cdb); err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Member."))
+			return nil
+		}
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"status": http.StatusOK,
+		"data":   search_val + " Updated Complete",
+	})	
+}

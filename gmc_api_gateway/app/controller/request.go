@@ -251,7 +251,7 @@ func UpdateRequest(c echo.Context) (err error) {
 	
 	if result.MatchedCount == 1 {
 		if err := cdb.FindOne(ctx, bson.M{"request_id": search_val}).Decode(&cdb); err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match request."))
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Request."))
 			return nil
 		}
 	}

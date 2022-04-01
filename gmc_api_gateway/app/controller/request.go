@@ -201,7 +201,7 @@ func DeleteRequest(c echo.Context) (err error) {
 
 func UpdateRequest(c echo.Context) (err error) {
 	cdb := GetRequestDB("request")
-	cdb2 := GetProjectDB("cluster")
+	cdb2 := GetRequestDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("requestId")
 

@@ -185,40 +185,71 @@ func DeleteWorkspace(c echo.Context) (err error) {
 	}
 }
 
-// func UpdateWorkspace(c echo.Context) (err error) {
-// 	cdb := GetWorkspaceDB("workspace")
-// 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+func UpdateWorkspace(c echo.Context) (err error) {
+	cdb := GetWorkspaceDB("workspace")
+	cdb2 := GetWorkspaceDB("cluster")
+	cdb3 := GetWorkspaceDB("member")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := c.Param("workspaceName")
 
-// 	models := new(model.Workspace)
+	models := new(model.RequestWorkspace)
+	validate := validator.New()
 
-// 	if err = c.Bind(models); err != nil {
-// 		common.ErrorMsg(c, http.StatusBadRequest, err)
-// 		return nil
-// 	}
+	if err = c.Bind(models); err != nil {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return nil
+	}
+	memberObjectId,err:= cdb3.Find(ctx, bson.M{"memberName": models.MemberName})
 
-// 	if err = c.Validate(models); err != nil {
-// 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
-// 		return nil
-// 	}
+	var clusterObjectId2 []bson.D
+	var clusterObjectId3 *mongo.Cursor
+	var memberObjectId2 []bson.D
+	var slice []primitive.ObjectID
 
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	for i := 0; i < len(models.ClusterName); i++ {
+		clusterObjectId3,_ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3.All(ctx, &clusterObjectId2)
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+	}
 
-// 	search_val := c.Param("id")
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+		log.Fatal(err)
+	}
 
-// 	result, err := cdb.UpdateOne(ctx, bson.M{"workspaceId": search_val})
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
-// 		return
-// 	}
-// 	if result.DeletedCount == 0 {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
-// 		return
-// 	} else {
-// 		return c.JSON(http.StatusOK, echo.Map{
-// 			"status": http.StatusOK,
-// 			"data":   search_val + " Deleted",
-// 		})
-// 	}
-// }
+	if err = validate.Struct(models); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Println(err)
+		}
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var update primitive.M
+	// switch models.조건{
+	// case nil :
+		// update = bson.M{"workspaceOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceDescription": models.Description, "selectCluster":slice}
+	// default :
+	    update = bson.M{"workspaceOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceDescription": models.Description, "selectCluster":slice}
+	// }
+
+	result, err := cdb.UpdateOne(ctx, bson.M{"workspaceName": search_val}, bson.M{"$set": update})
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to update."))
+		return
+	}
+
+	if result.MatchedCount == 1 {
+		if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&cdb); err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Project."))
+			return nil
+		}
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"status": http.StatusOK,
+		"data":   search_val + " Updated Complete",
+	})	
+}

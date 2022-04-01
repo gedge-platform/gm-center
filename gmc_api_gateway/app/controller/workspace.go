@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -29,6 +30,8 @@ func GetWorkspaceDB(name string) *mongo.Collection {
 
 func CreateWorkspace(c echo.Context) (err error) {
 	cdb := GetWorkspaceDB("workspace")
+	cdb2 := GetProjectDB("member")
+	cdb3 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := new(model.Workspace)
@@ -37,6 +40,23 @@ func CreateWorkspace(c echo.Context) (err error) {
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
+	}
+
+	memberObjectId,err:= cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+
+	var clusterObjectId2 []bson.D
+	var clusterObjectId3 *mongo.Cursor
+	var memberObjectId2 []bson.D
+	var slice []primitive.ObjectID
+	
+	for i := 0; i < len(models.ClusterName); i++ {
+		clusterObjectId3,_ = cdb3.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3.All(ctx, &clusterObjectId2)
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+	}
+
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+		log.Fatal(err)
 	}
 
 	if err = validate.Struct(models); err != nil {
@@ -50,7 +70,15 @@ func CreateWorkspace(c echo.Context) (err error) {
 		log.Fatal(err)
 	}
 
-	result, err := cdb.InsertOne(ctx, models)
+	newWorkspace := model.NewWorkspace{
+		Name : models.Name,
+		Description : models.Description,
+		Owner : memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Creator : memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Selectcluster : slice,
+	}
+
+	result, err := cdb.InsertOne(ctx, newWorkspace)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil
@@ -72,7 +100,7 @@ func ListWorkspace(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster.cluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
 		
 		fmt.Println("ttt : ", mongo.Pipeline{lookupCluster})
 		showWorkspaceCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster})
@@ -106,7 +134,7 @@ func FindWorkspace(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster.cluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
 		matchCluster := bson.D{
 			{Key: "$match", Value: bson.D{
 				{Key: "workspaceName", Value: search_val},

@@ -74,6 +74,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/project", c.ListProject)
 	r.GET("/project/:projectName", c.FindProject)
 	r.DELETE("/project/:projectName", c.DeleteProject)
+	r.PUT("/project/:projectName", c.UpdateProject)
 
 	
 	r.POST("/request", c.CreateRequest)

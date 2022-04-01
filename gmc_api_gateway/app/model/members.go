@@ -30,11 +30,6 @@ type RequestMember struct {
 	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
 }
 
-// type MemberWithPassword struct {
-// 	Member
-// 	Password string `json:"password" bson:"password, omitempty"`
-// }
-
 func (m *Member) Enable() {
 	m.Enabled = 1
 }

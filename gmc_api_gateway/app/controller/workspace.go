@@ -108,7 +108,6 @@ func ListWorkspace(c echo.Context) (err error) {
 		if err = showWorkspaceCursor.All(ctx, &showsWorkspace); err != nil {
 			panic(err)
 		}
-		// fmt.Println(showsWorkspace)
 	}
 
 	if err := cur.Err(); err != nil {
@@ -161,7 +160,6 @@ func FindWorkspace(c echo.Context) (err error) {
 	} else {
 		return c.JSON(http.StatusOK, showsWorkspace)
 	}
-	// return c.JSON(http.StatusOK, showsWorkspace)
 }
 
 func DeleteWorkspace(c echo.Context) (err error) {

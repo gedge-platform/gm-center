@@ -65,7 +65,6 @@ func ListMember(c echo.Context) (err error) {
 	cdb := GetDB("member")
 
 	findOptions := options.Find()
-	// findOptions.SetLimit(5)
 
 	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
 	if err != nil {
@@ -97,7 +96,6 @@ func FindMember(c echo.Context) (err error) {
 	search_val := c.Param("memberId")
 
 	if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&member); err != nil {
-		// common.ErrorMsg(c, http.StatusNotFound, err)
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Member not found."))
 		return nil
 	} else {

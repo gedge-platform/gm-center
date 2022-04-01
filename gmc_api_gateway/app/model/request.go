@@ -9,9 +9,9 @@ type Request struct {
 	Id 			string             `json:"request_id,omitempty" bson:"request_id" validate:"required"`
 	Status      string             `json:"status,omitempty" bson:"status"`
 	Message     string             `json:"message,omitempty" bson:"message"`
-	WorkspaceName   string `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
+	WorkspaceName   string 		   `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
 	Workspace   primitive.ObjectID `json:"workspace,omitempty" bson:"workspace"`
-	ProjectName     string `json:"projectName,omitempty" bson:"projectName" validate:"required"`
+	ProjectName     string 		   `json:"projectName,omitempty" bson:"projectName" validate:"required"`
 	Project     primitive.ObjectID `json:"project,omitempty" bson:"project"`
 	Date        primitive.DateTime `json:"date,omitempty" bson:"date" validate:"required"`
 	ClusterName string 			   `json:"clusterName,omitempty" bson:"clusterName"`
@@ -29,8 +29,8 @@ type RequestUpdate struct {
 	Workspace   primitive.ObjectID `json:"workspace,omitempty" bson:"workspace"`
 	Project     primitive.ObjectID `json:"project,omitempty" bson:"project"`
 	Date        primitive.DateTime `json:"date,omitempty" bson:"date"`
-	Code int 			   `json:"code,omitempty" bson:"code"`
-	ClusterName []string 			   `json:"cluster_name,omitempty" bson:"cluster_name"`
+	Code 		int 			   `json:"code,omitempty" bson:"code"`
+	ClusterName []string 		   `json:"cluster_name,omitempty" bson:"cluster_name"`
 	Cluster     []primitive.ObjectID `json:"cluster,omitempty" bson:"cluster"`
 	Name        string             `json:"name,omitempty" bson:"name"`
 	Reason      string             `json:"reason,omitempty" bson:"reason"`

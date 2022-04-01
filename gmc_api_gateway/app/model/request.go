@@ -30,8 +30,8 @@ type RequestUpdate struct {
 	Project     primitive.ObjectID `json:"project,omitempty" bson:"project"`
 	Date        primitive.DateTime `json:"date,omitempty" bson:"date"`
 	Code 		int 			   `json:"code,omitempty" bson:"code"`
-	ClusterName []string 		   `json:"cluster_name,omitempty" bson:"cluster_name"`
-	Cluster     []primitive.ObjectID `json:"cluster,omitempty" bson:"cluster"`
+	ClusterName string 		       `json:"cluster_name,omitempty" bson:"cluster_name"`
+	Cluster     primitive.ObjectID `json:"cluster,omitempty" bson:"cluster"`
 	Name        string             `json:"name,omitempty" bson:"name"`
 	Reason      string             `json:"reason,omitempty" bson:"reason"`
 	Type        string             `json:"type,omitempty" bson:"type"`

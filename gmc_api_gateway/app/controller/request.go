@@ -31,6 +31,7 @@ func GetRequestDB(name string) *mongo.Collection {
 
 func CreateRequest(c echo.Context) (err error) {
 	cdb := GetRequestDB("request")
+	// cdb2 := GetClusterDB("cluster")
 	cdb3 := GetClusterDB("workspace")
 	cdb4 := GetClusterDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -43,17 +44,25 @@ func CreateRequest(c echo.Context) (err error) {
 		return nil
 	}
 	
+	// clusterObjectId,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
 	workspaceObjectId,err:= cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 	projectObjectId,err:= cdb4.Find(ctx, bson.M{"projectName": models.ProjectName})
+	// var clusterObjectId2 []bson.D
 	var workspaceObjectId2 []bson.D
 	var projectObjectId2 []bson.D
 	
+	// if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
+	// 	log.Fatal(err)
+	// }
 	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
 		log.Fatal(err)
 	}
 	if err = projectObjectId.All(ctx, &projectObjectId2); err != nil{
 		log.Fatal(err)
 	}
+	// fmt.Println(clusterObjectId2[0][0].Value)
+	// fmt.Println(workspaceObjectId2[0][0].Value)
+	// fmt.Println(projectObjectId2[0][0].Value)	
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -80,6 +89,7 @@ func CreateRequest(c echo.Context) (err error) {
 		Project: projectObjectId2[0][0].Value.(primitive.ObjectID),
 	}
 
+	// result, err := cdb.InsertOne(ctx, models)
 	result, err := cdb.InsertOne(ctx, newRequest)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
@@ -111,6 +121,7 @@ func ListRequest(c echo.Context) (err error) {
 		if err = showProjectCursor.All(ctx, &showsRequest); err != nil {
 			panic(err)
 		}
+		// fmt.Println(showsRequest)
 	}
 
 	if err := cur.Err(); err != nil {
@@ -141,7 +152,7 @@ func FindRequest(c echo.Context) (err error) {
 		lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "project"}}}}
 		matchCluster := bson.D{
 			{Key: "$match", Value: bson.D{
-				{Key: "request_id", Value: search_val},
+				{Key: "requestId", Value: search_val},
 			}},
 		}
 
@@ -172,7 +183,7 @@ func DeleteRequest(c echo.Context) (err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("requestId")
 
-	result, err := cdb.DeleteOne(ctx, bson.M{"request_id": search_val})
+	result, err := cdb.DeleteOne(ctx, bson.M{"requestId": search_val})
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
 		return
@@ -190,7 +201,7 @@ func DeleteRequest(c echo.Context) (err error) {
 
 func UpdateRequest(c echo.Context) (err error) {
 	cdb := GetRequestDB("request")
-	cdb2 := GetProjectDB("cluster")
+	cdb2 := GetRequestDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("requestId")
 
@@ -202,14 +213,13 @@ func UpdateRequest(c echo.Context) (err error) {
 		return nil
 	}
 	var clusterObjectId2 []bson.D
-	var clusterObjectId3 *mongo.Cursor
-	var slice []primitive.ObjectID
 
-	for i := 0; i < len(models.ClusterName); i++ {
-		clusterObjectId3,_ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
-		clusterObjectId3.All(ctx, &clusterObjectId2)
-		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+	clusterObjectId,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
+
+	if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
+		log.Fatal(err)
 	}
+	// fmt.Println(clusterObjectId2[0][0].Value)
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -225,10 +235,10 @@ func UpdateRequest(c echo.Context) (err error) {
 
 	var update primitive.M
 	switch models.ClusterName{
-	case nil :
+	case "" :
 		update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date}
 	default :
-	    update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date, "code": models.Code, "cluster":slice}
+	    update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date, "code": models.Code, "cluster":clusterObjectId2[0][0].Value.(primitive.ObjectID)}
 	}
 
 	fmt.Println(update)
@@ -238,9 +248,6 @@ func UpdateRequest(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to update."))
 		return
 	}
-	fmt.Println(result)
-	fmt.Println(result.MatchedCount)
-	fmt.Println(bson.M{"request_id": search_val})
 	
 	if result.MatchedCount == 1 {
 		if err := cdb.FindOne(ctx, bson.M{"request_id": search_val}).Decode(&cdb); err != nil {

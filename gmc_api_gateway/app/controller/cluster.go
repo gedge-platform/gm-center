@@ -96,7 +96,6 @@ func FindCluster(c echo.Context) (err error) {
 	search_val := c.Param("clusterName")
 
 	if err := cdb.FindOne(ctx, bson.M{"clusterName": search_val}).Decode(&cluster); err != nil {
-		// common.ErrorMsg(c, http.StatusNotFound, err)
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
 		return nil
 	} else {
@@ -153,7 +152,7 @@ func UpdateCluster(c echo.Context) (err error) {
 	var update primitive.M
 	// switch models.조건{
 	// case nil :
-		// update = bson.M{"clusterName": models.Name, "clusterEndpoint": models.Endpoint, "clusterType":models.Type, "token": models.Token}
+		// update = bson.M{"clusterEndpoint": models.Endpoint, "clusterType":models.Type, "token": models.Token}
 	// default :
 	    update = bson.M{"clusterEndpoint": models.Endpoint, "clusterType":models.Type, "token": models.Token}
 	// }

@@ -16,6 +16,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -124,40 +125,53 @@ func DeleteCluster(c echo.Context) (err error) {
 	}
 }
 
-// func UpdateCluster(c echo.Context) (err error) {
-// 	cdb := GetClusterDB("cluster")
-// 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+func UpdateCluster(c echo.Context) (err error) {
+	cdb := GetClusterDB("cluster")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := c.Param("clusterName")
 
-// 	models := new(model.Cluster)
+	models := new(model.RequestCluster)
+	validate := validator.New()
 
-// 	if err = c.Bind(models); err != nil {
-// 		common.ErrorMsg(c, http.StatusBadRequest, err)
-// 		return nil
-// 	}
+	if err = c.Bind(models); err != nil {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return nil
+	}
 
-// 	if err = c.Validate(models); err != nil {
-// 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
-// 		return nil
-// 	}
+	if err = validate.Struct(models); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Println(err)
+		}
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return
+	}
 
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	if err != nil {
+		log.Fatal(err)
+	}
 
-// 	search_val := c.Param("id")
+	var update primitive.M
+	// switch models.조건{
+	// case nil :
+		// update = bson.M{"clusterName": models.Name, "clusterEndpoint": models.Endpoint, "clusterType":models.Type, "token": models.Token}
+	// default :
+	    update = bson.M{"clusterEndpoint": models.Endpoint, "clusterType":models.Type, "token": models.Token}
+	// }
 
-// 	result, err := cdb.UpdateOne(ctx, bson.M{"clusterId": search_val})
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
-// 		return
-// 	}
-// 	if result.DeletedCount == 0 {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
-// 		return
-// 	} else {
-// 		return c.JSON(http.StatusOK, echo.Map{
-// 			"status": http.StatusOK,
-// 			"data":   search_val + " Deleted",
-// 		})
-// 	}
-// }
+	result, err := cdb.UpdateOne(ctx, bson.M{"clusterName": search_val}, bson.M{"$set": update})
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to update."))
+		return
+	}
+
+	if result.MatchedCount == 1 {
+		if err := cdb.FindOne(ctx, bson.M{"clusterName": search_val}).Decode(&cdb); err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Cluster."))
+			return nil
+		}
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"status": http.StatusOK,
+		"data":   search_val + " Updated Complete",
+	})	
+}

@@ -168,7 +168,7 @@ func UpdateMember(c echo.Context) (err error) {
 
 	if result.MatchedCount == 1 {
 		if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&cdb); err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Project."))
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Member."))
 			return nil
 		}
 	}

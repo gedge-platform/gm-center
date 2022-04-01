@@ -152,7 +152,7 @@ func FindRequest(c echo.Context) (err error) {
 		lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "project"}}}}
 		matchCluster := bson.D{
 			{Key: "$match", Value: bson.D{
-				{Key: "requestId", Value: search_val},
+				{Key: "request_id", Value: search_val},
 			}},
 		}
 
@@ -183,7 +183,7 @@ func DeleteRequest(c echo.Context) (err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("requestId")
 
-	result, err := cdb.DeleteOne(ctx, bson.M{"requestId": search_val})
+	result, err := cdb.DeleteOne(ctx, bson.M{"request_id": search_val})
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
 		return
@@ -213,12 +213,18 @@ func UpdateRequest(c echo.Context) (err error) {
 		return nil
 	}
 	var clusterObjectId2 []bson.D
+	var clusterObjectId3 *mongo.Cursor
+	var slice []primitive.ObjectID
 
-	clusterObjectId,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
-
-	if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
-		log.Fatal(err)
+	for i := 0; i < len(models.ClusterName); i++ {
+		clusterObjectId3,_ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3.All(ctx, &clusterObjectId2)
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
 	}
+
+	// if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
+	// 	log.Fatal(err)
+	// }
 	// fmt.Println(clusterObjectId2[0][0].Value)
 
 	if err = validate.Struct(models); err != nil {
@@ -235,10 +241,10 @@ func UpdateRequest(c echo.Context) (err error) {
 
 	var update primitive.M
 	switch models.ClusterName{
-	case "" :
+	case nil :
 		update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date}
 	default :
-	    update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date, "code": models.Code, "cluster":clusterObjectId2[0][0].Value.(primitive.ObjectID)}
+	    update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date, "code": models.Code, "cluster":slice}
 	}
 
 	fmt.Println(update)
@@ -248,6 +254,9 @@ func UpdateRequest(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to update."))
 		return
 	}
+	fmt.Println(result)
+	fmt.Println(result.MatchedCount)
+	fmt.Println(bson.M{"request_id": search_val})
 	
 	if result.MatchedCount == 1 {
 		if err := cdb.FindOne(ctx, bson.M{"request_id": search_val}).Decode(&cdb); err != nil {

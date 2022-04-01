@@ -24,7 +24,6 @@ import (
 func GetProjectDB(name string) *mongo.Collection {
 	db := db.DbManager()
 	cdb := db.Collection(name)
-
 	return cdb
 }
 
@@ -46,8 +45,10 @@ func CreateProject(c echo.Context) (err error) {
 	memberObjectId,err:= cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
 	workspaceObjectId,err:= cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 
-	var clusterObjectId3 *mongo.Cursor
 	var clusterObjectId2 []bson.D
+	var clusterObjectId3 *mongo.Cursor
+	var memberObjectId2 []bson.D
+	var workspaceObjectId2 []bson.D
 	var slice []primitive.ObjectID
 	
 	for i := 0; i < len(models.ClusterName); i++ {
@@ -55,9 +56,6 @@ func CreateProject(c echo.Context) (err error) {
 		clusterObjectId3.All(ctx, &clusterObjectId2)
 		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
 	}
-
-	var memberObjectId2 []bson.D
-	var workspaceObjectId2 []bson.D
 
 	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
 		log.Fatal(err)
@@ -78,7 +76,7 @@ func CreateProject(c echo.Context) (err error) {
 		log.Fatal(err)
 	}
 
-	newRequest := model.NewProject{
+	newProject := model.NewProject{
 		Name : models.Name,
 		Description : models.Description,
 		Type : models.Type,
@@ -89,7 +87,7 @@ func CreateProject(c echo.Context) (err error) {
 		Selectcluster : slice,
 	}
 
-	result, err := cdb.InsertOne(ctx, newRequest)
+	result, err := cdb.InsertOne(ctx, newProject)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil
@@ -119,7 +117,6 @@ func ListProject(c echo.Context) (err error) {
 		if err = showProjectCursor.All(ctx, &showsProject); err != nil {
 			panic(err)
 		}
-		// fmt.Println(showsProject)
 	}
 	if err := cur.Err(); err != nil {
 		log.Fatal(err)
@@ -195,40 +192,77 @@ func DeleteProject(c echo.Context) (err error) {
 	}
 }
 
-// func UpdateProject(c echo.Context) (err error) {
-// 	cdb := GetProjectDB("project")
-// 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+func UpdateProject(c echo.Context) (err error) {
+	cdb := GetRequestDB("project")
+	cdb2 := GetProjectDB("cluster")
+	cdb3 := GetProjectDB("member")
+	cdb4 := GetProjectDB("workspace")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := c.Param("projectName")
 
-// 	models := new(model.Project)
+	models := new(model.RequestProject)
+	validate := validator.New()
 
-// 	if err = c.Bind(models); err != nil {
-// 		common.ErrorMsg(c, http.StatusBadRequest, err)
-// 		return nil
-// 	}
+	if err = c.Bind(models); err != nil {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
+		return nil
+	}
+	memberObjectId,err:= cdb3.Find(ctx, bson.M{"memberName": models.MemberName})
+	workspaceObjectId,err:= cdb4.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 
-// 	if err = c.Validate(models); err != nil {
-// 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
-// 		return nil
-// 	}
+	var clusterObjectId2 []bson.D
+	var clusterObjectId3 *mongo.Cursor
+	var memberObjectId2 []bson.D
+	var workspaceObjectId2 []bson.D
+	var slice []primitive.ObjectID
 
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	for i := 0; i < len(models.ClusterName); i++ {
+		clusterObjectId3,_ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3.All(ctx, &clusterObjectId2)
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+	}
 
-// 	search_val := c.Param("id")
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+		log.Fatal(err)
+	}
+	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
+		log.Fatal(err)
+	}
 
-// 	result, err := cdb.UpdateOne(ctx, bson.M{"projectId": search_val})
-// 	if err != nil {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
-// 		return
-// 	}
-// 	if result.DeletedCount == 0 {
-// 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Project not found."))
-// 		return
-// 	} else {
-// 		return c.JSON(http.StatusOK, echo.Map{
-// 			"status": http.StatusOK,
-// 			"data":   search_val + " Deleted",
-// 		})
-// 	}
-// }
+	if err = validate.Struct(models); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Println(err)
+		}
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var update primitive.M
+	// switch models.조건{
+	// case nil :
+		// update = bson.M{"workspace" : workspaceObjectId2[0][0].Value.(primitive.ObjectID),"projectOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectDescription": models.Description, "clusterName":slice}
+	// default :
+	    update = bson.M{"workspace" : workspaceObjectId2[0][0].Value.(primitive.ObjectID),"projectOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectDescription": models.Description, "clusterName":slice}
+	// }
+
+	result, err := cdb.UpdateOne(ctx, bson.M{"projectName": search_val}, bson.M{"$set": update})
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to update."))
+		return
+	}
+
+	if result.MatchedCount == 1 {
+		if err := cdb.FindOne(ctx, bson.M{"projectName": search_val}).Decode(&cdb); err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Project."))
+			return nil
+		}
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"status": http.StatusOK,
+		"data":   search_val + " Updated Complete",
+	})	
+}

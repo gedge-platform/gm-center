@@ -24,7 +24,6 @@ import (
 func GetProjectDB(name string) *mongo.Collection {
 	db := db.DbManager()
 	cdb := db.Collection(name)
-
 	return cdb
 }
 

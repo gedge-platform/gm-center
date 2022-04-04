@@ -19,4 +19,3 @@ type RequestCluster struct {
 	Name     string             `json:"clusterName,omitempty" bson:"clusterName"`
 	Token    string             `json:"token,omitempty" bson:"token"`
 }
-

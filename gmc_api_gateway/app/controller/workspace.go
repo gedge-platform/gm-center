@@ -42,20 +42,20 @@ func CreateWorkspace(c echo.Context) (err error) {
 		return nil
 	}
 
-	memberObjectId,err:= cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
 
 	var clusterObjectId2 []bson.D
 	var clusterObjectId3 *mongo.Cursor
 	var memberObjectId2 []bson.D
 	var slice []primitive.ObjectID
-	
+
 	for i := 0; i < len(models.ClusterName); i++ {
-		clusterObjectId3,_ = cdb3.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3, _ = cdb3.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
 		clusterObjectId3.All(ctx, &clusterObjectId2)
-		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))
 	}
 
-	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil {
 		log.Fatal(err)
 	}
 
@@ -71,11 +71,11 @@ func CreateWorkspace(c echo.Context) (err error) {
 	}
 
 	newWorkspace := model.NewWorkspace{
-		Name : models.Name,
-		Description : models.Description,
-		Owner : memberObjectId2[0][0].Value.(primitive.ObjectID),
-		Creator : memberObjectId2[0][0].Value.(primitive.ObjectID),
-		Selectcluster : slice,
+		Name:          models.Name,
+		Description:   models.Description,
+		Owner:         memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Selectcluster: slice,
 	}
 
 	result, err := cdb.InsertOne(ctx, newWorkspace)
@@ -101,7 +101,7 @@ func ListWorkspace(c echo.Context) (err error) {
 
 	for cur.Next(context.TODO()) {
 		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
-		
+
 		fmt.Println("ttt : ", mongo.Pipeline{lookupCluster})
 		showWorkspaceCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster})
 
@@ -197,7 +197,7 @@ func UpdateWorkspace(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-	memberObjectId,err:= cdb3.Find(ctx, bson.M{"memberName": models.MemberName})
+	memberObjectId, err := cdb3.Find(ctx, bson.M{"memberName": models.MemberName})
 
 	var clusterObjectId2 []bson.D
 	var clusterObjectId3 *mongo.Cursor
@@ -205,12 +205,12 @@ func UpdateWorkspace(c echo.Context) (err error) {
 	var slice []primitive.ObjectID
 
 	for i := 0; i < len(models.ClusterName); i++ {
-		clusterObjectId3,_ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3, _ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
 		clusterObjectId3.All(ctx, &clusterObjectId2)
-		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))
 	}
 
-	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil {
 		log.Fatal(err)
 	}
 
@@ -229,9 +229,9 @@ func UpdateWorkspace(c echo.Context) (err error) {
 	var update primitive.M
 	// switch models.조건{
 	// case nil :
-		// update = bson.M{"workspaceOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceDescription": models.Description, "selectCluster":slice}
+	// update = bson.M{"workspaceOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceDescription": models.Description, "selectCluster":slice}
 	// default :
-	    update = bson.M{"workspaceOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceDescription": models.Description, "selectCluster":slice}
+	update = bson.M{"workspaceOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "workspaceDescription": models.Description, "selectCluster": slice}
 	// }
 
 	result, err := cdb.UpdateOne(ctx, bson.M{"workspaceName": search_val}, bson.M{"$set": update})
@@ -249,5 +249,5 @@ func UpdateWorkspace(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"status": http.StatusOK,
 		"data":   search_val + " Updated Complete",
-	})	
+	})
 }

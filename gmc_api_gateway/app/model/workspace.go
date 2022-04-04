@@ -8,8 +8,8 @@ type Workspace struct {
 	_id           primitive.ObjectID  `json:"objectId,omitempty" bson:"_id"`
 	Name          string              `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
 	Description   string              `json:"workspaceDescription,omitempty" bson:"workspaceDescription" validate:"required"`
-	MemberName    string			  `json:"memberName,omitempty" bson:"memberName" validate:"required"`
-	ClusterName   []string  		  `json:"clusterName,omitempty" bson:"selectCluster2"`
+	MemberName    string              `json:"memberName,omitempty" bson:"memberName" validate:"required"`
+	ClusterName   []string            `json:"clusterName,omitempty" bson:"selectCluster2"`
 	Selectcluster []WorkspaceClusters `json:"selectCluster,omitempty" bson:"selectCluster"`
 }
 
@@ -23,8 +23,8 @@ type RequestWorkspace struct {
 	Description   string               `json:"workspaceDescription,omitempty" bson:"workspaceDescription"`
 	Owner         primitive.ObjectID   `json:"workspaceOwner,omitempty" bson:"workspaceOwner"`
 	Creator       primitive.ObjectID   `json:"workspaceCreator,omitempty" bson:"workspaceCreator"`
-	MemberName    string			   `json:"memberName,omitempty" bson:"memberName"`
-	ClusterName   []string  	   	   `json:"clusterName,omitempty" bson:"selectCluster2"`
+	MemberName    string               `json:"memberName,omitempty" bson:"memberName"`
+	ClusterName   []string             `json:"clusterName,omitempty" bson:"selectCluster2"`
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster"`
 }
 

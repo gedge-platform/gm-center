@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-
 func GEdgeRoute(e *echo.Echo) {
 
 	r := e.Group("/gmcapi/v2")

@@ -152,9 +152,9 @@ func UpdateCluster(c echo.Context) (err error) {
 	var update primitive.M
 	// switch models.조건{
 	// case nil :
-		// update = bson.M{"clusterEndpoint": models.Endpoint, "clusterType":models.Type, "token": models.Token}
+	// update = bson.M{"clusterEndpoint": models.Endpoint, "clusterType":models.Type, "token": models.Token}
 	// default :
-	    update = bson.M{"clusterEndpoint": models.Endpoint, "clusterType":models.Type, "token": models.Token}
+	update = bson.M{"clusterEndpoint": models.Endpoint, "clusterType": models.Type, "token": models.Token}
 	// }
 
 	result, err := cdb.UpdateOne(ctx, bson.M{"clusterName": search_val}, bson.M{"$set": update})
@@ -172,5 +172,5 @@ func UpdateCluster(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"status": http.StatusOK,
 		"data":   search_val + " Updated Complete",
-	})	
+	})
 }

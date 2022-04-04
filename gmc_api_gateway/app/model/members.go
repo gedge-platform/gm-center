@@ -11,7 +11,7 @@ type Member struct {
 	Password   string             `json:"password,omitempty" bson:"password" validate:"required,gte=0,lte=10"`
 	Email      string             `json:"email,omitempty" bson:"email" validate:"required,email"`
 	Contact    string             `json:"contact,omitempty" bson:"contact"`
-	Enabled    int                `json:"enabled,omitempty" bson:"enabled" validate:"gte=0,lte=1"`
+	Enabled    bool               `json:"enabled,omitempty" bson:"enabled"`
 	RoleName   string             `json:"memberRole,omitempty" bson:"memberRole"`
 	Created_at primitive.DateTime `json:"created_at,omitempty"`
 	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
@@ -24,16 +24,16 @@ type RequestMember struct {
 	Password   string             `json:"password,omitempty" bson:"password" validate:"gte=0,lte=10"`
 	Email      string             `json:"email,omitempty" bson:"email" validate:"email"`
 	Contact    string             `json:"contact,omitempty" bson:"contact"`
-	Enabled    int                `json:"enabled,omitempty" bson:"enabled" validate:"gte=0,lte=1"`
+	Enabled    bool               `json:"enabled,omitempty" bson:"enabled"`
 	RoleName   string             `json:"memberRole,omitempty" bson:"memberRole"`
 	Created_at primitive.DateTime `json:"created_at,omitempty"`
 	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
 }
 
-func (m *Member) Enable() {
-	m.Enabled = 1
-}
+// func (m *Member) Enable() {
+// 	m.Enabled = true
+// }
 
-func (m *Member) Disable() {
-	m.Enabled = 0
-}
+// func (m *Member) Disable() {
+// 	m.Enabled = false
+// }

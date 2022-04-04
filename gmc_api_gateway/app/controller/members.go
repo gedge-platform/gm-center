@@ -153,9 +153,9 @@ func UpdateMember(c echo.Context) (err error) {
 	var update primitive.M
 	// switch models.조건{
 	// case nil :
-		// update = bson.M{"memberName": models.Name, "email": models.Email, "password":models.Password, "contact": models.Contact, "memberRole": models.RoleName}
+	// update = bson.M{"memberName": models.Name, "email": models.Email, "password":models.Password, "contact": models.Contact, "memberRole": models.RoleName}
 	// default :
-	    update = bson.M{"memberName": models.Name, "email": models.Email, "password":models.Password, "contact": models.Contact, "memberRole": models.RoleName}
+	update = bson.M{"memberName": models.Name, "email": models.Email, "password": models.Password, "contact": models.Contact, "memberRole": models.RoleName}
 	// }
 
 	result, err := cdb.UpdateOne(ctx, bson.M{"memberId": search_val}, bson.M{"$set": update})
@@ -173,5 +173,5 @@ func UpdateMember(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"status": http.StatusOK,
 		"data":   search_val + " Updated Complete",
-	})	
+	})
 }

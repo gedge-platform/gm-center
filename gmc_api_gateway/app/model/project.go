@@ -11,8 +11,8 @@ type Project struct {
 	Type          string             `json:"projectType,omitempty" bson:"projectType" validate:"required"`
 	Owner         primitive.ObjectID `json:"projectOwner,omitempty" bson:"projectOwner"`
 	Creator       primitive.ObjectID `json:"projectCreator,omitempty" bson:"projectCreator"`
-	MemberName    string			 `json:"memberName,omitempty" bson:"memberName" validate:"required"`
-	WorkspaceName string			 `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
+	MemberName    string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`
+	WorkspaceName string             `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
 	Workspace     primitive.ObjectID `json:"workspace,omitempty" bson:"workspace"`
 	Selectcluster []ProjectClusters  `json:"selectCluster,omitempty" bson:"selectCluster"`
 	ClusterName   []string           `json:"clusterName,omitempty" bson:"selectCluster2"`
@@ -30,11 +30,11 @@ type RequestProject struct {
 	Type          string               `json:"projectType,omitempty" bson:"projectType"`
 	Owner         primitive.ObjectID   `json:"projectOwner,omitempty" bson:"projectOwner"`
 	Creator       primitive.ObjectID   `json:"projectCreator,omitempty" bson:"projectCreator"`
-	MemberName    string			   `json:"memberName,omitempty" bson:"memberName"`
-	WorkspaceName string			   `json:"workspaceName,omitempty" bson:"workspaceName"`
+	MemberName    string               `json:"memberName,omitempty" bson:"memberName"`
+	WorkspaceName string               `json:"workspaceName,omitempty" bson:"workspaceName"`
 	Workspace     primitive.ObjectID   `json:"workspace,omitempty" bson:"workspace"`
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster"`
-	ClusterName   []string 			   `json:"clusterName,omitempty" bson:"selectCluster2"`
+	ClusterName   []string             `json:"clusterName,omitempty" bson:"selectCluster2"`
 	Created_at    primitive.DateTime   `json:"created_at,omitempty"`
 }
 
@@ -49,5 +49,3 @@ type NewProject struct {
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster" validate:"required"`
 	Created_at    primitive.DateTime   `json:"created_at,omitempty"`
 }
-
-        

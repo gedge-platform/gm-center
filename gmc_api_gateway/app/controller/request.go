@@ -42,16 +42,16 @@ func CreateRequest(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-	
-	workspaceObjectId,err:= cdb2.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
-	projectObjectId,err:= cdb3.Find(ctx, bson.M{"projectName": models.ProjectName})
+
+	workspaceObjectId, err := cdb2.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
+	projectObjectId, err := cdb3.Find(ctx, bson.M{"projectName": models.ProjectName})
 	var workspaceObjectId2 []bson.D
 	var projectObjectId2 []bson.D
-	
-	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
+
+	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil {
 		log.Fatal(err)
 	}
-	if err = projectObjectId.All(ctx, &projectObjectId2); err != nil{
+	if err = projectObjectId.All(ctx, &projectObjectId2); err != nil {
 		log.Fatal(err)
 	}
 
@@ -68,16 +68,16 @@ func CreateRequest(c echo.Context) (err error) {
 	}
 
 	newRequest := model.NewRequest{
-		Id : models.Id,
-		Status : models.Status,
-		Message : models.Message,
-		Name : models.Name,
-		Reason : models.Reason,
-		Type : models.Type,
-		Date : models.Date,
-		Cluster: primitive.NewObjectID(),
+		Id:        models.Id,
+		Status:    models.Status,
+		Message:   models.Message,
+		Name:      models.Name,
+		Reason:    models.Reason,
+		Type:      models.Type,
+		Date:      models.Date,
+		Cluster:   primitive.NewObjectID(),
 		Workspace: workspaceObjectId2[0][0].Value.(primitive.ObjectID),
-		Project: projectObjectId2[0][0].Value.(primitive.ObjectID),
+		Project:   projectObjectId2[0][0].Value.(primitive.ObjectID),
 	}
 
 	result, err := cdb.InsertOne(ctx, newRequest)
@@ -203,9 +203,9 @@ func UpdateRequest(c echo.Context) (err error) {
 	}
 	var clusterObjectId2 []bson.D
 
-	clusterObjectId,err:= cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
+	clusterObjectId, err := cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName})
 
-	if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil{
+	if err = clusterObjectId.All(ctx, &clusterObjectId2); err != nil {
 		log.Fatal(err)
 	}
 
@@ -222,11 +222,11 @@ func UpdateRequest(c echo.Context) (err error) {
 	}
 
 	var update primitive.M
-	switch models.ClusterName{
-	case "" :
-		update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date}
-	default :
-	    update = bson.M{"status": models.Status, "reason": models.Reason, "date":models.Date, "code": models.Code, "cluster":clusterObjectId2[0][0].Value.(primitive.ObjectID)}
+	switch models.ClusterName {
+	case "":
+		update = bson.M{"status": models.Status, "reason": models.Reason, "date": models.Date}
+	default:
+		update = bson.M{"status": models.Status, "reason": models.Reason, "date": models.Date, "code": models.Code, "cluster": clusterObjectId2[0][0].Value.(primitive.ObjectID)}
 	}
 
 	fmt.Println(update)
@@ -236,7 +236,7 @@ func UpdateRequest(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to update."))
 		return
 	}
-	
+
 	if result.MatchedCount == 1 {
 		if err := cdb.FindOne(ctx, bson.M{"request_id": search_val}).Decode(&cdb); err != nil {
 			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Request."))
@@ -246,7 +246,7 @@ func UpdateRequest(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"status": http.StatusOK,
 		"data":   search_val + " Updated Complete",
-	})	
+	})
 }
 
 func StringToInterface(i string) interface{} {

@@ -42,25 +42,25 @@ func CreateProject(c echo.Context) (err error) {
 		return nil
 	}
 
-	memberObjectId,err:= cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
-	workspaceObjectId,err:= cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
+	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+	workspaceObjectId, err := cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 
 	var clusterObjectId2 []bson.D
 	var clusterObjectId3 *mongo.Cursor
 	var memberObjectId2 []bson.D
 	var workspaceObjectId2 []bson.D
 	var slice []primitive.ObjectID
-	
+
 	for i := 0; i < len(models.ClusterName); i++ {
-		clusterObjectId3,_ = cdb4.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3, _ = cdb4.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
 		clusterObjectId3.All(ctx, &clusterObjectId2)
-		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))
 	}
 
-	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil {
 		log.Fatal(err)
 	}
-	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
+	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil {
 		log.Fatal(err)
 	}
 
@@ -77,14 +77,14 @@ func CreateProject(c echo.Context) (err error) {
 	}
 
 	newProject := model.NewProject{
-		Name : models.Name,
-		Description : models.Description,
-		Type : models.Type,
-		Owner : memberObjectId2[0][0].Value.(primitive.ObjectID),
-		Creator : memberObjectId2[0][0].Value.(primitive.ObjectID),
-		Created_at : models.Created_at,
-		Workspace: workspaceObjectId2[0][0].Value.(primitive.ObjectID),
-		Selectcluster : slice,
+		Name:          models.Name,
+		Description:   models.Description,
+		Type:          models.Type,
+		Owner:         memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),
+		Created_at:    models.Created_at,
+		Workspace:     workspaceObjectId2[0][0].Value.(primitive.ObjectID),
+		Selectcluster: slice,
 	}
 
 	result, err := cdb.InsertOne(ctx, newProject)
@@ -207,8 +207,8 @@ func UpdateProject(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-	memberObjectId,err:= cdb3.Find(ctx, bson.M{"memberName": models.MemberName})
-	workspaceObjectId,err:= cdb4.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
+	memberObjectId, err := cdb3.Find(ctx, bson.M{"memberName": models.MemberName})
+	workspaceObjectId, err := cdb4.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 
 	var clusterObjectId2 []bson.D
 	var clusterObjectId3 *mongo.Cursor
@@ -217,15 +217,15 @@ func UpdateProject(c echo.Context) (err error) {
 	var slice []primitive.ObjectID
 
 	for i := 0; i < len(models.ClusterName); i++ {
-		clusterObjectId3,_ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
+		clusterObjectId3, _ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
 		clusterObjectId3.All(ctx, &clusterObjectId2)
-		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))		
+		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))
 	}
 
-	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil{
+	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil {
 		log.Fatal(err)
 	}
-	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil{
+	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil {
 		log.Fatal(err)
 	}
 
@@ -244,9 +244,9 @@ func UpdateProject(c echo.Context) (err error) {
 	var update primitive.M
 	// switch models.조건{
 	// case nil :
-		// update = bson.M{"workspace" : workspaceObjectId2[0][0].Value.(primitive.ObjectID),"projectOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectDescription": models.Description, "selectCluster":slice}
+	// update = bson.M{"workspace" : workspaceObjectId2[0][0].Value.(primitive.ObjectID),"projectOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectDescription": models.Description, "selectCluster":slice}
 	// default :
-	    update = bson.M{"workspace" : workspaceObjectId2[0][0].Value.(primitive.ObjectID),"projectOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectDescription": models.Description, "selectCluster":slice}
+	update = bson.M{"workspace": workspaceObjectId2[0][0].Value.(primitive.ObjectID), "projectOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectDescription": models.Description, "selectCluster": slice}
 	// }
 
 	result, err := cdb.UpdateOne(ctx, bson.M{"projectName": search_val}, bson.M{"$set": update})
@@ -264,5 +264,5 @@ func UpdateProject(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"status": http.StatusOK,
 		"data":   search_val + " Updated Complete",
-	})	
+	})
 }

@@ -22,7 +22,7 @@ type RequestMember struct {
 	Id         string             `json:"memberId,omitempty" bson:"memberId"`
 	Name       string             `json:"memberName,omitempty" bson:"memberName"`
 	Password   string             `json:"password,omitempty" bson:"password" validate:"gte=0,lte=10"`
-	Email      string             `json:"email,omitempty" bson:"email" validate:"email"`
+	Email      string             `json:"email,omitempty" bson:"email"`
 	Contact    string             `json:"contact,omitempty" bson:"contact"`
 	Enabled    bool               `json:"enabled,omitempty" bson:"enabled"`
 	RoleName   string             `json:"memberRole,omitempty" bson:"memberRole"`

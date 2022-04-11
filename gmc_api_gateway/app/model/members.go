@@ -1,41 +1,39 @@
 package model
 
 import (
-	"time"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Member struct {
-	Num         int       `gorm:"column:memberNum; primary_key" json:"memberNum"`
-	Id          string    `gorm:"column:memberId; not null" json:"memberId" validate:"required"`
-	Name        string    `gorm:"column:memberName; not null" json:"memberName" validate:"required"`
-	Email       string    `gorm:"column:memberEmail; not null" json:"memberEmail" validate:"required"`
-	Contact     string    `gorm:"column:memberContact; not null" json:"memberContact,omitempty"`
-	Description string    `gorm:"column:memberDescription" json:"memberDescription,omitempty"`
-	Enabled     int       `gorm:"column:memberEnabled; DEFAULT:0" json:"memberEnabled,omitempty"`
-	RoleName    string    `gorm:"column:memberRole; DEFAULT:''" json:"memberRole"`
-	Created_at  time.Time `gorm:"column:created_at; DEFAULT:''" json:"created_at"`
-	Logined_at  time.Time `gorm:"column:logined_at" json:"logined_at,omitempty"`
+	_id        primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
+	Id         string             `json:"memberId,omitempty" bson:"memberId" validate:"required"`
+	Name       string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`
+	Password   string             `json:"password,omitempty" bson:"password" validate:"required,gte=0,lte=10"`
+	Email      string             `json:"email,omitempty" bson:"email" validate:"required,email"`
+	Contact    string             `json:"contact,omitempty" bson:"contact"`
+	Enabled    bool               `json:"enabled,omitempty" bson:"enabled"`
+	RoleName   string             `json:"memberRole,omitempty" bson:"memberRole"`
+	Created_at primitive.DateTime `json:"created_at,omitempty"`
+	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
 }
 
-type MemberWithPassword struct {
-	Member
-	Password string `gorm:"column:memberPassword" json:"memberPassword" validate:"required"`
+type RequestMember struct {
+	_id        primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
+	Id         string             `json:"memberId,omitempty" bson:"memberId"`
+	Name       string             `json:"memberName,omitempty" bson:"memberName"`
+	Password   string             `json:"password,omitempty" bson:"password" validate:"gte=0,lte=10"`
+	Email      string             `json:"email,omitempty" bson:"email"`
+	Contact    string             `json:"contact,omitempty" bson:"contact"`
+	Enabled    bool               `json:"enabled,omitempty" bson:"enabled"`
+	RoleName   string             `json:"memberRole,omitempty" bson:"memberRole"`
+	Created_at primitive.DateTime `json:"created_at,omitempty"`
+	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
 }
 
-// Set Member table name to be `MEMBER_INFO`
-func (Member) TableName() string {
-	return "MEMBER_INFO"
-}
+// func (m *Member) Enable() {
+// 	m.Enabled = true
+// }
 
-// Set Member table name to be `MEMBER_INFO`
-func (MemberWithPassword) TableName() string {
-	return "MEMBER_INFO"
-}
-
-func (m *Member) Enable() {
-	m.Enabled = 1
-}
-
-func (m *Member) Disable() {
-	m.Enabled = 0
-}
+// func (m *Member) Disable() {
+// 	m.Enabled = false
+// }

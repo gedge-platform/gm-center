@@ -28,14 +28,14 @@ type ReferCronJob struct {
 	JOBList []JOBList `json:"jobs"`
 }
 type JOBList struct {
-	Metadata struct {
-		Name      string `json:"name"`
-		Namespace string `json:"namespace"`
-	} `json:"metadata"`
-	Status struct {
-		Conditions     []Conditions `json:"conditions"`
-		CompletionTime time.Time    `json:"completionTime"`
-		StartTime      time.Time    `json:"startTime"`
-		Succeeded      int          `json:"succeeded"`
-	} `json:"status"`
+	// Metadata struct {
+	Name string `json:"name"`
+	// Namespace string `json:"namespace"`
+	// } `json:"metadata"`
+	// Status struct {
+	// Conditions     interface{} `json:"conditions"`
+	CompletionTime time.Time `json:"completionTime"`
+	StartTime      time.Time `json:"startTime"`
+	Succeeded      int       `json:"succeeded"`
+	// } `json:"status"`
 }

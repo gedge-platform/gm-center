@@ -60,7 +60,8 @@ func GetCronJobs(c echo.Context) (err error) {
 		Namespace:                  common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
 		Lable:                      common.FindData(getData, "metadata", "labels"),
 		Annotations:                common.FindData(getData, "metadata", "annotations"),
-		Schedule:                   common.InterfaceToString(common.FindData(getData, "spec", "schedule")),
+		Schedule:          
+		         common.InterfaceToString(common.FindData(getData, "spec", "schedule")),
 		ConcurrencyPolicy:          common.InterfaceToString(common.FindData(getData, "spec", "concurrencyPolicy")),
 		SuccessfulJobsHistoryLimit: common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "successfulJobsHistoryLimit"))),
 		FailedJobsHistoryLimit:     common.StringToInt(common.InterfaceToString(common.FindData(getData, "spec", "failedJobsHistoryLimits"))),

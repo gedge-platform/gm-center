@@ -18,8 +18,8 @@ type JOB_DETAL struct {
 	Annotations  interface{} `json:"annotations,omitempty"`
 	Containers   interface{} `json:"containers,omitempty"`
 	BackoffLimit int         `json:"backoffLimit,omitempty"`
-	Voluems int         `json:"volume,omitempty"`
-	Parallelism int `json:"parallelism,omitempty"`
+	Voluems      int         `json:"volume,omitempty"`
+	Parallelism  int         `json:"parallelism,omitempty"`
 	// OwnerReference []OwnerReference `json:"ownerReferences,omitempty"`
 	Conditions     []Conditions `json:"conditions,omitempty"`
 	StartTime      time.Time    `json:"startTime,omitempty"`
@@ -54,24 +54,24 @@ type Conditions struct {
 	Type          string    `json:"type,omitempty"`
 	LastProbeTime time.Time `json:"lastProbeTime,omitempty"`
 }
-type JOBEvent struct {
-	Reason  string `json:"reson,omitempty"`
-	Message string `json:"type,omitempty"`
-}
+
+// type JOBEvent struct {
+// 	Reason  string `json:"reson,omitempty"`
+// 	Message string `json:"type,omitempty"`
+// }
 type ReferDataJob struct {
 	ReferPodList []ReferPodList `json:"podList"`
-	Event        []EVENT1       `json:"event"`
+	// OnwerReferInfo
+	OnwerReferInfo OnwerReferInfo `json:"ownerReferences,omitempty"`
+}
+type OnwerReferInfo struct {
+	Kind string `json:"kind,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 type ReferPodList struct {
-	Metadata struct {
-		Name string `json:"name,omitempty"`
-	} `json:"metadata"`
-	Status struct {
-		Phase  string `json:"phase,omitempty"`
-		HostIP string `json:"hostIP,omitempty"`
-		PodIP  string `json:"podIP,omitempty"`
-	} `json:"status"`
-	Spec struct {
-		NodeName string `json:"nodeName,omitempty"`
-	} `json:"spec"`
+	Name     string `json:"name,omitempty"`
+	Status   string `json:"status,omitempty"`
+	HostIP   string `json:"hostIP,omitempty"`
+	PodIP    string `json:"podIP,omitempty"`
+	NodeName string `json:"nodeName,omitempty"`
 }

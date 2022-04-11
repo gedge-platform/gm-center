@@ -90,6 +90,7 @@ func GetJobs(c echo.Context) error {
 		Containers:     common.FindData(getData, "spec.template.spec", "containers"),
 		Events:         getCallEvent(params),
 	}
+
 	jobDetail.JOB = jobInfo
 
 	return c.JSON(http.StatusOK, echo.Map{

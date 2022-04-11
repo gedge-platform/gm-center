@@ -630,50 +630,51 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		}
 		return deployments, nil
 	case "jobs":
+		OnwerRefer := model.OnwerReferInfo{
+			Kind: InterfaceToString(FindData(data, "metadata", "ownerReferences.0.kind")),
+			Name: InterfaceToString(FindData(data, "metadata", "ownerReferences.0.name")),
+		}
+		jobName := InterfaceToString(FindData(data, "metadata", "name"))
 		params.Kind = "pods"
 		params.Name = ""
-		jobName := InterfaceToString(FindData(data, "metadata", "name"))
-		uid := InterfaceToString(FindData(data, "metadata", "uid"))
-		log.Println("PARAMS.NAEMData12 : ", params.Name)
-		log.Println("jobName Data12 : ", jobName)
-		log.Println("uid Data12 : ", uid)
-		podData, err := DataRequest(params)
+
+		// uid := InterfaceToString(FindData(data, "metadata", "uid"))
+		// log.Println("PARAMS.NAEMData12 : ", params.Name)
+		// log.Println("jobName Data12 : ", jobName)
+		// log.Println("uid Data12 : ", uid)
+		podsData, err := DataRequest(params)
 		if err != nil {
 			return nil, err
 		}
-		podRefer, err := FindDataArr(podData, "items", "job-name", jobName)
+		// var podDataList []string
+		podData, err := FindDataArrStr2(podsData, "items", "name", jobName)
 		if err != nil {
 			return nil, err
 		}
-		log.Println("jobRefer Data12 : ", podRefer)
-
-		params.Kind = "events"
-		params.Name = ""
-
-		eventsData, err := DataRequest(params)
-		if err != nil {
-			return nil, err
-		}
-
-		eventRefer, err := FindDataArr(eventsData, "items", "uid", uid)
-		if err != nil {
-			return nil, err
-		}
-		var EventInfo []model.EVENT1
-		EventData := eventRefer
-		// log.Printf("# 확인 ", EventData)
-		Transcode(EventData, &EventInfo)
-
+		fmt.Printf("podData : %s", podData)
 		var PodsInfo []model.ReferPodList
-		PodsData := podRefer
-		// log.Printf("# pod list확인 ", podRefer)
-		Transcode(PodsData, &PodsInfo)
-		// log.Printf("# job list확인22 ", PodsInfo)
+		for i := range podData {
+			PodData := model.ReferPodList{
+				Name:     InterfaceToString(FindData(podData[i], "metadata", "name")),
+				NodeName: InterfaceToString(FindData(podData[i], "spec", "nodeName")),
+				Status:   InterfaceToString(FindData(podData[i], "status", "phase")),
+				HostIP:   InterfaceToString(FindData(podData[i], "status", "hostIP")),
+				PodIP:    InterfaceToString(FindData(podData[i], "status", "podIP")),
+			}
+			PodsInfo = append(PodsInfo, PodData)
+		}
 
+		// PodData := model.ReferPodList{}
+		// PodsData := podRefer
+		// // log.Printf("# pod list확인 ", podRefer)
+		// Transcode(PodsData, &PodsInfo)
+		// log.Printf("# job list확인22 ", PodsInfo)
+		fmt.Println("[########]tesdfsdef")
+		fmt.Printf("[########]OnwerRefer : %+v", OnwerRefer)
 		ReferDataJob := model.ReferDataJob{
 			ReferPodList: PodsInfo,
-			Event:        EventInfo,
 		}
+		ReferDataJob.OnwerReferInfo = OnwerRefer
 		return ReferDataJob, nil
 
 	case "cronjobs":
@@ -688,22 +689,32 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		jobRefer, err := FindDataArr(jobData, "items", "name", cronjobName)
+		jobRefer, err := FindDataArrStr2(jobData, "items", "name", cronjobName)
 		log.Printf("[###123]jobData", jobData)
 		if err != nil {
 			return nil, err
 		}
 		log.Println("jobRefer Data12 : ", jobRefer)
 
-		params.Kind = "events"
-		params.Name = ""
-		test := InterfaceToString(FindData(jobData, "metadata", "name"))
-		log.Println("[#11test Data12 : ", test)
+		// params.Kind = "events"
+		// params.Name = ""
+		// test := InterfaceToString(FindData(jobData, "metadata", "name"))
+		// log.Println("[#11test Data12 : ", test)
 		var JobsInfo []model.JOBList
-		JobData := jobRefer
-		log.Printf("# job list확인 ", jobRefer)
-		Transcode(JobData, &JobsInfo)
-		log.Printf("# job list확인22 ", JobsInfo)
+		for i := range jobRefer {
+			job := model.JOBList{
+				Name: InterfaceToString(FindData(jobRefer[i], "metadata", "name")),
+				// Conditions:  InterfaceToString(FindData(jobRefer[i], "status", "conditions")),
+				CompletionTime: InterfaceToTime(FindData(jobRefer[i], "status", "completionTime")),
+				StartTime:      InterfaceToTime(FindData(jobRefer[i], "status", "startTime")),
+				Succeeded:      InterfaceToInt(FindData(jobRefer[i], "status", "succeeded")),
+			}
+			JobsInfo = append(JobsInfo, job)
+		}
+		// JobData := jobRefer
+		// log.Printf("# job list확인 ", jobRefer)
+		// Transcode(JobData, &JobsInfo)
+		// log.Printf("# job list확인22 ", JobsInfo)
 
 		ReferData := model.ReferCronJob{
 			JOBList: JobsInfo,

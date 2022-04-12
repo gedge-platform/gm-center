@@ -19,7 +19,7 @@ type POD struct {
 	Podcontainers     []PODCONTAINERS    `json:"Podcontainers,omitempty"`
 	QosClass          string             `json:"qosClass,omitempty"`
 	StatusConditions  []StatusConditions `json:"statusConditions,omitempty"`
-	Restart		  int   `json:"restart"`
+	Restart           int                `json:"restart"`
 	// VolumeMounts      []VolumeMounts      `json:"volumemounts"`
 	ContainerStatuses []ContainerStatuses `json:"containerStatuses,omitempty"`
 	Events            []EVENT             `json:"events"`
@@ -113,14 +113,13 @@ type PodIPs struct {
 	Ip string `json:"ip,omitempty"`
 }
 type WorkloadInfo struct {
-		Name              string           `json:"name,omitempty"`
-		Kind 	 string           `json:"kind,omitempty"`
-		ReplicaName   string           `json:"replicaName,omitempty"`
-		
+	Name        string `json:"name,omitempty"`
+	Kind        string `json:"kind,omitempty"`
+	ReplicaName string `json:"replicaName,omitempty"`
 }
 type ReferDataDeploy struct {
-	WorkloadInfo  interface{}  `json:"workloadList"`
-	ServiceInfo []ServiceInfo `json:"serviceList"`
+	WorkloadInfo interface{}   `json:"workloadList"`
+	ServiceInfo  []ServiceInfo `json:"serviceList"`
 }
 type ServiceInfo struct {
 	Metadata struct {

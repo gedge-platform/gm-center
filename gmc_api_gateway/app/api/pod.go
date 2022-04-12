@@ -6,6 +6,7 @@ import (
 	"gmc_api_gateway/app/model"
 	"log"
 	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,13 +33,12 @@ func GetPods(c echo.Context) (err error) {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)
 	// 	return nil
 	// }
-if err != nil ||  common.InterfaceToString(common.FindData(getData, "status", "")) =="Failure"{		
-				msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
-			return c.JSON(http.StatusNotFound, echo.Map{
+	if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
+		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+		return c.JSON(http.StatusNotFound, echo.Map{
 			"error": msg,
-			
-				})
-			}
+		})
+	}
 
 	ownerReferencesData := common.FindData(getData, "metadata", "ownerReferences")
 	var ownerReferencesInfo []model.OwnerReference
@@ -67,8 +67,8 @@ if err != nil ||  common.InterfaceToString(common.FindData(getData, "status", ""
 	log.Printf("#####getdata99 ", involvesData)
 	project := GetDBProject(params)
 	pod := model.POD{
-		Workspace: project.WorkspaceName,
-		Cluster:   params.Cluster,
+		Workspace:         project.WorkspaceName,
+		Cluster:           params.Cluster,
 		Name:              common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Namespace:         common.InterfaceToString(common.FindData(getData, "metadata", "namespace")),
 		CreationTimestamp: common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
@@ -117,21 +117,38 @@ func GetAllPods(c echo.Context) error {
 	fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
-		containerStatusesData :=common.FindData(data[i], "status", "containerStatuses.0.restartCount")
-		fmt.Printf("####containerStatusesData : %+v", containerStatusesData)
+		var restart int
+		containerStatusesData := common.FindData(data[i], "status", "containerStatuses")
+		var containerStatusesInfo []model.ContainerStatuses
+		common.Transcode(containerStatusesData, &containerStatusesInfo)
+		for c := range containerStatusesInfo {
+			restart += containerStatusesInfo[c].RestartCount
+		}
+		var podIP string
+		var hostIP string
+		if common.InterfaceToString(common.FindData(data[i], "status", "podIP")) == "" {
+			podIP = "-"
+		} else {
+			podIP = common.InterfaceToString(common.FindData(data[i], "status", "podIP"))
+		}
+		if common.InterfaceToString(common.FindData(data[i], "status", "hostIP")) == "" {
+			hostIP = "-"
+		} else {
+			hostIP = common.InterfaceToString(common.FindData(data[i], "status", "hostIP"))
+		}
 		pod := model.POD{
 			Name:              common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
 			Namespace:         common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
 			Cluster:           common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-			Workspace:           common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
+			Workspace:         common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
 			CreationTimestamp: common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Status:            common.InterfaceToString(common.FindData(data[i], "status", "phase")),
 			NodeName:          common.InterfaceToString(common.FindData(data[i], "spec", "nodeName")),
-			PodIP:             common.InterfaceToString(common.FindData(data[i], "status", "podIP")),
-			HostIP:            common.InterfaceToString(common.FindData(data[i], "status", "hostIP")),
-			Restart : common.InterfaceToInt(containerStatusesData),	
+			PodIP:             podIP,
+			HostIP:            hostIP,
+			Restart:           restart,
 		}
-	
+
 		pods = append(pods, pod)
 	}
 

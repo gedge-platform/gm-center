@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -51,14 +52,23 @@ func GetDBWorkspace(params model.PARAMS) *model.Workspace {
 
 func CreateWorkspace(c echo.Context) (err error) {
 	db := db.DbManager()
-	models := new(model.Workspace)
-
-	if err = c.Bind(models); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-		// common.ErrorMsg(c, http.StatusBadRequest, err)
-
-		// return nil
+	// params := new(model.Workspace2)
+	params := echo.Map{}
+	if err := c.Bind(&params); err != nil {
+		return err
 	}
+
+	selectClusterArr := common.InterfaceToArray(params["selectCluster"])
+	var str string
+	for i := range selectClusterArr {
+		str += selectClusterArr[i] + ","
+	}
+	str = strings.TrimRight(str, ",")
+	params["selectCluster"] = str
+	fmt.Printf("#############c : %+v", params)
+	var models model.Workspace
+	common.Transcode(params, &models)
+	
 	if err = c.Validate(models); err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err)
 	}

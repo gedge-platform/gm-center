@@ -788,3 +788,53 @@ func SaveProjectDB(c echo.Context) (err error) {
 
 	return nil
 }
+
+func DuplicateCheckDB(c echo.Context) (err error) {
+	db := db.DbManager()
+	search_val := c.Param("name")
+	// var models interface{}
+	if c.QueryParam("type") == "cluster" {
+		models := model.Cluster{}
+		if err := c.Bind(&models); err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		}
+		if err := FindClusterDB(db, "Name", search_val); err == nil {
+			common.ErrorMsg(c, http.StatusOK, common.ErrDuplicatedCheckOK)
+		} else {
+			common.ErrorMsg(c, http.StatusBadRequest, common.ErrDuplicated)
+		}
+	} else if c.QueryParam("type") == "project" {
+		models := model.Project{}
+		if err := c.Bind(&models); err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		}
+		if err := FindProjectDB(db, "Name", search_val); err == nil {
+			common.ErrorMsg(c, http.StatusOK, common.ErrDuplicatedCheckOK)
+		} else {
+			common.ErrorMsg(c, http.StatusBadRequest, common.ErrDuplicated)
+		}
+	} else if c.QueryParam("type") == "workspace" {
+		models := model.Workspace{}
+		if err := c.Bind(&models); err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		}
+		if err := FindWorkspaceDB(db, "Name", search_val); err == nil {
+			common.ErrorMsg(c, http.StatusOK, common.ErrDuplicatedCheckOK)
+		} else {
+			common.ErrorMsg(c, http.StatusBadRequest, common.ErrDuplicated)
+		}
+	} else if c.QueryParam("type") == "member" {
+		models := model.Workspace{}
+		if err := c.Bind(&models); err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		}
+		if err := FindDB(db, "Name", search_val); err == nil {
+			common.ErrorMsg(c, http.StatusOK, common.ErrDuplicatedCheckOK)
+		} else {
+			common.ErrorMsg(c, http.StatusBadRequest, common.ErrDuplicated)
+		}
+	} else {
+		common.ErrorMsg(c, http.StatusBadRequest, common.ErrTypeNotFound)
+	}
+	return nil
+}

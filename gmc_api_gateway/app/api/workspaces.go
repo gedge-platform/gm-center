@@ -32,9 +32,9 @@ func GetWorkspace(c echo.Context) (err error) {
 	if models == nil {
 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		return nil
-	}else{
+	} else {
 
-	return c.JSON(http.StatusOK, echo.Map{"data": models})
+		return c.JSON(http.StatusOK, echo.Map{"data": models})
 	}
 }
 func GetDBWorkspace(params model.PARAMS) *model.Workspace {

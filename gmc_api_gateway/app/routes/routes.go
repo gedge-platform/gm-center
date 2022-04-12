@@ -74,7 +74,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/clusters/:name", api.GetCluster)
 	// r.PUT("/clusters/:name", api.UpdateCluster)
 	r.DELETE("/clusters/:name", api.DeleteCluster)
-	
+
 	// r.GET("/userProjects", api.GetUserProjects)
 	r.GET("/systemProjects", api.GetSystemProjects)
 	// r.GET("/projects", api.GetProjects)
@@ -167,6 +167,8 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/clusterrolebindings", api.GetAllClusterrolebindings)
 	r.GET("/clusterrolebindings/:name", api.GetClusterrolebinding)
+
+	r.GET("/duplicateCheck/:name", api.DuplicateCheckDB)
 
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		userChk, _ := api.AuthenticateUser(id, password)

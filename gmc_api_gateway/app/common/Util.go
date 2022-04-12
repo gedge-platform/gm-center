@@ -538,6 +538,8 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		}
 		return services, nil
 
+
+		
 	case "deployments":
 		fmt.Printf("[#####]origUid : %s\n", origUid)
 		params.Kind = "replicasets"

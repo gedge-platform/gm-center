@@ -201,7 +201,7 @@ func GetCluster(c echo.Context) (err error) {
 	//
 	// var WorkerList []model.CLUSTER
 	// for m, _ := range Master {
-	// params.Name = params.Cluster
+	params.Name = params.Cluster
 	cluster := GetDBCluster(params)
 	if cluster == nil {
 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)

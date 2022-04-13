@@ -30,6 +30,7 @@ cd gmc_api_gateway
 go mod tidy
 go build && ./main
 # or
+# LISTEN_PORT=8010 go run main.go
 go run main.go
 
 # API Endpoint : http://127.0.0.1:8010
@@ -42,17 +43,31 @@ go run main.go
 │   │   ├── apps.go
 │   │   ├── auth.go
 │   │   ├── callListModel.go
+│   │   ├── clusterInfo.go
+│   │   ├── clusterrolebindings.go
+│   │   ├── clusterroles.go
 │   │   ├── clusters.go
+│   │   ├── configmap.go
 │   │   ├── cronjob.go
 │   │   ├── custom.go
+│   │   ├── daemonset.go
 │   │   ├── deployment.go
 │   │   ├── event.go
 │   │   ├── job.go
 │   │   ├── members.go
 │   │   ├── monitoring.go
-│   │   ├── nowMonit.go
-│   │   ├── pod.go
+│   │   ├── event.go
+│   │   ├── job.go
 │   │   ├── projects.go
+│   │   ├── pv.go
+│   │   ├── pvc.go
+│   │   ├── realMonitoring.go
+│   │   ├── roles.go
+│   │   ├── secret.go
+│   │   ├── serviceaccount.go
+│   │   ├── services.go
+│   │   ├── statefulset.go
+│   │   ├── storageclasses.go
 │   │   ├── realMonitoring.go
 │   │   ├── service.go
 │   │   ├── workspaces.go
@@ -66,9 +81,12 @@ go run main.go
 │   └── model
 │       └── apps.go
 │       └── auth.go
+│       └── clusterInfo.go
+│       └── clusterrolebindings.go
+│       └── clusterroles.go
 │       └── clusters.go
+│       └── configmap.go
 │       └── cronjob.go
-│       └── deployment.go
 │       └── event.go
 │       └── job.go
 │       └── kubernetes.go
@@ -78,7 +96,14 @@ go run main.go
 │       └── params.go
 │       └── pod.go
 │       └── projects.go
+│       └── pv.go
+│       └── pvc.go
+│       └── roles.go
+│       └── secret.go
 │       └── service.go
+│       └── serviceaccount.go
+│       └── storageclasses.go
+│       └── workload.go
 │       └── workspaces.go
 │   └── routes
 │       └── routes.go
@@ -89,9 +114,14 @@ go run main.go
 │   └── swagger.json
 │   └── swagger.yaml
 └── .env.sample
-└── main.go
+└── .gitignore
+└── docker-compose.yml
+└── Dockerfile
 └── go.mod
+└── go.test.sh
+└── main.go
 └── README.md
+└── start.sh
 ```
 
 ## API
@@ -107,6 +137,17 @@ go run main.go
 - jobs
 - cronjobs
 - services
+- pv
+- pvc
+- secrets
+- storageclasses
+- clusterroles
+- roles
+- configmaps
+- daemonsets
+- statefulsets
+- serviceaccounts
+- clusterrolebindings
 - monitoring
 
 <br />

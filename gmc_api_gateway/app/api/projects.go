@@ -120,7 +120,7 @@ func FindWorkspacebyProject(params model.PARAMS) string {
 
 func CreateProject(c echo.Context) (err error) {
 	err, models := CreateProjectDB(c)
-	fmt.Printf("####test : ", models)
+
 	if err != nil {
 		return err
 	}
@@ -729,7 +729,7 @@ func DeleteProjectDB(c echo.Context) (err error) {
 	return nil
 }
 
-func CreateProjectDB(c echo.Context) (err error, st model.Project) {
+func CreateProjectDB(c echo.Context) (err error, st *model.Project) {
 	db := db.DbManager()
 	params := echo.Map{}
 	if err := c.Bind(&params); err != nil {
@@ -738,28 +738,10 @@ func CreateProjectDB(c echo.Context) (err error, st model.Project) {
 		return err, empty_models
 	}
 
-	selectClusterArr := common.InterfaceToArray(params["selectCluster"])
-	var str string
-	for i := range selectClusterArr {
-		str += selectClusterArr[i] + ","
-	}
-	str = strings.TrimRight(str, ",")
-	params["selectCluster"] = str
-	fmt.Printf("#############c : %+v", params)
-	var models model.Project
-	common.Transcode(params, &models)
-
-	if err = c.Validate(models); err != nil {
-		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+	if err = c.Bind(models); err != nil {
+		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return err, models
 	}
-
-	// models := new(model.Project)
-
-	// if err = c.Bind(models); err != nil {
-	// 	common.ErrorMsg(c, http.StatusBadRequest, err)
-	// 	return err, models
-	// }
 
 	if err = c.Validate(models); err != nil {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)

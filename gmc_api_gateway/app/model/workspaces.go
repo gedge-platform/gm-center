@@ -18,7 +18,6 @@ type Workspace_detail struct {
 	Project []workspace_project `json:"projects,omitempty"`
 
 	Events []EVENT `json:"events"`
-	
 }
 type workspace_project struct {
 	Name          string           `json:"projectName"`

@@ -119,7 +119,6 @@ func FindWorkspacebyProject(params model.PARAMS) string {
 // }
 
 func CreateProject(c echo.Context) (err error) {
-
 	err, models := CreateProjectDB(c)
 
 	if err != nil {
@@ -172,7 +171,7 @@ func UpdateProject(c echo.Context) (err error) {
 		return err
 	}
 
-	models := GetProjectModel(name)
+	models := GetProjectModel(c)
 	selectCluster := models.SelectCluster
 	slice := strings.Split(selectCluster, ",")
 
@@ -218,18 +217,23 @@ func ReplaceProject(c echo.Context) (err error) {
 }
 
 func DeleteProject(c echo.Context) (err error) {
-
+	fmt.Printf("########asdfsdf")
 	name := c.Param("name")
+	fmt.Printf("########asdfsdf : %s", name)
 	if check := strings.Compare(name, "") == 0; check {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return err
 	}
-
-	models := GetProjectModel(name)
+	fmt.Printf("########assadfsadfsadfDsdfsdf")
+	models := GetProjectModel(c)
+	fmt.Printf("########models : %s", models)
 	selectCluster := models.SelectCluster
+
+	fmt.Printf("########selectCluster : %s", selectCluster)
 	slice := strings.Split(selectCluster, ",")
-	for _, cluster := range slice {
-		clusters := GetClusterDB(cluster)
+	for i := range slice {
+		fmt.Printf("########clusterName : %s", slice[i])
+		clusters := GetClusterDB(common.InterfaceToString(slice[i]))
 
 		url := "https://" + clusters.Endpoint + ":6443/api/v1/namespaces/" + name
 		Token := clusters.Token
@@ -684,10 +688,24 @@ func GetClusterDB(str string) *model.Cluster {
 	return models
 }
 
-func GetProjectModel(str string) *model.Project {
+func GetProjectModel(c echo.Context) *model.Project {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	// params.Name = str
+	// project := GetDBProject(params)
 	db := db.DbManager()
-	models := FindProjectDB(db, "Name", str)
-
+	models := FindProjectDB(db, "Name", params.Name)
+	if models == nil {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		// return
+	}
 	return models
 }
 
@@ -711,14 +729,37 @@ func DeleteProjectDB(c echo.Context) (err error) {
 	return nil
 }
 
-func CreateProjectDB(c echo.Context) (err error, st *model.Project) {
+func CreateProjectDB(c echo.Context) (err error, st model.Project) {
 	db := db.DbManager()
-	models := new(model.Project)
+	params := echo.Map{}
+	if err := c.Bind(&params); err != nil {
+		empty_models := model.Project{}
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return err, empty_models
+	}
 
-	if err = c.Bind(models); err != nil {
-		common.ErrorMsg(c, http.StatusBadRequest, err)
+	selectClusterArr := common.InterfaceToArray(params["selectCluster"])
+	var str string
+	for i := range selectClusterArr {
+		str += selectClusterArr[i] + ","
+	}
+	str = strings.TrimRight(str, ",")
+	params["selectCluster"] = str
+	fmt.Printf("#############c : %+v", params)
+	var models model.Project
+	common.Transcode(params, &models)
+
+	if err = c.Validate(models); err != nil {
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return err, models
 	}
+
+	// models := new(model.Project)
+
+	// if err = c.Bind(models); err != nil {
+	// 	common.ErrorMsg(c, http.StatusBadRequest, err)
+	// 	return err, models
+	// }
 
 	if err = c.Validate(models); err != nil {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
@@ -796,7 +837,8 @@ func DuplicateCheckDB(c echo.Context) (err error) {
 	if c.QueryParam("type") == "cluster" {
 		models := model.Cluster{}
 		if err := c.Bind(&models); err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			return nil
 		}
 		if err := FindClusterDB(db, "Name", search_val); err == nil {
 			common.ErrorMsg(c, http.StatusOK, common.ErrDuplicatedCheckOK)
@@ -816,7 +858,8 @@ func DuplicateCheckDB(c echo.Context) (err error) {
 	} else if c.QueryParam("type") == "workspace" {
 		models := model.Workspace{}
 		if err := c.Bind(&models); err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			// return nil
 		}
 		if err := FindWorkspaceDB(db, "Name", search_val); err == nil {
 			common.ErrorMsg(c, http.StatusOK, common.ErrDuplicatedCheckOK)
@@ -826,7 +869,7 @@ func DuplicateCheckDB(c echo.Context) (err error) {
 	} else if c.QueryParam("type") == "member" {
 		models := model.Workspace{}
 		if err := c.Bind(&models); err != nil {
-			common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+			// common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		}
 		if err := FindDB(db, "Name", search_val); err == nil {
 			common.ErrorMsg(c, http.StatusOK, common.ErrDuplicatedCheckOK)

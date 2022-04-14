@@ -588,6 +588,60 @@ func GetSystemProject(c echo.Context) (err error) {
 
 }
 
+// func GetUserProjectResource(c echo.Context) (models model.PROJECT_DETAIL) {
+// 	params := model.PARAMS{
+// 		Kind:      "namespaces",
+// 		Name:      c.Param("name"),
+// 		Cluster:   c.QueryParam("cluster"),
+// 		Workspace: c.QueryParam("workspace"),
+// 		Project:   c.QueryParam("project"),
+// 		Method:    c.Request().Method,
+// 		Body:      responseBody(c.Request().Body),
+// 	}
+// 	project := GetDBProject(params)
+
+// 	var detailList []model.PROJECT_DETAIL
+// 	slice := strings.Split(selectCluster, ",")
+// 	for i, _ := range slice {
+// 		params.Cluster = slice[i]
+// 		params.Project = params.Name
+// 		getData, err := common.DataRequest(params)
+// 		fmt.Printf("#######err : %+v", getData)
+// 		if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
+// 			msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+// 			return c.JSON(http.StatusNotFound, echo.Map{
+// 				"error": msg,
+// 			})
+// 		}
+// 		tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+// 		tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+// 		ResourceCnt := model.PROJECT_RESOURCE{
+// 			DeploymentCount:  ResourceCnt(params, "deployments"),
+// 			DaemonsetCount:   ResourceCnt(params, "daemonsets"),
+// 			StatefulsetCount: ResourceCnt(params, "Statefulsets"),
+// 			PodCount:         ResourceCnt(params, "pods"),
+// 			ServiceCount:     ResourceCnt(params, "services"),
+// 			CronjobCount:     ResourceCnt(params, "cronjobs"),
+// 			JobCount:         ResourceCnt(params, "jobs"),
+// 			VolumeCount:      ResourceCnt(params, "persistentvolumeclaims"),
+// 		}
+// 		projectDetail := model.PROJECT_DETAIL{
+// 			Status:        common.InterfaceToString(common.FindData(getData, "status", "phase")),
+// 			ClusterName:   slice[i],
+// 			Resource:      ResourceCnt,
+// 			Label:         common.FindData(getData, "metadata", "labels"),
+// 			Annotation:    common.FindData(getData, "metadata", "annotations"),
+// 			ResourceUsage: tempresult,
+// 			CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+// 			Events:        getCallEvent(params),
+// 		}
+// 		detailList = append(detailList, projectDetail)
+// 	}
+
+// 	projectModel.Detail = detailList
+// 	return err, detailList
+// }
+
 func ResourceCnt(params model.PARAMS, kind string) int {
 	params.Kind = kind
 	params.Project = params.Name
@@ -745,7 +799,6 @@ func CreateProjectDB(c echo.Context) (err error, st model.Project) {
 	}
 	str = strings.TrimRight(str, ",")
 	params["selectCluster"] = str
-	fmt.Printf("#############c : %+v", params)
 	var models model.Project
 	common.Transcode(params, &models)
 

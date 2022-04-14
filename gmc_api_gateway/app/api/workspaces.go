@@ -25,18 +25,31 @@ func GetAllWorkspaces(c echo.Context) (err error) {
 }
 
 func GetWorkspace(c echo.Context) (err error) {
+	params := model.PARAMS{
+		// Kind:      "nodes",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
 	db := db.DbManager()
-	search_val := c.Param("name")
+	search_val := params.Name
 	models := FindWorkspaceDB(db, "Name", search_val)
 
 	if models == nil {
 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		return nil
-	} else {
-
-		return c.JSON(http.StatusOK, echo.Map{"data": models})
 	}
+	var workspaceDetail model.Workspace_detail
+
+	var tsWorkspace model.Workspace
+	common.Transcode(models, &tsWorkspace)
+	workspaceDetail.Workspace = tsWorkspace
+	return c.JSON(http.StatusOK, echo.Map{"data": workspaceDetail})
 }
+
 func GetDBWorkspace(params model.PARAMS) *model.Workspace {
 	db := db.DbManager()
 	search_val := params.Workspace
@@ -51,14 +64,29 @@ func GetDBWorkspace(params model.PARAMS) *model.Workspace {
 
 func CreateWorkspace(c echo.Context) (err error) {
 	db := db.DbManager()
-	models := new(model.Workspace)
+	// models := new(model.Workspace)
 
-	if err = c.Bind(models); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-		// common.ErrorMsg(c, http.StatusBadRequest, err)
-
-		// return nil
+	params := echo.Map{}
+	if err := c.Bind(&params); err != nil {
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return err
 	}
+
+	selectClusterArr := common.InterfaceToArray(params["selectCluster"])
+	var str string
+	for i := range selectClusterArr {
+		str += selectClusterArr[i] + ","
+	}
+	str = strings.TrimRight(str, ",")
+	params["selectCluster"] = str
+	var models model.Workspace
+	common.Transcode(params, &models)
+	// if err = c.Bind(models); err != nil {
+	// 	return c.JSON(http.StatusBadRequest, err)
+	// common.ErrorMsg(c, http.StatusBadRequest, err)
+
+	// return nil
+	// }
 	if err = c.Validate(models); err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err)
 	}

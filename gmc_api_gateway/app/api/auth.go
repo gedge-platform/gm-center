@@ -15,7 +15,7 @@ import (
 )
 
 type jwtCustomClaims struct {
-	Name string `json:"name"`
+	Id   string `json:"id"`
 	Role string `json:"role"`
 	jwt.StandardClaims
 }
@@ -87,6 +87,7 @@ func LoginUser(c echo.Context) (err error) {
 			"status":       200,
 			"access-token": accessToken,
 			"userRole":     userRole,
+			"userId":       user.Id,
 		})
 	}
 	return c.JSON(http.StatusUnauthorized, false)
@@ -101,7 +102,7 @@ func generateAccessToken(userid string, userrole string) (string, time.Time, err
 
 func generateToken(userid string, userrole string, expirationTime time.Time, secret []byte) (string, time.Time, error) {
 	claims := &jwtCustomClaims{
-		Name: userid,
+		Id:   userid,
 		Role: userrole,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),

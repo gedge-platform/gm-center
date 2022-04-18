@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"gmc_api_gateway/app/model"
 	"log"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -538,8 +539,6 @@ func GetModelRelatedList(params model.PARAMS) (interface{}, error) {
 		}
 		return services, nil
 
-
-		
 	case "deployments":
 		fmt.Printf("[#####]origUid : %s\n", origUid)
 		params.Kind = "replicasets"
@@ -916,6 +915,11 @@ func InterfaceToInt(i interface{}) int {
 	v, _ := strconv.Atoi(str)
 	return v
 }
+func InterfaceToFloat(i interface{}) float64 {
+	str := InterfaceToString(i)
+	v, _ := strconv.ParseFloat(str, 64)
+	return v
+}
 
 func StringToInt(i string) int {
 	v, _ := strconv.Atoi(i)
@@ -986,4 +990,19 @@ func FindDataLabelKey(i interface{}, p, f, u string) ([]string, error) {
 }
 func Duration(f float64) time.Duration {
 	return time.Duration(f * 1e9)
+}
+func FillStruct(data map[string]interface{}, result interface{}) {
+	t := reflect.ValueOf(result).Elem()
+	for k, v := range data {
+		val := t.FieldByName(k)
+		val.Set(reflect.ValueOf(v))
+	}
+}
+
+func round(num float64) int {
+	return int(num + math.Copysign(0.5, num))
+}
+func ToFixed(num float64, precision int) float64 {
+	output := math.Pow(10, float64(precision))
+	return float64(round(num*output)) / output
 }

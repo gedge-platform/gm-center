@@ -15,6 +15,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo/v4"
+	"github.com/mitchellh/mapstructure"
 	"github.com/tidwall/gjson"
 )
 
@@ -52,6 +53,18 @@ func GetAllDBProjects(params model.PARAMS) []model.Project {
 	db.Find(&models)
 
 	if db.Find(&models).RowsAffected == 0 {
+		// common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
+		return nil
+	}
+	fmt.Printf("[3##]models : %+v\n", models)
+	return models
+}
+func GetWorkspaceFilterProjects(params model.PARAMS) []model.Project {
+	db := db.DbManager()
+	models := []model.Project{}
+	db.Find(&models)
+
+	if db.Where("workspaceName = ?", params.Workspace).Find(&models).RowsAffected == 0 {
 		// common.ErrorMsg(c, http.StatusOK, common.ErrNoData)
 		return nil
 	}
@@ -588,67 +601,95 @@ func GetSystemProject(c echo.Context) (err error) {
 
 }
 
-// func GetUserProjectResource(c echo.Context) (models model.PROJECT_DETAIL) {
-// 	params := model.PARAMS{
-// 		Kind:      "namespaces",
-// 		Name:      c.Param("name"),
-// 		Cluster:   c.QueryParam("cluster"),
-// 		Workspace: c.QueryParam("workspace"),
-// 		Project:   c.QueryParam("project"),
-// 		Method:    c.Request().Method,
-// 		Body:      responseBody(c.Request().Body),
-// 	}
-// 	project := GetDBProject(params)
+func GetUserProjectResource(c echo.Context, projects []model.Project) (model.PROJECT_RESOURCE, model.Workspace_Usage, interface{}) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	params.Workspace = params.Name
+	params.Name = ""
+	var resourceCnt model.PROJECT_RESOURCE
+	var resourceUsage model.Workspace_Usage
+	var deployment_count int
+	var daemonset_count int
+	var Statefulset_count int
+	var pod_count int
+	var service_count int
+	var cronjob_count int
+	var job_count int
+	var volume_count int
+	var cpu_usage float64
+	var memory_usage float64
+	var List []model.EVENT
+	for k := range projects {
 
-// 	var detailList []model.PROJECT_DETAIL
-// 	slice := strings.Split(selectCluster, ",")
-// 	for i, _ := range slice {
-// 		params.Cluster = slice[i]
-// 		params.Project = params.Name
-// 		getData, err := common.DataRequest(params)
-// 		fmt.Printf("#######err : %+v", getData)
-// 		if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
-// 			msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
-// 			return c.JSON(http.StatusNotFound, echo.Map{
-// 				"error": msg,
-// 			})
-// 		}
-// 		tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-// 		tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-// 		ResourceCnt := model.PROJECT_RESOURCE{
-// 			DeploymentCount:  ResourceCnt(params, "deployments"),
-// 			DaemonsetCount:   ResourceCnt(params, "daemonsets"),
-// 			StatefulsetCount: ResourceCnt(params, "Statefulsets"),
-// 			PodCount:         ResourceCnt(params, "pods"),
-// 			ServiceCount:     ResourceCnt(params, "services"),
-// 			CronjobCount:     ResourceCnt(params, "cronjobs"),
-// 			JobCount:         ResourceCnt(params, "jobs"),
-// 			VolumeCount:      ResourceCnt(params, "persistentvolumeclaims"),
-// 		}
-// 		projectDetail := model.PROJECT_DETAIL{
-// 			Status:        common.InterfaceToString(common.FindData(getData, "status", "phase")),
-// 			ClusterName:   slice[i],
-// 			Resource:      ResourceCnt,
-// 			Label:         common.FindData(getData, "metadata", "labels"),
-// 			Annotation:    common.FindData(getData, "metadata", "annotations"),
-// 			ResourceUsage: tempresult,
-// 			CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
-// 			Events:        getCallEvent(params),
-// 		}
-// 		detailList = append(detailList, projectDetail)
-// 	}
+		selectCluster := projects[k].SelectCluster
+		slice := strings.Split(selectCluster, ",")
 
-// 	projectModel.Detail = detailList
-// 	return err, detailList
-// }
+		for i, _ := range slice {
+
+			params.Cluster = slice[i]
+			params.Name = projects[k].Name
+			params.Project = projects[k].Name
+			deployment_count += ResourceCnt(params, "deployments")
+			daemonset_count += ResourceCnt(params, "daemonsets")
+			Statefulset_count += ResourceCnt(params, "Statefulsets")
+			pod_count += ResourceCnt(params, "pods")
+			service_count += ResourceCnt(params, "services")
+			cronjob_count += ResourceCnt(params, "cronjobs")
+			job_count += ResourceCnt(params, "jobs")
+			volume_count += ResourceCnt(params, "persistentvolumeclaims")
+			tempMetric := []string{"namespace_cpu", "namespace_memory"}
+			// tempMetric := []string{"namespace_cpu"}
+			result := &model.Workspace_Usage{}
+			tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+			if err := mapstructure.Decode(tempresult, &result); err != nil {
+				fmt.Println(err)
+			}
+			cpu_usage += result.Namespace_cpu
+			memory_usage += result.Namespace_memory
+			events := getCallEvent(params)
+			if len(events) > 0 {
+				List = append(List, events...)
+			}
+			ResourceUsage := model.Workspace_Usage{
+				Namespace_cpu:    common.ToFixed(cpu_usage, 3),
+				Namespace_memory: common.ToFixed(memory_usage, 3),
+			}
+			ResourceCnt := model.PROJECT_RESOURCE{
+				DeploymentCount:  deployment_count,
+				DaemonsetCount:   daemonset_count,
+				StatefulsetCount: Statefulset_count,
+				PodCount:         pod_count,
+				ServiceCount:     service_count,
+				CronjobCount:     cronjob_count,
+				JobCount:         job_count,
+				VolumeCount:      volume_count,
+			}
+			resourceCnt = ResourceCnt
+			resourceUsage = ResourceUsage
+		}
+
+	}
+	// fmt.Printf("[###List] : %s", List)
+	eventList := List
+	return resourceCnt, resourceUsage, eventList
+}
 
 func ResourceCnt(params model.PARAMS, kind string) int {
+	fmt.Printf("[###Params] : %+v", params)
 	params.Kind = kind
 	params.Project = params.Name
 	params.Name = ""
 	cnt := 0
 	deployment_cnt := 0
 	deployments, _ := common.DataRequest(params)
+	// fmt.Printf("[###Data] : %+v", deployments)
 	deployment := common.FindingArray(common.Finding(deployments, "items"))
 	if kind == "pods" {
 		for i, _ := range deployment {

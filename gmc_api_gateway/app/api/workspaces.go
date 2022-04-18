@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -43,11 +44,32 @@ func GetWorkspace(c echo.Context) (err error) {
 		return nil
 	}
 	var workspaceDetail model.Workspace_detail
-
+	var projectList []model.Workspace_project
 	var tsWorkspace model.Workspace
 	common.Transcode(models, &tsWorkspace)
 	workspaceDetail.Workspace = tsWorkspace
-	return c.JSON(http.StatusOK, echo.Map{"data": workspaceDetail})
+	params.Workspace = params.Name
+	projects := GetWorkspaceFilterProjects(params)
+	for p := range projects {
+		fmt.Println("[####projects] : ", projects[p])
+		project := model.Workspace_project{
+			Name:          projects[p].Name,
+			SelectCluster: projects[p].SelectCluster,
+			CreateAt:      projects[p].CreateAt,
+			Creator:       projects[p].Creator,
+		}
+		projectList = append(projectList, project)
+	}
+	Resource, Usage, Events := GetUserProjectResource(c, projects)
+	workspaceDetail.ProjectList = projectList
+	workspaceDetail.Resource = Resource
+	workspaceDetail.ResourceUsage = Usage
+	workspaceDetail.Events = Events
+
+	fmt.Printf("selectClusters : %+v", workspaceDetail.Workspace.SelectCluster)
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": workspaceDetail,
+	})
 }
 
 func GetDBWorkspace(params model.PARAMS) *model.Workspace {
@@ -90,6 +112,7 @@ func CreateWorkspace(c echo.Context) (err error) {
 	if err = c.Validate(models); err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err)
 	}
+
 	// if err != nil {
 	// 	panic(err)
 	// }

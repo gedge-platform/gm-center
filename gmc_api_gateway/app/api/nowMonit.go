@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"gmc_api_gateway/app/common"
 	"log"
 	"os"
 	"strings"
@@ -31,7 +32,7 @@ var nowGpuMetric = map[string]string{
 
 func NowMonit(k string, c string, n string, m []string) interface{} {
 
-	// fmt.Println("==================", c, n)
+	fmt.Println("==================", c, n)
 
 	switch k {
 	case "namespace":
@@ -92,7 +93,6 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 					value = val.Value
 				}
 			}
-
 		case "cluster":
 			temp_filter := map[string]string{
 				"cluster": c,
@@ -108,7 +108,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			return nil
 		}
 
-		result[m[i]] = value
+		result[m[i]] = common.InterfaceToFloat(value)
 	}
 	// fmt.Println("=====result=====", result)
 	return result
@@ -196,7 +196,7 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 
 	data := nowQueryRange(addr, nowMetricExpr(nowGpuMetric["gpu_info"], temp_filter))
 
-	fmt.Println("#####data",data)
+	fmt.Println("#####data", data)
 	fmt.Println("======value======")
 	if check := len(data.(model.Matrix)) != 0; check {
 		// for _, val := range data.(model.Matrix)[0].Values {

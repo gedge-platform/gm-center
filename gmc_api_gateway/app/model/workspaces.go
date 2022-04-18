@@ -15,15 +15,24 @@ type Workspace struct {
 }
 type Workspace_detail struct {
 	Workspace
-	Project []workspace_project `json:"projects,omitempty"`
-
-	Events []EVENT `json:"events"`
+	ProjectList   []Workspace_project `json:"projectList,omitempty"`
+	Resource      PROJECT_RESOURCE    `json:"resource,omitempty"`
+	ResourceUsage Workspace_Usage     `json:"resourceUsage,omitempty"`
+	Events        interface{}         `json:"events"`
 }
-type workspace_project struct {
-	Name          string           `json:"projectName"`
-	SelectCluster string           `json:"selectCluster"`
-	Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
-	ResourceUsage interface{}      `json:"resourceUsage,omitempty"`
+
+type Workspace_Usage struct {
+	Namespace_cpu    float64 `json:"cpu_usage"`
+	Namespace_memory float64 `json:"memory_usage"`
+}
+
+type Workspace_project struct {
+	Name          string    `json:"projectName"`
+	SelectCluster string    `json:"selectCluster"`
+	CreateAt      time.Time `json:"created_at"`
+	Creator       string    `json:"projectCreator"`
+	// Resource      PROJECT_RESOURCE `json:"resource,omitempty"`
+	// ResourceUsage interface{}      `json:"resourceUsage,omitempty"`
 }
 
 // Set Cluster table name to be `CLUSTER_INFO`

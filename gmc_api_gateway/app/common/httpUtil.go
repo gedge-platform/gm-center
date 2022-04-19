@@ -86,9 +86,9 @@ func DataFind(param model.PARAM) (data string, err error) {
 	case "GET":
 		if resp, err := client.R().EnableTrace().
 			SetPathParams(map[string]string{
-				"CredentialName": param.CredentialName,
+				"credentialName": param.CredentialName,
 			}).
-			Get("http://210.207.104.188:1024/spider/credential/{CredentialName}"); err != nil {
+			Get("http://210.207.104.188:1024/spider/credential/{credentialName}"); err != nil {
 			panic(err)
 		} else {
 			response = string(resp.Body())
@@ -99,10 +99,10 @@ func DataFind(param model.PARAM) (data string, err error) {
 				"CredentialName": param.CredentialName,
 				"ProviderName":   "OPENSTACK",
 				"KeyValueInfoList": []interface{}{
-					map[string]interface{}{"Key": "IdentityEndpoint", "Value": param.IdentityEndPoint},
-					map[string]interface{}{"Key": "Username", "Value": param.Username},
-					map[string]interface{}{"Key": "Password", "Value": param.Password},
 					map[string]interface{}{"Key": "DomainName", "Value": param.DomainName},
+					map[string]interface{}{"Key": "IdentityEndpoint", "Value": param.IdentityEndPoint},
+					map[string]interface{}{"Key": "Password", "Value": param.Password},
+					map[string]interface{}{"Key": "Username", "Value": param.Username},
 					map[string]interface{}{"Key": "ProjectID", "Value": param.ProjectID}},
 			}).Post("http://210.207.104.188:1024/spider/credential"); err != nil {
 			panic(err)
@@ -112,9 +112,9 @@ func DataFind(param model.PARAM) (data string, err error) {
 	case "DELETE":
 		if resp, err := client.R().
 			SetPathParams(map[string]string{
-				"CredentialName": param.CredentialName,
+				"credentialName": param.CredentialName,
 			}).
-			Delete("http://210.207.104.188:1024/spider/credential/{CredentialName}"); err != nil {
+			Delete("http://210.207.104.188:1024/spider/credential/{credentialName}"); err != nil {
 			panic(err)
 		} else {
 			response = string(resp.Body())

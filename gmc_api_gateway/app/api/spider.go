@@ -17,7 +17,7 @@ func GetCredentials(c echo.Context) (err error) {
 
 func GetCredential(c echo.Context) (err error) {
 	param := model.PARAM{
-		CredentialName: c.Param("CredentialName"),
+		CredentialName: c.Param("credentialName"),
 		Method:         c.Request().Method,
 	}
 	cdb, _ := common.DataFind(param)
@@ -27,12 +27,12 @@ func GetCredential(c echo.Context) (err error) {
 
 func CreateCredential(c echo.Context) (err error) {
 	param := model.PARAM{
-		CredentialName:   c.QueryParam("CredentialName"),
-		DomainName:       c.Param("DomainName"),
-		IdentityEndPoint: c.Param("IdentityEndPoint"),
-		Password:         c.Param("Password"),
-		ProjectID:        c.Param("ProjectID"),
-		Username:         c.Param("Username"),
+		CredentialName:   c.QueryParam("credentialName"),
+		DomainName:       c.Param("domainName"),
+		IdentityEndPoint: c.Param("identityEndPoint"),
+		Password:         c.Param("password"),
+		ProjectID:        c.Param("projectID"),
+		Username:         c.Param("username"),
 		Method:           c.Request().Method}
 	cdb, _ := common.DataFind(param)
 	x := common.StringToMapInterface(cdb)
@@ -41,7 +41,7 @@ func CreateCredential(c echo.Context) (err error) {
 
 func DeleteCredential(c echo.Context) (err error) {
 	param := model.PARAM{
-		CredentialName: c.Param("CredentialName"),
+		CredentialName: c.Param("credentialName"),
 		Method:         c.Request().Method,
 	}
 	cdb, _ := common.DataFind(param)

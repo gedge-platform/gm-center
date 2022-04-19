@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"gmc_api_gateway/app/api"
 	c "gmc_api_gateway/app/controller"
 
 	"github.com/labstack/echo/v4"
@@ -39,4 +40,13 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/request/:requestId", c.FindRequest)
 	r.DELETE("/request/:requestId", c.DeleteRequest)
 	r.PUT("/request/:requestId", c.UpdateRequest)
+
+	r.GET("/credential", c.ListCredential)
+	r.GET("/credential/:name", c.FindCredential)
+
+	r2 := e.Group("/spider")
+	r2.GET("/credentials", api.GetCredentials)
+	r2.GET("/credentials/:CredentialName", api.GetCredential)
+	r2.POST("/credentials", api.CreateCredential)
+	r2.DELETE("/credentials/:CredentialName", api.DeleteCredential)
 }

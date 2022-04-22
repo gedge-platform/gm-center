@@ -1,6 +1,5 @@
 *.sum
 
-
 # Created by https://www.toptal.com/developers/gitignore/api/go
 # Edit at https://www.toptal.com/developers/gitignore?templates=go
 
@@ -10,6 +9,7 @@
 *.exe~
 *.dll
 *.so
+.env
 *.dylib
 
 # Test binary, built with `go test -c`

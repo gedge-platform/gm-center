@@ -124,16 +124,16 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/services/:name", api.DeleteService)
 
 	r.GET("/pvs", api.GetAllPVs)
-	// r.POST("/pvs", api.CreateService)
+	r.POST("/pvs", api.CreatePV)
 	r.GET("/pvs/:name", api.GetPV)
 	// // r.PUT("/services/:name", api.UpdateService)
-	// r.DELETE("/pvs/:name", api.DeleteService)
+	r.DELETE("/pvs/:name", api.DeletePV)
 
 	r.GET("/pvcs", api.GetAllPVCs)
-	// r.POST("/pvs", api.CreateService)
+	r.POST("/pvcs", api.CreatePVC)
 	r.GET("/pvcs/:name", api.GetPVC)
 	// // r.PUT("/services/:name", api.UpdateService)
-	// r.DELETE("/pvs/:name", api.DeleteService)
+	r.DELETE("/pvcs/:name", api.DeletePVC)
 
 	r.GET("/secrets", api.GetAllSecrets)
 	// r.POST("/pvs", api.CreateService)
@@ -143,6 +143,8 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/storageclasses/:name", api.GetStorageclass)
 	r.GET("/storageclasses", api.GetStorageclasses)
+	r.POST("/storageclasses", api.CreateStorageclasses)
+	r.DELETE("/storageclasses/:name", api.DeleteStorageclasses)
 
 	r.GET("/clusterroles/:name", api.GetClusterRole)
 	r.GET("/clusterroles", api.GetClusterRoles)
@@ -167,8 +169,12 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/clusterrolebindings", api.GetAllClusterrolebindings)
 	r.GET("/clusterrolebindings/:name", api.GetClusterrolebinding)
+	r.POST("/clusterrolebindings", api.CreateClusterRolebinding)
+	r.DELETE("/clusterrolebindings/:name", api.DeleteClusterRolebinding)
 
 	r.GET("/duplicateCheck/:name", api.DuplicateCheckDB)
+
+	r.GET("/view/:name", api.GetView)
 
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, c echo.Context) (bool, error) {
 		userChk, _ := api.AuthenticateUser(id, password)

@@ -93,7 +93,6 @@ func CreateWorkspace(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return err
 	}
-
 	selectClusterArr := common.InterfaceToArray(params["selectCluster"])
 	var str string
 	for i := range selectClusterArr {

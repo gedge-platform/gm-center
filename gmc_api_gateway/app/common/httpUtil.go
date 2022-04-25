@@ -280,7 +280,8 @@ func validate(params model.PARAMS) error {
 	clusterCheck := strings.Compare(params.Cluster, "") != 0
 	projectCheck := strings.Compare(params.Project, "") != 0
 	nameCheck := strings.Compare(params.Name, "") != 0
-
+	pvCheck := strings.Compare(params.Name, "persistentvolumes") != 0
+	scCheck := strings.Compare(params.Name, "storageclasses") != 0
 	Method := params.Method
 	// Body := responseBody(params.Body)
 	Body := params.Body
@@ -293,14 +294,14 @@ func validate(params model.PARAMS) error {
 		if !clusterCheck {
 			return ErrClusterInvalid
 		}
-		if !projectCheck {
+		if !projectCheck && !pvCheck && !scCheck {
 			return ErrProjectInvalid
 		}
 	} else if Method == "DELETE" {
 		if !clusterCheck {
 			return ErrClusterInvalid
 		}
-		if !projectCheck {
+		if !projectCheck && !pvCheck && !scCheck {
 			return ErrProjectInvalid
 		}
 		if !nameCheck {

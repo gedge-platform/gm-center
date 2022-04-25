@@ -80,3 +80,43 @@ func GetAllClusterrolebindings(c echo.Context) error {
 		"data": clusterrolebindings,
 	})
 }
+func CreateClusterRolebinding(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "clusterrolebindings",
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
+	})
+}
+
+func DeleteClusterRolebinding(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "clusterrolebindings",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"info": common.StringToInterface(postData),
+	})
+}

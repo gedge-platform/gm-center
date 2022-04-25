@@ -66,3 +66,69 @@ func FindCredential(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, &credential)
 	}
 }
+
+func InsertCredential(c echo.Context) (err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	cdb := GetClusterDB("credentials")
+
+	param := model.CPARAM{
+		Name:         c.QueryParam("name"),
+		Type:         "OPENSTACK",
+		Domain:       c.QueryParam("domain"),
+		Region:       c.QueryParam("region"),
+		Url:          c.QueryParam("url"),
+		Tenant:       c.QueryParam("tenant"),
+		Access_id:    c.QueryParam("access_id"),
+		Access_token: c.QueryParam("access_token"),
+		Project:      c.QueryParam("project")}
+	// Method:       c.Request().Method}
+	// c.Bind(param)
+	// c.Validate(param)
+	cdb.InsertOne(ctx, param)
+	return c.JSON(http.StatusCreated, echo.Map{"data": param})
+}
+
+func UpdateCredential(c echo.Context) (err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	cdb := GetClusterDB("credentials")
+	search_val := c.Param("name")
+
+	param := model.CPARAM{
+		Name:         search_val,
+		Type:         "OPENSTACK",
+		Domain:       c.QueryParam("domain"),
+		Region:       c.QueryParam("region"),
+		Url:          c.QueryParam("url"),
+		Tenant:       c.QueryParam("tenant"),
+		Access_id:    c.QueryParam("access_id"),
+		Access_token: c.QueryParam("access_token"),
+		Project:      c.QueryParam("project"),
+	}
+
+	cdb.UpdateOne(ctx, bson.M{"name": search_val}, bson.M{"$set": param})
+	return c.JSON(http.StatusOK, search_val+"Updated Complete")
+
+}
+
+func DeleteCredential(c echo.Context) (err error) {
+
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	cdb := GetClusterDB("credentials")
+	// var credential model.Credential
+
+	search_val := c.Param("name")
+	result, err := cdb.DeleteOne(ctx, bson.M{"name": search_val})
+
+	if result.DeletedCount == 0 {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Member not found."))
+		return
+	} else {
+		return c.JSON(http.StatusOK, echo.Map{
+			"status": http.StatusOK,
+			"data":   search_val + " Member Deleted Complete",
+		})
+	}
+}

@@ -43,10 +43,16 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/credential", c.ListCredential)
 	r.GET("/credential/:name", c.FindCredential)
+	r.POST("/credential", c.InsertCredential)
+	r.DELETE("/credential/:name", c.DeleteCredential)
+	r.PUT("/credential/:name", c.UpdateCredential)
 
 	r2 := e.Group("/gmcapi/v2/spider")
 	r2.GET("/credentials", api.GetCredentials)
 	r2.GET("/credentials/:credentialName", api.GetCredential)
 	r2.POST("/credentials", api.CreateCredential)
 	r2.DELETE("/credentials/:credentialName", api.DeleteCredential)
+
+	r.GET("/spider/vmstatus", api.GetVmStatus)
+	r.GET("/spider/vm", api.GetVm)
 }

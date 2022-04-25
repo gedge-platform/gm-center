@@ -9,6 +9,10 @@ import (
 )
 
 func GetCredentials(c echo.Context) (err error) {
+	//	param := model.PARAM{
+	//		CredentialName: "",
+	//		Method:         c.Request().Method,
+	//	}
 	cdb, _ := common.DataRequest()
 	x := common.StringToMapInterface(cdb)
 

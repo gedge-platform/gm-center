@@ -23,3 +23,21 @@ type PARAM struct {
 	Method           string `json:"reqMethod,omitempty"`
 	// Body             string `json:"reqBody,omitempty"`
 }
+
+type VMPARAM struct {
+	ConnectionName string `json:"ConnectionName,omitempty"`
+	Method         string `json:"reqMethod,omitempty"`
+}
+
+type CPARAM struct {
+	Name         string `json:"name,omitempty"`
+	Type         string `json:"type,omitempty"`
+	Domain       string `json:"domain,omitempty"`
+	Region       string `json:"region,omitempty"`
+	Url          string `json:"url,omitempty"`
+	Tenant       string `json:"tenant,omitempty"`
+	Access_id    string `json:"access_id,omitempty"`
+	Access_token string `json:"access_token,omitempty"`
+	Project      string `json:"project,omitempty"`
+	// Method       string `json:"reqMethod,omitempty"`
+}

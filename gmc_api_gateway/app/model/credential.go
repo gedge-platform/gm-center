@@ -8,6 +8,8 @@ type Credential struct {
 	Type            string             `json:"type,omitempty" bson:"type" validate:"required"`
 	Domain          string             `json:"domain,omitempty" bson:"domain"`
 	Region          string             `json:"region,omitempty" bson:"region"`
+	Url             string             `json:"url,omitempty" bson:"url"`
+	Tenant          string             `json:"tenant,omitempty" bson:"tenant"`
 	Access_id       string             `json:"access_id,omitempty" bson:"access_id"`
 	Access_token    string             `json:"access_token,omitempty" bson:"access_token"`
 	Project         string             `json:"project,omitempty" bson:"project"`

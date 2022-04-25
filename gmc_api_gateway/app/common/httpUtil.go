@@ -79,16 +79,17 @@ func DataRequest() (data string, err error) {
 func DataFind(param model.PARAM) (data string, err error) {
 	var response string
 	method := param.Method
+	defaultUrl := "http://210.207.104.188:1024/spider/credential"
+	// credentialName := param.CredentialName
 
 	client := resty.New()
-	fmt.Println(param.Method)
 	switch method {
 	case "GET":
 		if resp, err := client.R().EnableTrace().
 			SetPathParams(map[string]string{
 				"credentialName": param.CredentialName,
 			}).
-			Get("http://210.207.104.188:1024/spider/credential/{credentialName}"); err != nil {
+			Get(defaultUrl + "/{credentialName}"); err != nil {
 			panic(err)
 		} else {
 			response = string(resp.Body())
@@ -104,7 +105,7 @@ func DataFind(param model.PARAM) (data string, err error) {
 					map[string]interface{}{"Key": "Password", "Value": param.Password},
 					map[string]interface{}{"Key": "Username", "Value": param.Username},
 					map[string]interface{}{"Key": "ProjectID", "Value": param.ProjectID}},
-			}).Post("http://210.207.104.188:1024/spider/credential"); err != nil {
+			}).Post(defaultUrl); err != nil {
 			panic(err)
 		} else {
 			response = string(resp.Body())
@@ -114,11 +115,45 @@ func DataFind(param model.PARAM) (data string, err error) {
 			SetPathParams(map[string]string{
 				"credentialName": param.CredentialName,
 			}).
-			Delete("http://210.207.104.188:1024/spider/credential/{credentialName}"); err != nil {
+			Delete(defaultUrl + "/{credentialName}"); err != nil {
 			panic(err)
 		} else {
 			response = string(resp.Body())
 		}
+	}
+	return response, nil
+}
+
+func VmFind(param model.VMPARAM) (data string, err error) {
+	var response string
+	client := resty.New()
+
+	if resp, err := client.R().
+		SetQueryParams(map[string]string{
+			"ConnectionName": param.ConnectionName,
+		}).Get("http://210.207.104.188:1024/spider/vm"); err != nil {
+		panic(err)
+	} else {
+		response = string(resp.Body())
+	}
+
+	return response, nil
+}
+
+func VmStatusFind(param model.VMPARAM) (data string, err error) {
+	var response string
+	// method := param.Method
+	client := resty.New()
+
+	if resp, err := client.R().
+		SetQueryParams(map[string]string{
+			"ConnectionName": param.ConnectionName,
+		}).
+		Get("http://210.207.104.188:1024/spider/vmstatus"); err != nil {
+		panic(err)
+
+	} else {
+		response = string(resp.Body())
 	}
 	return response, nil
 }

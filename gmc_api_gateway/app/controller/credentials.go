@@ -29,7 +29,6 @@ func GetCredentialsDB(name string) *mongo.Collection {
 
 func CreateCredentials(c echo.Context) (err error) {
 	cdb := GetCredentialsDB("credentials")
-	cdb2 := GetCredentialsDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := new(model.Credentials)
@@ -40,15 +39,6 @@ func CreateCredentials(c echo.Context) (err error) {
 
 		return nil
 	}
-
-	projectObjectId, err := cdb2.Find(ctx, bson.M{"objectId": models.Project})
-	var projectObjectId2 []bson.D
-
-	if err = projectObjectId.All(ctx, &projectObjectId2); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("1", projectObjectId)
-	fmt.Println("2", projectObjectId2)
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -71,7 +61,7 @@ func CreateCredentials(c echo.Context) (err error) {
 		Tenant:       models.Tenant,
 		Access_id:    models.Access_id,
 		Access_token: models.Access_token,
-		//Project:      projectObjectId2[0][0].Value.(primitive.ObjectID),
+		Project:      models.Project,
 		//Created_at: models.Created_at,
 	}
 
@@ -86,9 +76,8 @@ func CreateCredentials(c echo.Context) (err error) {
 }
 
 func ListCredentials(c echo.Context) (err error) {
-	var showsCredentials []bson.M
-	cdb := GetProjectDB("credentials")
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	var results []model.Credentials
+	cdb := GetCredentialsDB("credentials")
 
 	findOptions := options.Find()
 
@@ -98,67 +87,37 @@ func ListCredentials(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "selectProject"}, {"foreignField", "_id"}, {"as", "sProject"}}}}
-
-		showCredentialsCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupProject})
-
-		fmt.Println(showCredentialsCursor)
-		if err = showCredentialsCursor.All(ctx, &showsCredentials); err != nil {
-			panic(err)
+		var elem model.Credentials
+		if err := cur.Decode(&elem); err != nil {
+			log.Fatal(err)
 		}
+		results = append(results, elem)
 	}
+
 	if err := cur.Err(); err != nil {
 		log.Fatal(err)
 	}
 
 	cur.Close(context.TODO())
 
-	return c.JSON(http.StatusOK, showsCredentials)
+	return c.JSON(http.StatusOK, results)
 }
 
 func FindCredentials(c echo.Context) (err error) {
-	var showsCredentials []bson.M
+	var credentials model.Credentials
+	//var credentials bson.M
 	cdb := GetCredentialsDB("credentials")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("credentialsName")
 
-	fmt.Println("--", search_val)
-	findOptions := options.Find()
-
-	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for cur.Next(context.TODO()) {
-		lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "sproject"}}}}
-		matchProject := bson.D{
-			{Key: "$match", Value: bson.D{
-				{Key: "name", Value: search_val},
-			}},
-		}
-		fmt.Println("1", matchProject)
-		fmt.Println("1", bson.D{})
-		showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupProject, matchProject})
-
-		if err = showLoadedCursor.All(ctx, &showsCredentials); err != nil {
-			panic(err)
-		}
-		fmt.Println(showsCredentials)
-	}
-
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	cur.Close(context.TODO())
-
-	if showsCredentials == nil {
-		common.ErrorMsg(c, http.StatusNotFound, errors.New("Credentials not found."))
-		return
+	if err := cdb.FindOne(ctx, bson.M{"name": search_val}).Decode(&credentials); err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("credentials not found."))
+		return nil
 	} else {
-		return c.JSON(http.StatusOK, showsCredentials)
+
+		return c.JSON(http.StatusOK, &credentials)
 	}
+
 }
 
 func DeleteCredentials(c echo.Context) (err error) {
@@ -184,9 +143,6 @@ func DeleteCredentials(c echo.Context) (err error) {
 
 func UpdateCredentials(c echo.Context) (err error) {
 	cdb := GetRequestDB("credentials")
-	/* 	cdb2 := GetCredentialsDB("cluster")
-	   	cdb3 := GetCredentialsDB("member")
-	   	cdb4 := GetCredentialsDB("workspace") */
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("credentialsName")
 
@@ -197,27 +153,6 @@ func UpdateCredentials(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-	/* 	memberObjectId, err := cdb3.Find(ctx, bson.M{"memberName": models.MemberName})
-	   	workspaceObjectId, err := cdb4.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
-
-	   	var clusterObjectId2 []bson.D
-	   	var clusterObjectId3 *mongo.Cursor
-	   	var memberObjectId2 []bson.D
-	   	var workspaceObjectId2 []bson.D
-	   	var slice []primitive.ObjectID
-
-	   	for i := 0; i < len(models.ClusterName); i++ {
-	   		clusterObjectId3, _ = cdb2.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
-	   		clusterObjectId3.All(ctx, &clusterObjectId2)
-	   		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))
-	   	}
-
-	   	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil {
-	   		log.Fatal(err)
-	   	}
-	   	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil {
-	   		log.Fatal(err)
-	   	} */
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -238,9 +173,7 @@ func UpdateCredentials(c echo.Context) (err error) {
 	// default :
 	//update = bson.M{"workspace": workspaceObjectId2[0][0].Value.(primitive.ObjectID), "projectOwner": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectCreator": memberObjectId2[0][0].Value.(primitive.ObjectID), "projectDescription": models.Description, "selectCluster": slice}
 
-	fmt.Println(models)
-
-	update = bson.M{"name": models.Name, "type": models.Type, "domain": models.Domain}
+	update = bson.M{"name": models.Name, "type": models.Type, "region": models.Region, "domain": models.Domain, "url": models.Url, "tenant": models.Tenant, "access_id": models.Access_id, "access_token": models.Access_token, "project": models.Project}
 	fmt.Println(update)
 	result, err := cdb.UpdateOne(ctx, bson.M{"name": search_val}, bson.M{"$set": update})
 	if err != nil {
@@ -249,7 +182,7 @@ func UpdateCredentials(c echo.Context) (err error) {
 	}
 
 	if result.MatchedCount == 1 {
-		if err := cdb.FindOne(ctx, bson.M{"credentialsName": search_val}).Decode(&cdb); err != nil {
+		if err := cdb.FindOne(ctx, bson.M{"name": search_val}).Decode(&cdb); err != nil {
 			common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Credentials."))
 			return nil
 		}

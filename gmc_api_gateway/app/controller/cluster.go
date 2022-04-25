@@ -78,6 +78,7 @@ func ListCluster(c echo.Context) (err error) {
 			log.Fatal(err)
 		}
 		results = append(results, elem)
+		fmt.Println(results)
 	}
 
 	if err := cur.Err(); err != nil {

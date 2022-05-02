@@ -167,7 +167,7 @@ func FindProject(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Project not found."))
 		return
 	} else {
-		return c.JSON(http.StatusOK, showsProject)
+		return c.JSON(http.StatusOK, showsProject[0])
 	}
 }
 

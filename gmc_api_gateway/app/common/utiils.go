@@ -1,7 +1,9 @@
 package common
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 
@@ -83,4 +85,12 @@ func ConvertStringToUuid(data string) (uuidData uuid.UUID, err error) {
 	}
 
 	return uuid, nil
+}
+
+func StringToMapInterface(i string) map[string]interface{} {
+	x := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(i), &x); err != nil {
+		fmt.Printf("Error : %s\n", err)
+	}
+	return x
 }

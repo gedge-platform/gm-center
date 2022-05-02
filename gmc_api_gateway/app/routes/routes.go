@@ -42,4 +42,5 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/vm/:vm_name/suspend", c.VmSuspend)
 	r.GET("/vm/:vm_name/resume", c.VmResume)
+	r.GET("/vm/:vm_name/reboot", c.VmReboot)
 }

@@ -266,3 +266,75 @@ func UpdateProject(c echo.Context) (err error) {
 		"data":   search_val + " Updated Complete",
 	})
 }
+
+func GetDBProject(params model.PARAMS) model.DBProject {
+	var project model.NewProject
+	var showsProject model.DBProject
+	var results bson.M
+	var workspace model.Workspace
+	var user model.Member
+	var clusterList []model.Cluster
+	cdb := GetClusterDB("project")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := params.Project
+
+	// query := &bson.M{
+	// 	"projectOwner": params.User,
+	// 	"projectName":  search_val,
+	// }
+
+	if err := cdb.FindOne(ctx, bson.M{"projectName": search_val}).Decode(&project); err != nil {
+
+	}
+	if err := cdb.FindOne(ctx, bson.M{"projectName": search_val}).Decode(&results); err != nil {
+
+	}
+	if err := cdb.FindOne(ctx, bson.M{"projectName": search_val}).Decode(&showsProject); err != nil {
+
+	}
+	user_objectId := project.Owner
+	userList := GetClusterDB("member")
+	users, _ := context.WithTimeout(context.Background(), time.Second*10)
+	if err := userList.FindOne(users, bson.M{"_id": user_objectId}).Decode(&user); err != nil {
+	}
+	workspace_objectId := project.Workspace
+	workspaceList := GetClusterDB("workspace")
+	workspaces, _ := context.WithTimeout(context.Background(), time.Second*10)
+	if err := workspaceList.FindOne(workspaces, bson.M{"_id": workspace_objectId}).Decode(&workspace); err != nil {
+	}
+	tempList := GetClusterDB("cluster")
+
+	clusters, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	cluster_objectId := project.Selectcluster
+	for i := range cluster_objectId {
+		var cluster model.Cluster
+		if err := tempList.FindOne(clusters, bson.M{"_id": cluster_objectId[i]}).Decode(&cluster); err != nil {
+
+		}
+
+		clusterList = append(clusterList, cluster)
+	}
+	showsProject.Workspace = workspace
+	showsProject.Selectcluster = clusterList
+	showsProject.MemberName = user.Id
+	return showsProject
+}
+
+func GetDBProjectList(params model.PARAMS, obj primitive.ObjectID, search_type string) []bson.M {
+	cdb := GetClusterDB("project")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := obj
+
+	cursor, err := cdb.Find(context.TODO(), bson.D{{search_type, search_val}})
+	if err != nil {
+		log.Fatal(err)
+	}
+	var results []bson.M
+	if err = cursor.All(ctx, &results); err != nil {
+		log.Fatal(err)
+	}
+
+	return results
+
+}

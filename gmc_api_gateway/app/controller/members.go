@@ -175,3 +175,27 @@ func UpdateMember(c echo.Context) (err error) {
 		"data":   search_val + " Updated Complete",
 	})
 }
+
+func FindDBwithPW(select_val string, search_val string) *model.MemberWithPassword {
+	var models model.MemberWithPassword
+	cdb := GetDB("member")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&models); err != nil {
+		return nil
+	} else if err := cdb.FindOne(ctx, bson.M{"memberName": search_val}).Decode(&models); err != nil {
+		return nil
+	}
+	return &models
+}
+
+func FindMemberDB(params model.PARAMS) model.Member {
+	var member model.Member
+	cdb := GetClusterDB("member")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := params.User
+
+	if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&member); err != nil {
+	}
+	return member
+}

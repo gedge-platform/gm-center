@@ -102,6 +102,48 @@ func FindCluster(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, &cluster)
 	}
 }
+func ListClusterDB(name string) []model.Cluster {
+	var results []model.Cluster
+	cdb := GetClusterDB(name)
+
+	findOptions := options.Find()
+
+	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for cur.Next(context.TODO()) {
+		var elem model.Cluster
+		if err := cur.Decode(&elem); err != nil {
+			log.Fatal(err)
+		}
+		results = append(results, elem)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	cur.Close(context.TODO())
+
+	return results
+}
+func FindClusterDB(value string) *model.Cluster {
+	fmt.Println("[####asdfsdfsadf] : ")
+	var cluster model.Cluster
+	cdb := GetClusterDB("cluster")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := value
+
+	if err := cdb.FindOne(ctx, bson.M{"clusterName": search_val}).Decode(&cluster); err != nil {
+		// common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
+		return nil
+	} else {
+		fmt.Println("[####cluster] : ", &cluster)
+		return &cluster
+	}
+}
 
 func DeleteCluster(c echo.Context) (err error) {
 	cdb := GetClusterDB("cluster")

@@ -36,3 +36,12 @@ type NewWorkspace struct {
 	Creator       primitive.ObjectID   `json:"workspaceCreator,omitempty" bson:"workspaceCreator" validate:"required"`
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster"`
 }
+
+type DBWorkspace struct {
+	ObjectID      primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
+	Name          string             `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
+	Description   string             `json:"workspaceDescription,omitempty" bson:"workspaceDescription" validate:"required"`
+	MemberName    string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`
+	Selectcluster []Cluster          `json:"selectCluster,omitempty" bson:"selectCluster"`
+	Created_at    primitive.DateTime `json:"created_at,omitempty"`
+}

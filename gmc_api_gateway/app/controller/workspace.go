@@ -251,3 +251,46 @@ func UpdateWorkspace(c echo.Context) (err error) {
 		"data":   search_val + " Updated Complete",
 	})
 }
+
+func GetDBWorkspace(params model.PARAMS) model.DBWorkspace {
+	var workspace model.NewWorkspace
+	var showsWorkspace model.DBWorkspace
+	var clusters []model.Cluster
+	var user model.Member
+	// var workspace model.Workspace
+	cdb := GetClusterDB("workspace")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := params.Workspace
+
+	if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&workspace); err != nil {
+
+	}
+
+	if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&showsWorkspace); err != nil {
+
+	}
+	user_objectId := workspace.Owner
+	userList := GetClusterDB("member")
+	users, _ := context.WithTimeout(context.Background(), time.Second*10)
+	if err := userList.FindOne(users, bson.M{"_id": user_objectId}).Decode(&user); err != nil {
+	}
+	tempList := GetClusterDB("cluster")
+	clusterList, _ := context.WithTimeout(context.Background(), time.Second*10)
+	objectId := workspace.Selectcluster
+	for i := range objectId {
+		var cluster model.Cluster
+		if err := tempList.FindOne(clusterList, bson.M{"_id": objectId[i]}).Decode(&cluster); err != nil {
+
+		}
+		clusters = append(clusters, cluster)
+	}
+	showsWorkspace.Selectcluster = clusters
+	showsWorkspace.MemberName = user.Id
+	// workspaceList := GetClusterDB("workspace")
+	// workspaces, _ := context.WithTimeout(context.Background(), time.Second*10)
+	// if err := workspaceList.FindOne(workspaces, bson.M{"_id": objectId}).Decode(&workspace); err != nil {
+
+	// }
+	// showsProject.Workspace = workspace
+	return showsWorkspace
+}

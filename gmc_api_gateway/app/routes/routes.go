@@ -1,14 +1,58 @@
 package routes
 
 import (
+	"os"
+
 	c "gmc_api_gateway/app/controller"
 
+	"github.com/dgrijalva/jwt-go"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
-func GEdgeRoute(e *echo.Echo) {
+type jwtCustomClaims struct {
+	Name string `json:"name"`
+	Role string `json:"role"`
+	jwt.StandardClaims
+}
 
-	r := e.Group("/gmcapi/v2")
+type DataValidator struct {
+	validator *validator.Validate
+}
+
+func NewValidator() *DataValidator {
+	return &DataValidator{
+		validator: validator.New(),
+	}
+}
+
+func (dv *DataValidator) Validate(i interface{}) error {
+	return dv.validator.Struct(i)
+}
+
+func GEdgeRoute(e *echo.Echo) {
+	e.Validator = NewValidator()
+
+	e.POST("/gmcapi/v2/auth", c.LoginUser)
+
+	r0 := e.Group("/gmcapi/v2/restricted")
+
+	// decoded, err := base64.URLEncoding.DecodeString(os.Getenv("SIGNINGKEY"))
+	// if err != nil {
+	// 	fmt.Println("signingkey base64 decoded Error")
+	// }
+
+	config := middleware.JWTConfig{
+		Claims:     &jwtCustomClaims{},
+		SigningKey: []byte(os.Getenv("SIGNINGKEY")),
+	}
+
+	r0.Use(middleware.JWTWithConfig(config))
+	r0.GET("/test", c.ListMember)
+
+	// /gmcapi/v2
+	r := e.Group("/gmcapi/v2", middleware.JWTWithConfig(config))
 
 	r.POST("/members", c.CreateMember)
 	r.GET("/members", c.ListMember)
@@ -39,4 +83,29 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/request/:requestId", c.FindRequest)
 	r.DELETE("/request/:requestId", c.DeleteRequest)
 	r.PUT("/request/:requestId", c.UpdateRequest)
+	r.GET("/view/:name", c.GetView)
+
+	r.GET("/deployments", c.GetDeployments)
+	r.POST("/deployments", c.CreateDeployment)
+	r.GET("/deployments/:name", c.GetDeployment)
+	// r.PUT("/deployments/:name", api.UpdateDeployment)
+	r.DELETE("/deployments/:name", c.DeleteDeployment)
+
+	r.GET("/services", c.GetServices)
+	r.POST("/services", c.CreateService)
+	r.GET("/services/:name", c.GetService)
+	// r.PUT("/services/:name", api.UpdateService)
+	r.DELETE("/services/:name", c.DeleteService)
+
+	r.GET("/pods", c.GetAllPods)
+	r.POST("/pods", c.CreatePod)
+	r.GET("/pods/:name", c.GetPods)
+	// r.PUT("/pods/:name", api.UpdatePods)
+	r.DELETE("/pods/:name", c.DeletePod)
+
+	r.GET("/jobs", c.GetAllJobs)
+	r.POST("/jobs", c.CreateJob)
+	r.GET("/jobs/:name", c.GetJobs)
+	// r.PUT("/jobs/:name", api.UpdateJob)
+	r.DELETE("/jobs/:name", c.DeleteJob)
 }

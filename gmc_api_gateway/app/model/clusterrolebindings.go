@@ -5,6 +5,8 @@ import "time"
 type CLUSTERROLEBINDING struct {
 	Name        string      `json:"name"`
 	Cluster     string      `json:"cluster"`
+	Workspace   string      `json:"workspace, omitempty"`
+	UserName    string      `json:"user, omitempty"`
 	Labels      interface{} `json:"labels,omitempty"`
 	Subjects    interface{} `json:"subjects"`
 	RoleRef     interface{} `json: "roleRef"`

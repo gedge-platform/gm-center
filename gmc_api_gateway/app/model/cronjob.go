@@ -3,9 +3,10 @@ package model
 import "time"
 
 type CRONJOB struct {
-	Workspace                  string       `json:"workspace"`
+	Workspace                  string       `json:"workspace,omitempty"`
 	Cluster                    string       `json:"cluster"`
 	Namespace                  string       `json:"project"`
+	UserName                   string       `json:"user,omitempty"`
 	Name                       string       `json:"name"`
 	Schedule                   string       `json:"schedule,omitempty"`
 	ConcurrencyPolicy          string       `json:"concurrencyPolicy,omitempty"`

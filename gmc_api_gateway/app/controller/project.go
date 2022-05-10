@@ -320,21 +320,3 @@ func GetDBProject(params model.PARAMS) model.DBProject {
 	showsProject.MemberName = user.Id
 	return showsProject
 }
-
-func GetDBProjectList(params model.PARAMS, obj primitive.ObjectID, search_type string) []bson.M {
-	cdb := GetClusterDB("project")
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := obj
-
-	cursor, err := cdb.Find(context.TODO(), bson.D{{search_type, search_val}})
-	if err != nil {
-		log.Fatal(err)
-	}
-	var results []bson.M
-	if err = cursor.All(ctx, &results); err != nil {
-		log.Fatal(err)
-	}
-
-	return results
-
-}

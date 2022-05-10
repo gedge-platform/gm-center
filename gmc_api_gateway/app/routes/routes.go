@@ -60,17 +60,17 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/members/:memberId", c.DeleteMember)
 	r.PUT("/members/:memberId", c.UpdateMember)
 
-	r.POST("/workspace", c.CreateWorkspace)
-	r.GET("/workspace", c.ListWorkspace)
-	r.GET("/workspace/:workspaceName", c.FindWorkspace)
-	r.DELETE("/workspace/:workspaceName", c.DeleteWorkspace)
-	r.PUT("/workspace/:workspaceName", c.UpdateWorkspace)
-
 	r.POST("/cluster", c.CreateCluster)
 	r.GET("/cluster", c.ListCluster)
 	r.GET("/cluster/:clusterName", c.FindCluster)
 	r.DELETE("/cluster/:clusterName", c.DeleteCluster)
 	r.PUT("/cluster/:clusterName", c.UpdateCluster)
+
+	r.POST("/workspace", c.CreateWorkspace)
+	r.GET("/workspace", c.ListWorkspace)
+	r.GET("/workspace/:workspaceName", c.FindWorkspace)
+	r.DELETE("/workspace/:workspaceName", c.DeleteWorkspace)
+	r.PUT("/workspace/:workspaceName", c.UpdateWorkspace)
 
 	r.POST("/project", c.CreateProject)
 	r.GET("/project", c.ListProject)
@@ -88,24 +88,83 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/deployments", c.GetDeployments)
 	r.POST("/deployments", c.CreateDeployment)
 	r.GET("/deployments/:name", c.GetDeployment)
-	// r.PUT("/deployments/:name", api.UpdateDeployment)
+	// r.PUT("/deployments/:name", c.UpdateDeployment)
 	r.DELETE("/deployments/:name", c.DeleteDeployment)
-
-	r.GET("/services", c.GetServices)
-	r.POST("/services", c.CreateService)
-	r.GET("/services/:name", c.GetService)
-	// r.PUT("/services/:name", api.UpdateService)
-	r.DELETE("/services/:name", c.DeleteService)
 
 	r.GET("/pods", c.GetAllPods)
 	r.POST("/pods", c.CreatePod)
 	r.GET("/pods/:name", c.GetPods)
-	// r.PUT("/pods/:name", api.UpdatePods)
+	// r.PUT("/pods/:name", c.UpdatePods)
 	r.DELETE("/pods/:name", c.DeletePod)
 
 	r.GET("/jobs", c.GetAllJobs)
 	r.POST("/jobs", c.CreateJob)
 	r.GET("/jobs/:name", c.GetJobs)
-	// r.PUT("/jobs/:name", api.UpdateJob)
+	// r.PUT("/jobs/:name", c.UpdateJob)
 	r.DELETE("/jobs/:name", c.DeleteJob)
+
+	r.GET("/cronjobs", c.GetCronAllJobs)
+	r.POST("/cronjobs", c.CreateCronJob)
+	r.GET("/cronjobs/:name", c.GetCronJobs)
+	// r.PUT("/cronjobs/:name", c.UpdateCronJobs)
+	r.DELETE("/cronjobs/:name", c.DeleteCronJob)
+
+	r.GET("/services", c.GetServices)
+	r.POST("/services", c.CreateService)
+	r.GET("/services/:name", c.GetService)
+	// r.PUT("/services/:name", c.UpdateService)
+	r.DELETE("/services/:name", c.DeleteService)
+
+	r.GET("/pvs", c.GetAllPVs)
+	r.POST("/pvs", c.CreatePV)
+	r.GET("/pvs/:name", c.GetPV)
+	// // r.PUT("/services/:name", c.UpdateService)
+	r.DELETE("/pvs/:name", c.DeletePV)
+
+	r.GET("/pvcs", c.GetAllPVCs)
+	r.POST("/pvcs", c.CreatePVC)
+	r.GET("/pvcs/:name", c.GetPVC)
+	// // r.PUT("/services/:name", c.UpdateService)
+	r.DELETE("/pvcs/:name", c.DeletePVC)
+
+	r.GET("/secrets", c.GetAllSecrets)
+	// r.POST("/pvs", c.CreateService)
+	r.GET("/secrets/:name", c.GetSecret)
+	// // r.PUT("/services/:name", c.UpdateService)
+	// r.DELETE("/pvs/:name", c.DeleteService)
+
+	r.GET("/storageclasses/:name", c.GetStorageclass)
+	r.GET("/storageclasses", c.GetStorageclasses)
+	r.POST("/storageclasses", c.CreateStorageclasses)
+	r.DELETE("/storageclasses/:name", c.DeleteStorageclasses)
+
+	r.GET("/clusterroles/:name", c.GetClusterRole)
+	r.GET("/clusterroles", c.GetClusterRoles)
+
+	r.GET("/roles/:name", c.GetRole)
+	r.GET("/roles", c.GetRoles)
+
+	r.GET("/configmaps", c.GetAllConfigmaps)
+	r.GET("/configmaps/:name", c.GetConfigmap)
+	r.GET("/daemonsets", c.GetAllDaemonsets)
+	// r.POST("/pvs", c.CreateService)
+	r.GET("/daemonsets/:name", c.GetDaemonset)
+
+	r.GET("/statefulsets", c.GetAllStatefulset)
+	// r.POST("/pvs", c.CreateService)
+	r.GET("/statefulsets/:name", c.GetStatefulset)
+	// // r.PUT("/services/:name", c.UpdateService)
+	// r.DELETE("/pvs/:name", c.DeleteService)
+
+	r.GET("/serviceaccounts", c.GetAllServiceaccounts)
+	r.GET("/serviceaccounts/:name", c.GetServiceaccount)
+
+	r.GET("/clusterrolebindings", c.GetAllClusterrolebindings)
+	r.GET("/clusterrolebindings/:name", c.GetClusterrolebinding)
+	r.POST("/clusterrolebindings", c.CreateClusterRolebinding)
+	r.DELETE("/clusterrolebindings/:name", c.DeleteClusterRolebinding)
+
+	r.GET("/duplicateCheck/:name", c.DuplicateCheckDB)
+
+	r.GET("/view/:name", c.GetView)
 }

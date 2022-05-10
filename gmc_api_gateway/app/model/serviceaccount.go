@@ -8,6 +8,8 @@ type SERVICEACCOUNT struct {
 	Name      string `json:"name"`
 	NameSpace string `json:"namespace"`
 	Cluster   string `json:"cluster"`
+	Workspace string `json:"workspace,omitempty"`
+	UserName  string `json:"user,omitempty"`
 	// Secrets     string      `json:"secrets"`
 	Secrets     interface{} `json:"secrets, omitempty"`
 	SecretCnt   int         `json:"secretCnt"`

@@ -96,81 +96,275 @@ func CreateProject(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, result)
 }
 
-func ListProject(c echo.Context) (err error) {
-	var showsProject []bson.M
-	cdb := GetProjectDB("project")
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-
-	findOptions := options.Find()
-
-	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	if err != nil {
-		log.Fatal(err)
+func ListUserProject(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		User:      c.QueryParam("user"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
 	}
+	var showsProject []bson.M
+	// var userProject model.NewProject
+	var userProjects []model.USERPROJECT
 
-	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
-		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
+	if params.User == "" {
+		cdb := GetProjectDB("project")
 
-		showProjectCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace})
+		ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-		if err = showProjectCursor.All(ctx, &showsProject); err != nil {
+		findOptions := options.Find()
+
+		cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err = cur.All(ctx, &showsProject); err != nil {
 			panic(err)
 		}
-	}
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	cur.Close(context.TODO())
-
-	return c.JSON(http.StatusOK, showsProject)
-}
-
-func FindProject(c echo.Context) (err error) {
-	var showsProject []bson.M
-	cdb := GetWorkspaceDB("project")
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("projectName")
-
-	findOptions := options.Find()
-
-	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
-		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
-		matchCluster := bson.D{
-			{Key: "$match", Value: bson.D{
-				{Key: "projectName", Value: search_val},
-			}},
+		if err := cur.Err(); err != nil {
+			log.Fatal(err)
 		}
 
-		showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace, matchCluster})
+		cur.Close(context.TODO())
 
-		if err = showLoadedCursor.All(ctx, &showsProject); err != nil {
-			panic(err)
-		}
-		fmt.Println(showsProject)
-	}
-
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	cur.Close(context.TODO())
-
-	if showsProject == nil {
-		common.ErrorMsg(c, http.StatusNotFound, errors.New("Project not found."))
-		return
 	} else {
-		return c.JSON(http.StatusOK, showsProject)
+		userObj := FindMemberDB(params)
+		showsProject = GetDBProjectList(params, userObj.ObjectId, "projectOwner")
 	}
+	for _, project := range showsProject {
+		params.Project = common.InterfaceToString(project["projectName"])
+		temp_project := GetDBProject(params)
+		var UserProject model.USERPROJECT
+		UserProject.DBProject = temp_project
+		userProjects = append(userProjects, UserProject)
+	}
+	// var userProjects []model.USERPROJECT
+
+	// findOptions := options.Find()
+
+	// cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// for cur.Next(context.TODO()) {
+	// 	lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+	// 	lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
+
+	// 	showProjectCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace})
+
+	// 	if err = showProjectCursor.All(ctx, &showsProject); err != nil {
+	// 		panic(err)
+	// 	}
+	// }
+	// if err := cur.Err(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// cur.Close(context.TODO())
+
+	return c.JSON(http.StatusOK, userProjects)
 }
 
+func ListSystemProject(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("cluster"),
+		User:      c.QueryParam("user"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	Projects := ListDB("project")
+	params.Project = ""
+	var projects []model.SYSTEMPROJECT
+	getData := GetModelList(params)
+	fmt.Println("getData : ", getData)
+	for k, _ := range getData {
+		project := model.SYSTEMPROJECT{
+			Name:        common.InterfaceToString(common.FindData(getData[k], "metadata", "name")),
+			Status:      common.InterfaceToString(common.FindData(getData[k], "status", "phase")),
+			ClusterName: common.InterfaceToString(common.FindData(getData[k], "clusterName", "")),
+			CreateAt:    common.InterfaceToTime(common.FindData(getData[k], "metadata", "creationTimestamp")),
+		}
+		projects = append(projects, project)
+	}
+	projectList := difference(Projects, projects)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": projectList,
+	})
+
+}
+func difference(slice1 []primitive.M, slice2 []model.SYSTEMPROJECT) []model.SYSTEMPROJECT {
+	var diff []model.SYSTEMPROJECT
+
+	for _, s1 := range slice2 {
+		found := false
+		for _, s2 := range slice1 {
+			if s1.Name == common.InterfaceToString(s2["projectName"]) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, s1)
+		}
+	}
+	return diff
+}
+
+func GetUserProject(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("cluster"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	params.Project = params.Name
+	project := GetDBProject(params)
+	if project.Name == "" {
+		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+		})
+	}
+	clusters := project.Selectcluster
+	resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, clusters)
+
+	var detailList []model.PROJECT_DETAIL
+	for _, cluster := range clusters {
+		params.Cluster = cluster.Name
+		// params.Project = ""
+		getData, err := common.DataRequest(params)
+		if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
+			msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+			return c.JSON(http.StatusNotFound, echo.Map{
+				"error": msg,
+			})
+		}
+		// tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
+		// tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
+		fmt.Println("getData : ", getData)
+		projectDetail := model.PROJECT_DETAIL{
+			Status:        common.InterfaceToString(common.FindData(getData, "status", "phase")),
+			ClusterName:   cluster.Name,
+			Resource:      resourceCnt,
+			Label:         common.FindData(getData, "metadata", "labels"),
+			Annotation:    common.FindData(getData, "metadata", "annotations"),
+			ResourceUsage: resourceUsage,
+			CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+		}
+		detailList = append(detailList, projectDetail)
+
+	}
+	userProject := model.USERPROJECT{
+		DBProject: project,
+		Events:    eventList,
+		Detail:    detailList,
+	}
+
+	// var showsProject []bson.M
+	// cdb := GetWorkspaceDB("project")
+	// ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	// search_val := c.Param("projectName")
+
+	// findOptions := options.Find()
+
+	// cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// for cur.Next(context.TODO()) {
+	// 	lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+	// 	lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
+	// 	matchCluster := bson.D{
+	// 		{Key: "$match", Value: bson.D{
+	// 			{Key: "projectName", Value: search_val},
+	// 		}},
+	// 	}
+
+	// 	showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace, matchCluster})
+
+	// 	if err = showLoadedCursor.All(ctx, &showsProject); err != nil {
+	// 		panic(err)
+	// 	}
+	// 	fmt.Println(showsProject)
+	// }
+
+	// if err := cur.Err(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// cur.Close(context.TODO())
+
+	// if showsProject == nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, errors.New("Project not found."))
+	// 	return
+	// } else {
+	// 	return c.JSON(http.StatusOK, showsProject)
+	// }
+	return c.JSON(http.StatusOK, userProject)
+
+}
+func GetSystemProject(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("cluster"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	if params.Cluster == "" {
+		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrClusterNotFound)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+		})
+	}
+	params.Project = params.Name
+	getData, err := common.DataRequest(params)
+	if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
+		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+		})
+	}
+	fmt.Println("getData : ", getData)
+	// for k, _ := range getData {
+	project := model.SYSTEMPROJECT{
+		Name:        common.InterfaceToString(common.FindData(getData, "metadata", "name")),
+		Status:      common.InterfaceToString(common.FindData(getData, "status", "phase")),
+		ClusterName: common.InterfaceToString(common.FindData(getData, "clusterName", "")),
+		CreateAt:    common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
+	}
+	project.Detail.ClusterName = params.Cluster
+	project.Detail.CreateAt = common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp"))
+	project.Detail.Label = common.FindData(getData, "metadata", "labels")
+	project.Detail.Annotation = common.FindData(getData, "metadata", "Annotations")
+	var Clusters []model.Cluster
+	var tsCluster model.Cluster
+	cluster := FindClusterDB(params.Cluster)
+	common.Transcode(cluster, &tsCluster)
+	Clusters = append(Clusters, tsCluster)
+	resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, Clusters)
+	project.Events = eventList
+	project.Detail.ResourceUsage = resourceUsage
+	project.Detail.Resource = resourceCnt
+
+	return c.JSON(http.StatusOK, project)
+}
 func DeleteProject(c echo.Context) (err error) {
 	cdb := GetProjectDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)

@@ -91,10 +91,10 @@ func LoginUser(c echo.Context) (err error) {
 		}
 		fmt.Println("token is : ", accessToken)
 		return c.JSON(http.StatusOK, echo.Map{
-			"status":       200,
-			"access-token": accessToken,
-			"userRole":     userRole,
-			"userId":       user.Id,
+			"status":      200,
+			"accessToken": accessToken,
+			"userRole":    userRole,
+			"userId":      user.Id,
 		})
 	}
 	return c.JSON(http.StatusUnauthorized, false)

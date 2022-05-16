@@ -62,21 +62,23 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.POST("/cluster", c.CreateCluster)
 	r.GET("/cluster", c.ListCluster)
-	r.GET("/cluster/:clusterName", c.FindCluster)
-	r.DELETE("/cluster/:clusterName", c.DeleteCluster)
-	r.PUT("/cluster/:clusterName", c.UpdateCluster)
+	r.GET("/cluster/:name", c.FindCluster)
+	r.DELETE("/cluster/:name", c.DeleteCluster)
+	r.PUT("/cluster/:name", c.UpdateCluster)
 
 	r.POST("/workspace", c.CreateWorkspace)
 	r.GET("/workspace", c.ListWorkspace)
-	r.GET("/workspace/:workspaceName", c.FindWorkspace)
-	r.DELETE("/workspace/:workspaceName", c.DeleteWorkspace)
-	r.PUT("/workspace/:workspaceName", c.UpdateWorkspace)
+	r.GET("/workspace/:name", c.FindWorkspace)
+	r.DELETE("/workspace/:name", c.DeleteWorkspace)
+	r.PUT("/workspace/:name", c.UpdateWorkspace)
 
 	r.POST("/project", c.CreateProject)
-	r.GET("/project", c.ListProject)
-	r.GET("/project/:projectName", c.FindProject)
-	r.DELETE("/project/:projectName", c.DeleteProject)
-	r.PUT("/project/:projectName", c.UpdateProject)
+	r.GET("/userProjects", c.ListUserProject)
+	r.GET("/systemProjects", c.ListSystemProject)
+	r.GET("/userProjects/:name", c.GetUserProject)
+	r.GET("/systemProjects/:name", c.GetSystemProject)
+	r.DELETE("/project/:name", c.DeleteProject)
+	r.PUT("/project/:name", c.UpdateProject)
 
 	r.POST("/request", c.CreateRequest)
 	r.GET("/request", c.ListRequest)
@@ -167,4 +169,6 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/duplicateCheck/:name", c.DuplicateCheckDB)
 
 	r.GET("/view/:name", c.GetView)
+
+	e.GET("/clusterInfo", c.GetClusterInfo)
 }

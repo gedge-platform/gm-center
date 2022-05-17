@@ -62,7 +62,18 @@ func CreateCluster(c echo.Context) (err error) {
 }
 
 func ListCluster(c echo.Context) (err error) {
-	var results []model.Cluster
+	params := model.PARAMS{
+		Kind:      "nodes",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		User:      c.QueryParam("user"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	var results []model.CLUSTER
+	var results2 []model.CLUSTER
 	cdb := GetClusterDB("cluster")
 
 	findOptions := options.Find()
@@ -77,7 +88,9 @@ func ListCluster(c echo.Context) (err error) {
 		if err := cur.Decode(&elem); err != nil {
 			log.Fatal(err)
 		}
-		results = append(results, elem)
+		var cluster model.CLUSTER
+		cluster.Cluster = elem
+		results = append(results, cluster)
 	}
 
 	if err := cur.Err(); err != nil {
@@ -85,21 +98,106 @@ func ListCluster(c echo.Context) (err error) {
 	}
 
 	cur.Close(context.TODO())
-
-	return c.JSON(http.StatusOK, results)
+	for _, cluster := range results {
+		params.Name = cluster.Name
+		gpuList, check := GpuCheck(cluster.Name)
+		fmt.Println("gpuList : ", gpuList)
+		fmt.Println("check : ", check)
+		if check == true {
+			cluster.GpuCnt = len(gpuList)
+		} else {
+			cluster.GpuCnt = 0
+		}
+		params.Cluster = cluster.Name
+		params.Name = ""
+		getData, err := common.DataRequest(params)
+		if err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, err)
+			return nil
+		}
+		cluster.NodeCnt = common.InterfaceOfLen(common.FindData(getData, "items", ""))
+		tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
+		tempresult := NowMonit("cluster", params.Cluster, params.Name, tempMetric)
+		cluster.ResourceUsage = tempresult
+		results2 = append(results2, cluster)
+	}
+	return c.JSON(http.StatusOK, results2)
 }
 
 func FindCluster(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "nodes",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		User:      c.QueryParam("user"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
 	var cluster model.Cluster
 	cdb := GetClusterDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("clusterName")
+	search_val := params.Name
 
 	if err := cdb.FindOne(ctx, bson.M{"clusterName": search_val}).Decode(&cluster); err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
 		return nil
 	} else {
-		return c.JSON(http.StatusOK, &cluster)
+		Cluster := model.CLUSTER_DETAIL{
+			Cluster: cluster,
+		}
+		gpuList, check := GpuCheck(params.Name)
+		if check != false {
+			Cluster.Gpu = gpuList
+		} else {
+			Cluster.Gpu = nil
+		}
+		params.Cluster = params.Name
+		params.Name = ""
+		getData, err := common.DataRequest(params)
+		if err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, err)
+			return nil
+		}
+		Nodes, _ := common.FindDataLabelKey(getData, "items", "labels", "node-role.kubernetes.io/master")
+		var NodeList []model.NODE
+		for n, _ := range Nodes {
+			Node := model.NODE{
+				Name:     common.InterfaceToString(common.FindData(Nodes[n], "metadata", "name")),
+				NodeType: common.InterfaceToString(common.FindData(Nodes[n], "nodeType", "")),
+
+				CreateAt:    common.InterfaceToTime(common.FindData(Nodes[n], "metadata", "creationTimestamp")),
+				Version:     common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "kubeletVersion")),
+				Label:       common.FindData(Nodes[n], "metadata", "labels"),
+				Annotation:  common.FindData(Nodes[n], "metadata", "annotations"),
+				Allocatable: common.FindData(Nodes[n], "status", "allocatable"),
+				IP:          common.InterfaceToString(common.FindData(Nodes[n], "status", "addresses.0.address")),
+				// Status                   : common.InterfaceToString(common.FindData(Nodes[n], "metadata", "name")),
+				// Network                 : common.InterfaceToString(common.FindData(Nodes[n], "metadata", "name")),
+				Os:                      common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "osImage")),
+				Kernel:                  common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "kernelVersion")),
+				ContainerRuntimeVersion: common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "containerRuntimeVersion")),
+				Capacity:                common.FindData(Nodes[n], "status", "capacity"),
+				// Addresses  : common.InterfaceToString(common.FindData(Nodes[n], "metadata", "name")),
+			}
+			NodeList = append(NodeList, Node)
+		}
+		ResourceCnt := model.Resource_cnt{
+			DeploymentCount:  ResourceCnt(params, "deployments"),
+			DaemonsetCount:   ResourceCnt(params, "daemonsets"),
+			StatefulsetCount: ResourceCnt(params, "statefulsets"),
+			PodCount:         ResourceCnt(params, "deployments"),
+			ServiceCount:     ResourceCnt(params, "pods"),
+			CronjobCount:     ResourceCnt(params, "cronjobs"),
+			JobCount:         ResourceCnt(params, "jobs"),
+			VolumeCount:      ResourceCnt(params, "persistentvolumeclaims"),
+		}
+
+		Cluster.Resource = ResourceCnt
+		Cluster.Nodes = NodeList
+		Cluster.Events = getCallEvent(params)
+		return c.JSON(http.StatusOK, Cluster)
 	}
 }
 func ListClusterDB(name string) []model.Cluster {
@@ -130,7 +228,6 @@ func ListClusterDB(name string) []model.Cluster {
 	return results
 }
 func FindClusterDB(value string) *model.Cluster {
-	fmt.Println("[####asdfsdfsadf] : ")
 	var cluster model.Cluster
 	cdb := GetClusterDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)

@@ -958,33 +958,50 @@ func getURL(c echo.Context, kind string) string {
 }
 
 func applicationResource(c echo.Context) error {
-	cluster_name := c.Param("cluster_name")
-	namespace_name := c.Param("namespace_name")
+	cluster_name := c.Param("name")
+	// namespace_name := c.Param("namespace_name")
 
-	var nodes, namespaces, pods, deployments, services, endpoints, jobs, cronjobs int
+	var nodes, namespaces, pods, deployments, services, endpoints, jobs, cronjobs, daemonsets, statefulsets, volumes int
 
-	log.Printf("[#63] cluster : %s, namespace : %s", cluster_name, namespace_name)
+	// log.Printf("[#63] cluster : %s, namespace : %s", cluster_name, namespace_name)
 
 	nodes = len(gjson.Parse(getData(c, getURL(c, "nodes"), false)).Get("items").Array())
 	namespaces = len(gjson.Parse(getData(c, getURL(c, "namespaces"), false)).Get("items").Array())
 	pods = len(gjson.Parse(getData(c, getURL(c, "pods"), false)).Get("items").Array())
 	deployments = len(gjson.Parse(getData(c, getURL(c, "deployments"), false)).Get("items").Array())
+	daemonsets = len(gjson.Parse(getData(c, getURL(c, "daemonsets"), false)).Get("items").Array())
+	statefulsets = len(gjson.Parse(getData(c, getURL(c, "statefulsets"), false)).Get("items").Array())
 	services = len(gjson.Parse(getData(c, getURL(c, "services"), false)).Get("items").Array())
 	endpoints = len(gjson.Parse(getData(c, getURL(c, "endpoints"), false)).Get("items").Array())
 	jobs = len(gjson.Parse(getData(c, getURL(c, "jobs"), false)).Get("items").Array())
 	cronjobs = len(gjson.Parse(getData(c, getURL(c, "cronjobs"), false)).Get("items").Array())
+	volumes = len(gjson.Parse(getData(c, getURL(c, "persistentvolumeclaims"), false)).Get("items").Array())
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"count": echo.Map{
-			"cluster_name":     cluster_name,
-			"node_count":       nodes,
-			"namespace_count":  namespaces,
-			"pod_count":        pods,
-			"deployment_count": deployments,
-			"service_count":    services,
-			"endpoint_count":   endpoints,
-			"job_count":        jobs,
-			"cronjob_count":    cronjobs,
-		},
+		"cluster_name":      cluster_name,
+		"node_count":        nodes,
+		"namespace_count":   namespaces,
+		"pod_count":         pods,
+		"deployment_count":  deployments,
+		"daemonset_count":   daemonsets,
+		"statefulset_count": statefulsets,
+		"service_count":     services,
+		"endpoint_count":    endpoints,
+		"job_count":         jobs,
+		"cronjob_count":     cronjobs,
+		"volume_count":      volumes,
 	})
 }
+
+
+// func ResourceCnt(params model.PARAMS, kind string) int {
+// 	fmt.Printf("[##]params : %+v\n", params)
+// 	params.Kind = kind
+// 	params.Project = ""
+// 	params.Name = ""
+// 	deployments, _ := common.DataRequest(params)
+// 	deployment := common.FindingArray(common.Finding(deployments, "items"))
+// 	deployment_cnt := common.FindingLen2(deployment)
+// 	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
+// 	return deployment_cnt
+// }

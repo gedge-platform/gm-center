@@ -26,15 +26,16 @@ type CLUSTER struct {
 	Cluster
 	// Status                  string                   `json:"status"`
 	// Network                 string                   `json:"network"`
-	Gpu           []map[string]interface{} `json:"gpu"`
-	ResourceUsage interface{}              `json:"resourceUsage"`
-	NodeCnt       int                      `json:"nodeCnt"`
+	GpuCnt int `json:"gpuCnt"`
+	// Gpu           []map[string]interface{} `json:"gpu,omitempty"`
+	ResourceUsage interface{} `json:"resourceUsage"`
+	NodeCnt       int         `json:"nodeCnt"`
 }
 
 type CLUSTER_DETAIL struct {
 	Cluster
 	Gpu      []map[string]interface{} `json:"gpu"`
-	Resource Resource_cnt             `json:"resource"`
+	Resource interface{}              `json:"resource"`
 	Nodes    []NODE                   `json:"nodes"`
 	Events   []EVENT                  `json:"events"`
 }

@@ -993,7 +993,6 @@ func applicationResource(c echo.Context) error {
 	})
 }
 
-
 // func ResourceCnt(params model.PARAMS, kind string) int {
 // 	fmt.Printf("[##]params : %+v\n", params)
 // 	params.Kind = kind
@@ -1005,3 +1004,52 @@ func applicationResource(c echo.Context) error {
 // 	// fmt.Printf("deployment_cnt : %d\n", deployment_cnt)
 // 	return deployment_cnt
 // }
+
+func RequsetKube(url string, method string, reqdata []byte, token string) int {
+
+	switch method {
+	case "POST":
+		client := &http.Client{}
+		req, _ := http.NewRequest(method, url, bytes.NewBuffer(reqdata))
+
+		req.Header.Add("Authorization", "Bearer "+token)
+		req.Header.Add("Content-Type", "application/json")
+
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+		res, err := client.Do(req)
+		if err != nil {
+			fmt.Println(err)
+			return 0
+		}
+		defer res.Body.Close()
+
+		// body, err := ioutil.ReadAll(res.Body)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	return 0
+		// }
+
+		// return res.StatusCode, string(body)
+		return res.StatusCode
+	case "DELETE":
+		client := &http.Client{}
+		req, _ := http.NewRequest(method, url, nil)
+
+		req.Header.Add("Authorization", "Bearer "+token)
+		req.Header.Add("Content-Type", "application/json")
+
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+		res, err := client.Do(req)
+		if err != nil {
+			fmt.Println(err)
+			return 500
+		}
+
+		return res.StatusCode
+	case "PUT":
+	case "PATCH":
+	}
+	return 404
+}

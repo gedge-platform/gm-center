@@ -18,8 +18,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetDBProjectList(params model.PARAMS, obj primitive.ObjectID, search_type string) []bson.M {
-	cdb := GetClusterDB("project")
+func GetDBList(params model.PARAMS, collectionName string, obj primitive.ObjectID, search_type string) []bson.M {
+	cdb := GetClusterDB(collectionName)
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := obj
 

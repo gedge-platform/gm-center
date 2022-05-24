@@ -88,78 +88,179 @@ func CreateWorkspace(c echo.Context) (err error) {
 }
 
 func ListWorkspace(c echo.Context) (err error) {
-	var showsWorkspace []bson.M
-	cdb := GetWorkspaceDB("workspace")
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-
-	findOptions := options.Find()
-
-	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	if err != nil {
-		log.Fatal(err)
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		User:      c.QueryParam("user"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
 	}
+	var showsWorkspace []bson.M
+	var Workspace []model.DBWorkspace
 
-	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+	if params.User == "" {
 
-		fmt.Println("ttt : ", mongo.Pipeline{lookupCluster})
-		showWorkspaceCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster})
+		cdb := GetWorkspaceDB("workspace")
+		ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-		if err = showWorkspaceCursor.All(ctx, &showsWorkspace); err != nil {
+		findOptions := options.Find()
+
+		cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err = cur.All(ctx, &showsWorkspace); err != nil {
 			panic(err)
 		}
+		// for cur.Next(context.TODO()) {
+		// 	lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+
+		// 	fmt.Println("ttt : ", mongo.Pipeline{lookupCluster})
+		// 	showWorkspaceCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster})
+
+		// 	if err = showWorkspaceCursor.All(ctx, &showsWorkspace); err != nil {
+		// 		panic(err)
+		// 	}
+		// }
+
+		if err := cur.Err(); err != nil {
+			log.Fatal(err)
+		}
+
+		cur.Close(context.TODO())
+	} else {
+		userObj := FindMemberDB(params)
+		showsWorkspace = GetDBList(params, "workspace", userObj.ObjectId, "workspaceOwner")
 	}
-
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+	for _, workspace := range showsWorkspace {
+		params.Workspace = common.InterfaceToString(workspace["workspaceName"])
+		temp_workspace := GetDBWorkspace(params)
+		Workspace = append(Workspace, temp_workspace)
 	}
-
-	cur.Close(context.TODO())
-
-	return c.JSON(http.StatusOK, showsWorkspace)
+	return c.JSON(http.StatusOK, Workspace)
 }
 
 func FindWorkspace(c echo.Context) (err error) {
-	var showsWorkspace []bson.M
-	cdb := GetWorkspaceDB("workspace")
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("workspaceName")
-
-	findOptions := options.Find()
-
-	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	if err != nil {
-		log.Fatal(err)
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		User:      c.QueryParam("user"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
 	}
+	var deployment_count int
+	var daemonset_count int
+	var Statefulset_count int
+	var pod_count int
+	var service_count int
+	var cronjob_count int
+	var job_count int
+	var volume_count int
+	var cpu_usage float64
+	var memory_usage float64
+	var EventList string
+	// var List []model.EVENT
+	params.Workspace = params.Name
+	workspace := GetDBWorkspace(params)
+	var Workspace model.Workspace_detail
+	var projectList []model.Workspace_project
+	Workspace.DBWorkspace = workspace
+	projects := GetDBList(params, "project", workspace.ObjectID, "workspace")
+	fmt.Println("projects : ", projects)
+	for _, project := range projects {
+		params.Project = common.InterfaceToString(project["projectName"])
+		tmp_project := GetDBProject(params)
+		params.Name = common.InterfaceToString(project["projectName"])
+		resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, tmp_project.Selectcluster)
+		// fmt.Println("resourceCnt : ", resourceCnt)
+		// fmt.Println("resourceUsage : ", resourceUsage)
+		fmt.Println("eventList : ", eventList)
 
-	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
-		matchCluster := bson.D{
-			{Key: "$match", Value: bson.D{
-				{Key: "workspaceName", Value: search_val},
-			}},
+		// EventList = EventList + common.InterfaceToString(eventList)
+		project := model.Workspace_project{
+			Name:          tmp_project.Name,
+			SelectCluster: tmp_project.Selectcluster,
+			CreateAt:      tmp_project.Created_at,
+			Creator:       tmp_project.MemberName,
 		}
-
-		showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, matchCluster})
-
-		if err = showLoadedCursor.All(ctx, &showsWorkspace); err != nil {
-			panic(err)
-		}
-		fmt.Println(showsWorkspace)
+		projectList = append(projectList, project)
+		deployment_count += resourceCnt.DeploymentCount
+		daemonset_count += resourceCnt.DaemonsetCount
+		Statefulset_count += resourceCnt.StatefulsetCount
+		pod_count += resourceCnt.PodCount
+		service_count += resourceCnt.ServiceCount
+		cronjob_count += resourceCnt.CronjobCount
+		job_count += resourceCnt.JobCount
+		volume_count += resourceCnt.VolumeCount
+		cpu_usage += resourceUsage.Namespace_cpu
+		memory_usage += resourceUsage.Namespace_memory
 	}
-
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+	ResourceUsage := model.Resource_usage{
+		Namespace_cpu:    common.ToFixed(cpu_usage, 3),
+		Namespace_memory: common.ToFixed(memory_usage, 3),
 	}
-
-	cur.Close(context.TODO())
-
-	if showsWorkspace == nil {
-		common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
-		return
-	} else {
-		return c.JSON(http.StatusOK, showsWorkspace)
+	ResourceCnt := model.Resource_cnt{
+		DeploymentCount:  deployment_count,
+		DaemonsetCount:   daemonset_count,
+		StatefulsetCount: Statefulset_count,
+		PodCount:         pod_count,
+		ServiceCount:     service_count,
+		CronjobCount:     cronjob_count,
+		JobCount:         job_count,
+		VolumeCount:      volume_count,
 	}
+	Workspace.ProjectList = projectList
+	Workspace.Resource = ResourceCnt
+	Workspace.ResourceUsage = ResourceUsage
+	Workspace.Events = common.StringToInterface(EventList)
+	fmt.Println("event : ", common.StringToInterface(EventList))
+	// var showsWorkspace []bson.M
+	// cdb := GetWorkspaceDB("workspace")
+	// ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	// search_val := c.Param("workspaceName")
+
+	// findOptions := options.Find()
+
+	// cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// for cur.Next(context.TODO()) {
+	// 	lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
+	// 	matchCluster := bson.D{
+	// 		{Key: "$match", Value: bson.D{
+	// 			{Key: "workspaceName", Value: search_val},
+	// 		}},
+	// 	}
+
+	// 	showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, matchCluster})
+
+	// 	if err = showLoadedCursor.All(ctx, &showsWorkspace); err != nil {
+	// 		panic(err)
+	// 	}
+	// 	fmt.Println(showsWorkspace)
+	// }
+
+	// if err := cur.Err(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// cur.Close(context.TODO())
+
+	// if showsWorkspace == nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
+	// 	return
+	// } else {
+	// 	return
+	// }
+	return c.JSON(http.StatusOK, Workspace)
 }
 
 func DeleteWorkspace(c echo.Context) (err error) {

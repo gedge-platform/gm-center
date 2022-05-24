@@ -18,6 +18,7 @@ type Project struct {
 	Workspace     primitive.ObjectID `json:"workspace,omitempty" bson:"workspace"`
 	Selectcluster []ProjectClusters  `json:"selectCluster,omitempty" bson:"selectCluster"`
 	ClusterName   []string           `json:"clusterName,omitempty" bson:"selectCluster2"`
+	IstioCheck    string             `json:"istioCheck,omitempty" bson:"istioCheck"`
 	Created_at    primitive.DateTime `json:"created_at,omitempty"`
 }
 
@@ -38,6 +39,7 @@ type RequestProject struct {
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster"`
 	ClusterName   []string             `json:"clusterName,omitempty" bson:"selectCluster2"`
 	Created_at    primitive.DateTime   `json:"created_at,omitempty"`
+	IstioCheck    string               `json:"istioCheck,omitempty" bson:"istioCheck"`
 }
 
 type NewProject struct {
@@ -49,6 +51,7 @@ type NewProject struct {
 	Creator       primitive.ObjectID   `json:"projectCreator,omitempty" bson:"projectCreator" validate:"required"`
 	Workspace     primitive.ObjectID   `json:"workspace,omitempty" bson:"workspace" validate:"required"`
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster" validate:"required"`
+	IstioCheck    string               `json:"istioCheck,omitempty" bson:"istioCheck"`
 	Created_at    primitive.DateTime   `json:"created_at,omitempty"`
 }
 
@@ -63,6 +66,7 @@ type DBProject struct {
 	Workspace     Workspace          `json:"workspace,omitempty" bson:"workspace"`
 	Selectcluster []Cluster          `json:"selectCluster,omitempty" bson:"selectCluster"`
 	Created_at    primitive.DateTime `json:"created_at,omitempty"`
+	IstioCheck    string             `json:"istioCheck,omitempty" bson:"istioCheck"`
 }
 
 type USERPROJECT struct {

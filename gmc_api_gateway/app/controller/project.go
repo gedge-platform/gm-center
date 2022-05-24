@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -20,6 +21,21 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+type Namespace struct {
+	APIVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
+	Metadata   struct {
+		Name   string `json:"name"`
+		Labels struct {
+			IstioCheck string `json:"istio-injection"`
+		} `json:"labels"`
+	} `json:"metadata"`
+	Spec struct {
+	} `json:"spec"`
+	Status struct {
+	} `json:"status"`
+}
 
 func GetProjectDB(name string) *mongo.Collection {
 	db := db.DbManager()
@@ -85,6 +101,7 @@ func CreateProject(c echo.Context) (err error) {
 		Created_at:    models.Created_at,
 		Workspace:     workspaceObjectId2[0][0].Value.(primitive.ObjectID),
 		Selectcluster: slice,
+		IstioCheck:    models.IstioCheck,
 	}
 
 	result, err := cdb.InsertOne(ctx, newProject)
@@ -92,7 +109,41 @@ func CreateProject(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil
 	}
-
+	for _, cluster := range models.ClusterName {
+		clusterInfo := FindClusterDB(cluster)
+		namespace := Namespace{}
+		namespace.APIVersion = "v1"
+		namespace.Kind = "Namespace"
+		namespace.Metadata.Name = models.Name
+		namespace.Metadata.Labels.IstioCheck = models.IstioCheck
+		url := "https://" + clusterInfo.Endpoint + ":6443/api/v1/namespaces/"
+		Token := clusterInfo.Token
+		// fmt.Println("clusterInfo.Endpoint: ", clusterInfo.Endpoint)
+		// fmt.Println("clusterInfo.Token: ", clusterInfo.Token)
+		data, err := json.Marshal(namespace)
+		fmt.Printf("// %s", data)
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+		var jsonStr = []byte(fmt.Sprint(string(data)))
+		code := RequsetKube(url, "POST", jsonStr, Token)
+		fmt.Println("code", code)
+		switch code {
+		case 200:
+		case 201:
+		case 202:
+		// case 409:
+		// cdb.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+		// fmt.Println("result : ", result.InsertedID)
+		// common.ErrorMsg(c, http.StatusBadRequest, err)
+		// return err
+		default:
+			cdb.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+	}
 	return c.JSON(http.StatusOK, result)
 }
 
@@ -133,7 +184,7 @@ func ListUserProject(c echo.Context) (err error) {
 
 	} else {
 		userObj := FindMemberDB(params)
-		showsProject = GetDBProjectList(params, userObj.ObjectId, "projectOwner")
+		showsProject = GetDBList(params, "project", userObj.ObjectId, "projectOwner")
 	}
 	for _, project := range showsProject {
 		params.Project = common.InterfaceToString(project["projectName"])
@@ -366,10 +417,43 @@ func GetSystemProject(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, project)
 }
 func DeleteProject(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("cluster"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
 	cdb := GetProjectDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("projectName")
+	search_val := c.Param("name")
+	params.Project = c.Param("name")
+	project := GetDBProject(params)
+	fmt.Println("project : ", project)
+	for _, cluster := range project.Selectcluster {
+		// fmt.Printf("########clusterName : %s", slice[i])
+		// clusters := GetClusterDB(common.InterfaceToString(slice[i]))
 
+		url := "https://" + cluster.Endpoint + ":6443/api/v1/namespaces/" + params.Name
+		Token := cluster.Token
+
+		if err != nil {
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+
+		code := RequsetKube(url, "DELETE", nil, Token)
+
+		switch code {
+		case 200:
+		case 202:
+		default:
+			common.ErrorMsg(c, http.StatusBadRequest, err)
+			return err
+		}
+	}
 	result, err := cdb.DeleteOne(ctx, bson.M{"projectName": search_val})
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
@@ -504,9 +588,7 @@ func GetDBProject(params model.PARAMS) model.DBProject {
 	for i := range cluster_objectId {
 		var cluster model.Cluster
 		if err := tempList.FindOne(clusters, bson.M{"_id": cluster_objectId[i]}).Decode(&cluster); err != nil {
-
 		}
-
 		clusterList = append(clusterList, cluster)
 	}
 	showsProject.Workspace = workspace

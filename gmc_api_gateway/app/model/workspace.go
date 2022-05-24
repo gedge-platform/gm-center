@@ -45,3 +45,16 @@ type DBWorkspace struct {
 	Selectcluster []Cluster          `json:"selectCluster,omitempty" bson:"selectCluster"`
 	Created_at    primitive.DateTime `json:"created_at,omitempty"`
 }
+type Workspace_detail struct {
+	DBWorkspace
+	ProjectList   []Workspace_project `json:"projectList,omitempty"`
+	Resource      Resource_cnt        `json:"resource,omitempty"`
+	ResourceUsage Resource_usage      `json:"resourceUsage,omitempty"`
+	Events        interface{}         `json:"events"`
+}
+type Workspace_project struct {
+	Name          string             `json:"projectName"`
+	SelectCluster []Cluster          `json:"selectCluster"`
+	CreateAt      primitive.DateTime `json:"created_at"`
+	Creator       string             `json:"projectCreator"`
+}

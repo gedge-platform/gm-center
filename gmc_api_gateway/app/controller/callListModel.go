@@ -56,7 +56,7 @@ func GetModelList(params model.PARAMS) []string {
 		fmt.Println("#################Workspace List")
 		Workspace := GetDBWorkspace(params)
 		objectID := Workspace.ObjectID
-		Projects := GetDBProjectList(params, objectID, "workspace")
+		Projects := GetDBList(params, "project", objectID, "workspace")
 		for _, Project := range Projects {
 			params.Project = common.InterfaceToString(Project["projectName"])
 			fmt.Println("[#####params]", params)

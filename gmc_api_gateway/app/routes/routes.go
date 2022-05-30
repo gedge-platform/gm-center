@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type jwtCustomClaims struct {
@@ -171,4 +172,20 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/view/:name", c.GetView)
 
 	e.GET("/clusterInfo", c.GetClusterInfo)
+
+	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, echo echo.Context) (bool, error) {
+		userChk, _ := c.AuthenticateUser(id, password)
+		return userChk, nil
+	}))
+	// r2.Any("/:cluster_name", api.Kubernetes)
+	// r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)
+	// r2.Any("/:cluster_name/:namespace_name/:kind_name", api.Kubernetes)
+	// r2.Any("/:cluster_name/:namespace_name/:kind_name/*", api.Kubernetes)
+
+	r2.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
+	r2.GET("/monitoring", echo.WrapHandler(promhttp.Handler()))
+	r2.Any("/monitoring/:kind", c.Monit)
+	// r2.Any("/monitoring/:kind/:name", api.Monit)
+	r2.Any("/monitoring/realtime/:kind", c.RealMetrics)
+	r2.Any("/monitoring/realtime", c.RealMetrics)
 }

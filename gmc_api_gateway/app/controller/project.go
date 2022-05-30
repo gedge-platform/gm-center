@@ -596,3 +596,20 @@ func GetDBProject(params model.PARAMS) model.DBProject {
 	showsProject.MemberName = user.Id
 	return showsProject
 }
+
+func DeleteKubeProject(params model.PARAMS, obj primitive.ObjectID) {
+	project := GetDBProject(params)
+	fmt.Println("project : ", project)
+	for _, cluster := range project.Selectcluster {
+		url := "https://" + cluster.Endpoint + ":6443/api/v1/namespaces/" + params.Name
+		Token := cluster.Token
+		code := RequsetKube(url, "DELETE", nil, Token)
+
+		switch code {
+		case 200:
+		case 202:
+		default:
+			fmt.Print("Project Deleted Complete")
+		}
+	}
+}

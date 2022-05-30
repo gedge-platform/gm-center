@@ -36,6 +36,18 @@ func GetDBList(params model.PARAMS, collectionName string, obj primitive.ObjectI
 
 }
 
+func GetDB(collectionName string, obj interface{}, search_type string) bson.M {
+	cdb := GetClusterDB(collectionName)
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := obj
+	var result bson.M
+	if err := cdb.FindOne(ctx, bson.M{search_type: search_val}).Decode(&result); err != nil {
+		return nil
+	}
+	return result
+
+}
+
 func DuplicateCheckDB(c echo.Context) (err error) {
 	search_val := c.Param("name")
 	// var models interface{}

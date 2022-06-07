@@ -63,34 +63,38 @@ func GetAllServiceaccounts(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	getData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
+	// getData, err := common.DataRequest(params)
+	// if err != nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, err)
+	// 	return nil
+	// }
 
 	data := GetModelList(params)
 	fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
 		serviceaccount := model.SERVICEACCOUNT{
-			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			NameSpace:   common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			Secrets:     common.FindData(data[i], "secrets", ""),
-			SecretCnt:   common.InterfaceOfLen(common.FindData(data[i], "secrets", "")),
-			Annotations: common.FindData(getData, "metadata", "annotations"),
-			Label:       common.FindData(data[i], "metadata", "labels"),
-			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
-			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-			Workspace:   common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
-			UserName:    common.InterfaceToString(common.FindData(data[i], "userName", "")),
+			Name:      common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+			NameSpace: common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+			// Secrets:     common.FindData(data[i], "secrets", ""),
+			SecretCnt: common.InterfaceOfLen(common.FindData(data[i], "secrets", "")),
+			// Annotations: common.FindData(data[i], "metadata", "annotations"),
+			// Label:       common.FindData(data[i], "metadata", "labels"),
+			CreateAt:  common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+			Cluster:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+			Workspace: common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
+			UserName:  common.InterfaceToString(common.FindData(data[i], "userName", "")),
 		}
 		if params.User != "" {
 			if params.User == serviceaccount.UserName {
 				serviceaccounts = append(serviceaccounts, serviceaccount)
+			} else if params.User == "all" {
+				serviceaccounts = append(serviceaccounts, serviceaccount)
 			}
 		} else {
-			serviceaccounts = append(serviceaccounts, serviceaccount)
+			if serviceaccount.UserName == "" {
+				serviceaccounts = append(serviceaccounts, serviceaccount)
+			}
 		}
 	}
 

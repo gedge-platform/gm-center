@@ -35,7 +35,7 @@ func AuthenticateUser(id string, password string) (bool, string) {
 	passCheck := strings.Compare(password, "") != 0
 
 	if idCheck && passCheck {
-		fmt.Println("asfasdf")
+		// fmt.Println("asfasdf")
 		if err := cdb.FindOne(ctx, bson.M{"memberId": id}).Decode(&user); err != nil {
 
 			return false, ""
@@ -102,7 +102,7 @@ func LoginUser(c echo.Context) (err error) {
 
 func generateAccessToken(userid string, userrole string) (string, time.Time, error) {
 
-	expirationTime := time.Now().Add(time.Minute * 15)
+	expirationTime := time.Now().Add(time.Minute * 60)
 
 	return generateToken(userid, userrole, expirationTime, []byte(GetJWTSecret()))
 }

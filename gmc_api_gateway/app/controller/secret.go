@@ -47,9 +47,13 @@ func GetAllSecrets(c echo.Context) error {
 		if params.User != "" {
 			if params.User == secret.UserName {
 				secrets = append(secrets, secret)
+			} else if params.User == "all" {
+				secrets = append(secrets, secret)
 			}
 		} else {
-			secrets = append(secrets, secret)
+			if secret.UserName == "" {
+				secrets = append(secrets, secret)
+			}
 		}
 	}
 

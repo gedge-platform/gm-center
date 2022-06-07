@@ -28,11 +28,18 @@ func GetStorageclass(c echo.Context) error {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)
 	// 	return nil
 	// }
+
 	if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
 		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
 		return c.JSON(http.StatusNotFound, echo.Map{
 			"error": msg,
 		})
+	}
+	var allowVolumeExpansion string
+	if common.InterfaceToString(common.FindData(getData, "allowVolumeExpansion", "")) != "" {
+		allowVolumeExpansion = common.InterfaceToString(common.FindData(getData, "allowVolumeExpansion", ""))
+	} else {
+		allowVolumeExpansion = "false"
 	}
 	fmt.Println("[###########storageclass]", getData)
 	storageclass := model.STORAGECLASS{
@@ -41,7 +48,7 @@ func GetStorageclass(c echo.Context) error {
 		ReclaimPolicy:        common.InterfaceToString(common.FindData(getData, "reclaimPolicy", "")),
 		Provisioner:          common.InterfaceToString(common.FindData(getData, "provisioner", "")),
 		VolumeBindingMode:    common.InterfaceToString(common.FindData(getData, "volumeBindingMode", "")),
-		AllowVolumeExpansion: common.InterfaceToString(common.FindData(getData, "allowVolumeExpansion", "")),
+		AllowVolumeExpansion: allowVolumeExpansion,
 		Parameters:           common.FindData(getData, "parameters", ""),
 		CreateAt:             common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Labels:               common.FindData(getData, "metadata", "labels"),

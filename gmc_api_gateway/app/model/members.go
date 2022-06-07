@@ -5,7 +5,7 @@ import (
 )
 
 type Member struct {
-	_id        primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
+	ObjectId   primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
 	Id         string             `json:"memberId,omitempty" bson:"memberId" validate:"required"`
 	Name       string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`
 	Password   string             `json:"password,omitempty" bson:"password" validate:"required,gte=0,lte=10"`
@@ -28,6 +28,11 @@ type RequestMember struct {
 	RoleName   string             `json:"memberRole,omitempty" bson:"memberRole"`
 	Created_at primitive.DateTime `json:"created_at,omitempty"`
 	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
+}
+
+type MemberWithPassword struct {
+	Member
+	Password string `gorm:"column:memberPassword" json:"memberPassword" validate:"required"`
 }
 
 // func (m *Member) Enable() {

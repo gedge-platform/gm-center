@@ -1,9 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 
 	"gmc_api_gateway/app/common"
@@ -13,140 +10,547 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const (
-	defaultbaseURL = "http://210.207.104.188:1024/spider/controlvm/"
-)
+func GetCloudOS(c echo.Context) (err error) {
 
-func VmSuspend(c echo.Context) error {
-
-	method := c.Request().Method
-
-	log.Println("[method] is : ", c.Request().Method)
-	log.Println("[vm_name] is : ", c.Param("vm_name"))
-
-	url := defaultbaseURL + c.Param("vm_name") + "?action=suspend"
-
-	log.Println("[url] is : ", url)
-
-	body := c.Request().Body
-	var i map[string]interface{}
-
-	data, _ := common.HttpRequest(method, url, body)
-
-	jsonResp, err := json.Marshal(data)
-	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	params := model.PARAMS{
+		Kind:   "cloudos",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
-	if err := json.Unmarshal([]byte(jsonResp), &i); err != nil {
-		fmt.Printf("Error : %s\n", err)
-	}
+	getData, err := common.DataRequest_spider(params)
+	cloudos := StringToInterface(getData)
 
-	return c.JSON(http.StatusOK, &i)
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": cloudos,
+	})
+
 }
 
-func VmResume(c echo.Context) error {
+func GetALLCredential(c echo.Context) (err error) {
 
-	method := c.Request().Method
-
-	log.Println("[method] is : ", c.Request().Method)
-	log.Println("[vm_name] is : ", c.Param("vm_name"))
-
-	url := defaultbaseURL + c.Param("vm_name") + "?action=resume"
-
-	log.Println("[url] is : ", url)
-
-	body := c.Request().Body
-	var i map[string]interface{}
-
-	data, _ := common.HttpRequest(method, url, body)
-
-	jsonResp, err := json.Marshal(data)
-	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	params := model.PARAMS{
+		Kind:   "credential",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
-	if err := json.Unmarshal([]byte(jsonResp), &i); err != nil {
-		fmt.Printf("Error : %s\n", err)
-	}
+	getData, err := common.DataRequest_spider(params)
+	credential := StringToInterface(getData)
 
-	return c.JSON(http.StatusOK, &i)
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": credential,
+	})
+
 }
 
-func VmReboot(c echo.Context) error {
+func GetCredential(c echo.Context) (err error) {
 
-	method := c.Request().Method
-
-	log.Println("[method] is : ", c.Request().Method)
-	log.Println("[vm_name] is : ", c.Param("vm_name"))
-
-	url := defaultbaseURL + c.Param("vm_name") + "?action=reboot"
-
-	log.Println("[url] is : ", url)
-
-	body := c.Request().Body
-	var i map[string]interface{}
-
-	data, _ := common.HttpRequest(method, url, body)
-
-	jsonResp, err := json.Marshal(data)
-	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	params := model.PARAMS{
+		Kind:   "credential",
+		Name:   c.Param("credentialName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
-	if err := json.Unmarshal([]byte(jsonResp), &i); err != nil {
-		fmt.Printf("Error : %s\n", err)
-	}
+	getData, err := common.DataRequest_spider(params)
+	credential := StringToInterface(getData)
 
-	return c.JSON(http.StatusOK, &i)
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": credential,
+	})
+
 }
 
-func VmTerminate(c echo.Context) error {
-
-	method := c.Request().Method
-
-	log.Println("[method] is : ", c.Request().Method)
-	log.Println("[vm_name] is : ", c.Param("vm_name"))
-
-	url := defaultbaseURL + c.Param("vm_name") + "?action=terminate"
-
-	log.Println("[url] is : ", url)
-
-	body := c.Request().Body
-	var i map[string]interface{}
-
-	data, _ := common.HttpRequest(method, url, body)
-
-	jsonResp, err := json.Marshal(data)
-	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+func CreateCredential(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:   "credential",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
-	if err := json.Unmarshal([]byte(jsonResp), &i); err != nil {
-		fmt.Printf("Error : %s\n", err)
+	getData, err := common.DataRequest_spider(params)
+	credential := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": credential,
+	})
+}
+
+func DeleteCredential(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "credential",
+		Name:   c.Param("credentialName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
-	return c.JSON(http.StatusOK, &i)
+	getData, err := common.DataRequest_spider(params)
+	credential := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": credential,
+	})
+
+}
+
+func GetALLConnectionconfig(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "connectionconfig",
+		Method: c.Request().Method,
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	connectionconfig := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": connectionconfig,
+	})
+}
+
+func GetConnectionconfig(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "connectionconfig",
+		Name:   c.Param("configName"),
+		Method: c.Request().Method,
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	connectionconfig := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": connectionconfig,
+	})
+}
+
+func CreateConnectionconfig(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "connectionconfig",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	connectionconfig := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": connectionconfig,
+	})
+}
+
+func DeleteConnectionconfig(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "connectionconfig",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	connectionconfig := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": connectionconfig,
+	})
+}
+
+func GetALLClouddriver(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "clouddriver",
+		Method: c.Request().Method,
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	clouddriver := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": clouddriver,
+	})
+}
+
+func GetClouddriver(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "clouddriver",
+		Name:   c.Param("clouddriverName"),
+		Method: c.Request().Method,
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	clouddriver := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": clouddriver,
+	})
+}
+
+func RegisterClouddriver(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "clouddriver",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	clouddriver := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": clouddriver,
+	})
+}
+
+func UnregisterClouddriver(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "clouddriver",
+		Name:   c.Param("clouddriverName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	clouddriver := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": clouddriver,
+	})
+}
+
+func GetALLCloudregion(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "cloudregion",
+		Method: c.Request().Method,
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	cloudregion := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": cloudregion,
+	})
+}
+
+func GetCloudregion(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "cloudregion",
+		Name:   c.Param("cloudregionName"),
+		Method: c.Request().Method,
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	cloudregion := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": cloudregion,
+	})
+}
+
+func RegisterCloudregion(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "cloudregion",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	cloudregion := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": cloudregion,
+	})
+}
+
+func UnregisterCloudregion(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "cloudregion",
+		Name:   c.Param("cloudregionName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	cloudregion := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": cloudregion,
+	})
+}
+
+func VmControl(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "controlvm",
+		Name:   c.Param("vmName"),
+		Action: c.QueryParam("action"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vm := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vm,
+	})
+}
+
+func VmTerminate(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "controlvm",
+		Name:   c.Param("vmName"),
+		Action: c.QueryParam("action"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vm := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vm,
+	})
 }
 
 func GetALLVm(c echo.Context) (err error) {
 
 	params := model.PARAMS{
 		Kind:   "vm",
-		Name:   c.Param("name"),
 		Method: c.Request().Method,
-		Body:   common.ResponseBody(c.Request().Body),
+		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
-	body := make(map[string]string)
-	_ = c.Bind(&body)
-
-	getData, err := common.DataRequest(params)
-
+	getData, err := common.DataRequest_spider(params)
 	vm := StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vm,
 	})
 
+}
+
+func GetVm(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vm",
+		Name:   c.Param("vmName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vm := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vm,
+	})
+
+}
+
+func CreateVm(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:   "vm",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+
+	vm := StringToInterface(getData)
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vm,
+	})
+}
+
+func DeleteVm(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vm",
+		Name:   c.Param("vmName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vm := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vm,
+	})
+
+}
+
+func GetALLVMStatus(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmstatus",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmstatus := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmstatus,
+	})
+}
+
+func GetVMStatus(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmstatus",
+		Name:   c.Param("vmstatusName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmstatus := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmstatus,
+	})
+}
+
+func GetALLVMSpec(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmspec",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmspec := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmspec,
+	})
+}
+
+func GetVMSpec(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmspec",
+		Name:   c.Param("vmspecName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmspec := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmspec,
+	})
+}
+
+func GetALLVMImage(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmimage",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmimage := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmimage,
+	})
+}
+
+func GetVMImage(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmimage",
+		Name:   c.Param("vmImageNameId"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmimage := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmimage,
+	})
+}
+
+func GetALLVPC(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vpc",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vpc := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vpc,
+	})
+}
+
+func GetVPC(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vpc",
+		Name:   c.Param("vpcName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vpc := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vpc,
+	})
+}
+
+func CreateVPC(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vpc",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vpc := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vpc,
+	})
+}
+
+func DeleteVPC(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vpc",
+		Name:   c.Param("vpcName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vpc := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vpc,
+	})
 }

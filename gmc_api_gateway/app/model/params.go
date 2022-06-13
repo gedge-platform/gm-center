@@ -11,4 +11,5 @@ type PARAMS struct {
 	Compare   string `json:"compare,omitempty"`
 	Method    string `json:"reqMethod,omitempty"`
 	Body      string `json:"reqBody,omitempty"`
+	Action    string `json:"action,omitempty"`
 }

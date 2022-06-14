@@ -232,6 +232,22 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.POST("/vm/vpc", c.CreateVPC)
 	r3.DELETE("/vm/vpc/:vpcName", c.DeleteVPC)
 
+	r3.GET("/vm/securitygroup", c.GetALLSecurityGroup)
+	r3.GET("/vm/securitygroup/:securitygroupName", c.GetSecurityGroup)
+	r3.POST("/vm/securitygroup", c.CreateSecurityGroup)
+	r3.DELETE("/vm/securitygroup/:securitygroupName", c.DeleteSecurityGroup)
+
+	r3.POST("/vm/regsecuritygroup", c.CreateSecurityGroup)
+	r3.DELETE("/vm/regsecuritygroup/:securitygroupName", c.DeleteSecurityGroup)
+
+	r3.GET("/vm/keypair", c.GetALLKeypair)
+	r3.GET("/vm/keypair/:keypairName", c.GetKeypair)
+	r3.POST("/vm/keypair", c.CreateKeypair)
+	r3.DELETE("/vm/keypair/:keypairName", c.DeleteKeypair)
+
+	r3.POST("/vm/regkeypair", c.RegisterKeypair)
+	r3.DELETE("/vm/regkeypair/:keypairName", c.UnregisterKeypair)
+
 	r3.GET("/controlvm/:vmName", c.VmControl)
 	r3.DELETE("/controlvm/:vmName", c.VmTerminate)
 

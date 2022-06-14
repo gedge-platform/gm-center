@@ -25,6 +25,10 @@ var listTemplates_spider = map[string]string{
 	"vmspec":           "/spider/vmspec",
 	"vmimage":          "/spider/vmimage",
 	"vpc":              "/spider/vpc",
+	"securitygroup":    "/spider/securitygroup",
+	"regsecuritygroup": "/spider/regsecuritygroup",
+	"keypair":          "/spider/keypair",
+	"regkeypair":       "/spider/regkeypair",
 }
 
 var nsTemplates_spider = map[string]string{

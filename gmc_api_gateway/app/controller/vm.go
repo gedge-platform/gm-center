@@ -554,3 +554,201 @@ func DeleteVPC(c echo.Context) (err error) {
 		"data": vpc,
 	})
 }
+
+func GetALLSecurityGroup(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "securitygroup",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	securitygroup := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": securitygroup,
+	})
+}
+
+func GetSecurityGroup(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "securitygroup",
+		Name:   c.Param("securitygroupName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	securitygroup := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": securitygroup,
+	})
+}
+
+func CreateSecurityGroup(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "securitygroup",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	securitygroup := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": securitygroup,
+	})
+}
+
+func DeleteSecurityGroup(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "securitygroup",
+		Name:   c.Param("securitygroupName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	securitygroup := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": securitygroup,
+	})
+}
+
+func RegisterSecurityGroup(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "regsecuritygroup",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	regsecuritygroup := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": regsecuritygroup,
+	})
+}
+
+func UnregisterSecurityGroup(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "regsecuritygroup",
+		Name:   c.Param("securitygroupName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	regsecuritygroup := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": regsecuritygroup,
+	})
+}
+
+func GetALLKeypair(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "keypair",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	keypair := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": keypair,
+	})
+}
+
+func GetKeypair(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "keypair",
+		Name:   c.Param("keypairName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	keypair := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": keypair,
+	})
+}
+
+func CreateKeypair(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "keypair",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	keypair := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": keypair,
+	})
+}
+
+func DeleteKeypair(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "keypair",
+		Name:   c.Param("keypairName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	keypair := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": keypair,
+	})
+}
+
+func RegisterKeypair(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "regkeypair",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	regkeypair := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": regkeypair,
+	})
+}
+
+func UnregisterKeypair(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "regkeypair",
+		Name:   c.Param("keypairName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	regkeypair := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": regkeypair,
+	})
+}

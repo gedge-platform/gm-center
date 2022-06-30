@@ -8,6 +8,7 @@ import (
 	db "gmc_api_gateway/app/database"
 	"gmc_api_gateway/app/routes"
 	"gmc_api_gateway/config"
+	"gmc_api_gateway/docs"
 
 	_ "gmc_api_gateway/docs"
 
@@ -17,7 +18,7 @@ import (
 )
 
 // @title Gedge GM-Center Swagger API
-// @version 1.0
+// @version 2.0
 // @description This is a Gedge GM-Center Swagger API.
 
 // @contact.name GM-Center
@@ -26,15 +27,15 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host 192.168.150.197:8009
-// @BasePath /gmcapi/v1
+// @host 101.79.1.173:8010
+// @BasePath /gmcapi/v2
 // @schemes http
 // @query.collection.format multi
 
 // @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
+
 func StartGedge() {
+	docs.SwaggerInfo.BasePath = "/gmcapi/v2"
 	config.Init()
 	config := config.GetConfig()
 

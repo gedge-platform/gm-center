@@ -13,11 +13,15 @@ import (
 // GetCronjobs godoc
 // @Summary Show detail cronjob
 // @Description get cronjob Details
+// @ApiImplicitParam
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} model.CRONJOB
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Param name path string true "name of the Cronjob"
 // @Header 200 {string} Token "qwerty"
-// @Router /cronjob/:name [get]
+// @Router /cronjob/{name} [get]
 func GetCronJobs(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -82,7 +86,8 @@ func GetCronJobs(c echo.Context) (err error) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} model.CRONJOB
-// @Header 200 {string} Token "qwerty"
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
 // @Router /cronjobs [get]
 func GetCronAllJobs(c echo.Context) error {
 	var cronjobs []model.CRONJOB

@@ -86,6 +86,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/request/:requestId", c.FindRequest)
 	r.DELETE("/request/:requestId", c.DeleteRequest)
 	r.PUT("/request/:requestId", c.UpdateRequest)
+
 	r.GET("/view/:name", c.GetView)
 
 	r.GET("/deployments", c.GetDeployments)
@@ -189,4 +190,66 @@ func GEdgeRoute(e *echo.Echo) {
 	// r2.Any("/monitoring/:kind/:name", api.Monit)
 	r2.Any("/monitoring/realtime/:kind", c.RealMetrics)
 	r2.Any("/monitoring/realtime", c.RealMetrics)
+
+	r3 := e.Group("/gmcapi/v2/spider")
+	r3.GET("/cloudos", c.GetCloudOS)
+
+	r3.GET("/credentials", c.GetALLCredential)
+	r3.GET("/credentials/:credentialName", c.GetCredential)
+	r3.POST("/credentials", c.CreateCredential)
+	r3.DELETE("/credentials/:credentialName", c.DeleteCredential)
+
+	r3.GET("/connectionconfig", c.GetALLConnectionconfig)
+	r3.GET("/connectionconfig/:configName", c.GetConnectionconfig)
+	r3.POST("/connectionconfig", c.CreateConnectionconfig)
+	r3.DELETE("/connectionconfig/:configName", c.GetConnectionconfig)
+
+	r3.GET("/clouddriver", c.GetALLClouddriver)
+	r3.GET("/clouddriver/:clouddriverName", c.GetClouddriver)
+	r3.POST("/clouddriver", c.RegisterClouddriver)
+	r3.DELETE("/clouddriver/:clouddriverName", c.UnregisterClouddriver)
+
+	r3.GET("/cloudregion", c.GetALLCloudregion)
+	r3.GET("/cloudregion/:cloudregionName", c.GetCloudregion)
+	r3.POST("/cloudregion", c.RegisterCloudregion)
+	r3.DELETE("/cloudregion/:cloudregionName", c.UnregisterCloudregion)
+
+	r3.GET("/vm", c.GetALLVm)
+	r3.GET("/vm/:vmName", c.GetVm)
+	r3.POST("/vm", c.CreateVm)
+	r3.DELETE("/vm/:vmName", c.DeleteVm)
+
+	r3.GET("/vm/vmstatus", c.GetALLVMStatus)
+	r3.GET("/vm/vmstatus/:vmstatusName", c.GetVMStatus)
+
+	r3.GET("/vm/vmspec", c.GetALLVMSpec)
+	r3.GET("/vm/vmspec/:vmspecName", c.GetVMSpec)
+
+	r3.GET("/vm/vmimage", c.GetALLVMImage)
+	r3.GET("/vm/vmimage/:vmImageNameId", c.GetVMImage)
+
+	r3.GET("/vm/vpc", c.GetALLVPC)
+	r3.GET("/vm/vpc/:vpcName", c.GetVPC)
+	r3.POST("/vm/vpc", c.CreateVPC)
+	r3.DELETE("/vm/vpc/:vpcName", c.DeleteVPC)
+
+	r3.GET("/vm/securitygroup", c.GetALLSecurityGroup)
+	r3.GET("/vm/securitygroup/:securitygroupName", c.GetSecurityGroup)
+	r3.POST("/vm/securitygroup", c.CreateSecurityGroup)
+	r3.DELETE("/vm/securitygroup/:securitygroupName", c.DeleteSecurityGroup)
+
+	r3.POST("/vm/regsecuritygroup", c.CreateSecurityGroup)
+	r3.DELETE("/vm/regsecuritygroup/:securitygroupName", c.DeleteSecurityGroup)
+
+	r3.GET("/vm/keypair", c.GetALLKeypair)
+	r3.GET("/vm/keypair/:keypairName", c.GetKeypair)
+	r3.POST("/vm/keypair", c.CreateKeypair)
+	r3.DELETE("/vm/keypair/:keypairName", c.DeleteKeypair)
+
+	r3.POST("/vm/regkeypair", c.RegisterKeypair)
+	r3.DELETE("/vm/regkeypair/:keypairName", c.UnregisterKeypair)
+
+	r3.GET("/controlvm/:vmName", c.VmControl)
+	r3.DELETE("/controlvm/:vmName", c.VmTerminate)
+
 }

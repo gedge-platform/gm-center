@@ -212,7 +212,7 @@ func FindRequest(c echo.Context) (err error) {
 		lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "project"}}}}
 		matchCluster := bson.D{
 			{Key: "$match", Value: bson.D{
-				{Key: "requestId", Value: search_val},
+				{Key: "request_id", Value: search_val},
 			}},
 		}
 
@@ -243,7 +243,7 @@ func DeleteRequest(c echo.Context) (err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("requestId")
 
-	result, err := cdb.DeleteOne(ctx, bson.M{"requestId": search_val})
+	result, err := cdb.DeleteOne(ctx, bson.M{"request_id": search_val})
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
 		return

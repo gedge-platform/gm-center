@@ -49,6 +49,16 @@ func AuthenticateUser(id string, password string) (bool, string) {
 	return true, common.InterfaceToString(user["memberRole"])
 }
 
+// GetCronjobs godoc
+// @Summary Login
+// @Description get JWT token
+// @Param authBody body model.User true "User Info Body"
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.User
+// @Header 200 {string} Token "qwerty"
+// @Router /auth [post]
 func LoginUser(c echo.Context) (err error) {
 
 	var user model.User
@@ -127,4 +137,8 @@ func generateToken(userid string, userrole string, expirationTime time.Time, sec
 
 // func VerifyAccessToken(c echo.Context) (err error) {
 
+// // }
+// func JwtTokenProvider() {
+// 	var secretKey
+// 	var expiredMin
 // }

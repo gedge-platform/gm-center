@@ -170,7 +170,8 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/duplicateCheck/:name", c.DuplicateCheckDB)
 
 	r.GET("/view/:name", c.GetView)
-
+	r.GET("/metallb", c.GetAllMetallb)
+	r.GET("/metallbDetail", c.GetMetallb)
 	e.GET("/clusterInfo", c.GetClusterInfo)
 
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, echo echo.Context) (bool, error) {

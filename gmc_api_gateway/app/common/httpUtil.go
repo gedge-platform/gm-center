@@ -40,6 +40,7 @@ var listTemplates = map[string]string{
 	"persistentvolumes":      "/api/v1/persistentvolumes",
 	"persistentvolumeclaims": "/api/v1/persistentvolumeclaims",
 	"secrets":                "/api/v1/secrets",
+	"metallb":                "/apis/metallb.io/v1beta1/ipaddresspools",
 }
 
 var nsTemplates = map[string]string{
@@ -114,31 +115,31 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	switch reqMethod {
 	case "GET":
 		if resp, err := client.R().SetAuthToken(token).Get(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "POST":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Post(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "PATCH":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "PUT":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "DELETE":
 		if resp, err := client.R().SetAuthToken(token).Delete(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}

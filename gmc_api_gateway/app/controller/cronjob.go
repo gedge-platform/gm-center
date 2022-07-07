@@ -17,10 +17,9 @@ import (
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} model.CRONJOB
-// @Security ApiKeyAuth
-// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Security   Bearer
 // @Param name path string true "name of the Cronjob"
-// @Header 200 {string} Token "qwerty"
+// @Param cluster query string true "cluster Name of the Cronjob"
 // @Router /cronjob/{name} [get]
 func GetCronJobs(c echo.Context) (err error) {
 
@@ -86,8 +85,7 @@ func GetCronJobs(c echo.Context) (err error) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} model.CRONJOB
-// @Security ApiKeyAuth
-// @Param Authorization header string true "Insert your access token" default(Bearer <Add access token here>)
+// @Security Bearer
 // @Router /cronjobs [get]
 func GetCronAllJobs(c echo.Context) error {
 	var cronjobs []model.CRONJOB

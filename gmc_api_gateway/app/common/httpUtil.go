@@ -74,9 +74,9 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	if err := validate(params); err != nil {
 		return "", err
 	}
-	clusters, _ := FindClusterDB(params.Cluster)
-	fmt.Println("[####cluster] : ", clusters)
-	if data, err := FindClusterDB(params.Cluster); err != nil {
+	// clusters, _ := FindClusterDB(params.Cluster)
+	// fmt.Println("[####cluster] : ", clusters)
+	if data, err := FindClusterDB(params.Cluster); err != nil || data.Status == "fail" {
 		return "", err
 	} else {
 		endPoint = data.Endpoint
@@ -105,46 +105,63 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 
 	client := resty.New()
 	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	client.SetTimeout(1 * time.Minute)
+	client.SetTimeout(3 * time.Second)
 	client.SetHeaders(map[string]string{
 		"Access-Control-Allow-Origin": "*",
 		"Content-Type":                "application/json; charset=utf-8",
 		"Accept":                      "application/json; charset=utf-8",
 	})
+	client.OnError(func(req *resty.Request, err error) {
+		if v, ok := err.(*resty.ResponseError); ok {
+			fmt.Println("########################ok")
+			fmt.Println("v : ", v)
+			fmt.Println("ok : ", ok)
+		} else {
+			fmt.Println("######################## !ok")
+			fmt.Println("v : ", v)
+			fmt.Println("ok : ", ok)
+		}
 
+		// Log the error, increment a metric, etc...
+	})
 	switch reqMethod {
 	case "GET":
 		if resp, err := client.R().SetAuthToken(token).Get(url); err != nil {
-			// panic(err)
+
+			fmt.Println("##########err : ", err)
+			break
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "POST":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Post(url); err != nil {
-			// panic(err)
+
+			fmt.Println("##########err : ", err)
+
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "PATCH":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
-			// panic(err)
+
+			fmt.Println("##########err : ", err)
+
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "PUT":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
-			// panic(err)
+
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "DELETE":
 		if resp, err := client.R().SetAuthToken(token).Delete(url); err != nil {
-			// panic(err)
+
 		} else {
 			responseString = string(resp.Body())
 		}
 	}
-
 	return responseString, nil
 }
 
@@ -185,7 +202,7 @@ func UrlExpr(endpoint, project, item, kind string) string {
 
 	defaultUrl := "https://" + endpoint + ":6443"
 	var returnUrl string
-	fmt.Printf("##### teststest : %v,%v \n", check_project, check_item)
+	// fmt.Printf("##### teststest : %v,%v \n", check_project, check_item)
 	if check_project || check_item {
 		// project or item value exist
 		// if err := errCheck(project, item, kind); err != "" {

@@ -20,9 +20,15 @@ func GetModelList(params model.PARAMS) []string {
 		for c, _ := range Clusters {
 			params.Cluster = Clusters[c].Name
 			params.Workspace = Clusters[c].Name
-			getData, _ := common.DataRequest(params)
+			getData, err := common.DataRequest(params)
+
+			if err != nil {
+				fmt.Println("###########err : ", err)
+				continue
+			}
 			getData0 := gjson.Get(getData, "items").Array()
 			for k, _ := range getData0 {
+
 				str := getData0[k].String()
 				namespace := gjson.Get(str, "metadata.namespace")
 				params.Project = namespace.String()

@@ -51,3 +51,8 @@ func Init() {
 		log.Fatal("Error loading .env file")
 	}
 }
+
+// func Test() {
+// 	config.Init()
+// 	IP := os.Getenv("PROMETHEUS")
+// }

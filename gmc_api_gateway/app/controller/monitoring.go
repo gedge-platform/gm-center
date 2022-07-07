@@ -3,8 +3,10 @@ package controller
 import (
 	"context"
 	"fmt"
+	"gmc_api_gateway/config"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -154,8 +156,8 @@ func Monit(c echo.Context) (err error) {
 }
 
 func mericResult(c echo.Context, kind string, a []string) error {
-
-	addr := "http://101.79.4.15:32548/"
+	config.Init()
+	addr := os.Getenv("PROMETHEUS")
 
 	cluster := c.QueryParam("cluster_filter")
 

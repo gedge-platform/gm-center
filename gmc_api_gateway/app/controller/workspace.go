@@ -172,7 +172,6 @@ func FindWorkspace(c echo.Context) (err error) {
 	var projectList []model.Workspace_project
 	Workspace.DBWorkspace = workspace
 	projects := GetDBList(params, "project", workspace.ObjectID, "workspace")
-	fmt.Println("projects : ", projects)
 	for _, project := range projects {
 		params.Project = common.InterfaceToString(project["projectName"])
 		tmp_project := GetDBProject(params)
@@ -180,9 +179,8 @@ func FindWorkspace(c echo.Context) (err error) {
 		resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, tmp_project.Selectcluster)
 		// fmt.Println("resourceCnt : ", resourceCnt)
 		// fmt.Println("resourceUsage : ", resourceUsage)
-		fmt.Println("eventList : ", eventList)
 
-		// EventList = EventList + common.InterfaceToString(eventList)
+		EventList = EventList + common.InterfaceToString(eventList)
 		project := model.Workspace_project{
 			Name:          tmp_project.Name,
 			SelectCluster: tmp_project.Selectcluster,
@@ -219,8 +217,6 @@ func FindWorkspace(c echo.Context) (err error) {
 	Workspace.Resource = ResourceCnt
 	Workspace.ResourceUsage = ResourceUsage
 	Workspace.Events = common.StringToInterface(EventList)
-	fmt.Println("event : ", common.StringToInterface(EventList))
-	// var showsWorkspace []bson.M
 	// cdb := GetWorkspaceDB("workspace")
 	// ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	// search_val := c.Param("workspaceName")

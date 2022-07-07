@@ -124,6 +124,16 @@ func ListCluster(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, results2)
 }
 
+// GetCluster godoc
+// @Summary Show detail cluster
+// @Description get cluster Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.CLUSTER
+// @Security   Bearer
+// @Param name path string true "name of the Cluster"
+// @Router /cluster/{name} [get]
 func FindCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "nodes",

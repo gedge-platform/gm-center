@@ -10,7 +10,14 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "GM-Center",
+            "url": "https://gedge-platform.github.io/gm-center/"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -53,11 +60,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/cluster/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get cluster Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show detail cluster",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTER"
+                        }
+                    }
+                }
+            }
+        },
         "/cronjob/{name}": {
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "get cronjob Details",
@@ -71,17 +112,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "Bearer \u003cAdd access token here\u003e",
-                        "description": "Insert your access token",
-                        "name": "Authorization",
-                        "in": "header",
+                        "description": "name of the Cronjob",
+                        "name": "name",
+                        "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "name of the Cronjob",
-                        "name": "name",
-                        "in": "path",
+                        "description": "cluster Name of the Cronjob",
+                        "name": "cluster",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -90,12 +130,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.CRONJOB"
-                        },
-                        "headers": {
-                            "Token": {
-                                "type": "string",
-                                "description": "qwerty"
-                            }
                         }
                     }
                 }
@@ -105,7 +139,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "Bearer": []
                     }
                 ],
                 "description": "get cronjob List",
@@ -116,16 +150,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "Show List cronjob",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cAdd access token here\u003e",
-                        "description": "Insert your access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -188,34 +212,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/pod/:name": {
-            "get": {
-                "description": "get pods Details",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Show detail pods",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.POD"
-                        },
-                        "headers": {
-                            "Token": {
-                                "type": "string",
-                                "description": "qwerty"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/pods": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "get pods List",
                 "consumes": [
                     "application/json"
@@ -224,17 +227,73 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "summary": "Show List pods",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "cluster Name of the pods",
+                        "name": "cluster",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "workspace Name of the pods",
+                        "name": "workspace",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.POD"
-                        },
-                        "headers": {
-                            "Token": {
-                                "type": "string",
-                                "description": "qwerty"
-                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pods/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get pods Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show detail pods",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the pods",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster Name of the pods",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "workspace Name of the pods",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.POD"
                         }
                     }
                 }
@@ -309,6 +368,39 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CLUSTER": {
+            "type": "object",
+            "required": [
+                "clusterEndpoint",
+                "clusterName",
+                "clusterType",
+                "token"
+            ],
+            "properties": {
+                "clusterEndpoint": {
+                    "type": "string"
+                },
+                "clusterName": {
+                    "type": "string"
+                },
+                "clusterType": {
+                    "type": "string"
+                },
+                "gpuCnt": {
+                    "description": "Status                  string                   ` + "`" + `json:\"status\"` + "`" + `\nNetwork                 string                   ` + "`" + `json:\"network\"` + "`" + `",
+                    "type": "integer"
+                },
+                "nodeCnt": {
+                    "type": "integer"
+                },
+                "resourceUsage": {
+                    "description": "Gpu           []map[string]interface{} ` + "`" + `json:\"gpu,omitempty\"` + "`" + `"
+                },
+                "token": {
                     "type": "string"
                 }
             }
@@ -797,17 +889,25 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "\"Type \\\"Bearer \\\" and then your API Token\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
-	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Version:          "2.0",
+	Host:             "101.79.1.173:8010",
+	BasePath:         "/gmcapi/v2",
+	Schemes:          []string{"http"},
+	Title:            "Gedge GM-Center Swagger API",
+	Description:      "This is a Gedge GM-Center Swagger API.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

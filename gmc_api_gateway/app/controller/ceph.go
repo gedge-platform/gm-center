@@ -52,6 +52,7 @@ func GetCephAuthToken() (token string) {
 
 func GetCephHealth(c echo.Context) (err error) {
 	token := GetCephAuthToken()
+	url := os.Getenv("CEPH") + "api/auth"
 	// params := model.PARAMS{
 	// 	Kind:      "nodes",
 	// 	Name:      c.Param("name"),

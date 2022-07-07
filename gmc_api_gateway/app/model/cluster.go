@@ -12,6 +12,7 @@ type Cluster struct {
 	Type     string             `json:"clusterType,omitempty" bson:"clusterType" validate:"required"`
 	Name     string             `json:"clusterName,omitempty" bson:"clusterName" validate:"required"`
 	Token    string             `json:"token,omitempty" bson:"token" validate:"required"`
+	Status   string             `json:"status,omitempty" bson:"status" `
 }
 
 type RequestCluster struct {
@@ -20,6 +21,7 @@ type RequestCluster struct {
 	Type     string             `json:"clusterType,omitempty" bson:"clusterType"`
 	Name     string             `json:"clusterName,omitempty" bson:"clusterName"`
 	Token    string             `json:"token,omitempty" bson:"token"`
+	Status   string             `json:"status,omitempty" bson:"status" `
 }
 
 type CLUSTER struct {

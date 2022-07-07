@@ -15,8 +15,11 @@ import (
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} model.POD
-// @Header 200 {string} Token "qwerty"
-// @Router /pod/:name [get]
+// @Router /pods/{name} [get]
+// @Security   Bearer
+// @Param name path string true "name of the pods"
+// @Param cluster query string true "cluster Name of the pods"
+// @Param workspace query string true "workspace Name of the pods"
 func GetPods(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "pods",
@@ -97,8 +100,10 @@ func GetPods(c echo.Context) (err error) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} model.POD
-// @Header 200 {string} Token "qwerty"
 // @Router /pods [get]
+// @Security   Bearer
+// @Param cluster query string false "cluster Name of the pods"
+// @Param workspace query string  false "workspace Name of the pods"
 func GetAllPods(c echo.Context) error {
 	var pods []model.POD
 	fmt.Printf("## pods", pods)

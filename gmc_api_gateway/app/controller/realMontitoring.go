@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"gmc_api_gateway/app/common"
+	"gmc_api_gateway/config"
 	"log"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 
@@ -400,7 +402,8 @@ func realValidateParam(c echo.Context) bool {
 }
 
 func realQueryMetric(m string, q string, k string) map[string]interface{} {
-	client := influxdb2.NewClient("http://101.79.4.15:31577", "TEb3k8D0IjefpDpaRbZCBWTXeTNXQE5W")
+	config.Init()
+	client := influxdb2.NewClient(os.Getenv("INFLUXDB"), os.Getenv("INFLUX_TOKEN"))
 	queryAPI := client.QueryAPI("influxdata")
 
 	var valueResult []InfluxDBModel

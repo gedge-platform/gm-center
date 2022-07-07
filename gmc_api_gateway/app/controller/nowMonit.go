@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gmc_api_gateway/app/common"
+	"gmc_api_gateway/config"
 	"log"
 	"os"
 	"strings"
@@ -67,7 +68,8 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 	}
 
 	//Prometheus call
-	addr := "http://101.79.4.15:32548/"
+	config.Init()
+	addr := os.Getenv("PROMETHEUS")
 	// result := map[string]model.Value{}
 
 	result := map[string]interface{}{}
@@ -187,8 +189,8 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 	if check := strings.Compare(c, "") == 0; check {
 		return gpuList, false
 	}
-
-	addr := "http://101.79.4.15:32548//"
+	config.Init()
+	addr := os.Getenv("PROMETHEUS")
 
 	temp_filter := map[string]string{
 		"cluster": c,

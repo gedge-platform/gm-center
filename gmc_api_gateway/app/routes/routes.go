@@ -224,6 +224,9 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.GET("/vm/vmspec", c.GetALLVMSpec)
 	r3.GET("/vm/vmspec/:vmspecName", c.GetVMSpec)
 
+	r3.GET("/vm/vmorgspec", c.GetALLVMOrgSpec)
+	r3.GET("/vm/vmorgspec/:vmspecName", c.GetVMOrgSpec)
+
 	r3.GET("/vm/vmimage", c.GetALLVMImage)
 	r3.GET("/vm/vmimage/:vmImageNameId", c.GetVMImage)
 

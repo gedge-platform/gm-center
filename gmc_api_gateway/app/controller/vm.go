@@ -456,6 +456,39 @@ func GetVMSpec(c echo.Context) (err error) {
 	})
 }
 
+func GetALLVMOrgSpec(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmorgspec",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmorgspec := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmorgspec,
+	})
+}
+
+func GetVMOrgSpec(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmorgspec",
+		Name:   c.Param("vmspecName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmorgspec := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmorgspec,
+	})
+}
+
 func GetALLVMImage(c echo.Context) (err error) {
 
 	params := model.PARAMS{

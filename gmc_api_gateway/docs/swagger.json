@@ -1,86 +1,24 @@
 {
-    "schemes": [
-        "http"
-    ],
     "swagger": "2.0",
     "info": {
-        "description": "This is a Gedge GM-Center Swagger API.",
-        "title": "Gedge GM-Center Swagger API",
-        "contact": {
-            "name": "GM-Center",
-            "url": "https://gedge-platform.github.io/gm-center/"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
-        "version": "1.0"
+        "contact": {}
     },
-    "host": "192.168.150.197:8009",
-    "basePath": "/gmcapi/v1",
     "paths": {
-        "/apps": {
-            "get": {
-                "description": "get App Lists",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Show all apps",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.App"
-                        },
-                        "headers": {
-                            "Token": {
-                                "type": "string",
-                                "description": "qwerty"
-                            }
-                        }
-                    }
-                }
-            },
+        "/auth": {
             "post": {
-                "description": "create App",
+                "description": "get JWT token",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Create App",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "App Name",
-                        "name": "appName",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "App Category",
-                        "name": "appCategory",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "App Description",
-                        "name": "appDescription",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Login",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.App"
+                            "$ref": "#/definitions/model.User"
                         },
                         "headers": {
                             "Token": {
@@ -92,30 +30,21 @@
                 }
             }
         },
-        "/apps/{name}": {
+        "/cronjob/:name": {
             "get": {
-                "description": "get App",
+                "description": "get cronjob Details",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Show App",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "App Name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Show detail cronjob",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.App"
+                            "$ref": "#/definitions/model.CRONJOB"
                         },
                         "headers": {
                             "Token": {
@@ -125,39 +54,694 @@
                         }
                     }
                 }
+            }
+        },
+        "/cronjobs": {
+            "get": {
+                "description": "get cronjob List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show List cronjob",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CRONJOB"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/job/:name": {
+            "get": {
+                "description": "get job Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show detail job",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.JOB"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/jobs": {
+            "get": {
+                "description": "get job List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show List job",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.JOB"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pod/:name": {
+            "get": {
+                "description": "get pods Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show detail pods",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.POD"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pods": {
+            "get": {
+                "description": "get pods List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show List pods",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.POD"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pvcs": {
+            "get": {
+                "description": "get pvc List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show app PVCs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.PVC"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pvs": {
+            "get": {
+                "description": "get pv List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Show app PVs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.PV"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pvs/:name": {
+            "get": {
+                "responses": {}
             }
         }
     },
     "definitions": {
-        "model.App": {
+        "model.Active": {
             "type": "object",
             "properties": {
-                "appCategory": {
+                "kind": {
                     "type": "string"
                 },
-                "appDescription": {
+                "name": {
                     "type": "string"
                 },
-                "appInstalled": {
-                    "type": "integer"
-                },
-                "appName": {
-                    "type": "string"
-                },
-                "appNum": {
-                    "type": "integer"
-                },
-                "created_at": {
+                "namespace": {
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "ApiKeyAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
+        },
+        "model.CRONJOB": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Active"
+                    }
+                },
+                "annotations": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "concurrencyPolicy": {
+                    "type": "string"
+                },
+                "containers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Containers"
+                    }
+                },
+                "creationTimestamp": {
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "failedJobsHistoryLimit": {
+                    "type": "integer"
+                },
+                "label": {},
+                "lastScheduleTime": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "successfulJobsHistoryLimit": {
+                    "type": "integer"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ConfigMapKeyRef": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ContainerStatuses": {
+            "type": "object",
+            "properties": {
+                "containerID": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ready": {
+                    "type": "boolean"
+                },
+                "restartCount": {
+                    "type": "integer"
+                },
+                "started": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.Containers": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.ENV": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "valueFrom": {
+                    "$ref": "#/definitions/model.ValueFrom"
+                }
+            }
+        },
+        "model.EVENT": {
+            "type": "object",
+            "properties": {
+                "cluster": {
+                    "type": "string"
+                },
+                "eventTime": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.FieldRef": {
+            "type": "object",
+            "properties": {
+                "apiVersion": {
+                    "type": "string"
+                },
+                "fieldPath": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.JOB": {
+            "type": "object",
+            "properties": {
+                "cluster": {
+                    "type": "string"
+                },
+                "completions": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "duration": {},
+                "name": {
+                    "type": "string"
+                },
+                "project": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OwnerReference": {
+            "type": "object",
+            "properties": {
+                "apiVersion": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.POD": {
+            "type": "object",
+            "properties": {
+                "Podcontainers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PODCONTAINERS"
+                    }
+                },
+                "annotations": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "containerStatuses": {
+                    "description": "VolumeMounts      []VolumeMounts      `json:\"volumemounts\"`",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ContainerStatuses"
+                    }
+                },
+                "creationTimestamp": {
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "hostIP": {
+                    "type": "string"
+                },
+                "label": {},
+                "name": {
+                    "type": "string"
+                },
+                "node_name": {
+                    "type": "string"
+                },
+                "ownerReferences": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.OwnerReference"
+                    }
+                },
+                "podIP": {
+                    "type": "string"
+                },
+                "podIPs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PodIPs"
+                    }
+                },
+                "project": {
+                    "type": "string"
+                },
+                "qosClass": {
+                    "type": "string"
+                },
+                "restart": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "statusConditions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.StatusConditions"
+                    }
+                },
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.PODCONTAINERS": {
+            "type": "object",
+            "properties": {
+                "env": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ENV"
+                    }
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ports": {
+                    "description": "ReadinessProbe ReadinessProbe `json:\"readinessProbe\",omitempty`\nLivenessProbe  LivenessProbe  `json:\"livenessProbe\",omitempty`",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Ports"
+                    }
+                },
+                "volumemounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.VolumeMounts"
+                    }
+                }
+            }
+        },
+        "model.PV": {
+            "type": "object",
+            "properties": {
+                "accessMode": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "annotations": {},
+                "capacity": {
+                    "type": "string"
+                },
+                "claim": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "createAt": {
+                    "description": "Workspace string `json:\"workspace\"`",
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "label": {},
+                "name": {
+                    "type": "string"
+                },
+                "reclaimPolicy": {
+                    "type": "string"
+                },
+                "status": {},
+                "storageClass": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "volumeMode": {
+                    "description": "Reason        []EVENT          `json:\"events\"`",
+                    "type": "string"
+                }
+            }
+        },
+        "model.PVC": {
+            "type": "object",
+            "properties": {
+                "accessMode": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "annotations": {},
+                "capacity": {
+                    "type": "string"
+                },
+                "clusterName": {
+                    "type": "string"
+                },
+                "createAt": {
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "finalizers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "label": {
+                    "description": "Reason        []EVENT          `json:\"events\"`"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "type": "string"
+                },
+                "status": {},
+                "storageClass": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "volume": {},
+                "workspaceName": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.PodIPs": {
+            "type": "object",
+            "properties": {
+                "ip": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Ports": {
+            "type": "object",
+            "properties": {
+                "containerPort": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "protocol": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.StatusConditions": {
+            "type": "object",
+            "properties": {
+                "lastTransitionTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Email    string `json:\"email\"`",
+                    "type": "string"
+                }
+            }
+        },
+        "model.ValueFrom": {
+            "type": "object",
+            "properties": {
+                "configMapKeyRef": {
+                    "$ref": "#/definitions/model.ConfigMapKeyRef"
+                },
+                "fieldRef": {
+                    "$ref": "#/definitions/model.FieldRef"
+                }
+            }
+        },
+        "model.VolumeMounts": {
+            "type": "object",
+            "properties": {
+                "mountpath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "readonly": {
+                    "type": "boolean"
+                }
+            }
         }
     }
 }

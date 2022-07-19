@@ -26,8 +26,8 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host 192.168.150.197:8009
-// @BasePath /gmcapi/v1
+// @host 127.0.0.1:8010
+// @BasePath /gmcapi/v2
 // @schemes http
 // @query.collection.format multi
 
@@ -66,7 +66,7 @@ func StartGedge() {
 		`)
 	})
 
-	e.GET("/swagger/*any", echoSwagger.WrapHandler)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	routes.GEdgeRoute(e)
 

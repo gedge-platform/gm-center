@@ -23,6 +23,7 @@ var listTemplates_spider = map[string]string{
 	"controlvm":        "/spider/controlvm",
 	"vmstatus":         "/spider/vmstatus",
 	"vmspec":           "/spider/vmspec",
+	"vmorgspec":        "/spider/vmorgspec",
 	"vmimage":          "/spider/vmimage",
 	"vpc":              "/spider/vpc",
 	"securitygroup":    "/spider/securitygroup",

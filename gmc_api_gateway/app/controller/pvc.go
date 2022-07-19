@@ -14,6 +14,7 @@ import (
 // GetPvs godoc
 // @Summary Show app PVCs
 // @Description get pvc List
+// @Requestbody
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} model.PVC
@@ -138,11 +139,12 @@ func CreatePVC(c echo.Context) (err error) {
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
+	} else {
+		return c.JSON(http.StatusCreated, echo.Map{
+			"info": common.StringToInterface(postData),
+		})
 	}
 
-	return c.JSON(http.StatusCreated, echo.Map{
-		"info": common.StringToInterface(postData),
-	})
 }
 
 func DeletePVC(c echo.Context) (err error) {

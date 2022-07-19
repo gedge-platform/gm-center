@@ -73,7 +73,7 @@ func GetServices(c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
-	// fmt.Printf("#################dataerr : %s", data)
+	fmt.Printf("#################dataerr : %s", data)
 	for i, _ := range data {
 		service := model.SERVICE{
 			Name:       common.InterfaceToString(common.FindData(data[i], "metadata", "name")),

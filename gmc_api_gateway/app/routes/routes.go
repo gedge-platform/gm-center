@@ -61,17 +61,17 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/members/:memberId", c.DeleteMember)
 	r.PUT("/members/:memberId", c.UpdateMember)
 
-	r.POST("/cluster", c.CreateCluster)
-	r.GET("/cluster", c.ListCluster)
-	r.GET("/cluster/:name", c.FindCluster)
-	r.DELETE("/cluster/:name", c.DeleteCluster)
-	r.PUT("/cluster/:name", c.UpdateCluster)
+	r.POST("/clusters", c.CreateCluster)
+	r.GET("/clusters", c.ListCluster)
+	r.GET("/clusters/:name", c.FindCluster)
+	r.DELETE("/clusters/:name", c.DeleteCluster)
+	r.PUT("/clusters/:name", c.UpdateCluster)
 
-	r.POST("/workspace", c.CreateWorkspace)
-	r.GET("/workspace", c.ListWorkspace)
-	r.GET("/workspace/:name", c.FindWorkspace)
-	r.DELETE("/workspace/:name", c.DeleteWorkspace)
-	r.PUT("/workspace/:name", c.UpdateWorkspace)
+	r.POST("/workspaces", c.CreateWorkspace)
+	r.GET("/workspaces", c.ListWorkspace)
+	r.GET("/workspaces/:name", c.FindWorkspace)
+	r.DELETE("/workspaces/:name", c.DeleteWorkspace)
+	r.PUT("/workspaces/:name", c.UpdateWorkspace)
 
 	r.POST("/projects", c.CreateProject)
 	r.GET("/userProjects", c.ListUserProject)
@@ -171,9 +171,11 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/duplicateCheck/:name", c.DuplicateCheckDB)
 
 	r.GET("/view/:name", c.GetView)
-
+	r.GET("/metallb", c.GetAllMetallb)
+	r.GET("/metallbDetail", c.GetMetallb)
 	e.GET("/clusterInfo", c.GetClusterInfo)
 
+	r.GET("/ceph/health", c.GetCephHealth)
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, echo echo.Context) (bool, error) {
 		userChk, _ := c.AuthenticateUser(id, password)
 		return userChk, nil

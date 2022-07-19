@@ -87,7 +87,10 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 				"cluster":   c,
 				"namespace": n,
 			}
-			data := nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
+			data, err := nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
+			if err != nil {
+				fmt.Println("err : ", err)
+			}
 
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
@@ -99,7 +102,10 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			temp_filter := map[string]string{
 				"cluster": c,
 			}
-			data := nowQueryRange(addr, nowMetricExpr(nowClusterMetric[m[i]], temp_filter))
+			data, err := nowQueryRange(addr, nowMetricExpr(nowClusterMetric[m[i]], temp_filter))
+			if err != nil {
+				fmt.Println("err : ", err)
+			}
 
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
@@ -116,7 +122,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 	return result
 }
 
-func nowQueryRange(endpointAddr string, query string) model.Value {
+func nowQueryRange(endpointAddr string, query string) (result model.Value, err error) {
 	var start_time time.Time
 	var end_time time.Time
 	var step time.Duration
@@ -137,7 +143,8 @@ func nowQueryRange(endpointAddr string, query string) model.Value {
 
 	if err != nil {
 		log.Printf("Error creating client: %v\n", err)
-		os.Exit(1)
+		return nil, err
+		// os.Exit(1)
 	}
 
 	v1api := v1.NewAPI(client)
@@ -155,14 +162,15 @@ func nowQueryRange(endpointAddr string, query string) model.Value {
 
 	if err != nil {
 		log.Printf("Error querying Prometheus: %v\n", err)
-		os.Exit(1)
+		return nil, err
+		// os.Exit(1)
 	}
 
 	if len(warnings) > 0 {
 		log.Printf("Warnings: %v\n", warnings)
 	}
 	// log.Printf("Result:\n%v\n", result)
-	return result
+	return result, nil
 }
 
 func nowMetricExpr(val string, filter map[string]string) string {
@@ -196,30 +204,33 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 		"cluster": c,
 	}
 
-	data := nowQueryRange(addr, nowMetricExpr(nowGpuMetric["gpu_info"], temp_filter))
-
-	fmt.Println("#####data", data)
-	fmt.Println("======value======")
-	if check := len(data.(model.Matrix)) != 0; check {
-		// for _, val := range data.(model.Matrix)[0].Values {
-		// 	// value = val.Value
-		// 	fmt.Println(val)
-		// }
-		for _, val := range data.(model.Matrix) {
-			gpu := make(map[string]interface{})
-			// value = val.Value
-			fmt.Println(val.Metric["name"])
-			gpu["name"] = val.Metric["name"]
-			gpu["node"] = val.Metric["node"]
-			gpu["uuid"] = val.Metric["uuid"]
-			gpu["container"] = val.Metric["container"]
-			gpu["vbios_version"] = val.Metric["vbios_version"]
-			gpuList = append(gpuList, gpu)
-
-		}
+	data, err := nowQueryRange(addr, nowMetricExpr(nowGpuMetric["gpu_info"], temp_filter))
+	fmt.Println("err : ", err)
+	if err != nil {
+		fmt.Println("err : ", err)
 	} else {
-		return gpuList, false
-	}
+		fmt.Println("#####GpuCheck", data)
+		fmt.Println("======value======")
+		if check := len(data.(model.Matrix)) != 0; check {
+			// for _, val := range data.(model.Matrix)[0].Values {
+			// 	// value = val.Value
+			// 	fmt.Println(val)
+			// }
+			for _, val := range data.(model.Matrix) {
+				gpu := make(map[string]interface{})
+				// value = val.Value
+				fmt.Println(val.Metric["name"])
+				gpu["name"] = val.Metric["name"]
+				gpu["node"] = val.Metric["node"]
+				gpu["uuid"] = val.Metric["uuid"]
+				gpu["container"] = val.Metric["container"]
+				gpu["vbios_version"] = val.Metric["vbios_version"]
+				gpuList = append(gpuList, gpu)
 
+			}
+		} else {
+			return gpuList, false
+		}
+	}
 	return gpuList, true
 }

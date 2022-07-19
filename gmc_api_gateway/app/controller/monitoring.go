@@ -356,6 +356,7 @@ func validateParam(c echo.Context) bool {
 }
 
 func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value, error) {
+	fmt.Println("1")
 	// log.Println("queryrange in")
 	// log.Println(query)
 	// log.Println(endpointAddr)
@@ -371,18 +372,18 @@ func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value,
 
 	tm3, _ := time.ParseDuration(c.QueryParam("step"))
 	step = tm3
-
+	fmt.Println("2")
 	client, err := api.NewClient(api.Config{
 		Address: endpointAddr,
 	})
-
+	fmt.Println("3")
 	if err != nil {
 		log.Printf("Error creating client: %v\n", err)
 		var tempResult model.Value
 		return tempResult, err
 
 	}
-
+	fmt.Println("4")
 	v1api := v1.NewAPI(client)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
@@ -405,7 +406,7 @@ func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value,
 	if len(warnings) > 0 {
 		log.Printf("Warnings: %v\n", warnings)
 	}
-
+	fmt.Println("result : ", result)
 	return result, nil
 }
 

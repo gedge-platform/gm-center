@@ -400,6 +400,9 @@ const docTemplate = `{
                 "resourceUsage": {
                     "description": "Gpu           []map[string]interface{} ` + "`" + `json:\"gpu,omitempty\"` + "`" + `"
                 },
+                "status": {
+                    "type": "string"
+                },
                 "token": {
                     "type": "string"
                 }
@@ -903,7 +906,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "101.79.1.173:8010",
+	Host:             "127.0.0.1:8010",
 	BasePath:         "/gmcapi/v2",
 	Schemes:          []string{"http"},
 	Title:            "Gedge GM-Center Swagger API",

@@ -103,8 +103,8 @@ func LoginUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, echo.Map{
 			"status":      200,
 			"accessToken": accessToken,
-			"userRole":    userRole,
-			"userId":      user.Id,
+			// "userRole":    userRole,
+			"userId": user.Id,
 		})
 	}
 	return c.JSON(http.StatusUnauthorized, false)

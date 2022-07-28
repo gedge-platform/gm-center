@@ -26,6 +26,8 @@ definitions:
         type: integer
       resourceUsage:
         description: Gpu           []map[string]interface{} `json:"gpu,omitempty"`
+      status:
+        type: string
       token:
         type: string
     required:
@@ -358,7 +360,7 @@ definitions:
       readonly:
         type: boolean
     type: object
-host: 101.79.1.173:8010
+host: 127.0.0.1:8010
 info:
   contact:
     name: GM-Center

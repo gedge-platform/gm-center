@@ -2,14 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="27612f21-8bc3-4391-963a-628fcfa36992" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/app/common/httpUitls.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/common/httpUitls.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controller/cluster.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/controller/cluster.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/controller/vm.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/controller/vm.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/routes.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/routes.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,5 +49,19 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="2104" y="86" key="MergeDialog" timestamp="1658218084967">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2104" y="86" key="MergeDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1658218084967" />
+    <state x="2592" y="235" key="MultipleFileMergeDialog" timestamp="1658218084974">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2592" y="235" key="MultipleFileMergeDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1658218084974" />
+    <state x="2580" y="311" key="git4idea.merge.GitPullDialog" timestamp="1658218012124">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2580" y="311" key="git4idea.merge.GitPullDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1658218012124" />
   </component>
 </project>

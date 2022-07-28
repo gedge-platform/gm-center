@@ -1,6 +1,10 @@
 package controller
 
 import (
+	
+	"log"
+	"encoding/json"
+
 	"net/http"
 
 	"gmc_api_gateway/app/common"
@@ -10,6 +14,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetCloudOS godoc
+// @Summary Cloudos
+// @Description get CloudOS
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/cloudos [get]
 func GetCloudOS(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -27,6 +39,14 @@ func GetCloudOS(c echo.Context) (err error) {
 
 }
 
+// GetALLCredential godoc
+// @Summary Credential
+// @Description get ALLCredential
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/credentials [get]
 func GetALLCredential(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -44,6 +64,15 @@ func GetALLCredential(c echo.Context) (err error) {
 
 }
 
+// GetCredential godoc
+// @Summary Credential
+// @Description get Credential
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/credentials/{credentialName} [get]
+// @Param credentialName path string true "Name of the credentials"
 func GetCredential(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -59,9 +88,36 @@ func GetCredential(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": credential,
 	})
-
 }
 
+
+func GetALLCredentialCount(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "credential",
+		Method: c.Request().Method,
+	}
+
+	getData, err := common.DataRequest_spider(params)
+
+	var p model.CredentialCount
+	json.Unmarshal([]byte(getData), &p)
+	log.Printf("[#Credential Count] is %s", len(p.CredentialNames))
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"count": len(p.CredentialNames),
+	})
+}
+
+// CreateCredential godoc
+// @Summary Credential
+// @Description get Credential
+// @Param CredentialBody body string true "Credential Info Body"
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/credentials [post]
 func CreateCredential(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:   "credential",
@@ -77,6 +133,15 @@ func CreateCredential(c echo.Context) (err error) {
 	})
 }
 
+// DeleteCredential godoc
+// @Summary Credential
+// @Description get Credential
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/credentials/{credentialName} [delete]
+// @Param credentialName path string true "Name of the credentials"
 func DeleteCredential(c echo.Context) (err error) {
 
 	params := model.PARAMS{

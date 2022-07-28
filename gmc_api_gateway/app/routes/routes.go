@@ -192,6 +192,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r2.Any("/monitoring/realtime/:kind", c.RealMetrics)
 	r2.Any("/monitoring/realtime", c.RealMetrics)
 
+	// r3 := e.Group("/gmcapi/v2/spider", middleware.JWTWithConfig(config))
 	r3 := e.Group("/gmcapi/v2/spider")
 	r3.GET("/cloudos", c.GetCloudOS)
 
@@ -199,6 +200,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.GET("/credentials/:credentialName", c.GetCredential)
 	r3.POST("/credentials", c.CreateCredential)
 	r3.DELETE("/credentials/:credentialName", c.DeleteCredential)
+	r3.GET("/credentialsCount", c.GetALLCredentialCount)
 
 	r3.GET("/connectionconfig", c.GetALLConnectionconfig)
 	r3.GET("/connectionconfig/:configName", c.GetConnectionconfig)

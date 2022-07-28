@@ -51,7 +51,13 @@ func CreateCluster(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	if models.Type == "edge" {
+		point := GeoCoder(models.Address)
+		Point := make(map[string]string)
+		Point["x"] = common.InterfaceToString(common.FindData(point, "response.result.point", "x"))
+		Point["y"] = common.InterfaceToString(common.FindData(point, "response.result.point", "y"))
+		models.Point = Point
+	}
 	result, err := cdb.InsertOne(ctx, models)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)

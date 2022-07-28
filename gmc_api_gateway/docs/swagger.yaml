@@ -9,6 +9,33 @@ definitions:
       namespace:
         type: string
     type: object
+  model.CLUSTER:
+    properties:
+      clusterEndpoint:
+        type: string
+      clusterName:
+        type: string
+      clusterType:
+        type: string
+      gpuCnt:
+        description: |-
+          Status                  string                   `json:"status"`
+          Network                 string                   `json:"network"`
+        type: integer
+      nodeCnt:
+        type: integer
+      resourceUsage:
+        description: Gpu           []map[string]interface{} `json:"gpu,omitempty"`
+      status:
+        type: string
+      token:
+        type: string
+    required:
+    - clusterEndpoint
+    - clusterName
+    - clusterType
+    - token
+    type: object
   model.CRONJOB:
     properties:
       active:
@@ -382,7 +409,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CLUSTER'
       security:
       - Bearer: []
       summary: Show detail cluster

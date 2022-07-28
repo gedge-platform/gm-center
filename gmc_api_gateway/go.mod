@@ -25,6 +25,7 @@ require (
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
 	github.com/deepmap/oapi-codegen v1.8.2 // indirect
@@ -90,4 +91,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/klog/v2 v2.8.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.0 // indirect
+	xojoc.pw/useragent v0.0.0-20200116211053-1ec61d55e8fe // indirect
 )

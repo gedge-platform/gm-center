@@ -80,7 +80,14 @@
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTER"
+                        }
+                    }
+                }
             }
         },
         "/cronjob/{name}": {
@@ -472,6 +479,42 @@
                     "type": "string"
                 },
                 "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CLUSTER": {
+            "type": "object",
+            "required": [
+                "clusterEndpoint",
+                "clusterName",
+                "clusterType",
+                "token"
+            ],
+            "properties": {
+                "clusterEndpoint": {
+                    "type": "string"
+                },
+                "clusterName": {
+                    "type": "string"
+                },
+                "clusterType": {
+                    "type": "string"
+                },
+                "gpuCnt": {
+                    "description": "Status                  string                   `json:\"status\"`\nNetwork                 string                   `json:\"network\"`",
+                    "type": "integer"
+                },
+                "nodeCnt": {
+                    "type": "integer"
+                },
+                "resourceUsage": {
+                    "description": "Gpu           []map[string]interface{} `json:\"gpu,omitempty\"`"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }

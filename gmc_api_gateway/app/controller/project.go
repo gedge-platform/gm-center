@@ -49,15 +49,16 @@ func CreateProject(c echo.Context) (err error) {
 	cdb3 := GetProjectDB("workspace")
 	cdb4 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-
+	fmt.Println("1")
 	models := new(model.Project)
 	validate := validator.New()
-
+	fmt.Println("1.5")
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
+		fmt.Println("1.6")
 		return nil
 	}
-
+	fmt.Println("2")
 	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
 	workspaceObjectId, err := cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 
@@ -66,28 +67,34 @@ func CreateProject(c echo.Context) (err error) {
 	var memberObjectId2 []bson.D
 	var workspaceObjectId2 []bson.D
 	var slice []primitive.ObjectID
-
+	fmt.Println("3")
 	for i := 0; i < len(models.ClusterName); i++ {
 		clusterObjectId3, _ = cdb4.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
 		clusterObjectId3.All(ctx, &clusterObjectId2)
 		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))
 	}
-
+	fmt.Println("4")
 	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("&memberObjectId2 : ", &memberObjectId2)
 	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("&&workspaceObjectId : ", workspaceObjectId)
 
+	fmt.Println("&&workspaceObjectId2 : ", &workspaceObjectId2)
+	fmt.Println("5")
 	if err = validate.Struct(models); err != nil {
+		fmt.Println("6")
 		for _, err := range err.(validator.ValidationErrors) {
+			fmt.Println("7")
 			fmt.Println(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
 	}
-
+	fmt.Println("8")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,7 +110,7 @@ func CreateProject(c echo.Context) (err error) {
 		Selectcluster: slice,
 		IstioCheck:    models.IstioCheck,
 	}
-
+	fmt.Println("9")
 	result, err := cdb.InsertOne(ctx, newProject)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)

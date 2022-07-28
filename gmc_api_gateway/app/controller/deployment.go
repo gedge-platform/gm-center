@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 	"net/http"
@@ -123,9 +124,10 @@ func CreateDeployment(c echo.Context) (err error) {
 		Method:  c.Request().Method,
 		Body:    responseBody(c.Request().Body),
 	}
-
+	fmt.Println("params : ", params)
 	postData, err := common.DataRequest(params)
 	if err != nil {
+		fmt.Println("err : ", err)
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}

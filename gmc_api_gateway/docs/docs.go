@@ -84,7 +84,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTER"
+                        }
+                    }
+                }
             }
         },
         "/cronjob/{name}": {
@@ -348,121 +355,6 @@ const docTemplate = `{
             "get": {
                 "responses": {}
             }
-        },
-        "/spider/cloudos": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get CloudOS",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Cloudos",
-                "responses": {}
-            }
-        },
-        "/spider/credentials": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get ALLCredential",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Credential",
-                "responses": {}
-            },
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get Credential",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Credential",
-                "parameters": [
-                    {
-                        "description": "Credential Info Body",
-                        "name": "CredentialBody",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/spider/credentials/{credentialName}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get Credential",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Credential",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Name of the credentials",
-                        "name": "credentialName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get Credential",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Credential",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Name of the credentials",
-                        "name": "credentialName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
         }
     },
     "definitions": {
@@ -476,6 +368,42 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "namespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CLUSTER": {
+            "type": "object",
+            "required": [
+                "clusterEndpoint",
+                "clusterName",
+                "clusterType",
+                "token"
+            ],
+            "properties": {
+                "clusterEndpoint": {
+                    "type": "string"
+                },
+                "clusterName": {
+                    "type": "string"
+                },
+                "clusterType": {
+                    "type": "string"
+                },
+                "gpuCnt": {
+                    "description": "Status                  string                   ` + "`" + `json:\"status\"` + "`" + `\nNetwork                 string                   ` + "`" + `json:\"network\"` + "`" + `",
+                    "type": "integer"
+                },
+                "nodeCnt": {
+                    "type": "integer"
+                },
+                "resourceUsage": {
+                    "description": "Gpu           []map[string]interface{} ` + "`" + `json:\"gpu,omitempty\"` + "`" + `"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }

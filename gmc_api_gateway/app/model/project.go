@@ -9,7 +9,7 @@ import (
 type Project struct {
 	_id           primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
 	Name          string             `json:"projectName,omitempty" bson:"projectName" validate:"required"`
-	Description   string             `json:"projectDescription,omitempty" bson:"projectDescription" validate:"required"`
+	Description   string             `json:"projectDescription,omitempty" bson:"projectDescription"`
 	Type          string             `json:"projectType,omitempty" bson:"projectType" validate:"required"`
 	Owner         primitive.ObjectID `json:"projectOwner,omitempty" bson:"projectOwner"`
 	Creator       primitive.ObjectID `json:"projectCreator,omitempty" bson:"projectCreator"`

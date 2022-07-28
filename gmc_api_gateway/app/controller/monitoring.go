@@ -3,10 +3,12 @@ package controller
 import (
 	"context"
 	"fmt"
+	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/config"
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -425,4 +427,87 @@ func metricExpr(val string, filter map[string]string) string {
 	}
 
 	return strings.Replace(val, "$1", returnVal, -1)
+}
+
+var dashboardMetric = map[string]string{
+	"dashboard_cpu_used_podList":     "topk(5,rate (container_cpu_usage_seconds_total{image!=''}[1m]))",
+	"dashboard_mem_used_podList":     "topk(5,rate(container_memory_working_set_bytes{image!=''}[1m]))",
+	"dashboard_cpu_used_clusterList": "round(sum(rate(container_cpu_usage_seconds_total[1m]))by(cluster),0.01)",
+	"dashboard_mem_used_clusterList": "nvidia_smi_power_limit_watts{$1}",
+}
+
+func dashboard_pod_monit(c, query string) interface{} {
+	// var gpuList []interface{}
+	var podList []map[string]interface{}
+
+	// if check := strings.Compare(c, "") == 0; check {
+	// 	return gpuList, false
+	// }
+	config.Init()
+	addr := os.Getenv("PROMETHEUS")
+
+	temp_filter := map[string]string{
+		"cluster": c,
+	}
+
+	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
+	fmt.Println("err : ", err)
+	if err != nil {
+		fmt.Println("err : ", err)
+	} else {
+		if check := len(data.(model.Matrix)) != 0; check {
+			// data.(model.Matrix)[0].Values
+			for _, val := range data.(model.Matrix) {
+				value := val.Values[0].Value
+				pod := make(map[string]interface{})
+				fmt.Println(val.Metric["name"])
+				pod["name"] = val.Metric["pod"]
+				pod["namespace"] = val.Metric["namespace"]
+				pod["cluster"] = val.Metric["cluster"]
+				pod["value"] = value
+				podList = append(podList, pod)
+			}
+		}
+	}
+	sort.SliceStable(podList, func(i, j int) bool {
+		return common.InterfaceToFloat(podList[i]["value"]) > common.InterfaceToFloat(podList[j]["value"])
+	})
+	return podList
+}
+
+func dashboard_cluster_monit(c, query string) interface{} {
+	// var gpuList []interface{}
+	var podList []map[string]interface{}
+
+	// if check := strings.Compare(c, "") == 0; check {
+	// 	return gpuList, false
+	// }
+	config.Init()
+	addr := os.Getenv("PROMETHEUS")
+
+	temp_filter := map[string]string{
+		"cluster": c,
+	}
+
+	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
+	fmt.Println("err : ", err)
+	if err != nil {
+		fmt.Println("err : ", err)
+	} else {
+		if check := len(data.(model.Matrix)) != 0; check {
+			// data.(model.Matrix)[0].Values
+			for _, val := range data.(model.Matrix) {
+				value := val.Values[0].Value
+				pod := make(map[string]interface{})
+				fmt.Println(val.Metric["name"])
+				pod["cluster"] = val.Metric["cluster"]
+				pod["value"] = value
+				podList = append(podList, pod)
+			}
+		}
+	}
+	sort.SliceStable(podList, func(i, j int) bool {
+		return common.InterfaceToFloat(podList[i]["value"]) > common.InterfaceToFloat(podList[j]["value"])
+	})
+	return podList
 }

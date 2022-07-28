@@ -26,7 +26,7 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host 101.79.1.173:8010
+// @host 127.0.0.1:8010
 // @BasePath /gmcapi/v2
 // @schemes http
 // @query.collection.format multi

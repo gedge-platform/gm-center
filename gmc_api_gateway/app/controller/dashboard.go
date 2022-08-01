@@ -44,8 +44,6 @@ func TotalDashboard(c echo.Context) (err error) {
 	if err = cursor2.All(ctx, &edgeClouds); err != nil {
 		log.Fatal(err)
 	}
-	add := GeoCoder("서울시 중구 을지로 100")
-	fmt.Print(add)
 	dashbaordData := model.TOTAL_DASHBOARD{
 		ClusterCnt:     ClusterCount,
 		CoreClusterCnt: len(coreClouds),

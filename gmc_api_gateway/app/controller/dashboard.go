@@ -60,6 +60,21 @@ func TotalDashboard(c echo.Context) (err error) {
 		"data": dashbaordData,
 	})
 }
+func TotalDashboard(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		User:      c.QueryParam("user"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": dashbaordData,
+	})
+}
 
 func GeoCoder(add string) (result string) {
 

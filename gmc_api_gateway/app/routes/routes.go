@@ -224,9 +224,11 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.GET("/vm/:vmName", c.GetVm)
 	r3.POST("/vm", c.CreateVm)
 	r3.DELETE("/vm/:vmName", c.DeleteVm)
+	r3.GET("/vm/vmCount", c.GetALLVmCount)
 
 	r3.GET("/vm/vmstatus", c.GetALLVMStatus)
 	r3.GET("/vm/vmstatus/:vmstatusName", c.GetVMStatus)
+	r3.GET("/vm/vmstatus/vmstatusCount", c.GetALLVMStatusCount)
 
 	r3.GET("/vm/vmspec", c.GetALLVMSpec)
 	r3.GET("/vm/vmspec/:vmspecName", c.GetVMSpec)

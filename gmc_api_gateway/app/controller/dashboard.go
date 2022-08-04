@@ -11,6 +11,9 @@ import (
 	"os"
 	"time"
 
+	"encoding/json"
+	"gmc_api_gateway/app/common"
+
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -46,6 +49,18 @@ func TotalDashboard(c echo.Context) (err error) {
 	}
 	add := GeoCoder("서울시 중구 을지로 100")
 	fmt.Print(add)
+
+	Credentialparams := model.PARAMS{
+		Kind:   "credential",
+		Method: c.Request().Method,
+	}
+
+	CredentialgetData, err := common.DataRequest_spider(Credentialparams)
+
+	var CredentialCount model.CredentialCount
+
+	json.Unmarshal([]byte(CredentialgetData), &CredentialCount)
+
 	dashbaordData := model.TOTAL_DASHBOARD{
 		ClusterCnt:     ClusterCount,
 		CoreClusterCnt: len(coreClouds),
@@ -57,6 +72,7 @@ func TotalDashboard(c echo.Context) (err error) {
 		ClusterCpuTop5: dashboard_cluster_monit("all", dashboardMetric["dashboard_cpu_used_clusterList"]),
 		ClusterMemTop5: dashboard_cluster_monit("all", clusterMetric["memory_usage"]),
 		EdgeCloud:      edgeClouds,
+		CredentialCnt : len(CredentialCount.CredentialNames),
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": dashbaordData,

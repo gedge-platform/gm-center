@@ -1,9 +1,9 @@
 package controller
 
 import (
-	
-	"log"
 	"encoding/json"
+	"log"
+	"fmt"
 
 	"net/http"
 
@@ -90,8 +90,7 @@ func GetCredential(c echo.Context) (err error) {
 	})
 }
 
-
-func GetALLCredentialCount(c echo.Context) (err error) {
+func GetALLCredentialCount(c echo.Context)(err error) {
 
 	params := model.PARAMS{
 		Kind:   "credential",
@@ -100,12 +99,12 @@ func GetALLCredentialCount(c echo.Context) (err error) {
 
 	getData, err := common.DataRequest_spider(params)
 
-	var p model.CredentialCount
-	json.Unmarshal([]byte(getData), &p)
-	log.Printf("[#Credential Count] is %s", len(p.CredentialNames))
+	var P model.CredentialCount
+	json.Unmarshal([]byte(getData), &P)
+	log.Printf("[#Credential Count] is %s", P.CredentialNames)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"count": len(p.CredentialNames),
+		"credentialCnt": len(P.CredentialNames),
 	})
 }
 
@@ -404,6 +403,25 @@ func GetALLVm(c echo.Context) (err error) {
 
 }
 
+func GetALLVmCount(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vm",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+
+	var P model.VMCount
+	json.Unmarshal([]byte(getData), &P)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"VMCnt": len(P.VMCount),
+	})
+
+}
+
 func GetVm(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -468,6 +486,44 @@ func GetALLVMStatus(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmstatus,
+	})
+}
+
+func GetALLVMStatusCount(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmstatus",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+
+	var P model.VMStatusCount
+	json.Unmarshal([]byte(getData), &P)
+
+
+	var running int = 0
+	var suspended int = 0
+	var failed int = 0
+
+	for i := 0; i < len(P.Vmstatus); i++ {
+		str := fmt.Sprintf("%v", P.Vmstatus[i])
+		if(str == "{Running}"){
+			running++
+		}
+		if(str == "{Suspended}"){
+			suspended++
+		}
+		if(str == "{Failed}"){
+			failed++
+		}		
+	}
+	
+	return c.JSON(http.StatusOK, echo.Map{
+		"Running": running,
+		"Stop": suspended,
+		"Paused": failed,
 	})
 }
 

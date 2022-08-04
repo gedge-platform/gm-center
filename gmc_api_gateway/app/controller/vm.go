@@ -2,8 +2,8 @@ package controller
 
 import (
 	"encoding/json"
-	"log"
 	"fmt"
+	"log"
 
 	"net/http"
 
@@ -90,8 +90,7 @@ func GetCredential(c echo.Context) (err error) {
 	})
 }
 
-func GetALLCredentialCount(c echo.Context)(err error) {
-
+func GetALLCredentialCount(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:   "credential",
 		Method: c.Request().Method,
@@ -508,21 +507,21 @@ func GetALLVMStatusCount(c echo.Context) (err error) {
 
 	for i := 0; i < len(P.Vmstatus); i++ {
 		str := fmt.Sprintf("%v", P.Vmstatus[i])
-		if(str == "{Running}"){
+		if str == "{Running}" {
 			running++
 		}
-		if(str == "{Suspended}"){
+		if str == "{Suspended}" {
 			suspended++
 		}
-		if(str == "{Failed}"){
+		if str == "{Failed}" {
 			failed++
-		}		
+		}
 	}
-	
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"Running": running,
-		"Stop": suspended,
-		"Paused": failed,
+		"Stop":    suspended,
+		"Paused":  failed,
 	})
 }
 

@@ -195,8 +195,8 @@ func GEdgeRoute(e *echo.Echo) {
 	r2.Any("/monitoring/realtime/:kind", c.RealMetrics)
 	r2.Any("/monitoring/realtime", c.RealMetrics)
 
-	// r3 := e.Group("/gmcapi/v2/spider", middleware.JWTWithConfig(config))
-	r3 := e.Group("/gmcapi/v2/spider")
+	r3 := e.Group("/gmcapi/v2/spider", middleware.JWTWithConfig(config))
+	// r3 := e.Group("/gmcapi/v2/spider")
 	r3.GET("/cloudos", c.GetCloudOS)
 
 	r3.GET("/credentials", c.GetALLCredential)

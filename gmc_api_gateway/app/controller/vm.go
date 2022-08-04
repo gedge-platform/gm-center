@@ -502,7 +502,6 @@ func GetALLVMStatusCount(c echo.Context) (err error) {
 	var P model.VMStatusCount
 	json.Unmarshal([]byte(getData), &P)
 
-
 	var running int = 0
 	var suspended int = 0
 	var failed int = 0

@@ -10,7 +10,7 @@ type TOTAL_DASHBOARD struct {
 	PodCpuTop5     interface{} `json:"podCpuTop5"`
 	ClusterMemTop5 interface{} `json:"clusterMemTop5"`
 	PodMemTop5     interface{} `json:"podMemTop5"`
-	CoreCloud      CoreCloud
+	CredentialCnt  int     	   `json:"credentialCnt"`
 	EdgeCloud      interface{} `json:"edgeInfo"`
 }
 

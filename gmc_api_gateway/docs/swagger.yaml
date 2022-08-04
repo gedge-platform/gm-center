@@ -360,7 +360,7 @@ definitions:
       readonly:
         type: boolean
     type: object
-host: 127.0.0.1:8010
+host: 192.168.160.216:8010
 info:
   contact:
     name: GM-Center
@@ -584,6 +584,78 @@ paths:
   /pvs/:name:
     get:
       responses: {}
+  /spider/cloudos:
+    get:
+      consumes:
+      - application/json
+      description: get CloudOS
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Cloudos
+  /spider/credentials:
+    get:
+      consumes:
+      - application/json
+      description: get ALLCredential
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Credential
+    post:
+      consumes:
+      - application/json
+      description: get Credential
+      parameters:
+      - description: Credential Info Body
+        in: body
+        name: CredentialBody
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Credential
+  /spider/credentials/{credentialName}:
+    delete:
+      consumes:
+      - application/json
+      description: get Credential
+      parameters:
+      - description: Name of the credentials
+        in: path
+        name: credentialName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Credential
+    get:
+      consumes:
+      - application/json
+      description: get Credential
+      parameters:
+      - description: Name of the credentials
+        in: path
+        name: credentialName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Credential
 schemes:
 - http
 securityDefinitions:

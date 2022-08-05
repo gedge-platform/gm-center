@@ -927,11 +927,11 @@ func StringToInt(i string) int {
 }
 
 func FindDataLabelKey(i interface{}, p, f, u string) ([]string, error) {
-	log.Println("[In #FindDataArr]")
-	log.Println("[#1] Data is ", i)
-	log.Println("[#2] find path string is ", p)
-	log.Println("[#2] find key string is ", f)
-	log.Println("[#3] uniq string is ", u)
+	// log.Println("[In #FindDataArr]")
+	// log.Println("[#1] Data is ", i)
+	// log.Println("[#2] find path string is ", p)
+	// log.Println("[#2] find key string is ", f)
+	// log.Println("[#3] uniq string is ", u)
 
 	// var itemCheck bool
 	var parse, data gjson.Result
@@ -942,7 +942,7 @@ func FindDataLabelKey(i interface{}, p, f, u string) ([]string, error) {
 	ia := InterfaceToString(i)
 
 	parse = gjson.Parse(ia)
-	log.Println("[#4] Parse is ", parse)
+	// log.Println("[#4] Parse is ", parse)
 
 	pathCheck := strings.Compare(p, "") != 0
 	// itemCheck = len(parse.Get("items").Array()) > 0
@@ -950,19 +950,19 @@ func FindDataLabelKey(i interface{}, p, f, u string) ([]string, error) {
 
 	if pathCheck {
 		data = parse.Get(p)
-		log.Println("[#5] filter data is ", data)
+		// log.Println("[#5] filter data is ", data)
 	} else {
 		data = parse
-		log.Println("[#5] filter data is ", data)
+		// log.Println("[#5] filter data is ", data)
 	}
 
 	len := len(data.Array())
-	log.Println("[#6] len(data) is ", len)
+	// log.Println("[#6] len(data) is ", len)
 
 	if len > 0 {
 		// list
 		arr = data.Array()
-		log.Println("[#7-1] len > 0, list")
+		// log.Println("[#7-1] len > 0, list")
 		for t, _ := range arr {
 			masterCheck := strings.Contains(arr[t].String(), "node-role.kubernetes.io/master")
 			if masterCheck {

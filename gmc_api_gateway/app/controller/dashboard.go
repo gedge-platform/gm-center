@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 	"io/ioutil"
 	"log"
@@ -47,8 +48,6 @@ func TotalDashboard(c echo.Context) (err error) {
 	if err = cursor2.All(ctx, &edgeClouds); err != nil {
 		log.Fatal(err)
 	}
-	add := GeoCoder("서울시 중구 을지로 100")
-	fmt.Print(add)
 
 	Credentialparams := model.PARAMS{
 		Kind:   "credential",
@@ -72,12 +71,80 @@ func TotalDashboard(c echo.Context) (err error) {
 		ClusterCpuTop5: dashboard_cluster_monit("all", dashboardMetric["dashboard_cpu_used_clusterList"]),
 		ClusterMemTop5: dashboard_cluster_monit("all", clusterMetric["memory_usage"]),
 		EdgeCloud:      edgeClouds,
-		CredentialCnt : len(CredentialCount.CredentialNames),
+		CredentialCnt:  len(CredentialCount.CredentialNames),
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": dashbaordData,
 	})
 }
+func CloudDashboard(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "nodes",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		User:      c.QueryParam("user"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+	cluster := GetDB("cluster", params.Cluster, "clusterName")
+	// nodeStatus := node_status(params.Cluster)
+	getData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	Nodes, _ := common.FindDataLabelKey(getData, "items", "labels", "node-role.kubernetes.io/master")
+	var NodeList []model.NODE
+	for n, _ := range Nodes {
+		Node := model.NODE{
+			Name:                    common.InterfaceToString(common.FindData(Nodes[n], "metadata", "name")),
+			NodeType:                common.InterfaceToString(common.FindData(Nodes[n], "nodeType", "")),
+			CreateAt:                common.InterfaceToTime(common.FindData(Nodes[n], "metadata", "creationTimestamp")),
+			Version:                 common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "kubeletVersion")),
+			IP:                      common.InterfaceToString(common.FindData(Nodes[n], "status", "addresses.0.address")),
+			Os:                      common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "operatingSystem")) + " / " + common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "osImage")),
+			ContainerRuntimeVersion: common.InterfaceToString(common.FindData(Nodes[n], "status.nodeInfo", "containerRuntimeVersion")),
+		}
+		NodeList = append(NodeList, Node)
+	}
+	dashbaordData := model.CLOUD_DASHBOARD{
+		ClusterInfo: cluster,
+		NodeRunning: node_status(params.Cluster),
+		CpuUtil:     dashboard_cluster_monit(params.Cluster, clusterMetric["cpu_util"]),
+		CpuUsage:    dashboard_cluster_monit(params.Cluster, clusterMetric["cpu_usage"]),
+		CpuTotal:    dashboard_cluster_monit(params.Cluster, clusterMetric["cpu_total"]),
+		MemoryTotal: dashboard_cluster_monit(params.Cluster, clusterMetric["memory_total"]),
+		MemoryUsage: dashboard_cluster_monit(params.Cluster, clusterMetric["memory_usage"]),
+		MemoryUtil:  dashboard_cluster_monit(params.Cluster, clusterMetric["memory_util"]),
+		DiskTotal:   dashboard_cluster_monit(params.Cluster, clusterMetric["disk_total"]),
+		DiskUsage:   dashboard_cluster_monit(params.Cluster, clusterMetric["disk_usage"]),
+		DiskUtil:    dashboard_cluster_monit(params.Cluster, clusterMetric["disk_util"]),
+		ResourceCnt: resourceCnt(params.Cluster),
+
+		NodeInfo: NodeList,
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": dashbaordData,
+	})
+}
+
+// func SADashboard(c echo.Context) (err error) {
+// 	params := model.PARAMS{
+// 		Kind:      "namespaces",
+// 		Name:      c.Param("name"),
+// 		Cluster:   c.QueryParam("cluster"),
+// 		Workspace: c.QueryParam("workspace"),
+// 		User:      c.QueryParam("user"),
+// 		Project:   c.QueryParam("project"),
+// 		Method:    c.Request().Method,
+// 		Body:      responseBody(c.Request().Body),
+// 	}
+// 	return c.JSON(http.StatusOK, echo.Map{
+// 		"data": dashbaordData,
+// 	})
+// }
 
 func GeoCoder(add string) (result string) {
 

@@ -23,6 +23,7 @@ var listTemplates_spider = map[string]string{
 	"controlvm":        "/spider/controlvm",
 	"vmstatus":         "/spider/vmstatus",
 	"vmspec":           "/spider/vmspec",
+	"vmorgspec":        "/spider/vmorgspec",
 	"vmimage":          "/spider/vmimage",
 	"vpc":              "/spider/vpc",
 	"securitygroup":    "/spider/securitygroup",
@@ -70,7 +71,7 @@ func DataRequest_spider(params model.PARAMS) (data string, err error) {
 
 	client := resty.New()
 	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	client.SetTimeout(1 * time.Minute)
+	client.SetTimeout(2 * time.Minute)
 	client.SetHeaders(map[string]string{
 		"Access-Control-Allow-Origin": "*",
 		"Content-Type":                "application/json; charset=utf-8",

@@ -1,6 +1,10 @@
 package controller
 
 import (
+	"encoding/json"
+	"log"
+	"fmt"
+
 	"net/http"
 
 	"gmc_api_gateway/app/common"
@@ -10,6 +14,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetCloudOS godoc
+// @Summary Cloudos
+// @Description get CloudOS
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/cloudos [get]
 func GetCloudOS(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -27,6 +39,14 @@ func GetCloudOS(c echo.Context) (err error) {
 
 }
 
+// GetALLCredential godoc
+// @Summary Credential
+// @Description get ALLCredential
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/credentials [get]
 func GetALLCredential(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -44,6 +64,15 @@ func GetALLCredential(c echo.Context) (err error) {
 
 }
 
+// GetCredential godoc
+// @Summary Credential
+// @Description get Credential
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/credentials/{credentialName} [get]
+// @Param credentialName path string true "Name of the credentials"
 func GetCredential(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -59,9 +88,35 @@ func GetCredential(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": credential,
 	})
-
 }
 
+func GetALLCredentialCount(c echo.Context)(err error) {
+
+	params := model.PARAMS{
+		Kind:   "credential",
+		Method: c.Request().Method,
+	}
+
+	getData, err := common.DataRequest_spider(params)
+
+	var P model.CredentialCount
+	json.Unmarshal([]byte(getData), &P)
+	log.Printf("[#Credential Count] is %s", P.CredentialNames)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"credentialCnt": len(P.CredentialNames),
+	})
+}
+
+// CreateCredential godoc
+// @Summary Credential
+// @Description get Credential
+// @Param CredentialBody body string true "Credential Info Body"
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/credentials [post]
 func CreateCredential(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:   "credential",
@@ -77,6 +132,15 @@ func CreateCredential(c echo.Context) (err error) {
 	})
 }
 
+// DeleteCredential godoc
+// @Summary Credential
+// @Description get Credential
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /spider/credentials/{credentialName} [delete]
+// @Param credentialName path string true "Name of the credentials"
 func DeleteCredential(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -339,6 +403,25 @@ func GetALLVm(c echo.Context) (err error) {
 
 }
 
+func GetALLVmCount(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vm",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+
+	var P model.VMCount
+	json.Unmarshal([]byte(getData), &P)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"VMCnt": len(P.VMCount),
+	})
+
+}
+
 func GetVm(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -406,6 +489,44 @@ func GetALLVMStatus(c echo.Context) (err error) {
 	})
 }
 
+func GetALLVMStatusCount(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmstatus",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+
+	var P model.VMStatusCount
+	json.Unmarshal([]byte(getData), &P)
+
+
+	var running int = 0
+	var suspended int = 0
+	var failed int = 0
+
+	for i := 0; i < len(P.Vmstatus); i++ {
+		str := fmt.Sprintf("%v", P.Vmstatus[i])
+		if(str == "{Running}"){
+			running++
+		}
+		if(str == "{Suspended}"){
+			suspended++
+		}
+		if(str == "{Failed}"){
+			failed++
+		}		
+	}
+	
+	return c.JSON(http.StatusOK, echo.Map{
+		"Running": running,
+		"Stop": suspended,
+		"Paused": failed,
+	})
+}
+
 func GetVMStatus(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -453,6 +574,39 @@ func GetVMSpec(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmspec,
+	})
+}
+
+func GetALLVMOrgSpec(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmorgspec",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmorgspec := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmorgspec,
+	})
+}
+
+func GetVMOrgSpec(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmorgspec",
+		Name:   c.Param("vmspecName"),
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmorgspec := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmorgspec,
 	})
 }
 

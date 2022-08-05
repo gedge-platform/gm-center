@@ -136,7 +136,6 @@ func ListCluster(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.CLUSTER
 // @Security   Bearer
 // @Param name path string true "name of the Cluster"
 // @Router /cluster/{name} [get]

@@ -196,13 +196,15 @@ func GEdgeRoute(e *echo.Echo) {
 	r2.Any("/monitoring/realtime/:kind", c.RealMetrics)
 	r2.Any("/monitoring/realtime", c.RealMetrics)
 
-	r3 := e.Group("/gmcapi/v2/spider")
+	r3 := e.Group("/gmcapi/v2/spider", middleware.JWTWithConfig(config))
+	// r3 := e.Group("/gmcapi/v2/spider")
 	r3.GET("/cloudos", c.GetCloudOS)
 
 	r3.GET("/credentials", c.GetALLCredential)
 	r3.GET("/credentials/:credentialName", c.GetCredential)
 	r3.POST("/credentials", c.CreateCredential)
 	r3.DELETE("/credentials/:credentialName", c.DeleteCredential)
+	r3.GET("/credentialsCount", c.GetALLCredentialCount)
 
 	r3.GET("/connectionconfig", c.GetALLConnectionconfig)
 	r3.GET("/connectionconfig/:configName", c.GetConnectionconfig)
@@ -223,12 +225,17 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.GET("/vm/:vmName", c.GetVm)
 	r3.POST("/vm", c.CreateVm)
 	r3.DELETE("/vm/:vmName", c.DeleteVm)
+	r3.GET("/vm/vmCount", c.GetALLVmCount)
 
 	r3.GET("/vm/vmstatus", c.GetALLVMStatus)
 	r3.GET("/vm/vmstatus/:vmstatusName", c.GetVMStatus)
+	r3.GET("/vm/vmstatus/vmstatusCount", c.GetALLVMStatusCount)
 
 	r3.GET("/vm/vmspec", c.GetALLVMSpec)
 	r3.GET("/vm/vmspec/:vmspecName", c.GetVMSpec)
+
+	r3.GET("/vm/vmorgspec", c.GetALLVMOrgSpec)
+	r3.GET("/vm/vmorgspec/:vmspecName", c.GetVMOrgSpec)
 
 	r3.GET("/vm/vmimage", c.GetALLVMImage)
 	r3.GET("/vm/vmimage/:vmImageNameId", c.GetVMImage)

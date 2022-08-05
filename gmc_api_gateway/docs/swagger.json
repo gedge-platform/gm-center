@@ -16,7 +16,7 @@
         },
         "version": "2.0"
     },
-    "host": "127.0.0.1:8010",
+    "host": "192.168.160.216:8010",
     "basePath": "/gmcapi/v2",
     "paths": {
         "/auth": {
@@ -349,6 +349,121 @@
         },
         "/pvs/:name": {
             "get": {
+                "responses": {}
+            }
+        },
+        "/spider/cloudos": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get CloudOS",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Cloudos",
+                "responses": {}
+            }
+        },
+        "/spider/credentials": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get ALLCredential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Credential",
+                "responses": {}
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Credential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Credential",
+                "parameters": [
+                    {
+                        "description": "Credential Info Body",
+                        "name": "CredentialBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/spider/credentials/{credentialName}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Credential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Credential",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the credentials",
+                        "name": "credentialName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Credential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Credential",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the credentials",
+                        "name": "credentialName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {}
             }
         }

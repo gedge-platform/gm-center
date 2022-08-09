@@ -13,10 +13,10 @@ import (
 	"time"
 
 	"encoding/json"
-	"gmc_api_gateway/app/common"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TotalDashboard(c echo.Context) (err error) {
@@ -89,6 +89,17 @@ func CloudDashboard(c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	cluster := GetDB("cluster", params.Cluster, "clusterName")
+	workspaces := GetDBList(params, "workspace", cluster["_id"].(primitive.ObjectID), "selectCluster")
+	projects := GetDBList(params, "project", cluster["_id"].(primitive.ObjectID), "selectCluster")
+	resourceCnt := resourceCntList(params.Cluster, params.Kind)
+	workspaceCnt := map[string]interface{}{
+		"workspace_count": len(workspaces),
+	}
+	projectCnt := map[string]interface{}{
+		"project_count": len(projects),
+	}
+	resourceCnt = append(resourceCnt, workspaceCnt)
+	resourceCnt = append(resourceCnt, projectCnt)
 	// nodeStatus := node_status(params.Cluster)
 	getData, err := common.DataRequest(params)
 	if err != nil {
@@ -109,6 +120,8 @@ func CloudDashboard(c echo.Context) (err error) {
 		}
 		NodeList = append(NodeList, Node)
 	}
+	// resourceCnt := resourceCnt(params.Cluster)
+
 	dashbaordData := model.CLOUD_DASHBOARD{
 		ClusterInfo: cluster,
 		NodeRunning: node_status(params.Cluster),
@@ -121,30 +134,50 @@ func CloudDashboard(c echo.Context) (err error) {
 		DiskTotal:   dashboard_cluster_monit(params.Cluster, clusterMetric["disk_total"]),
 		DiskUsage:   dashboard_cluster_monit(params.Cluster, clusterMetric["disk_usage"]),
 		DiskUtil:    dashboard_cluster_monit(params.Cluster, clusterMetric["disk_util"]),
-		ResourceCnt: resourceCnt(params.Cluster),
-
-		NodeInfo: NodeList,
+		ResourceCnt: resourceCnt,
+		NodeInfo:    NodeList,
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": dashbaordData,
 	})
 }
 
-// func SADashboard(c echo.Context) (err error) {
-// 	params := model.PARAMS{
-// 		Kind:      "namespaces",
-// 		Name:      c.Param("name"),
-// 		Cluster:   c.QueryParam("cluster"),
-// 		Workspace: c.QueryParam("workspace"),
-// 		User:      c.QueryParam("user"),
-// 		Project:   c.QueryParam("project"),
-// 		Method:    c.Request().Method,
-// 		Body:      responseBody(c.Request().Body),
-// 	}
-// 	return c.JSON(http.StatusOK, echo.Map{
-// 		"data": dashbaordData,
-// 	})
-// }
+func SADashboard(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		User:      c.QueryParam("user"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+
+	userObj := FindMemberDB(params).ObjectId
+	workspaces := GetDBList(params, "workspace", userObj, "workspaceOwner")
+
+	projects := GetDBList(params, "project", userObj, "projectOwner")
+	var resource model.Resource_cnt
+	for _, project := range projects {
+		resource.DeploymentCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "deployment_count")
+		resource.DaemonsetCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "daemonset_count")
+		resource.StatefulsetCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "statefulset_count")
+		resource.PodCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "pod_count")
+		resource.ServiceCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "service_count")
+		resource.CronjobCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "cronjob_count")
+		resource.JobCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "job_count")
+		resource.VolumeCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "pv_count")
+	}
+	dashboardData := model.SERVICE_DASHBOARD{
+		WorkspaceCnt: len(workspaces),
+		ProjectCnt:   len(projects),
+		Resource:     resource,
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": dashboardData,
+	})
+}
 
 func GeoCoder(add string) (result string) {
 

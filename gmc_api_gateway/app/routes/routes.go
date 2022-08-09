@@ -176,6 +176,7 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/totalDashboard", c.TotalDashboard)
 	r.GET("/cloudDashboard", c.CloudDashboard)
+	r.GET("/serviceDashboard", c.SADashboard)
 
 	e.GET("/clusterInfo", c.GetClusterInfo)
 	e.POST("/auth", c.LoginUser)

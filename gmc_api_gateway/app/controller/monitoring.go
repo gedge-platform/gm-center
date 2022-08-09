@@ -21,20 +21,21 @@ import (
 
 //memory -> GI / Disk -> GB / CPU -> Core / Net -> Kbps
 var clusterMetric = map[string]string{
-	"cpu_util":      "round(cluster:node_cpu:ratio_rate5m{$1} *100,0.01)",
-	"cpu_util_bak":  "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster)*100),0.1)",
-	"cpu_usage":     "round(sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{$1}) by (cluster),0.01)",
-	"cpu_usage_bak": "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[1m]))by(cluster),0.01)",
-	"cpu_total":     "sum(machine_cpu_cores{$1})by(cluster)",
-	"memory_util":   "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)",
-	"memory_usage":  "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
-	"memory_total":  "round(sum(node_memory_MemTotal_bytes{$1})by(cluster)/1024/1024/1024,0.01)",
-	"disk_util":     "round(((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)))*100,0.1)",
-	"disk_usage":    "round((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/1000/1000/1000,0.01)",
-	"disk_total":    "round(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)/1000/1000/1000,0.01)",
-	"pod_running":   "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster)",
-	"pod_quota":     "sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)",
-	"pod_util":      "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
+	"cpu_util":        "round(100 - (avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster) * 100),0.01)",
+	"cpu_util_bak":    "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster)*100),0.1)",
+	"cpu_usage":       "round(sum(rate(node_cpu_seconds_total{mode!='idle',mode!='iowait',$1}[5m]))by(cluster),0.01)",
+	"cpu_usage_bak":   "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[1m]))by(cluster),0.01)",
+	"cpu_total":       "sum(machine_cpu_cores{$1})by(cluster)",
+	"memory_util":     "round(avg((1 - (node_memory_MemAvailable_bytes{$1} / (node_memory_MemTotal_bytes{$1})))* 100)by(cluster),0.01)",
+	"memory_util_bak": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)",
+	"memory_usage":    "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
+	"memory_total":    "round(sum(node_memory_MemTotal_bytes{$1})by(cluster)/1024/1024/1024,0.01)",
+	"disk_util":       "round(((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)))*100,0.1)",
+	"disk_usage":      "round((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/1000/1000/1000,0.01)",
+	"disk_total":      "round(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)/1000/1000/1000,0.01)",
+	"pod_running":     "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster)",
+	"pod_quota":       "sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)",
+	"pod_util":        "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
 
 	"apiserver_request_rate": "round(sum(irate(apiserver_request_total{$1}[5m]))by(cluster),0.001)",
 	// latency 보완 필요 (응답속도 느림)
@@ -557,19 +558,20 @@ func dashboard_cluster_monit(c, query string) interface{} {
 	fmt.Println("data : ", result)
 	return result
 }
-func resourceCnt(c string) interface{} {
+
+func resourceCntList(c, kind string) []map[string]interface{} {
 	var resourceList []map[string]interface{}
 	config.Init()
 	addr := os.Getenv("PROMETHEUS")
+	temp_filter := make(map[string]string)
+	if kind == "nodes" {
+		temp_filter["cluster"] = c
 
-	temp_filter := map[string]string{
-		"cluster": c,
+	} else if kind == "namespaces" {
+		temp_filter["namespace"] = c
 	}
-	fmt.Println("resourceCntMetric : ", resourceCntMetric)
 	for key, _ := range resourceCntMetric {
 		data, err := nowQueryRange(addr, nowMetricExpr(resourceCntMetric[key], temp_filter))
-		fmt.Println("resourceCntMetric[key] : ", resourceCntMetric[key])
-		fmt.Println("query : ", nowMetricExpr(resourceCntMetric[key], temp_filter))
 		if err != nil {
 			fmt.Println("err : ", err)
 		} else {
@@ -577,11 +579,38 @@ func resourceCnt(c string) interface{} {
 				data := data.(model.Matrix)
 				resource := make(map[string]interface{})
 				value := data[0].Values[0].Value
-				resource[key] = value
+				resource[key] = common.InterfaceToInt(value)
 				resourceList = append(resourceList, resource)
 			}
 		}
 	}
+	// fmt.Println("resourceCntMetric : ", resourceCntMetric)
+
 	fmt.Println("resourceList : ", resourceList)
 	return resourceList
+}
+func resourceCnt(c, kind, key string) int {
+	config.Init()
+	temp_filter := make(map[string]string)
+	addr := os.Getenv("PROMETHEUS")
+	if kind == "nodes" {
+		temp_filter["cluster"] = c
+
+	} else if kind == "namespaces" {
+		temp_filter["namespace"] = c
+	}
+	var result int
+	data, err := nowQueryRange(addr, nowMetricExpr(resourceCntMetric[key], temp_filter))
+	if err != nil {
+		fmt.Println("err : ", err)
+	} else {
+		if check := len(data.(model.Matrix)) != 0; check {
+			data := data.(model.Matrix)
+			// resource := make(map[string]interface{})
+			value := data[0].Values[0].Value
+			resource := common.InterfaceToInt(value)
+			result = resource
+		}
+	}
+	return result
 }

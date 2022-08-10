@@ -1006,3 +1006,12 @@ func ToFixed(num float64, precision int) float64 {
 	output := math.Pow(10, float64(precision))
 	return float64(round(num*output)) / output
 }
+func ListSlice(list []map[string]interface{}, num int) []map[string]interface{} {
+	var result []map[string]interface{}
+	if len(list) > num {
+		result = list[:num]
+	} else {
+		result = list
+	}
+	return result
+}

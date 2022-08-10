@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sort"
 	"time"
 
 	"encoding/json"
@@ -66,8 +67,8 @@ func TotalDashboard(c echo.Context) (err error) {
 		EdgeClusterCnt: len(edgeClouds),
 		ProjectCnt:     projectCount,
 		WorkspaceCnt:   workspaceCount,
-		PodCpuTop5:     dashboard_pod_monit("all", dashboardMetric["dashboard_cpu_used_podList"]),
-		PodMemTop5:     dashboard_pod_monit("all", dashboardMetric["dashboard_mem_used_podList"]),
+		PodCpuTop5:     dashboard_pod_monit("all", "cluster", dashboardMetric["dashboard_cpu_used_podList"]),
+		PodMemTop5:     dashboard_pod_monit("all", "cluster", dashboardMetric["dashboard_mem_used_podList"]),
 		ClusterCpuTop5: dashboard_cluster_monit("all", dashboardMetric["dashboard_cpu_used_clusterList"]),
 		ClusterMemTop5: dashboard_cluster_monit("all", clusterMetric["memory_usage"]),
 		EdgeCloud:      edgeClouds,
@@ -153,13 +154,25 @@ func SADashboard(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-
+	var podCpuList []map[string]interface{}
+	var podMemList []map[string]interface{}
+	var namespaceCpuList []map[string]interface{}
+	var namespaceMemList []map[string]interface{}
 	userObj := FindMemberDB(params).ObjectId
 	workspaces := GetDBList(params, "workspace", userObj, "workspaceOwner")
 
 	projects := GetDBList(params, "project", userObj, "projectOwner")
 	var resource model.Resource_cnt
 	for _, project := range projects {
+		projectName := common.InterfaceToString(project["projectName"])
+		namespaceCpu := map[string]interface{}{
+			"name":  projectName,
+			"value": namespaceUsage(projectName, dashboardMetric["namespace_cpu"]),
+		}
+		namespaceMem := map[string]interface{}{
+			"name":  projectName,
+			"value": namespaceUsage(projectName, dashboardMetric["namespace_memory"]),
+		}
 		resource.DeploymentCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "deployment_count")
 		resource.DaemonsetCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "daemonset_count")
 		resource.StatefulsetCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "statefulset_count")
@@ -168,15 +181,62 @@ func SADashboard(c echo.Context) (err error) {
 		resource.CronjobCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "cronjob_count")
 		resource.JobCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "job_count")
 		resource.VolumeCount += resourceCnt(common.InterfaceToString(project["projectName"]), params.Kind, "pv_count")
+		cpuList := dashboard_pod_monit(common.InterfaceToString(project["projectName"]), params.Kind, dashboardMetric["cpu_used_podList"])
+		memoryList := dashboard_pod_monit(common.InterfaceToString(project["projectName"]), params.Kind, podMetric["pod_memory"])
+		podCpuList = append(podCpuList, cpuList...)
+		podMemList = append(podMemList, memoryList...)
+		namespaceCpuList = append(namespaceCpuList, namespaceCpu)
+		namespaceMemList = append(namespaceMemList, namespaceMem)
 	}
+	sort.SliceStable(podCpuList, func(i, j int) bool {
+		return common.InterfaceToFloat(podCpuList[i]["value"]) > common.InterfaceToFloat(podCpuList[j]["value"])
+	})
+	sort.SliceStable(podMemList, func(i, j int) bool {
+		return common.InterfaceToFloat(podMemList[i]["value"]) > common.InterfaceToFloat(podMemList[j]["value"])
+	})
+	sort.SliceStable(namespaceCpuList, func(i, j int) bool {
+		return common.InterfaceToFloat(namespaceCpuList[i]["value"]) > common.InterfaceToFloat(namespaceCpuList[j]["value"])
+	})
+	sort.SliceStable(namespaceMemList, func(i, j int) bool {
+		return common.InterfaceToFloat(namespaceMemList[i]["value"]) > common.InterfaceToFloat(namespaceMemList[j]["value"])
+	})
 	dashboardData := model.SERVICE_DASHBOARD{
-		WorkspaceCnt: len(workspaces),
-		ProjectCnt:   len(projects),
-		Resource:     resource,
+		WorkspaceCnt:   len(workspaces),
+		ProjectCnt:     len(projects),
+		Resource:       resource,
+		PodCpuTop5:     common.ListSlice(podCpuList, 5),
+		PodMemTop5:     common.ListSlice(podMemList, 5),
+		ProjectCpuTop5: common.ListSlice(namespaceCpuList, 5),
+		ProjectMemTop5: common.ListSlice(namespaceMemList, 5),
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": dashboardData,
 	})
+}
+func ResourceMonit(c echo.Context) (err error) {
+	// params := model.PARAMS{
+	// 	Kind:      "namespaces",
+	// 	Name:      c.Param("name"),
+	// 	Cluster:   c.QueryParam("cluster"),
+	// 	Workspace: c.QueryParam("workspace"),
+	// 	User:      c.QueryParam("user"),
+	// 	Project:   c.QueryParam("project"),
+	// 	Method:    c.Request().Method,
+	// 	Body:      responseBody(c.Request().Body),
+	// }
+	metric_filter := "pod_count|cronjob_count|job_count|service_count|daemonset_count|statefulset_count|deployment_count|pv_count"
+	metrics := metricParsing(metric_filter)
+	mericResult(c, "resource", metrics)
+	// config.Init()
+	// addr := os.Getenv("PROMETHEUS")
+	// for k, metric := range metrics {
+	// 	if metric == "" {
+	// 		continue
+	// 	}
+	// 	var data model.Value
+	// 	var err error
+	// }
+	return nil
 }
 
 func GeoCoder(add string) (result string) {

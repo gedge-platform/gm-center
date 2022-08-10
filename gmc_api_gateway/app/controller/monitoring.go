@@ -111,8 +111,8 @@ var resourceCntMetric = map[string]string{
 	"daemonset_count":   "sum(kube_daemonset_labels{$1})",
 	"statefulset_count": "sum(kube_statefulset_labels{$1})",
 	"deployment_count":  "sum(kube_deployment_labels{$1})",
-	"pv_count":          "sum(kube_deployment_labels{$1})",
-	"namespace_count":   "sum(kube_deployment_labels{$1})",
+	"pv_count":          "sum(kube_persistentvolumeclaim_info{$1})",
+	"namespace_count":   "sum(kube_namespace_labels{$1})",
 }
 
 var gpuMetric = map[string]string{
@@ -225,6 +225,13 @@ func mericResult(c echo.Context, kind string, a []string) error {
 			}
 
 			data, err = QueryRange(addr, metricExpr(namespaceMetric[a[k]], temp_filter), c)
+		case "resource":
+			namespace := c.QueryParam("project")
+			temp_filter := map[string]string{
+				"namespace": namespace,
+			}
+
+			data, err = QueryRange(addr, metricExpr(resourceCntMetric[a[k]], temp_filter), c)
 
 		case "gpu":
 			temp_filter := map[string]string{
@@ -444,22 +451,25 @@ func metricExpr(val string, filter map[string]string) string {
 }
 
 var dashboardMetric = map[string]string{
-	"dashboard_cpu_used_podList":     "topk(5,rate (container_cpu_usage_seconds_total{image!=''}[1m]))",
-	"dashboard_mem_used_podList":     "topk(5,rate(container_memory_working_set_bytes{image!=''}[1m]))",
+	"dashboard_cpu_used_podList":     "topk(5,sum(rate(container_cpu_usage_seconds_total{$1}[30m])) by (cluster,pod,namespace))",
+	"dashboard_mem_used_podList":     "topk(5,sum(container_memory_working_set_bytes{container!='POD',container!='',pod!='',$1}) by (cluster,pod,namespace))",
 	"dashboard_cpu_used_clusterList": "round(sum(rate(container_cpu_usage_seconds_total[1m]))by(cluster),0.01)",
 	"dashboard_mem_used_clusterList": "nvidia_smi_power_limit_watts{$1}",
-	"node_status":                    "kube_node_status_condition{condition='Ready',cluster='{$1}' ,status='true'}==1",
+	"node_status":                    "kube_node_status_condition{condition='Ready',status='true',$1}==1",
+	"cpu_used_podList":               "topk(5,sum(rate(container_cpu_usage_seconds_total{$1}[5m]))by(pod,namespace,cluster))",
+	"memory_used_podList":            "topk(5,sum(rate(container_memory_usage_bytes{$1}))by(pod,namespace,cluster))",
+	"namespace_cpu":                  "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace),0.001)",
+	"namespace_memory":               "sum(container_memory_working_set_bytes{$1})by(namespace)",
 }
 
 func node_status(c string) interface{} {
 	var nodeList []map[string]interface{}
 	config.Init()
 	addr := os.Getenv("PROMETHEUS")
-	query := "kube_node_status_condition{condition='Ready',cluster='" + c + "', status='true'}==1"
 	temp_filter := map[string]string{
 		"cluster": c,
 	}
-	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
+	data, err := nowQueryRange(addr, nowMetricExpr(dashboardMetric["node_status"], temp_filter))
 	fmt.Println("err : ", err)
 	if err != nil {
 		fmt.Println("err : ", err)
@@ -479,18 +489,16 @@ func node_status(c string) interface{} {
 	return nodeList
 }
 
-func dashboard_pod_monit(c, query string) interface{} {
+func dashboard_pod_monit(c, kind, query string) []map[string]interface{} {
 	// var gpuList []interface{}
 	var podList []map[string]interface{}
-
-	// if check := strings.Compare(c, "") == 0; check {
-	// 	return gpuList, false
-	// }
 	config.Init()
 	addr := os.Getenv("PROMETHEUS")
-
-	temp_filter := map[string]string{
-		"cluster": c,
+	temp_filter := make(map[string]string)
+	if kind == "cluster" {
+		temp_filter["cluster"] = c
+	} else if kind == "namespaces" {
+		temp_filter["namespace"] = c
 	}
 
 	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
@@ -609,6 +617,29 @@ func resourceCnt(c, kind, key string) int {
 			// resource := make(map[string]interface{})
 			value := data[0].Values[0].Value
 			resource := common.InterfaceToInt(value)
+			result = resource
+		}
+	}
+	return result
+}
+
+func namespaceUsage(c, query string) float64 {
+	config.Init()
+	temp_filter := make(map[string]string)
+	addr := os.Getenv("PROMETHEUS")
+
+	temp_filter["namespace"] = c
+
+	var result float64
+	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
+	if err != nil {
+		fmt.Println("err : ", err)
+	} else {
+		if check := len(data.(model.Matrix)) != 0; check {
+			data := data.(model.Matrix)
+			// resource := make(map[string]interface{})
+			value := data[0].Values[0].Value
+			resource := common.InterfaceToFloat(value)
 			result = resource
 		}
 	}

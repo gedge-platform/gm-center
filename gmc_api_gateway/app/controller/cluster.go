@@ -67,6 +67,14 @@ func CreateCluster(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, result)
 }
 
+// GetAllCluster godoc
+// @Summary Show List cluster
+// @Description get cluster List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.CLUSTER
+// @Security Bearer
+// @Router /clusters [get]
 func ListCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "nodes",
@@ -107,8 +115,6 @@ func ListCluster(c echo.Context) (err error) {
 	for _, cluster := range results {
 		params.Name = cluster.Name
 		gpuList, check := GpuCheck(cluster.Name)
-		fmt.Println("gpuList : ", gpuList)
-		fmt.Println("check : ", check)
 		if check == true {
 			cluster.GpuCnt = len(gpuList)
 		} else {
@@ -123,7 +129,8 @@ func ListCluster(c echo.Context) (err error) {
 		}
 		cluster.NodeCnt = common.InterfaceOfLen(common.FindData(getData, "items", ""))
 		tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
-		tempresult := NowMonit("cluster", params.Cluster, params.Name, tempMetric)
+		tempresult := NowMonit("cluster", params.Cluster, "", tempMetric)
+		fmt.Println("test : ", tempresult)
 		cluster.ResourceUsage = tempresult
 		results2 = append(results2, cluster)
 	}
@@ -199,14 +206,14 @@ func FindCluster(c echo.Context) (err error) {
 			NodeList = append(NodeList, Node)
 		}
 		ResourceCnt := model.Resource_cnt{
-			DeploymentCount:  ResourceCnt(params, "deployments"),
-			DaemonsetCount:   ResourceCnt(params, "daemonsets"),
-			StatefulsetCount: ResourceCnt(params, "statefulsets"),
-			PodCount:         ResourceCnt(params, "deployments"),
-			ServiceCount:     ResourceCnt(params, "pods"),
-			CronjobCount:     ResourceCnt(params, "cronjobs"),
-			JobCount:         ResourceCnt(params, "jobs"),
-			VolumeCount:      ResourceCnt(params, "persistentvolumeclaims"),
+			DeploymentCount:  resourceCnt(params.Cluster, params.Kind, "deployment_count"),
+			DaemonsetCount:   resourceCnt(params.Cluster, params.Kind, "daemonset_count"),
+			StatefulsetCount: resourceCnt(params.Cluster, params.Kind, "statefulset_count"),
+			PodCount:         resourceCnt(params.Cluster, params.Kind, "pod_count"),
+			ServiceCount:     resourceCnt(params.Cluster, params.Kind, "service_count"),
+			CronjobCount:     resourceCnt(params.Cluster, params.Kind, "cronjob_count"),
+			JobCount:         resourceCnt(params.Cluster, params.Kind, "job_count"),
+			VolumeCount:      resourceCnt(params.Cluster, params.Kind, "pv_count"),
 		}
 
 		Cluster.Resource = ResourceCnt

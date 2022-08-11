@@ -618,6 +618,7 @@ func resourceCnt(c, kind, key string) int {
 			value := data[0].Values[0].Value
 			resource := common.InterfaceToInt(value)
 			result = resource
+			fmt.Println("###########result", result)
 		}
 	}
 	return result

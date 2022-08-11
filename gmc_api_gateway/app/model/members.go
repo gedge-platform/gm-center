@@ -18,7 +18,7 @@ type Member struct {
 }
 
 type RequestMember struct {
-	_id        primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
+	// _id        primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
 	Id         string             `json:"memberId,omitempty" bson:"memberId"`
 	Name       string             `json:"memberName,omitempty" bson:"memberName"`
 	Password   string             `json:"password,omitempty" bson:"password" validate:"gte=0,lte=10"`

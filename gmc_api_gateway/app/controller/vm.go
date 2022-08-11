@@ -12,6 +12,11 @@ import (
 	"gmc_api_gateway/app/model"
 
 	"github.com/labstack/echo/v4"
+	
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	// "github.com/tidwall/gjson"
 )
 
 // GetCloudOS godoc
@@ -403,21 +408,71 @@ func GetALLVm(c echo.Context) (err error) {
 
 }
 
+
+func GetALLVm2(c echo.Context) (err error) {
+
+	type SystemId struct {
+		SystemId string `json:"SystemId"`
+	}
+
+	var SystemIds []SystemId
+	// cb-spider 에서 vmstatus 목록 가져와서, SystemId 추려내기 위함
+	params := model.PARAMS{
+		Kind:   "vmstatus",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	// vm := common.FindData(getData, "vmstatus", "IId")
+	vms := common.FindingArray(common.Finding(getData, "vmstatus"))
+	for e, _ := range vms {
+		vmSystemId := common.FindData(vms[e].String(), "IId", "SystemId")
+		vm := SystemId{
+			SystemId: common.InterfaceToString(vmSystemId),
+		}
+		SystemIds = append(SystemIds, vm)
+	}
+
+	fmt.Println("vmSystemIds : ", SystemIds)
+
+	OpenStackAuthOpts := gophercloud.AuthOptions{
+		IdentityEndpoint: c.QueryParam("endpoint"),
+		Username:         c.QueryParam("username"),
+		Password:         c.QueryParam("password"),
+		DomainName:       "Default",
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": SystemIds,
+		"OpenStackAuthOpts": OpenStackAuthOpts,
+	})
+}
+
+
 func GetALLVmCount(c echo.Context) (err error) {
 
 	params := model.PARAMS{
-		Kind:   "vm",
+		Kind:   "vmstatus",
 		Method: c.Request().Method,
 		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
 	getData, err := common.DataRequest_spider(params)
 
-	var P model.VMCount
+	var P model.VMStatusCount
 	json.Unmarshal([]byte(getData), &P)
 
+
+	var vmCnt int = 0
+
+	for i := 0; i < len(P.Vmstatus); i++ {
+		vmCnt++
+	}
+
+
 	return c.JSON(http.StatusOK, echo.Map{
-		"VMCnt": len(P.VMCount),
+		"VMCnt": vmCnt,
 	})
 
 }
@@ -905,4 +960,58 @@ func UnregisterKeypair(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": regkeypair,
 	})
+}
+
+
+
+func OpenstackVmList(opts gophercloud.AuthOptions) ([]string, error) {
+	fmt.Println("[in VmList Function] Hello ?")
+	
+		// params := model.PARAMS{
+		// 	Endpoint:   c.Request().Body["endpoint"],
+		// 	Method: c.Request().Method,
+		// 	Body:   common.ResponseBody_spider(c.Request().Body),
+		// }
+	
+
+	// fmt.Println("endpoint : ", endpoint)
+	// fmt.Println("username : ", username)
+	// fmt.Println("password : ", password)
+
+	// // TODO: 추후 개별 struct 만들어서 넣기
+	// opts := gophercloud.AuthOptions{
+	// 	IdentityEndpoint: endpoint,
+	// 	Username:         username,
+	// 	Password:         password,
+	// 	DomainName:       "Default",
+	// 	// TenantName:				"차세대R&D기획본부",
+	// }
+
+	client, err := openstack.AuthenticatedClient(opts)
+	if err != nil {
+		panic(err)
+	}
+
+		fmt.Println("[#1]client Token : ", client.TokenID)
+
+	eo := gophercloud.EndpointOpts{
+		Type:   "compute",
+		Region: "RegionOne",
+	}
+	compute, err := openstack.NewComputeV2(client, eo)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("[#2]compute : ", compute)
+
+
+	listOpts := servers.ListOpts{}
+	pager, err5 := servers.List(compute, listOpts).AllPages()
+	if err5 != nil {
+		fmt.Println("Error is : ", err5.Error())
+		return nil, err5
+	}
+	
+	return pager, ""
 }

@@ -32,7 +32,8 @@ func CreateMember(c echo.Context) (err error) {
 	cdb := GetMemberDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-	models := new(model.Member)
+	models := new(model.RequestMember)
+
 	validate := validator.New()
 
 	if err = c.Bind(models); err != nil {

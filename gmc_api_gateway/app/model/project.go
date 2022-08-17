@@ -19,7 +19,7 @@ type Project struct {
 	Selectcluster []ProjectClusters  `json:"selectCluster,omitempty" bson:"selectCluster"`
 	ClusterName   []string           `json:"clusterName,omitempty" bson:"selectCluster2"`
 	IstioCheck    string             `json:"istioCheck,omitempty" bson:"istioCheck"`
-	Created_at    primitive.DateTime `json:"created_at,omitempty"`
+	Created_at    time.Time          `json:"created_at,omitempty"`
 }
 
 type ProjectClusters struct {
@@ -38,7 +38,7 @@ type RequestProject struct {
 	Workspace     primitive.ObjectID   `json:"workspace,omitempty" bson:"workspace"`
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster"`
 	ClusterName   []string             `json:"clusterName,omitempty" bson:"selectCluster2"`
-	Created_at    primitive.DateTime   `json:"created_at,omitempty"`
+	Created_at    time.Time            `json:"created_at,omitempty"`
 	IstioCheck    string               `json:"istioCheck,omitempty" bson:"istioCheck"`
 }
 
@@ -52,7 +52,7 @@ type NewProject struct {
 	Workspace     primitive.ObjectID   `json:"workspace,omitempty" bson:"workspace" validate:"required"`
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster" validate:"required"`
 	IstioCheck    string               `json:"istioCheck,omitempty" bson:"istioCheck"`
-	Created_at    primitive.DateTime   `json:"created_at,omitempty"`
+	Created_at    time.Time            `json:"created_at,omitempty"`
 }
 
 type DBProject struct {
@@ -62,11 +62,11 @@ type DBProject struct {
 	Type        string             `json:"projectType" bson:"projectType" validate:"required"`
 	// Owner         primitive.ObjectID `json:"projectOwner,omitempty" bson:"projectOwner"`
 	// Creator       primitive.ObjectID `json:"projectCreator,omitempty" bson:"projectCreator"`
-	MemberName    string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`
-	Workspace     Workspace          `json:"workspace,omitempty" bson:"workspace"`
-	Selectcluster []Cluster          `json:"selectCluster,omitempty" bson:"selectCluster"`
-	Created_at    primitive.DateTime `json:"created_at,omitempty"`
-	IstioCheck    string             `json:"istioCheck,omitempty" bson:"istioCheck"`
+	MemberName    string      `json:"memberName,omitempty" bson:"memberName" validate:"required"`
+	Workspace     DBWorkspace `json:"workspace,omitempty" bson:"workspace"`
+	Selectcluster []Cluster   `json:"selectCluster,omitempty" bson:"selectCluster"`
+	Created_at    time.Time   `json:"created_at,omitempty"`
+	IstioCheck    string      `json:"istioCheck,omitempty" bson:"istioCheck"`
 }
 
 type USERPROJECT struct {
@@ -85,17 +85,17 @@ type SYSTEMPROJECT struct {
 	ClusterName string         `json:"clusterName,omitempty"`
 	CreateAt    time.Time      `json:"created_at"`
 	Status      string         `json:"status"`
-	Events      interface{}    `json:"events"`
+	Events      interface{}    `json:"events,omitempty"`
 	Detail      PROJECT_DETAIL `json:"DetailInfo,omitempty"`
 }
 type PROJECT_DETAIL struct {
 	// Project
-	ClusterName   string       `json:"clusterName,omitempty"`
-	ProjectName   string       `json:"Name,omitempty"`
-	CreateAt      time.Time    `json:"created_at"`
-	Status        string       `json:"status,omitempty"`
-	Label         interface{}  `json:"labels,omitempty"`
-	Annotation    interface{}  `json:"annotations,omitempty"`
-	Resource      Resource_cnt `json:"resource,omitempty"`
-	ResourceUsage interface{}  `json:"resourceUsage,omitempty"`
+	ClusterName   string                 `json:"clusterName,omitempty"`
+	ProjectName   string                 `json:"Name,omitempty"`
+	CreateAt      time.Time              `json:"created_at,omitempty"`
+	Status        string                 `json:"status,omitempty"`
+	Label         interface{}            `json:"labels,omitempty"`
+	Annotation    interface{}            `json:"annotations,omitempty"`
+	Resource      map[string]interface{} `json:"resource,omitempty"`
+	ResourceUsage interface{}            `json:"resourceUsage,omitempty"`
 }

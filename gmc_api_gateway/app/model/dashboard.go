@@ -21,6 +21,7 @@ type EdgeCloud struct {
 }
 
 type SERVICE_DASHBOARD struct {
+	ProjectList    interface{} `json:"projectList"`
 	WorkspaceCnt   int         `json:"workspaceCnt"`
 	ProjectCnt     int         `json:"projectCnt"`
 	Resource       interface{} `json:"resource"`

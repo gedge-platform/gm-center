@@ -28,6 +28,16 @@ func GetClusterDB(name string) *mongo.Collection {
 	return cdb
 }
 
+// CreateCluster godoc
+// @Summary Create Cluster
+// @Description Create Cluster
+// @Param body body model.Cluster true "Cluster Info Body"
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.Cluster
+// @Header 200 {string} Token "qwerty"
+// @Router /clusters [post]
 func CreateCluster(c echo.Context) (err error) {
 	cdb := GetClusterDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -58,13 +68,18 @@ func CreateCluster(c echo.Context) (err error) {
 		Point["y"] = common.InterfaceToString(common.FindData(point, "response.result.point", "y"))
 		models.Point = Point
 	}
+	models.Created_at = time.Now()
 	result, err := cdb.InsertOne(ctx, models)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil
 	}
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusCreated, echo.Map{
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   result,
+	})
 }
 
 // GetAllCluster godoc
@@ -134,7 +149,9 @@ func ListCluster(c echo.Context) (err error) {
 		cluster.ResourceUsage = tempresult
 		results2 = append(results2, cluster)
 	}
-	return c.JSON(http.StatusOK, results2)
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": results2,
+	})
 }
 
 // GetCluster godoc
@@ -145,7 +162,7 @@ func ListCluster(c echo.Context) (err error) {
 // @Produce  json
 // @Security   Bearer
 // @Param name path string true "name of the Cluster"
-// @Router /cluster/{name} [get]
+// @Router /clusters/{name} [get]
 func FindCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "nodes",
@@ -219,7 +236,9 @@ func FindCluster(c echo.Context) (err error) {
 		Cluster.Resource = ResourceCnt
 		Cluster.Nodes = NodeList
 		Cluster.Events = getCallEvent(params)
-		return c.JSON(http.StatusOK, Cluster)
+		return c.JSON(http.StatusOK, echo.Map{
+			"data": Cluster,
+		})
 	}
 }
 func ListClusterDB(name string) []model.Cluster {

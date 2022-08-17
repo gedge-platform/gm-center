@@ -29,17 +29,26 @@ func GetMemberDB(name string) *mongo.Collection {
 }
 
 func CreateMember(c echo.Context) (err error) {
+	params := model.PARAMS{
+		// Name:      c.Param("name"),
+		// Cluster:   c.QueryParam("cluster"),
+		// Workspace: c.QueryParam("workspace"),
+		// Project:   c.QueryParam("project"),
+		User: c.QueryParam("user"),
+		// Method:    c.Request().Method,
+		// Body:      responseBody(c.Request().Body),
+	}
 	cdb := GetMemberDB("member")
+
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-	models := new(model.Member)
+	models := new(model.RequestMember)
 	validate := validator.New()
 
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			fmt.Println(err)
@@ -51,13 +60,27 @@ func CreateMember(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	fmt.Println("models : ", models)
+	params.User = models.Id
+	memberCheck := FindMemberDB(params)
+	fmt.Println("check : ", memberCheck)
+	if memberCheck.Id != "" {
+		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrDuplicated)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+		})
+	}
+	models.Created_at = time.Now()
 	result, err := cdb.InsertOne(ctx, models)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil
 	}
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusCreated, echo.Map{
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   result,
+	})
 }
 
 func ListMember(c echo.Context) (err error) {
@@ -87,6 +110,7 @@ func ListMember(c echo.Context) (err error) {
 	cur.Close(context.TODO())
 
 	return c.JSON(http.StatusOK, results)
+
 }
 
 func FindMember(c echo.Context) (err error) {

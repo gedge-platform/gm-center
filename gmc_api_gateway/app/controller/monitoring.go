@@ -567,8 +567,8 @@ func dashboard_cluster_monit(c, query string) interface{} {
 	return result
 }
 
-func resourceCntList(c, kind string) []map[string]interface{} {
-	var resourceList []map[string]interface{}
+func resourceCntList(c, n, kind string) map[string]interface{} {
+	resource := make(map[string]interface{})
 	config.Init()
 	addr := os.Getenv("PROMETHEUS")
 	temp_filter := make(map[string]string)
@@ -576,7 +576,8 @@ func resourceCntList(c, kind string) []map[string]interface{} {
 		temp_filter["cluster"] = c
 
 	} else if kind == "namespaces" {
-		temp_filter["namespace"] = c
+		temp_filter["namespace"] = n
+		temp_filter["cluster"] = c
 	}
 	for key, _ := range resourceCntMetric {
 		data, err := nowQueryRange(addr, nowMetricExpr(resourceCntMetric[key], temp_filter))
@@ -585,17 +586,24 @@ func resourceCntList(c, kind string) []map[string]interface{} {
 		} else {
 			if check := len(data.(model.Matrix)) != 0; check {
 				data := data.(model.Matrix)
-				resource := make(map[string]interface{})
+				// resource := make(map[string]interface{})
+				// fmt.Println("data", data)
 				value := data[0].Values[0].Value
+				fmt.Println("value", value)
+				// if value ==  {
+				// 	value = 0
+				// }
+
 				resource[key] = common.InterfaceToInt(value)
-				resourceList = append(resourceList, resource)
+				// resourceList = append(resourceList, resource)
+			} else {
+				resource[key] = 0
 			}
 		}
 	}
 	// fmt.Println("resourceCntMetric : ", resourceCntMetric)
 
-	fmt.Println("resourceList : ", resourceList)
-	return resourceList
+	return resource
 }
 func resourceCnt(c, kind, key string) int {
 	config.Init()

@@ -43,6 +43,16 @@ func GetProjectDB(name string) *mongo.Collection {
 	return cdb
 }
 
+// Create UserProject godoc
+// @Summary Create userProject
+// @Description Create userProject
+// @Param body body model.userProject true "UserProject Info Body"
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.UserProject
+// @Header 200 {string} Token "qwerty"
+// @Router /userProjects [post]
 func CreateProject(c echo.Context) (err error) {
 	cdb := GetProjectDB("project")
 	cdb2 := GetProjectDB("member")
@@ -105,12 +115,13 @@ func CreateProject(c echo.Context) (err error) {
 		Type:          models.Type,
 		Owner:         memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),
-		Created_at:    models.Created_at,
+		Created_at:    time.Now(),
 		Workspace:     workspaceObjectId2[0][0].Value.(primitive.ObjectID),
 		Selectcluster: slice,
 		IstioCheck:    models.IstioCheck,
 	}
 	fmt.Println("9")
+	// models.Created_at = time.Now()
 	result, err := cdb.InsertOne(ctx, newProject)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
@@ -154,6 +165,14 @@ func CreateProject(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, result)
 }
 
+// GetAlluserProject godoc
+// @Summary Show List userProject
+// @Description get userProject List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.UserProject
+// @Security Bearer
+// @Router /userProjects [get]
 func ListUserProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -191,6 +210,10 @@ func ListUserProject(c echo.Context) (err error) {
 
 	} else {
 		userObj := FindMemberDB(params)
+		if userObj.Name == "" {
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found User"))
+			return
+		}
 		showsProject = GetDBList(params, "project", userObj.ObjectId, "projectOwner")
 	}
 	for _, project := range showsProject {
@@ -241,6 +264,11 @@ func ListSystemProject(c echo.Context) (err error) {
 	}
 	Projects := ListDB("project")
 	params.Project = ""
+	clusters := GetDB("cluster", params.Cluster, "clusterName")
+	if params.Cluster != "" && clusters == nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found Cluster"))
+		return
+	}
 	var projects []model.SYSTEMPROJECT
 	getData := GetModelList(params)
 	fmt.Println("getData : ", getData)
@@ -278,6 +306,15 @@ func difference(slice1 []primitive.M, slice2 []model.SYSTEMPROJECT) []model.SYST
 	return diff
 }
 
+// Get userProject godoc
+// @Summary Show detail userProject
+// @Description get userProject Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the userProject"
+// @Router /userProjects/{name} [get]
 func GetUserProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -297,8 +334,8 @@ func GetUserProject(c echo.Context) (err error) {
 		})
 	}
 	clusters := project.Selectcluster
-	resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, clusters)
-
+	// resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, clusters)
+	var List []model.EVENT
 	var detailList []model.PROJECT_DETAIL
 	for _, cluster := range clusters {
 		params.Cluster = cluster.Name
@@ -310,16 +347,20 @@ func GetUserProject(c echo.Context) (err error) {
 				"error": msg,
 			})
 		}
-		// tempMetric := []string{"namespace_cpu", "namespace_memory", "namespace_pod_count"}
-		// tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
-		fmt.Println("getData : ", getData)
+		events := getCallEvent(params)
+		if len(events) > 0 {
+			List = append(List, events...)
+		}
+		tempMetric := []string{"namespace_cpu", "namespace_memory", "pod_running"}
+		tempresult := NowMonit("namespace", params.Cluster, params.Project, tempMetric)
+
 		projectDetail := model.PROJECT_DETAIL{
 			Status:        common.InterfaceToString(common.FindData(getData, "status", "phase")),
 			ClusterName:   cluster.Name,
-			Resource:      resourceCnt,
+			Resource:      resourceCntList(cluster.Name, params.Name, params.Kind),
 			Label:         common.FindData(getData, "metadata", "labels"),
 			Annotation:    common.FindData(getData, "metadata", "annotations"),
-			ResourceUsage: resourceUsage,
+			ResourceUsage: tempresult,
 			CreateAt:      common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		}
 		detailList = append(detailList, projectDetail)
@@ -327,7 +368,7 @@ func GetUserProject(c echo.Context) (err error) {
 	}
 	userProject := model.USERPROJECT{
 		DBProject: project,
-		Events:    eventList,
+		Events:    List,
 		Detail:    detailList,
 	}
 
@@ -372,9 +413,21 @@ func GetUserProject(c echo.Context) (err error) {
 	// } else {
 	// 	return c.JSON(http.StatusOK, showsProject)
 	// }
-	return c.JSON(http.StatusOK, userProject)
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": userProject,
+	})
 
 }
+
+// Get systemProject godoc
+// @Summary Show detail systemProject
+// @Description get systemProject Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the systemProject"
+// @Router /systemProjects/{name} [get]
 func GetSystemProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -385,7 +438,13 @@ func GetSystemProject(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	clusters := GetDB("cluster", params.Cluster, "clusterName")
 	if params.Cluster == "" {
+		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrClusterNotFound)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"error": msg,
+		})
+	} else if params.Cluster != "" && clusters == nil {
 		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrClusterNotFound)
 		return c.JSON(http.StatusNotFound, echo.Map{
 			"error": msg,
@@ -399,7 +458,8 @@ func GetSystemProject(c echo.Context) (err error) {
 			"error": msg,
 		})
 	}
-	fmt.Println("getData : ", getData)
+	tempMetric := []string{"namespace_cpu", "namespace_memory", "pod_running"}
+	tempresult := NowMonit("namespace", params.Cluster, params.Project, tempMetric)
 	// for k, _ := range getData {
 	project := model.SYSTEMPROJECT{
 		Name:        common.InterfaceToString(common.FindData(getData, "metadata", "name")),
@@ -416,10 +476,10 @@ func GetSystemProject(c echo.Context) (err error) {
 	cluster := FindClusterDB(params.Cluster)
 	common.Transcode(cluster, &tsCluster)
 	Clusters = append(Clusters, tsCluster)
-	resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, Clusters)
-	project.Events = eventList
-	project.Detail.ResourceUsage = resourceUsage
-	project.Detail.Resource = resourceCnt
+	// resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, Clusters)
+	project.Events = getCallEvent(params)
+	project.Detail.ResourceUsage = tempresult
+	project.Detail.Resource = resourceCntList(cluster.Name, params.Name, params.Kind)
 
 	return c.JSON(http.StatusOK, project)
 }
@@ -556,7 +616,7 @@ func GetDBProject(params model.PARAMS) model.DBProject {
 	var project model.NewProject
 	var showsProject model.DBProject
 	var results bson.M
-	var workspace model.Workspace
+	var workspace model.NewWorkspace
 	var user model.Member
 	var clusterList []model.Cluster
 	cdb := GetClusterDB("project")
@@ -577,6 +637,7 @@ func GetDBProject(params model.PARAMS) model.DBProject {
 	if err := cdb.FindOne(ctx, bson.M{"projectName": search_val}).Decode(&showsProject); err != nil {
 
 	}
+	showsProject.Created_at = project.Created_at
 	user_objectId := project.Owner
 	userList := GetClusterDB("member")
 	users, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -587,6 +648,10 @@ func GetDBProject(params model.PARAMS) model.DBProject {
 	workspaces, _ := context.WithTimeout(context.Background(), time.Second*10)
 	if err := workspaceList.FindOne(workspaces, bson.M{"_id": workspace_objectId}).Decode(&workspace); err != nil {
 	}
+	params.Workspace = workspace.Name
+	resultWorkspace := GetDBWorkspace(params)
+	// if err := workspaceList.FindOne(workspaces, bson.M{"_id": workspace_objectId}).Decode(&workspace); err != nil {
+	// }
 	tempList := GetClusterDB("cluster")
 
 	clusters, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -598,7 +663,7 @@ func GetDBProject(params model.PARAMS) model.DBProject {
 		}
 		clusterList = append(clusterList, cluster)
 	}
-	showsProject.Workspace = workspace
+	showsProject.Workspace = resultWorkspace
 	showsProject.Selectcluster = clusterList
 	showsProject.MemberName = user.Id
 	return showsProject

@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -10,7 +12,9 @@ type Workspace struct {
 	Description   string              `json:"workspaceDescription,omitempty" bson:"workspaceDescription" validate:"required"`
 	MemberName    string              `json:"memberName,omitempty" bson:"memberName" validate:"required"`
 	ClusterName   []string            `json:"clusterName,omitempty" bson:"selectCluster2"`
-	Selectcluster []WorkspaceClusters `json:"selectCluster,omitempty" bson:"selectCluster"`
+	Selectcluster []WorkspaceClusters `json:"selectCluster,omitempty" 
+	bson:"selectCluster"`
+	Created_at time.Time `json:"created_at,omitempty"`
 }
 
 type WorkspaceClusters struct {
@@ -35,6 +39,7 @@ type NewWorkspace struct {
 	Owner         primitive.ObjectID   `json:"workspaceOwner,omitempty" bson:"workspaceOwner" validate:"required"`
 	Creator       primitive.ObjectID   `json:"workspaceCreator,omitempty" bson:"workspaceCreator" validate:"required"`
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster"`
+	Created_at    time.Time            `json:"created_at,omitempty"`
 }
 
 type DBWorkspace struct {
@@ -43,7 +48,7 @@ type DBWorkspace struct {
 	Description   string             `json:"workspaceDescription,omitempty" bson:"workspaceDescription" validate:"required"`
 	MemberName    string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`
 	Selectcluster []Cluster          `json:"selectCluster,omitempty" bson:"selectCluster"`
-	Created_at    primitive.DateTime `json:"created_at,omitempty"`
+	Created_at    time.Time          `json:"created_at,omitempty"`
 }
 type Workspace_detail struct {
 	DBWorkspace
@@ -53,8 +58,8 @@ type Workspace_detail struct {
 	Events        interface{}         `json:"events"`
 }
 type Workspace_project struct {
-	Name          string             `json:"projectName"`
-	SelectCluster []Cluster          `json:"selectCluster"`
-	CreateAt      primitive.DateTime `json:"created_at"`
-	Creator       string             `json:"projectCreator"`
+	Name          string    `json:"projectName"`
+	SelectCluster []Cluster `json:"selectCluster"`
+	CreateAt      time.Time `json:"created_at"`
+	Creator       string    `json:"projectCreator"`
 }

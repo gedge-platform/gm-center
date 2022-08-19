@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/config"
 	"log"
 	"os"
@@ -16,9 +15,9 @@ import (
 )
 
 var nowClusterMetric = map[string]string{
-	"cpu_usage":    "round(sum(rate(container_cpu_usage_seconds_total{id='/', $1}[5m]))by(cluster),0.01)",
+	"cpu_usage":    "round(sum(rate(node_cpu_seconds_total{mode!='idle',mode!='iowait',$1}[5m]))by(cluster),0.01)",
 	"memory_usage": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
-	"pod_running":  "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster)",
+	"pod_running":  "sum(kube_pod_container_status_running{$1})by(cluster)",
 }
 
 var nowNamespaceMetric = map[string]string{
@@ -106,17 +105,23 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			if err != nil {
 				fmt.Println("err : ", err)
 			}
-
+			fmt.Println("query : ", nowMetricExpr(nowClusterMetric[m[i]], temp_filter))
+			fmt.Println("data : ", data)
+			fmt.Println("m[i] : ", m[i])
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
+					fmt.Println(m[i], " : ", val.Value)
 					value = val.Value
 				}
 			}
 		default:
-			return nil
-		}
 
-		result[m[i]] = common.InterfaceToFloat(value)
+			return result
+		}
+		fmt.Println("value2 : ", value)
+		result[m[i]] = value
+		// fmt.Println("value2 : ", value)
+		// result[m[i]] = value
 	}
 	// fmt.Println("=====result=====", result)
 	return result

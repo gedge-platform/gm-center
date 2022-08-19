@@ -1,21 +1,366 @@
-basePath: /gmcapi/v1
+basePath: /gmcapi/v2
 definitions:
-  model.App:
+  model.Active:
     properties:
-      appCategory:
+      kind:
         type: string
-      appDescription:
+      name:
         type: string
-      appInstalled:
-        type: integer
-      appName:
-        type: string
-      appNum:
-        type: integer
-      created_at:
+      namespace:
         type: string
     type: object
-host: 192.168.150.197:8009
+  model.CLUSTER:
+    properties:
+      clusterEndpoint:
+        type: string
+      clusterName:
+        type: string
+      clusterType:
+        type: string
+      gpuCnt:
+        description: |-
+          Status                  string                   `json:"status"`
+          Network                 string                   `json:"network"`
+        type: integer
+      nodeCnt:
+        type: integer
+      resourceUsage:
+        description: Gpu           []map[string]interface{} `json:"gpu,omitempty"`
+      status:
+        type: string
+      token:
+        type: string
+    required:
+    - clusterEndpoint
+    - clusterName
+    - clusterType
+    - token
+    type: object
+  model.CRONJOB:
+    properties:
+      active:
+        items:
+          $ref: '#/definitions/model.Active'
+        type: array
+      annotations: {}
+      cluster:
+        type: string
+      concurrencyPolicy:
+        type: string
+      containers:
+        items:
+          $ref: '#/definitions/model.Containers'
+        type: array
+      creationTimestamp:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/model.EVENT'
+        type: array
+      failedJobsHistoryLimit:
+        type: integer
+      label: {}
+      lastScheduleTime:
+        type: string
+      name:
+        type: string
+      project:
+        type: string
+      schedule:
+        type: string
+      successfulJobsHistoryLimit:
+        type: integer
+      user:
+        type: string
+      workspace:
+        type: string
+    type: object
+  model.ConfigMapKeyRef:
+    properties:
+      key:
+        type: string
+      name:
+        type: string
+    type: object
+  model.ContainerStatuses:
+    properties:
+      containerID:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      ready:
+        type: boolean
+      restartCount:
+        type: integer
+      started:
+        type: boolean
+    type: object
+  model.Containers:
+    properties:
+      image:
+        type: string
+      name:
+        type: string
+    type: object
+  model.ENV:
+    properties:
+      name:
+        type: string
+      value:
+        type: string
+      valueFrom:
+        $ref: '#/definitions/model.ValueFrom'
+    type: object
+  model.EVENT:
+    properties:
+      cluster:
+        type: string
+      eventTime:
+        type: string
+      kind:
+        type: string
+      message:
+        type: string
+      name:
+        type: string
+      namespace:
+        type: string
+      reason:
+        type: string
+      type:
+        type: string
+    type: object
+  model.FieldRef:
+    properties:
+      apiVersion:
+        type: string
+      fieldPath:
+        type: string
+    type: object
+  model.JOB:
+    properties:
+      cluster:
+        type: string
+      completions:
+        type: string
+      created_at:
+        type: string
+      duration: {}
+      name:
+        type: string
+      project:
+        type: string
+      user:
+        type: string
+      workspace:
+        type: string
+    type: object
+  model.OwnerReference:
+    properties:
+      apiVersion:
+        type: string
+      kind:
+        type: string
+      name:
+        type: string
+    type: object
+  model.POD:
+    properties:
+      Podcontainers:
+        items:
+          $ref: '#/definitions/model.PODCONTAINERS'
+        type: array
+      annotations: {}
+      cluster:
+        type: string
+      containerStatuses:
+        description: VolumeMounts      []VolumeMounts      `json:"volumemounts"`
+        items:
+          $ref: '#/definitions/model.ContainerStatuses'
+        type: array
+      creationTimestamp:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/model.EVENT'
+        type: array
+      hostIP:
+        type: string
+      label: {}
+      name:
+        type: string
+      node_name:
+        type: string
+      ownerReferences:
+        items:
+          $ref: '#/definitions/model.OwnerReference'
+        type: array
+      podIP:
+        type: string
+      podIPs:
+        items:
+          $ref: '#/definitions/model.PodIPs'
+        type: array
+      project:
+        type: string
+      qosClass:
+        type: string
+      restart:
+        type: integer
+      status:
+        type: string
+      statusConditions:
+        items:
+          $ref: '#/definitions/model.StatusConditions'
+        type: array
+      user:
+        type: string
+      workspace:
+        type: string
+    type: object
+  model.PODCONTAINERS:
+    properties:
+      env:
+        items:
+          $ref: '#/definitions/model.ENV'
+        type: array
+      image:
+        type: string
+      name:
+        type: string
+      ports:
+        description: |-
+          ReadinessProbe ReadinessProbe `json:"readinessProbe",omitempty`
+          LivenessProbe  LivenessProbe  `json:"livenessProbe",omitempty`
+        items:
+          $ref: '#/definitions/model.Ports'
+        type: array
+      volumemounts:
+        items:
+          $ref: '#/definitions/model.VolumeMounts'
+        type: array
+    type: object
+  model.PV:
+    properties:
+      accessMode:
+        items:
+          type: string
+        type: array
+      annotations: {}
+      capacity:
+        type: string
+      claim: {}
+      cluster:
+        type: string
+      createAt:
+        description: Workspace string `json:"workspace"`
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/model.EVENT'
+        type: array
+      label: {}
+      name:
+        type: string
+      reclaimPolicy:
+        type: string
+      status: {}
+      storageClass:
+        type: string
+      user:
+        type: string
+      volumeMode:
+        description: Reason        []EVENT          `json:"events"`
+        type: string
+    type: object
+  model.PVC:
+    properties:
+      accessMode:
+        items:
+          type: string
+        type: array
+      annotations: {}
+      capacity:
+        type: string
+      clusterName:
+        type: string
+      createAt:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/model.EVENT'
+        type: array
+      finalizers:
+        items:
+          type: string
+        type: array
+      label:
+        description: Reason        []EVENT          `json:"events"`
+      name:
+        type: string
+      namespace:
+        type: string
+      status: {}
+      storageClass:
+        type: string
+      user:
+        type: string
+      volume: {}
+      workspaceName:
+        type: string
+    type: object
+  model.PodIPs:
+    properties:
+      ip:
+        type: string
+    type: object
+  model.Ports:
+    properties:
+      containerPort:
+        type: integer
+      name:
+        type: string
+      port:
+        type: integer
+      protocol:
+        type: string
+    type: object
+  model.StatusConditions:
+    properties:
+      lastTransitionTime:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+    type: object
+  model.User:
+    properties:
+      Id:
+        type: string
+      Password:
+        description: Email    string `json:"email"`
+        type: string
+    type: object
+  model.ValueFrom:
+    properties:
+      configMapKeyRef:
+        $ref: '#/definitions/model.ConfigMapKeyRef'
+      fieldRef:
+        $ref: '#/definitions/model.FieldRef'
+    type: object
+  model.VolumeMounts:
+    properties:
+      mountpath:
+        type: string
+      name:
+        type: string
+      readonly:
+        type: boolean
+    type: object
+host: 192.168.160.216:8010
 info:
   contact:
     name: GM-Center
@@ -25,45 +370,20 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Gedge GM-Center Swagger API
-  version: "1.0"
+  version: "2.0"
 paths:
-  /apps:
-    get:
-      consumes:
-      - application/json
-      description: get App Lists
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          headers:
-            Token:
-              description: qwerty
-              type: string
-          schema:
-            $ref: '#/definitions/model.App'
-      summary: Show all apps
+  /auth:
     post:
       consumes:
       - application/json
-      description: create App
+      description: get JWT token
       parameters:
-      - description: App Name
-        in: path
-        name: appName
+      - description: User Info Body
+        in: body
+        name: authBody
         required: true
-        type: string
-      - description: App Category
-        in: path
-        name: appCategory
-        required: true
-        type: string
-      - description: App Description
-        in: path
-        name: appDescription
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/model.User'
       produces:
       - application/json
       responses:
@@ -74,15 +394,15 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.App'
-      summary: Create App
-  /apps/{name}:
+            $ref: '#/definitions/model.User'
+      summary: Login
+  /cluster/{name}:
     get:
       consumes:
       - application/json
-      description: get App
+      description: get cluster Details
       parameters:
-      - description: App Name
+      - description: name of the Cluster
         in: path
         name: name
         required: true
@@ -92,17 +412,255 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/model.CLUSTER'
+      security:
+      - Bearer: []
+      summary: Show detail cluster
+  /cronjob/{name}:
+    get:
+      consumes:
+      - application/json
+      description: get cronjob Details
+      parameters:
+      - description: name of the Cronjob
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: cluster Name of the Cronjob
+        in: query
+        name: cluster
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CRONJOB'
+      security:
+      - Bearer: []
+      summary: Show detail cronjob
+  /cronjobs:
+    get:
+      consumes:
+      - application/json
+      description: get cronjob List
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CRONJOB'
+      security:
+      - Bearer: []
+      summary: Show List cronjob
+  /job/:name:
+    get:
+      consumes:
+      - application/json
+      description: get job Details
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
           headers:
             Token:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.App'
-      summary: Show App
+            $ref: '#/definitions/model.JOB'
+      summary: Show detail job
+  /jobs:
+    get:
+      consumes:
+      - application/json
+      description: get job List
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Token:
+              description: qwerty
+              type: string
+          schema:
+            $ref: '#/definitions/model.JOB'
+      summary: Show List job
+  /pods:
+    get:
+      consumes:
+      - application/json
+      description: get pods List
+      parameters:
+      - description: cluster Name of the pods
+        in: query
+        name: cluster
+        type: string
+      - description: workspace Name of the pods
+        in: query
+        name: workspace
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.POD'
+      security:
+      - Bearer: []
+      summary: Show List pods
+  /pods/{name}:
+    get:
+      consumes:
+      - application/json
+      description: get pods Details
+      parameters:
+      - description: name of the pods
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: cluster Name of the pods
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: workspace Name of the pods
+        in: query
+        name: workspace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.POD'
+      security:
+      - Bearer: []
+      summary: Show detail pods
+  /pvcs:
+    get:
+      consumes:
+      - application/json
+      description: get pvc List
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Token:
+              description: qwerty
+              type: string
+          schema:
+            $ref: '#/definitions/model.PVC'
+      summary: Show app PVCs
+  /pvs:
+    get:
+      consumes:
+      - application/json
+      description: get pv List
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Token:
+              description: qwerty
+              type: string
+          schema:
+            $ref: '#/definitions/model.PV'
+      summary: Show app PVs
+  /pvs/:name:
+    get:
+      responses: {}
+  /spider/cloudos:
+    get:
+      consumes:
+      - application/json
+      description: get CloudOS
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Cloudos
+  /spider/credentials:
+    get:
+      consumes:
+      - application/json
+      description: get ALLCredential
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Credential
+    post:
+      consumes:
+      - application/json
+      description: get Credential
+      parameters:
+      - description: Credential Info Body
+        in: body
+        name: CredentialBody
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Credential
+  /spider/credentials/{credentialName}:
+    delete:
+      consumes:
+      - application/json
+      description: get Credential
+      parameters:
+      - description: Name of the credentials
+        in: path
+        name: credentialName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Credential
+    get:
+      consumes:
+      - application/json
+      description: get Credential
+      parameters:
+      - description: Name of the credentials
+        in: path
+        name: credentialName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Credential
 schemes:
 - http
 securityDefinitions:
-  ApiKeyAuth:
+  Bearer:
+    description: '"Type \"Bearer \" and then your API Token"'
     in: header
     name: Authorization
     type: apiKey

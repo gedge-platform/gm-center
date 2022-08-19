@@ -90,36 +90,107 @@ func CreateRequest(c echo.Context) (err error) {
 }
 
 func ListRequest(c echo.Context) (err error) {
-	var showsRequest []bson.M
-	cdb := GetRequestDB("request")
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-
-	findOptions := options.Find()
-
-	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	if err != nil {
-		log.Fatal(err)
+	params := model.PARAMS{
+		Kind:      "namespaces",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		User:      c.QueryParam("user"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
 	}
+	var showsRequest []bson.M
+	if params.User == "" {
+		cdb := GetProjectDB("request")
+		ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+		findOptions := options.Find()
 
-	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "_id"}, {"as", "cluster"}}}}
-		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
-		lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "project"}}}}
-
-		showProjectCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace, lookupProject})
-
-		if err = showProjectCursor.All(ctx, &showsRequest); err != nil {
+		cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err = cur.All(ctx, &showsRequest); err != nil {
 			panic(err)
 		}
+		if err := cur.Err(); err != nil {
+			log.Fatal(err)
+		}
+
+		cur.Close(context.TODO())
+	} else {
+		userObj := FindMemberDB(params)
+		showsRequest = GetDBList(params, "request", userObj.ObjectId, "requestCreator")
 	}
 
-	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+	var results []model.DBRequest
+	for _, request := range showsRequest {
+		var tmp_request model.NewRequest
+		common.Transcode(request, &tmp_request)
+		fmt.Println("request : ", request)
+		fmt.Println("tmp_request : ", tmp_request)
+		var project model.NewProject
+		cdb2 := GetRequestDB("project")
+		ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+		if err := cdb2.FindOne(ctx, bson.M{"_id": tmp_request.Project}).Decode(&project); err != nil {
+
+		}
+		params.Project = project.Name
+		tmp_project := GetDBProject(params)
+		fmt.Println("request : ", request)
+		cluster := GetDB("cluster", tmp_request.Cluster, "_id")
+		member := GetDB("member", request["requestCreator"], "_id")
+		fmt.Println("member : ", member)
+		result := model.DBRequest{
+			ObjectID:   request["_id"],
+			Id:         tmp_request.Id,
+			Status:     tmp_request.Status,
+			Message:    tmp_request.Message,
+			Workspace:  tmp_project.Workspace.Name,
+			Project:    project.Name,
+			Date:       tmp_request.Date,
+			Cluster:    common.InterfaceToString(cluster["clusterName"]),
+			Name:       tmp_request.Name,
+			Reason:     tmp_request.Reason,
+			Type:       tmp_request.Type,
+			MemberName: common.InterfaceToString(member["memberId"]),
+		}
+		results = append(results, result)
 	}
 
-	cur.Close(context.TODO())
+	// var project model.NewProject
+	// cdb2 := GetRequestDB("project")
+	// ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-	return c.JSON(http.StatusOK, showsRequest)
+	// if err := cdb2.FindOne(ctx, bson.M{"_id": showsRequest["project"]}).Decode(&project); err != nil {
+
+	// }
+	// findOptions := options.Find()
+
+	// cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// for cur.Next(context.TODO()) {
+	// 	lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "_id"}, {"as", "cluster"}}}}
+	// 	lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
+	// 	lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "project"}}}}
+
+	// 	showProjectCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace, lookupProject})
+
+	// 	if err = showProjectCursor.All(ctx, &showsRequest); err != nil {
+	// 		panic(err)
+	// 	}
+	// }
+
+	// if err := cur.Err(); err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// cur.Close(context.TODO())
+
+	return c.JSON(http.StatusOK, results)
 }
 
 func FindRequest(c echo.Context) (err error) {
@@ -141,7 +212,7 @@ func FindRequest(c echo.Context) (err error) {
 		lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "project"}}}}
 		matchCluster := bson.D{
 			{Key: "$match", Value: bson.D{
-				{Key: "requestId", Value: search_val},
+				{Key: "request_id", Value: search_val},
 			}},
 		}
 
@@ -172,7 +243,7 @@ func DeleteRequest(c echo.Context) (err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("requestId")
 
-	result, err := cdb.DeleteOne(ctx, bson.M{"requestId": search_val})
+	result, err := cdb.DeleteOne(ctx, bson.M{"request_id": search_val})
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to delete."))
 		return

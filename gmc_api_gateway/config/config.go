@@ -10,6 +10,7 @@ import (
 type Config struct {
 	DB     *DBConfig
 	COMMON *CommonConfig
+	URL		 *URLConfig
 }
 
 type DBConfig struct {
@@ -25,6 +26,9 @@ type DBConfig struct {
 type CommonConfig struct {
 	Port       string
 	CorsOrigin string
+}
+type URLConfig struct {
+	Spider	string
 }
 
 func GetConfig() *Config {
@@ -42,6 +46,9 @@ func GetConfig() *Config {
 			Port:       os.Getenv("PORT"),
 			CorsOrigin: os.Getenv("CORS"),
 		},
+		URL: &URLConfig{
+			Spider:     os.Getenv("SPIDER_URL"),
+		},
 	}
 }
 
@@ -51,3 +58,8 @@ func Init() {
 		log.Fatal("Error loading .env file")
 	}
 }
+
+// func Test() {
+// 	config.Init()
+// 	IP := os.Getenv("PROMETHEUS")
+// }

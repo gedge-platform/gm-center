@@ -21,7 +21,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetDB(name string) *mongo.Collection {
+func GetMemberDB(name string) *mongo.Collection {
 	db := db.DbManager()
 	cdb := db.Collection(name)
 
@@ -29,10 +29,11 @@ func GetDB(name string) *mongo.Collection {
 }
 
 func CreateMember(c echo.Context) (err error) {
-	cdb := GetDB("member")
+	cdb := GetMemberDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
-	models := new(model.Member)
+	models := new(model.RequestMember)
+
 	validate := validator.New()
 
 	if err = c.Bind(models); err != nil {
@@ -62,7 +63,7 @@ func CreateMember(c echo.Context) (err error) {
 
 func ListMember(c echo.Context) (err error) {
 	var results []model.Member
-	cdb := GetDB("member")
+	cdb := GetMemberDB("member")
 
 	findOptions := options.Find()
 
@@ -91,7 +92,7 @@ func ListMember(c echo.Context) (err error) {
 
 func FindMember(c echo.Context) (err error) {
 	var member model.Member
-	cdb := GetDB("member")
+	cdb := GetMemberDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("memberId")
 
@@ -105,7 +106,7 @@ func FindMember(c echo.Context) (err error) {
 }
 
 func DeleteMember(c echo.Context) (err error) {
-	cdb := GetDB("member")
+	cdb := GetMemberDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("memberId")
 
@@ -126,7 +127,7 @@ func DeleteMember(c echo.Context) (err error) {
 }
 
 func UpdateMember(c echo.Context) (err error) {
-	cdb := GetDB("member")
+	cdb := GetMemberDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("memberId")
 
@@ -174,4 +175,28 @@ func UpdateMember(c echo.Context) (err error) {
 		"status": http.StatusOK,
 		"data":   search_val + " Updated Complete",
 	})
+}
+
+func FindDBwithPW(select_val string, search_val string) *model.MemberWithPassword {
+	var models model.MemberWithPassword
+	cdb := GetMemberDB("member")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&models); err != nil {
+		return nil
+	} else if err := cdb.FindOne(ctx, bson.M{"memberName": search_val}).Decode(&models); err != nil {
+		return nil
+	}
+	return &models
+}
+
+func FindMemberDB(params model.PARAMS) model.Member {
+	var member model.Member
+	cdb := GetClusterDB("member")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := params.User
+
+	if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&member); err != nil {
+	}
+	return member
 }

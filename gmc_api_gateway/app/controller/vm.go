@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"fmt"
+	"strings"
 
 	"net/http"
 
@@ -14,10 +15,22 @@ import (
 	"github.com/labstack/echo/v4"
 	
 	"github.com/gophercloud/gophercloud"
+	// "github.com/gophercloud/gophercloud/pagination"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	// "github.com/tidwall/gjson"
 )
+
+type SystemId struct {
+	SystemId string `json:"SystemId"`
+}
+
+type NameId struct {
+	NameId string `json:"NameId"`
+}
+
 
 // GetCloudOS godoc
 // @Summary Cloudos
@@ -393,28 +406,6 @@ func VmTerminate(c echo.Context) (err error) {
 
 func GetALLVm(c echo.Context) (err error) {
 
-	params := model.PARAMS{
-		Kind:   "vm",
-		Method: c.Request().Method,
-		Body:   common.ResponseBody_spider(c.Request().Body),
-	}
-
-	getData, err := common.DataRequest_spider(params)
-	vm := StringToInterface(getData)
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"data": vm,
-	})
-
-}
-
-
-func GetALLVm2(c echo.Context) (err error) {
-
-	type SystemId struct {
-		SystemId string `json:"SystemId"`
-	}
-
 	var SystemIds []SystemId
 	// cb-spider 에서 vmstatus 목록 가져와서, SystemId 추려내기 위함
 	params := model.PARAMS{
@@ -436,19 +427,29 @@ func GetALLVm2(c echo.Context) (err error) {
 
 	fmt.Println("vmSystemIds : ", SystemIds)
 
+
+	// TODO: 임시
 	OpenStackAuthOpts := gophercloud.AuthOptions{
-		IdentityEndpoint: c.QueryParam("endpoint"),
-		Username:         c.QueryParam("username"),
-		Password:         c.QueryParam("password"),
+		IdentityEndpoint: "http://192.168.160.220:5000",
+		Username:         "consine2c",
+		Password:         "consine2c",
 		DomainName:       "Default",
 	}
+	// OpenStackAuthOpts := gophercloud.AuthOptions{
+	// 	IdentityEndpoint: c.QueryParam("endpoint"),
+	// 	Username:         c.QueryParam("username"),
+	// 	Password:         c.QueryParam("password"),
+	// 	DomainName:       "Default",
+	// }
+	
+	getData2, _ := OpenstackVmList(OpenStackAuthOpts, SystemIds)
+
+	fmt.Println("getData is : ", getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": SystemIds,
-		"OpenStackAuthOpts": OpenStackAuthOpts,
+		"data": getData2,
 	})
 }
-
 
 func GetALLVmCount(c echo.Context) (err error) {
 
@@ -496,13 +497,42 @@ func GetVm(c echo.Context) (err error) {
 }
 
 func CreateVm(c echo.Context) (err error) {
+	vmName := c.QueryParam("name")
+	connectionName := c.QueryParam("config")
+	imageName := c.QueryParam("image")
+	flavorName := c.QueryParam("flavor")
+	// uniqName := "Ct2W9bAZ3kvcLJ54RzBR"
+
+	vpcName, subnetName := CheckVPC(c, connectionName)
+	securityGroupName := CheckSecurityGroup(c, connectionName)
+	keyPairName := CheckKeyPair(c, connectionName)
+
+	var securityGroupNameList []interface{}
+	securityGroupNameList = append(securityGroupNameList, securityGroupName)
+
+	vmInfo := model.CreateVMInfo {
+		ConnectionName: connectionName,
+		ReqInfo: model.VmReqInfo {
+			Name: vmName,
+			ImageName: imageName,
+			VPCName: vpcName,
+			SubnetName: subnetName,
+			SecurityGroupNames: securityGroupNameList,
+			VMSpecName: flavorName,
+			KeyPairName: keyPairName,
+		},
+	}
+
+	fmt.Println("vmInfo is ", vmInfo)
+	payload, _ := json.Marshal(vmInfo)
+
 	params := model.PARAMS{
 		Kind:   "vm",
 		Method: c.Request().Method,
-		Body:   common.ResponseBody_spider(c.Request().Body),
+		Body:   string(payload),
 	}
 
-	getData, err := common.DataRequest_spider(params)
+	getData, _ := common.DataRequest_spider(params)
 
 	vm := StringToInterface(getData)
 	return c.JSON(http.StatusOK, echo.Map{
@@ -731,6 +761,54 @@ func GetVPC(c echo.Context) (err error) {
 	})
 }
 
+
+func CheckVPC(c echo.Context,connectionName string) (string, string) {
+	fmt.Println("[CheckVPC]")
+	vpcName := connectionName + "-vpc"
+	subnetName := connectionName + "-subnet"
+
+	// vpc 확인
+	if !DuplicatiCheck(c, "vpc", connectionName) {
+		fmt.Println("[Create VPC Start]")
+		// vpc 생성
+
+		var SubnetInfoList model.SubnetInfoLists	
+		subnetInfo := model.SubnetInfoList{
+			Name:	subnetName,
+			IPv4_CIDR:	"10.10.1.0/24",
+		}
+	
+		SubnetInfoList = append(SubnetInfoList, subnetInfo)
+
+		createVpcInfo := model.CreateVPC {
+			ConnectionName: connectionName,
+			ReqInfo: model.VpcReqInfo {
+				Name: vpcName,
+				IPv4_CIDR: "10.10.0.0/16",
+				SubnetInfoLists: SubnetInfoList,
+			},
+		}
+		
+		payload, _ := json.Marshal(createVpcInfo)
+		
+		fmt.Println("[createVpcInfo] value : ", string(payload))
+		
+		params := model.PARAMS{
+			Kind:   "vpc",
+			Method: "POST",
+			Body:   string(payload),
+		}
+	
+		vpcData, err := common.DataRequest_spider(params)
+		if err != nil {
+			fmt.Println("err : ", err)
+		}
+		fmt.Println("vpcData : ", vpcData)
+	}
+
+	return vpcName, subnetName
+}
+
 func CreateVPC(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -795,6 +873,56 @@ func GetSecurityGroup(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": securitygroup,
 	})
+}
+
+func CheckSecurityGroup(c echo.Context,connectionName string) string {
+	fmt.Println("[CheckSecurityGroup]")
+	SecurityGroupName := connectionName + "-sg"
+
+
+	// SecurityGroup 확인
+	if !DuplicatiCheck(c, "securitygroup", connectionName) {
+		fmt.Println("[Create SecurityGroup Start]")
+		// SecurityGroup 생성		
+		var SecurityRules model.SecurityRules
+		SecurityRule := model.SecurityRule {
+				FromPort: "1",
+				ToPort: "65535",
+				IPProtocol: "tcp",
+				Direction: "inbound",
+		}
+
+		SecurityRules = append(SecurityRules, SecurityRule)
+		
+		createSecurityGroupInfo := model.CreateSecurityGroup {
+			ConnectionName: connectionName,
+			ReqInfo: model.SecurityGroupReqInfo {
+				Name: SecurityGroupName,
+				VPCName: connectionName+"-vpc",
+				SecurityRules: SecurityRules,
+			},
+		}
+
+		fmt.Println("[createSecurityGroupInfo] value : ", common.InterfaceToString(createSecurityGroupInfo))
+
+		payload, _ := json.Marshal(createSecurityGroupInfo)
+
+		fmt.Println("[createSecurityGroupInfo] value : ", string(payload))
+
+		params := model.PARAMS{
+			Kind:   "securitygroup",
+			Method: "POST",
+			Body:   string(payload),
+		}
+
+		sgData, err := common.DataRequest_spider(params)
+		if err != nil {
+			fmt.Println("err : ", err)
+		}
+		fmt.Println("sgData : ", sgData)
+	}
+
+	return SecurityGroupName
 }
 
 func CreateSecurityGroup(c echo.Context) (err error) {
@@ -896,6 +1024,42 @@ func GetKeypair(c echo.Context) (err error) {
 	})
 }
 
+func CheckKeyPair(c echo.Context,connectionName string) (string) {
+	fmt.Println("[CheckKeyPair]")
+	keyPairName := connectionName + "-key"
+
+
+	// vpc 확인
+	if !DuplicatiCheck(c, "keypair", connectionName) {
+		fmt.Println("[Create Keypair Start]")
+		// vpc 생성
+		createKeyPairInfo := model.CreateKeyPair {
+			ConnectionName: connectionName,
+			ReqInfo: model.KeyPairReqInfo {
+				Name: keyPairName,
+			},
+		}
+		
+		payload, _ := json.Marshal(createKeyPairInfo)
+		
+		fmt.Println("[createKeyPairInfo] value : ", string(payload))
+
+		params := model.PARAMS{
+			Kind:   "keypair",
+			Method: "POST",
+			Body:   string(payload),
+		}
+
+		keyData, err := common.DataRequest_spider(params)
+		if err != nil {
+			fmt.Println("err : ", err)
+		}
+		fmt.Println("keyData : ", keyData)
+	}
+
+	return keyPairName
+}
+
 func CreateKeypair(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -964,35 +1128,22 @@ func UnregisterKeypair(c echo.Context) (err error) {
 
 
 
-func OpenstackVmList(opts gophercloud.AuthOptions) ([]string, error) {
+func OpenstackVmList(opts gophercloud.AuthOptions, vmSystemId []SystemId) (model.OpenstackVmInfos, error) {
 	fmt.Println("[in VmList Function] Hello ?")
-	
-		// params := model.PARAMS{
-		// 	Endpoint:   c.Request().Body["endpoint"],
-		// 	Method: c.Request().Method,
-		// 	Body:   common.ResponseBody_spider(c.Request().Body),
-		// }
-	
 
-	// fmt.Println("endpoint : ", endpoint)
-	// fmt.Println("username : ", username)
-	// fmt.Println("password : ", password)
-
-	// // TODO: 추후 개별 struct 만들어서 넣기
-	// opts := gophercloud.AuthOptions{
-	// 	IdentityEndpoint: endpoint,
-	// 	Username:         username,
-	// 	Password:         password,
-	// 	DomainName:       "Default",
-	// 	// TenantName:				"차세대R&D기획본부",
-	// }
+	type IID struct {
+		NameId     string
+		SystemId   string
+	}
+	
+	type VMInfo struct {
+		IId       IID
+	}
 
 	client, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
 		panic(err)
 	}
-
-		fmt.Println("[#1]client Token : ", client.TokenID)
 
 	eo := gophercloud.EndpointOpts{
 		Type:   "compute",
@@ -1003,15 +1154,77 @@ func OpenstackVmList(opts gophercloud.AuthOptions) ([]string, error) {
 		panic(err)
 	}
 
-	fmt.Println("[#2]compute : ", compute)
+	var List model.OpenstackVmInfos
+	for i := 0; i < len(vmSystemId); i++ {
+			ServerResult, _ := servers.Get(compute, common.InterfaceToString(vmSystemId[i].SystemId)).Extract()
+			ImageResult, _ := images.Get(compute, common.InterfaceToString(ServerResult.Image["id"])).Extract()
+			FlavorResult, _ := flavors.Get(compute, common.InterfaceToString(ServerResult.Flavor["id"])).Extract()
+		
+			vmInfo := model.OpenstackVmInfo{
+				Id:									ServerResult.ID,
+				Name:								ServerResult.Name,
+				Status:							ServerResult.Status,
+				Image:							ImageResult,
+				Flavor:							FlavorResult,
+				Addresses:					ServerResult.Addresses,
+				Key:								ServerResult.KeyName,
+				SecurityGroups:			ServerResult.SecurityGroups,
+				Created:						ServerResult.Created,
+			}
 
-
-	listOpts := servers.ListOpts{}
-	pager, err5 := servers.List(compute, listOpts).AllPages()
-	if err5 != nil {
-		fmt.Println("Error is : ", err5.Error())
-		return nil, err5
+			List = append(List, vmInfo)
 	}
+
+	return List, nil
+}
+
+func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
+	fmt.Println("[DuplicatiCheck]")
+
+	_Connection := model.ConnectionNameOnly {
+		ConnectionName:	connectionName,
+	}
+	payload, _ := json.Marshal(_Connection)
 	
-	return pager, ""
+	var NameIds []NameId
+	Check := false
+	// cb-spider 에서 _kind 목록 가져와서, SystemId 추려내기 위함
+	params := model.PARAMS{
+		Kind:   _kind,
+		Method: "GET",
+		Body:   string(payload),
+	}
+
+	getData, _ := common.DataRequest_spider(params)
+	kind := common.FindingArray(common.Finding(getData, _kind))
+
+	fmt.Println("_kind is : ", _kind)
+	fmt.Println("kind is : ", kind)
+	var containValue string
+
+	switch _kind {
+	case "securitygroup":
+		containValue = "-sg"
+	case "keypair":
+		containValue = "-key"
+	case "vpc":
+		containValue = "-vpc"
+	}
+
+
+	
+	for e, _ := range kind {
+		kindNameId := common.FindData(kind[e].String(), "IId", "NameId")
+		fmt.Println("kindNameId is : ", kindNameId)
+		fmt.Println("kindNameId contains is : ", connectionName + containValue)
+		if strings.Contains(common.InterfaceToString(kindNameId), connectionName + containValue) {
+			Check = true
+		}
+		value := NameId{
+			NameId: common.InterfaceToString(kindNameId),
+		}
+		NameIds = append(NameIds, value)
+	}
+
+	return Check
 }

@@ -10,6 +10,7 @@ import (
 type Config struct {
 	DB     *DBConfig
 	COMMON *CommonConfig
+	URL		 *URLConfig
 }
 
 type DBConfig struct {
@@ -26,6 +27,9 @@ type CommonConfig struct {
 	Port       string
 	CorsOrigin string
 }
+type URLConfig struct {
+	Spider	string
+}
 
 func GetConfig() *Config {
 	return &Config{
@@ -41,6 +45,9 @@ func GetConfig() *Config {
 		COMMON: &CommonConfig{
 			Port:       os.Getenv("PORT"),
 			CorsOrigin: os.Getenv("CORS"),
+		},
+		URL: &URLConfig{
+			Spider:     os.Getenv("SPIDER_URL"),
 		},
 	}
 }

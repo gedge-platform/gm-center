@@ -224,7 +224,6 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.DELETE("/cloudregion/:cloudregionName", c.UnregisterCloudregion)
 
 	r3.GET("/vm", c.GetALLVm)
-	r3.GET("/vm2", c.GetALLVm2)
 	r3.GET("/vm/:vmName", c.GetVm)
 	r3.POST("/vm", c.CreateVm)
 	r3.DELETE("/vm/:vmName", c.DeleteVm)

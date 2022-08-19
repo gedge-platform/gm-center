@@ -523,7 +523,6 @@ func CreateVm(c echo.Context) (err error) {
 		},
 	}
 
-	fmt.Println("vmInfo is ", vmInfo)
 	payload, _ := json.Marshal(vmInfo)
 
 	params := model.PARAMS{
@@ -763,13 +762,11 @@ func GetVPC(c echo.Context) (err error) {
 
 
 func CheckVPC(c echo.Context,connectionName string) (string, string) {
-	fmt.Println("[CheckVPC]")
 	vpcName := connectionName + "-vpc"
 	subnetName := connectionName + "-subnet"
 
 	// vpc 확인
 	if !DuplicatiCheck(c, "vpc", connectionName) {
-		fmt.Println("[Create VPC Start]")
 		// vpc 생성
 
 		var SubnetInfoList model.SubnetInfoLists	
@@ -791,19 +788,16 @@ func CheckVPC(c echo.Context,connectionName string) (string, string) {
 		
 		payload, _ := json.Marshal(createVpcInfo)
 		
-		fmt.Println("[createVpcInfo] value : ", string(payload))
-		
 		params := model.PARAMS{
 			Kind:   "vpc",
 			Method: "POST",
 			Body:   string(payload),
 		}
 	
-		vpcData, err := common.DataRequest_spider(params)
+		_, err := common.DataRequest_spider(params)
 		if err != nil {
 			fmt.Println("err : ", err)
 		}
-		fmt.Println("vpcData : ", vpcData)
 	}
 
 	return vpcName, subnetName
@@ -876,13 +870,11 @@ func GetSecurityGroup(c echo.Context) (err error) {
 }
 
 func CheckSecurityGroup(c echo.Context,connectionName string) string {
-	fmt.Println("[CheckSecurityGroup]")
 	SecurityGroupName := connectionName + "-sg"
 
 
 	// SecurityGroup 확인
 	if !DuplicatiCheck(c, "securitygroup", connectionName) {
-		fmt.Println("[Create SecurityGroup Start]")
 		// SecurityGroup 생성		
 		var SecurityRules model.SecurityRules
 		SecurityRule := model.SecurityRule {
@@ -903,11 +895,7 @@ func CheckSecurityGroup(c echo.Context,connectionName string) string {
 			},
 		}
 
-		fmt.Println("[createSecurityGroupInfo] value : ", common.InterfaceToString(createSecurityGroupInfo))
-
 		payload, _ := json.Marshal(createSecurityGroupInfo)
-
-		fmt.Println("[createSecurityGroupInfo] value : ", string(payload))
 
 		params := model.PARAMS{
 			Kind:   "securitygroup",
@@ -915,11 +903,10 @@ func CheckSecurityGroup(c echo.Context,connectionName string) string {
 			Body:   string(payload),
 		}
 
-		sgData, err := common.DataRequest_spider(params)
+		_, err := common.DataRequest_spider(params)
 		if err != nil {
 			fmt.Println("err : ", err)
 		}
-		fmt.Println("sgData : ", sgData)
 	}
 
 	return SecurityGroupName
@@ -1025,13 +1012,11 @@ func GetKeypair(c echo.Context) (err error) {
 }
 
 func CheckKeyPair(c echo.Context,connectionName string) (string) {
-	fmt.Println("[CheckKeyPair]")
 	keyPairName := connectionName + "-key"
 
 
 	// vpc 확인
 	if !DuplicatiCheck(c, "keypair", connectionName) {
-		fmt.Println("[Create Keypair Start]")
 		// vpc 생성
 		createKeyPairInfo := model.CreateKeyPair {
 			ConnectionName: connectionName,
@@ -1041,8 +1026,6 @@ func CheckKeyPair(c echo.Context,connectionName string) (string) {
 		}
 		
 		payload, _ := json.Marshal(createKeyPairInfo)
-		
-		fmt.Println("[createKeyPairInfo] value : ", string(payload))
 
 		params := model.PARAMS{
 			Kind:   "keypair",
@@ -1050,11 +1033,10 @@ func CheckKeyPair(c echo.Context,connectionName string) (string) {
 			Body:   string(payload),
 		}
 
-		keyData, err := common.DataRequest_spider(params)
+		_, err := common.DataRequest_spider(params)
 		if err != nil {
 			fmt.Println("err : ", err)
 		}
-		fmt.Println("keyData : ", keyData)
 	}
 
 	return keyPairName

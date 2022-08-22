@@ -142,7 +142,45 @@ func CreateCredential(c echo.Context) (err error) {
 		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
+	var credentialInfo model.CredentialInfo
+	err2 := json.Unmarshal([]byte(params.Body),&credentialInfo)
+	if err2 != nil {
+			log.Fatal(err2)
+	}
+
+	credentialName := credentialInfo.CredentialName
+	providerName := credentialInfo.ProviderName
+
+	_ = CheckDriver(c, credentialName, providerName)
+	_ = CheckRegion(c, credentialName, providerName)
+	_ = CheckConnectionConfig(c, credentialName, providerName)
+	
+	// var KeyValues model.KeyValues
+	// KeyValue := model.KeyValue {
+	// 	Key: "Region",
+	// 	Value: "RegionOne",
+	// }
+
+	// KeyValues = append(KeyValues, KeyValue)
+
+	createCredentialInfo := model.CredentialInfo{
+		CredentialName:	credentialName,
+		ProviderName:	providerName,
+		KeyValueInfoList: credentialInfo.KeyValueInfoList,
+	}
+	
+	payload, _ := json.Marshal(createCredentialInfo)
+	
+	params = model.PARAMS{
+		Kind:   "credential",
+		Method: "POST",
+		Body:   string(payload),
+	}
+
 	getData, err := common.DataRequest_spider(params)
+	if err != nil {
+		fmt.Println("err : ", err)
+	}
 	credential := StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
@@ -160,10 +198,45 @@ func CreateCredential(c echo.Context) (err error) {
 // @Router /spider/credentials/{credentialName} [delete]
 // @Param credentialName path string true "Name of the credentials"
 func DeleteCredential(c echo.Context) (err error) {
+	credentialName := c.Param("credentialName")
 
+	origName := strings.TrimSuffix(credentialName, "-credential")
+
+	// connectionConfig 삭제
 	params := model.PARAMS{
+		Kind:   "connectionconfig",
+		Name:   origName + "-config",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	_, err = common.DataRequest_spider(params)
+
+	// region 삭제
+	params = model.PARAMS{
+		Kind:   "region",
+		Name:   origName + "-region",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	_, err = common.DataRequest_spider(params)
+
+	
+	// driver 삭제
+	params = model.PARAMS{
+		Kind:   "driver",
+		Name:   origName + "-driver",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	_, err = common.DataRequest_spider(params)
+	
+	// credentials 삭제
+	params = model.PARAMS{
 		Kind:   "credential",
-		Name:   c.Param("credentialName"),
+		Name:   credentialName,
 		Method: c.Request().Method,
 		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
@@ -207,6 +280,46 @@ func GetConnectionconfig(c echo.Context) (err error) {
 		"data": connectionconfig,
 	})
 }
+
+
+
+func CheckConnectionConfig(c echo.Context, CredentialName string, ProviderName string) string {
+	fmt.Println("[CheckConnectionConfig in]")
+
+	connectionConfigName := CredentialName + "-config"
+	regionName := CredentialName + "-region"
+	driverName := CredentialName + "-driver"
+
+	// vpc 확인
+	if !DuplicatiCheck(c, "connectionconfig", CredentialName) {
+		// vpc 생성
+
+		// connectionConfig 생성		
+		createConnectionConfigInfo := model.ConnectionConfigInfo{
+			ConfigName:	connectionConfigName,
+			ProviderName:	ProviderName,
+			DriverName: driverName,
+			CredentialName: CredentialName,
+			RegionName: regionName,
+		}
+		
+		payload, _ := json.Marshal(createConnectionConfigInfo)
+		
+		params := model.PARAMS{
+			Kind:   "connectionconfig",
+			Method: "POST",
+			Body:   string(payload),
+		}
+	
+		_, err := common.DataRequest_spider(params)
+		if err != nil {
+			fmt.Println("err : ", err)
+		}
+	}
+
+	return connectionConfigName
+}
+
 
 func CreateConnectionconfig(c echo.Context) (err error) {
 
@@ -333,6 +446,48 @@ func GetCloudregion(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": cloudregion,
 	})
+}
+
+
+func CheckRegion(c echo.Context,CredentialName string, ProviderName string) string {
+	fmt.Println("[CheckRegion in]")
+
+	regionName := CredentialName + "-region"
+
+	// vpc 확인
+	if !DuplicatiCheck(c, "region", CredentialName) {
+		// vpc 생성
+
+		// Region Key Value 생성		
+		var KeyValues model.KeyValues
+		KeyValue := model.KeyValue {
+			Key: "Region",
+			Value: "RegionOne",
+		}
+
+		KeyValues = append(KeyValues, KeyValue)
+
+		createRegionInfo := model.RegionInfo{
+			RegionName:	regionName,
+			ProviderName:	ProviderName,
+			KeyValueInfoList: KeyValues,
+		}
+		
+		payload, _ := json.Marshal(createRegionInfo)
+		
+		params := model.PARAMS{
+			Kind:   "cloudregion",
+			Method: "POST",
+			Body:   string(payload),
+		}
+	
+		_, err := common.DataRequest_spider(params)
+		if err != nil {
+			fmt.Println("err : ", err)
+		}
+	}
+
+	return regionName
 }
 
 func RegisterCloudregion(c echo.Context) (err error) {
@@ -1191,6 +1346,12 @@ func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
 		containValue = "-key"
 	case "vpc":
 		containValue = "-vpc"
+	case "connectionconfig":
+		containValue = "-config"
+	case "region":
+		containValue = "-region"
+	case "driver":
+		containValue = "-driver"
 	}
 
 
@@ -1209,4 +1370,46 @@ func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
 	}
 
 	return Check
+}
+
+
+func CheckDriver(c echo.Context, CredentialName string, ProviderName string) string {
+	fmt.Println("[CheckDriver in]")
+
+	driverName := CredentialName + "-driver"
+	DriverLibFileName := ""
+
+	switch (ProviderName) {
+	case "AWS":
+		DriverLibFileName = "aws-driver-v1.0.so"
+	case "OPENSTACK":
+		DriverLibFileName = "openstack-driver-v1.0.so"
+	}
+
+	// vpc 확인
+	if !DuplicatiCheck(c, "driver", CredentialName) {
+		// vpc 생성
+
+		// connectionConfig 생성		
+		createDriverInfo := model.DriverInfo{
+			DriverName:	driverName,
+			ProviderName:	ProviderName,
+			DriverLibFileName:	DriverLibFileName,
+		}
+		
+		payload, _ := json.Marshal(createDriverInfo)
+		
+		params := model.PARAMS{
+			Kind:   "clouddriver",
+			Method: "POST",
+			Body:   string(payload),
+		}
+	
+		_, err := common.DataRequest_spider(params)
+		if err != nil {
+			fmt.Println("err : ", err)
+		}
+	}
+
+	return driverName
 }

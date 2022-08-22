@@ -115,6 +115,38 @@ type CreateVMInfo struct {
 	ReqInfo	VmReqInfo
 }
 
+type KeyValue struct {
+	Key		string    `json:"Key"`
+	Value		string    `json:"Value"`
+}
+
+type KeyValues []KeyValue
+
+type CredentialInfo struct {
+	CredentialName		string    `json:"CredentialName"`
+	ProviderName	string		`json:"ProviderName"`
+	KeyValueInfoList	KeyValues		`json:"KeyValueInfoList"`
+}
+
+type RegionInfo struct {
+	RegionName		string    `json:"RegionName"`
+	ProviderName	string		`json:"ProviderName"`
+	KeyValueInfoList	KeyValues		`json:"KeyValueInfoList"`
+}
+
+type ConnectionConfigInfo struct {
+	ConfigName		string    `json:"ConfigName"`
+	ProviderName	string		`json:"ProviderName"`
+	DriverName	string		`json:"DriverName"`
+	CredentialName	string		`json:"CredentialName"`
+	RegionName	string		`json:"RegionName"`
+}
+
+type DriverInfo struct {
+	DriverName		string    `json:"DriverName"`
+	ProviderName	string		`json:"ProviderName"`
+	DriverLibFileName	string		`json:"DriverLibFileName"`
+}
 
 // type EVENT1 struct {
 // 	Metadata struct {

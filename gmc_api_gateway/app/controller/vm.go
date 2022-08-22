@@ -582,6 +582,13 @@ func GetALLVm(c echo.Context) (err error) {
 
 	fmt.Println("vmSystemIds : ", SystemIds)
 
+	if len(SystemIds) == 0 {
+		return c.JSON(http.StatusOK, echo.Map{
+			"count": len(SystemIds),
+			"data": "VM Not Found",
+		})
+	}
+
 
 	// TODO: 임시
 	OpenStackAuthOpts := gophercloud.AuthOptions{
@@ -603,6 +610,7 @@ func GetALLVm(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": getData2,
+		"count": len(SystemIds),
 	})
 }
 

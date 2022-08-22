@@ -791,6 +791,49 @@ func GetVMStatus(c echo.Context) (err error) {
 	})
 }
 
+func GetAllVmFlavor(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmspec",
+		Method: c.Request().Method,
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+
+	type Flavor struct {
+		Name	string	`json:"Name"`
+		Memory	string	`json:"Memory"`
+		VCpu	string	`json:"VCpu"`
+	}
+
+	var Flavors []Flavor
+	flavors := common.FindingArray(common.Finding(getData, "vmspec"))
+	for e, _ := range flavors {
+		flavorName := common.FindData(flavors[e].String(), "Name", "")
+		flavorMemory := common.FindData(flavors[e].String(), "Mem", "")
+		flavorVCpu := common.FindData(flavors[e].String(), "VCpu", "Count")
+		flavorInfo := Flavor{
+			Name: common.InterfaceToString(flavorName),
+			Memory: common.InterfaceToString(flavorMemory),
+			VCpu: common.InterfaceToString(flavorVCpu),
+		}
+		Flavors = append(Flavors, flavorInfo)
+	}
+
+	fmt.Println("Flavors is : ", Flavors)
+
+
+
+	// vmspec := StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": Flavors,
+	})
+}
+
+
+
 func GetALLVMSpec(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -866,10 +909,22 @@ func GetALLVMImage(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vmimage := StringToInterface(getData)
+
+	var imageNameIds []NameId
+	images := common.FindingArray(common.Finding(getData, "image"))
+	for e, _ := range images {
+		imageNameId := common.FindData(images[e].String(), "IId", "NameId")
+		image := NameId{
+			NameId: common.InterfaceToString(imageNameId),
+		}
+		imageNameIds = append(imageNameIds, image)
+	}
+
+	fmt.Println("imageNameIds is : ", imageNameIds)
+	// vmimage := StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": vmimage,
+		"data": imageNameIds,
 	})
 }
 

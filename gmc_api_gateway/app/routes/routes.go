@@ -233,6 +233,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.GET("/vm/vmstatus/:vmstatusName", c.GetVMStatus)
 	r3.GET("/vm/vmstatus/vmstatusCount", c.GetALLVMStatusCount)
 
+	r3.GET("/vm/vmflavor", c.GetAllVmFlavor)
 	r3.GET("/vm/vmspec", c.GetALLVMSpec)
 	r3.GET("/vm/vmspec/:vmspecName", c.GetVMSpec)
 

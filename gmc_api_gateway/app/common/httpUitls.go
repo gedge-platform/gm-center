@@ -3,12 +3,14 @@ package common
 import (
 	"bytes"
 	"crypto/tls"
-	"gmc_api_gateway/app/model"
 	"io"
 	"io/ioutil"
 	"log"
 	"strings"
 	"time"
+
+	"gmc_api_gateway/app/model"
+	"gmc_api_gateway/config"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -38,12 +40,16 @@ var nsTemplates_spider = map[string]string{
 
 func DataRequest_spider(params model.PARAMS) (data string, err error) {
 	var endPoint, token_value string
+	config := config.GetConfig()
 
-	endPoint = "210.207.104.188"
+	endPoint = config.URL.Spider
+
+	log.Printf("[#endPoint] is %s", endPoint)
 
 	log.Printf("[#params.Name] is %s", params.Name)
 	log.Printf("[#params.Kind] is %s", params.Kind)
 	log.Printf("[#params.Action] is %s", params.Action)
+	log.Printf("[#params.Body] is %s", params.Body)
 	log.Printf("[#############]")
 
 	url := UrlExpr_spider(endPoint, params.Name, params.Kind, params.Action)

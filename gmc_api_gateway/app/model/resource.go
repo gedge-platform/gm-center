@@ -6,6 +6,7 @@ type Resource_usage struct {
 }
 
 type Resource_cnt struct {
+	NamespaceCount   int `json:"namespace_count"`
 	DeploymentCount  int `json:"deployment_count"`
 	DaemonsetCount   int `json:"daemonset_count"`
 	StatefulsetCount int `json:"Statefulset_count"`

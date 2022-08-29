@@ -92,15 +92,18 @@ func CloudDashboard(c echo.Context) (err error) {
 	cluster := GetDB("cluster", params.Cluster, "clusterName")
 	workspaces := GetDBList(params, "workspace", cluster["_id"].(primitive.ObjectID), "selectCluster")
 	projects := GetDBList(params, "project", cluster["_id"].(primitive.ObjectID), "selectCluster")
-	resourceCnt := resourceCntList(params.Cluster, params.Kind)
-	workspaceCnt := map[string]interface{}{
-		"workspace_count": len(workspaces),
-	}
-	projectCnt := map[string]interface{}{
-		"project_count": len(projects),
-	}
-	resourceCnt = append(resourceCnt, workspaceCnt)
-	resourceCnt = append(resourceCnt, projectCnt)
+	resourceCnt := resourceCntList(params.Cluster, "", params.Kind)
+	resourceCnt["workspace_count"] = len(workspaces)
+	resourceCnt["project_count"] = len(projects)
+
+	// workspaceCnt := map[string]interface{}{
+	// 	"workspace_count": len(workspaces),
+	// }
+	// projectCnt := map[string]interface{}{
+	// 	"project_count": len(projects),
+	// }
+	// resourceCnt = append(resourceCnt, workspaceCnt)
+	// resourceCnt = append(resourceCnt, projectCnt)
 	// nodeStatus := node_status(params.Cluster)
 	getData, err := common.DataRequest(params)
 	if err != nil {
@@ -160,8 +163,11 @@ func SADashboard(c echo.Context) (err error) {
 	var namespaceMemList []map[string]interface{}
 	userObj := FindMemberDB(params).ObjectId
 	workspaces := GetDBList(params, "workspace", userObj, "workspaceOwner")
+	workspace := GetDBWorkspace(params)
+	projects := GetDBList(params, "project", workspace.ObjectID, "workspace")
+	fmt.Println("workspace : ", workspace)
+	allProject := GetDBList(params, "project", userObj, "projectOwner")
 
-	projects := GetDBList(params, "project", userObj, "projectOwner")
 	var resource model.Resource_cnt
 	for _, project := range projects {
 		projectName := common.InterfaceToString(project["projectName"])
@@ -188,6 +194,7 @@ func SADashboard(c echo.Context) (err error) {
 		namespaceCpuList = append(namespaceCpuList, namespaceCpu)
 		namespaceMemList = append(namespaceMemList, namespaceMem)
 	}
+	resource.NamespaceCount = len(projects)
 	sort.SliceStable(podCpuList, func(i, j int) bool {
 		return common.InterfaceToFloat(podCpuList[i]["value"]) > common.InterfaceToFloat(podCpuList[j]["value"])
 	})
@@ -201,8 +208,9 @@ func SADashboard(c echo.Context) (err error) {
 		return common.InterfaceToFloat(namespaceMemList[i]["value"]) > common.InterfaceToFloat(namespaceMemList[j]["value"])
 	})
 	dashboardData := model.SERVICE_DASHBOARD{
+		ProjectList:    projects,
 		WorkspaceCnt:   len(workspaces),
-		ProjectCnt:     len(projects),
+		ProjectCnt:     len(allProject),
 		Resource:       resource,
 		PodCpuTop5:     common.ListSlice(podCpuList, 5),
 		PodMemTop5:     common.ListSlice(podMemList, 5),
@@ -214,28 +222,10 @@ func SADashboard(c echo.Context) (err error) {
 	})
 }
 func ResourceMonit(c echo.Context) (err error) {
-	// params := model.PARAMS{
-	// 	Kind:      "namespaces",
-	// 	Name:      c.Param("name"),
-	// 	Cluster:   c.QueryParam("cluster"),
-	// 	Workspace: c.QueryParam("workspace"),
-	// 	User:      c.QueryParam("user"),
-	// 	Project:   c.QueryParam("project"),
-	// 	Method:    c.Request().Method,
-	// 	Body:      responseBody(c.Request().Body),
-	// }
 	metric_filter := "pod_count|cronjob_count|job_count|service_count|daemonset_count|statefulset_count|deployment_count|pv_count"
 	metrics := metricParsing(metric_filter)
 	mericResult(c, "resource", metrics)
-	// config.Init()
-	// addr := os.Getenv("PROMETHEUS")
-	// for k, metric := range metrics {
-	// 	if metric == "" {
-	// 		continue
-	// 	}
-	// 	var data model.Value
-	// 	var err error
-	// }
+
 	return nil
 }
 

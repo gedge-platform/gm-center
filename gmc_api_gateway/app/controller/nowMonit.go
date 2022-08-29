@@ -19,11 +19,16 @@ var nowClusterMetric = map[string]string{
 	"memory_usage": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
 	"pod_running":  "sum(kube_pod_container_status_running{$1})by(cluster)",
 }
+var nowWorkspaceMetric = map[string]string{
+	"namespace_cpu":    "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace),0.001)",
+	"namespace_memory": "round(sum(sum(container_memory_rss{job='kubelet',pod!='',image!='',$1})by(namespace,pod,cluster))by(namespace)/1024/1024/1024,0.001)",
+	"pod_running":      "sum(kube_pod_container_status_running{$1})by(namespace)",
+}
 
 var nowNamespaceMetric = map[string]string{
-	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
-	"namespace_memory":    "round(sum(sum(container_memory_rss{job='kubelet',pod!='',image!='',$1})by(namespace,pod,cluster))by(namespace,cluster)/1024/1024/1024,0.001)",
-	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
+	"namespace_cpu":    "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
+	"namespace_memory": "round(sum(sum(container_memory_rss{job='kubelet',pod!='',image!='',$1})by(namespace,pod,cluster))by(namespace,cluster)/1024/1024/1024,0.001)",
+	"pod_running":      "sum(kube_pod_container_status_running{$1})by(namespace)",
 }
 
 var nowGpuMetric = map[string]string{
@@ -64,8 +69,22 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 				return nil
 			}
 		}
-	}
 
+	case "workspace":
+		if check := strings.Compare(n, "")*len(m) == 0; check {
+			return nil //에러 반환
+		}
+
+		//메트릭 검증
+		for _, metric := range m {
+			if metric == "" {
+				continue
+			}
+			if check := strings.Compare(nowWorkspaceMetric[metric], "") == 0; check {
+				return nil
+			}
+		}
+	}
 	//Prometheus call
 	config.Init()
 	addr := os.Getenv("PROMETHEUS")
@@ -90,7 +109,20 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			if err != nil {
 				fmt.Println("err : ", err)
 			}
-
+			if check := len(data.(model.Matrix)) != 0; check {
+				for _, val := range data.(model.Matrix)[0].Values {
+					// mapData[val.Timestamp] = val.Value
+					value = val.Value
+				}
+			}
+		case "workspace":
+			temp_filter := map[string]string{
+				"namespace": n,
+			}
+			data, err := nowQueryRange(addr, nowMetricExpr(nowWorkspaceMetric[m[i]], temp_filter))
+			if err != nil {
+				fmt.Println("err : ", err)
+			}
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
 					// mapData[val.Timestamp] = val.Value
@@ -105,12 +137,10 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			if err != nil {
 				fmt.Println("err : ", err)
 			}
-			fmt.Println("query : ", nowMetricExpr(nowClusterMetric[m[i]], temp_filter))
-			fmt.Println("data : ", data)
-			fmt.Println("m[i] : ", m[i])
+
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
-					fmt.Println(m[i], " : ", val.Value)
+
 					value = val.Value
 				}
 			}
@@ -118,7 +148,6 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 
 			return result
 		}
-		fmt.Println("value2 : ", value)
 		result[m[i]] = value
 		// fmt.Println("value2 : ", value)
 		// result[m[i]] = value

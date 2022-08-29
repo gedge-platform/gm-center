@@ -28,6 +28,17 @@ func GetWorkspaceDB(name string) *mongo.Collection {
 	return cdb
 }
 
+// Create workspace godoc
+// @Summary Create workspace
+// @Description Create workspace
+// @Param body body model.Workspace true "workspace Info Body"
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.Workspace
+// @Header 200 {string} Token "qwerty"
+// @Router /workspaces [post]
+// @Tags Workspace
 func CreateWorkspace(c echo.Context) (err error) {
 	cdb := GetWorkspaceDB("workspace")
 	cdb2 := GetProjectDB("member")
@@ -77,16 +88,30 @@ func CreateWorkspace(c echo.Context) (err error) {
 		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Selectcluster: slice,
 	}
-
+	models.Created_at = time.Now()
 	result, err := cdb.InsertOne(ctx, newWorkspace)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusInternalServerError, err)
 		return nil
 	}
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusCreated, echo.Map{
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   result,
+	})
 }
 
+// GetAllworkspace godoc
+// @Summary Show List workspace
+// @Description get workspace List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.Workspace
+// @Security Bearer
+// @Router /workspaces [get]
+// @Param user query string false "user name of the workspace Owner"
+// @Tags Workspace
 func ListWorkspace(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -133,6 +158,10 @@ func ListWorkspace(c echo.Context) (err error) {
 		cur.Close(context.TODO())
 	} else {
 		userObj := FindMemberDB(params)
+		if userObj.Name == "" {
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found User"))
+			return
+		}
 		showsWorkspace = GetDBList(params, "workspace", userObj.ObjectId, "workspaceOwner")
 	}
 	for _, workspace := range showsWorkspace {
@@ -140,9 +169,19 @@ func ListWorkspace(c echo.Context) (err error) {
 		temp_workspace := GetDBWorkspace(params)
 		Workspace = append(Workspace, temp_workspace)
 	}
-	return c.JSON(http.StatusOK, Workspace)
+	return c.JSON(http.StatusOK, echo.Map{"data": Workspace})
 }
 
+// Getworkspace godoc
+// @Summary Show detail workspace
+// @Description get workspace Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the workspace"
+// @Router /workspace/{name} [get]
+// @Tags Workspace
 func FindWorkspace(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -164,10 +203,14 @@ func FindWorkspace(c echo.Context) (err error) {
 	var volume_count int
 	var cpu_usage float64
 	var memory_usage float64
-	var EventList string
-	// var List []model.EVENT
+	var List []model.EVENT
+	var EventList []model.EVENT
 	params.Workspace = params.Name
 	workspace := GetDBWorkspace(params)
+	if workspace.Name == "" {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found Workspace"))
+		return
+	}
 	var Workspace model.Workspace_detail
 	var projectList []model.Workspace_project
 	Workspace.DBWorkspace = workspace
@@ -176,11 +219,18 @@ func FindWorkspace(c echo.Context) (err error) {
 		params.Project = common.InterfaceToString(project["projectName"])
 		tmp_project := GetDBProject(params)
 		params.Name = common.InterfaceToString(project["projectName"])
-		resourceCnt, resourceUsage, eventList := GetUserProjectResource(params, tmp_project.Selectcluster)
-		// fmt.Println("resourceCnt : ", resourceCnt)
+		for _, cluster := range tmp_project.Selectcluster {
+			params.Cluster = cluster.Name
+			events := getCallEvent(params)
+			if len(events) > 0 {
+				List = append(List, events...)
+			}
+		}
+		// resourceCnt2, resourceUsage, eventList := GetUserProjectResource(params, tmp_project.Selectcluster)
+		// fmt.Println("resourceCnt : ", resourceCnt2)
 		// fmt.Println("resourceUsage : ", resourceUsage)
-
-		EventList = EventList + common.InterfaceToString(eventList)
+		EventList = append(EventList, List...)
+		// EventList = EventList + common.InterfaceToString(eventList)
 		project := model.Workspace_project{
 			Name:          tmp_project.Name,
 			SelectCluster: tmp_project.Selectcluster,
@@ -188,16 +238,20 @@ func FindWorkspace(c echo.Context) (err error) {
 			Creator:       tmp_project.MemberName,
 		}
 		projectList = append(projectList, project)
-		deployment_count += resourceCnt.DeploymentCount
-		daemonset_count += resourceCnt.DaemonsetCount
-		Statefulset_count += resourceCnt.StatefulsetCount
-		pod_count += resourceCnt.PodCount
-		service_count += resourceCnt.ServiceCount
-		cronjob_count += resourceCnt.CronjobCount
-		job_count += resourceCnt.JobCount
-		volume_count += resourceCnt.VolumeCount
-		cpu_usage += resourceUsage.Namespace_cpu
-		memory_usage += resourceUsage.Namespace_memory
+		deployment_count += resourceCnt(params.Project, params.Kind, "deployment_count")
+		daemonset_count += resourceCnt(params.Project, params.Kind, "daemonset_count")
+		Statefulset_count += resourceCnt(params.Project, params.Kind, "statefulset_count")
+		pod_count += resourceCnt(params.Project, params.Kind, "pod_count")
+		service_count += resourceCnt(params.Project, params.Kind, "service_count")
+		cronjob_count += resourceCnt(params.Project, params.Kind, "cronjob_count")
+		job_count += resourceCnt(params.Project, params.Kind, "job_count")
+		volume_count += resourceCnt(params.Project, params.Kind, "pv_count")
+		metric_result := make(map[string]interface{})
+		tempMetric := []string{"namespace_cpu", "namespace_memory", "pod_running"}
+		tempresult := NowMonit("workspace", "", params.Project, tempMetric)
+		common.Transcode(tempresult, &metric_result)
+		cpu_usage += common.InterfaceToFloat(metric_result["namespace_cpu"])
+		memory_usage += common.InterfaceToFloat(metric_result["namespace_memory"])
 	}
 	ResourceUsage := model.Resource_usage{
 		Namespace_cpu:    common.ToFixed(cpu_usage, 3),
@@ -216,7 +270,7 @@ func FindWorkspace(c echo.Context) (err error) {
 	Workspace.ProjectList = projectList
 	Workspace.Resource = ResourceCnt
 	Workspace.ResourceUsage = ResourceUsage
-	Workspace.Events = common.StringToInterface(EventList)
+	Workspace.Events = EventList
 	// cdb := GetWorkspaceDB("workspace")
 	// ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	// search_val := c.Param("workspaceName")
@@ -366,6 +420,7 @@ func GetDBWorkspace(params model.PARAMS) model.DBWorkspace {
 	if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&showsWorkspace); err != nil {
 
 	}
+	showsWorkspace.Created_at = workspace.Created_at
 	user_objectId := workspace.Owner
 	userList := GetClusterDB("member")
 	users, _ := context.WithTimeout(context.Background(), time.Second*10)

@@ -87,8 +87,17 @@ func GetCephAuthToken() (token string, err error) {
 	return common.InterfaceToString(result), nil
 }
 
+// Get Ceph Health
+// @Summary Show Ceph volume Health
+// @Description get Ceph volume Health info
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.CEPH
+// @Security Bearer
+// @Router /ceph/health [get]
+// @Tags Volume
 func GetCephHealth(c echo.Context) (err error) {
-
+	fmt.Println("test")
 	token, err := GetCephAuthToken()
 	if err != nil || token == "errer" {
 		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)

@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -13,21 +15,21 @@ type Member struct {
 	Contact    string             `json:"contact,omitempty" bson:"contact"`
 	Enabled    bool               `json:"enabled,omitempty" bson:"enabled"`
 	RoleName   string             `json:"memberRole,omitempty" bson:"memberRole"`
-	Created_at primitive.DateTime `json:"created_at,omitempty"`
+	Created_at time.Time          `json:"created_at,omitempty bson:"created_at"`
 	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
 }
 
 type RequestMember struct {
 	// _id        primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
-	Id         string             `json:"memberId,omitempty" bson:"memberId"`
-	Name       string             `json:"memberName,omitempty" bson:"memberName"`
-	Password   string             `json:"password,omitempty" bson:"password" validate:"gte=0,lte=10"`
-	Email      string             `json:"email,omitempty" bson:"email"`
-	Contact    string             `json:"contact,omitempty" bson:"contact"`
-	Enabled    bool               `json:"enabled,omitempty" bson:"enabled"`
-	RoleName   string             `json:"memberRole,omitempty" bson:"memberRole"`
-	Created_at primitive.DateTime `json:"created_at,omitempty"`
-	Logined_at primitive.DateTime `json:"logined_at,omitempty"`
+	Id         string    `json:"memberId,omitempty" bson:"memberId"`
+	Name       string    `json:"memberName,omitempty" bson:"memberName"`
+	Password   string    `json:"password,omitempty" bson:"password" validate:"gte=0,lte=10"`
+	Email      string    `json:"email,omitempty" bson:"email"`
+	Contact    string    `json:"contact,omitempty" bson:"contact"`
+	Enabled    bool      `json:"enabled,omitempty" bson:"enabled"`
+	RoleName   string    `json:"memberRole,omitempty" bson:"memberRole"`
+	Created_at time.Time `json:"created_at,omitempty" bson:"created_at"`
+	// Logined_at primitive.DateTime `json:"logined_at,omitempty"`
 }
 
 type MemberWithPassword struct {

@@ -59,6 +59,7 @@ func AuthenticateUser(id string, password string) (bool, string) {
 // @Success 200 {object} model.User
 // @Header 200 {string} Token "qwerty"
 // @Router /auth [post]
+// @Tags Login
 func LoginUser(c echo.Context) (err error) {
 
 	var user model.User

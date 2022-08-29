@@ -89,7 +89,7 @@ func DataRequest_spider(params model.PARAMS) (data string, err error) {
 	switch reqMethod {
 	case "GET":
 		if resp, err := client.R().SetBody([]byte(params.Body)).Get(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
@@ -97,7 +97,7 @@ func DataRequest_spider(params model.PARAMS) (data string, err error) {
 		if resp, err := client.R().SetBody([]byte(string(passBody))).
 			SetAuthToken(token).
 			Post(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 
@@ -105,19 +105,19 @@ func DataRequest_spider(params model.PARAMS) (data string, err error) {
 
 	case "PATCH":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "PUT":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "DELETE":
 		if resp, err := client.R().SetAuthToken(token).SetBody([]byte(params.Body)).Delete(url); err != nil {
-			panic(err)
+			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}

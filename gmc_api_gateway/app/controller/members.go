@@ -28,6 +28,17 @@ func GetMemberDB(name string) *mongo.Collection {
 	return cdb
 }
 
+// Create Member godoc
+// @Summary Create Member
+// @Description Create Member
+// @Param body body model.Member true "Cluster Info Body"
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.Member
+// @Header 200 {string} Token "qwerty"
+// @Router /members [post]
+// @Tags User
 func CreateMember(c echo.Context) (err error) {
 	params := model.PARAMS{
 		// Name:      c.Param("name"),
@@ -83,6 +94,15 @@ func CreateMember(c echo.Context) (err error) {
 	})
 }
 
+// GetAllMember godoc
+// @Summary Show List Member
+// @Description get Member List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.Member
+// @Security Bearer
+// @Router /members [get]
+// @Tags User
 func ListMember(c echo.Context) (err error) {
 	var results []model.Member
 	cdb := GetMemberDB("member")
@@ -113,6 +133,16 @@ func ListMember(c echo.Context) (err error) {
 
 }
 
+// Get Member godoc
+// @Summary Show detail Member
+// @Description get Member Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Member"
+// @Router /members/{name} [get]
+// @Tags User
 func FindMember(c echo.Context) (err error) {
 	var member model.Member
 	cdb := GetMemberDB("member")

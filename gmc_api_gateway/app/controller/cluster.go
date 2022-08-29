@@ -38,6 +38,7 @@ func GetClusterDB(name string) *mongo.Collection {
 // @Success 200 {object} model.Cluster
 // @Header 200 {string} Token "qwerty"
 // @Router /clusters [post]
+// @Tags Cluster
 func CreateCluster(c echo.Context) (err error) {
 	cdb := GetClusterDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -90,6 +91,7 @@ func CreateCluster(c echo.Context) (err error) {
 // @Success 200 {object} model.CLUSTER
 // @Security Bearer
 // @Router /clusters [get]
+// @Tags Cluster
 func ListCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "nodes",
@@ -163,6 +165,7 @@ func ListCluster(c echo.Context) (err error) {
 // @Security   Bearer
 // @Param name path string true "name of the Cluster"
 // @Router /clusters/{name} [get]
+// @Tags Cluster
 func FindCluster(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "nodes",

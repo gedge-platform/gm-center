@@ -31,13 +31,14 @@ func GetWorkspaceDB(name string) *mongo.Collection {
 // Create workspace godoc
 // @Summary Create workspace
 // @Description Create workspace
-// @Param body body model.workspace true "workspace Info Body"
+// @Param body body model.Workspace true "workspace Info Body"
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.workspace
+// @Success 200 {object} model.Workspace
 // @Header 200 {string} Token "qwerty"
 // @Router /workspaces [post]
+// @Tags Workspace
 func CreateWorkspace(c echo.Context) (err error) {
 	cdb := GetWorkspaceDB("workspace")
 	cdb2 := GetProjectDB("member")
@@ -106,9 +107,11 @@ func CreateWorkspace(c echo.Context) (err error) {
 // @Description get workspace List
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.workspace
+// @Success 200 {object} model.Workspace
 // @Security Bearer
 // @Router /workspaces [get]
+// @Param user query string false "user name of the workspace Owner"
+// @Tags Workspace
 func ListWorkspace(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -178,6 +181,7 @@ func ListWorkspace(c echo.Context) (err error) {
 // @Security   Bearer
 // @Param name path string true "name of the workspace"
 // @Router /workspace/{name} [get]
+// @Tags Workspace
 func FindWorkspace(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",

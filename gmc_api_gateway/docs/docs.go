@@ -32,6 +32,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Login"
+                ],
                 "summary": "Login",
                 "parameters": [
                     {
@@ -60,7 +63,101 @@ const docTemplate = `{
                 }
             }
         },
-        "/cluster/{name}": {
+        "/ceph/health": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Ceph volume Health info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Volume"
+                ],
+                "summary": "Show Ceph volume Health",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CEPH"
+                        }
+                    }
+                }
+            }
+        },
+        "/clusters": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get cluster List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cluster"
+                ],
+                "summary": "Show List cluster",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTER"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create Cluster",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cluster"
+                ],
+                "summary": "Create Cluster",
+                "parameters": [
+                    {
+                        "description": "Cluster Info Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Cluster"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Cluster"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/clusters/{name}": {
             "get": {
                 "security": [
                     {
@@ -74,6 +171,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Cluster"
+                ],
                 "summary": "Show detail cluster",
                 "parameters": [
                     {
@@ -84,14 +184,7 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.CLUSTER"
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
         "/cronjob/{name}": {
@@ -107,6 +200,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
                 ],
                 "summary": "Show detail cronjob",
                 "parameters": [
@@ -148,6 +244,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
                 ],
                 "summary": "Show List cronjob",
                 "responses": {
@@ -210,6 +309,102 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/members": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Member List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Show List Member",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Member"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create Member",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create Member",
+                "parameters": [
+                    {
+                        "description": "Cluster Info Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Member"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Member"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/members/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Member Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Show detail Member",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Member",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
             }
         },
         "/pods": {
@@ -299,6 +494,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/projects": {
+            "post": {
+                "description": "Create userProject",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Create userProject",
+                "parameters": [
+                    {
+                        "description": "UserProject Info Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.USERPROJECT"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.USERPROJECT"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/pvcs": {
             "get": {
                 "description": "get pvc List",
@@ -355,6 +590,536 @@ const docTemplate = `{
             "get": {
                 "responses": {}
             }
+        },
+        "/services": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Service List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show List Service",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SERVICE"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Create Service",
+                "parameters": [
+                    {
+                        "description": "Service Info Body",
+                        "name": "yaml",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster Name of the Service",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "project Name of the Service",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SERVICE"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/services/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get cronjob Service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show detail Service",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Service",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster Name of the Service",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SERVICE"
+                        }
+                    }
+                }
+            }
+        },
+        "/spider/cloudos": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get CloudOS",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "VM"
+                ],
+                "summary": "Cloudos",
+                "responses": {}
+            }
+        },
+        "/spider/credentials": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get ALLCredential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "VM"
+                ],
+                "summary": "Credential",
+                "responses": {}
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Credential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "VM"
+                ],
+                "summary": "Credential",
+                "parameters": [
+                    {
+                        "description": "Credential Info Body",
+                        "name": "CredentialBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/spider/credentials/{credentialName}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Credential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "VM"
+                ],
+                "summary": "Credential",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the credentials",
+                        "name": "credentialName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Credential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "VM"
+                ],
+                "summary": "Credential",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the credentials",
+                        "name": "credentialName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/systemProjects": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get systemProject List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Show List systemProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User Name of the Project Owner",
+                        "name": "user",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SYSTEMPROJECT"
+                        }
+                    }
+                }
+            }
+        },
+        "/systemProjects/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get systemProject Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Show detail systemProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the systemProject",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "cluster Name of the systemProject",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/userProjects": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get userProject List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Show List userProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User Name of the Project Owner",
+                        "name": "user",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.USERPROJECT"
+                        }
+                    }
+                }
+            }
+        },
+        "/userProjects/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get userProject Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Show detail userProject",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the userProject",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "delete userProjects",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "delete userProjects",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the userProjects",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/workspace/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get workspace Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "Show detail workspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the workspace",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/workspaces": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get workspace List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "Show List workspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user name of the workspace Owner",
+                        "name": "user",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Workspace"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create workspace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "Create workspace",
+                "parameters": [
+                    {
+                        "description": "workspace Info Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Workspace"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Workspace"
+                        },
+                        "headers": {
+                            "Token": {
+                                "type": "string",
+                                "description": "qwerty"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -372,6 +1137,39 @@ const docTemplate = `{
                 }
             }
         },
+        "model.CEPH": {
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "$ref": "#/definitions/model.Capacity"
+                },
+                "clientPerformance": {
+                    "$ref": "#/definitions/model.ClientPerformance"
+                },
+                "clusterStatus": {
+                    "type": "string"
+                },
+                "hostNum": {
+                    "type": "integer"
+                },
+                "monitor": {
+                    "$ref": "#/definitions/model.Monitor"
+                },
+                "object": {
+                    "$ref": "#/definitions/model.Object"
+                },
+                "osd": {
+                    "$ref": "#/definitions/model.OSD"
+                },
+                "pgStatus": {},
+                "pgs_per_osd": {
+                    "type": "number"
+                },
+                "poolNum": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.CLUSTER": {
             "type": "object",
             "required": [
@@ -381,6 +1179,9 @@ const docTemplate = `{
                 "token"
             ],
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "clusterEndpoint": {
                     "type": "string"
                 },
@@ -390,6 +1191,9 @@ const docTemplate = `{
                 "clusterType": {
                     "type": "string"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "gpuCnt": {
                     "description": "Status                  string                   ` + "`" + `json:\"status\"` + "`" + `\nNetwork                 string                   ` + "`" + `json:\"network\"` + "`" + `",
                     "type": "integer"
@@ -397,6 +1201,7 @@ const docTemplate = `{
                 "nodeCnt": {
                     "type": "integer"
                 },
+                "point": {},
                 "resourceUsage": {
                     "description": "Gpu           []map[string]interface{} ` + "`" + `json:\"gpu,omitempty\"` + "`" + `"
                 },
@@ -466,6 +1271,70 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Capacity": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "used": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.ClientPerformance": {
+            "type": "object",
+            "properties": {
+                "read_bytes_sec": {
+                    "type": "number"
+                },
+                "read_op_per_sec": {
+                    "type": "number"
+                },
+                "write_bytes_sec": {
+                    "type": "number"
+                },
+                "write_op_per_sec": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.Cluster": {
+            "type": "object",
+            "required": [
+                "clusterEndpoint",
+                "clusterName",
+                "clusterType",
+                "token"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "clusterEndpoint": {
+                    "type": "string"
+                },
+                "clusterName": {
+                    "type": "string"
+                },
+                "clusterType": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "point": {},
+                "status": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "model.ConfigMapKeyRef": {
             "type": "object",
             "properties": {
@@ -507,6 +1376,37 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.DBWorkspace": {
+            "type": "object",
+            "required": [
+                "memberName",
+                "workspaceDescription",
+                "workspaceName"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "memberName": {
+                    "type": "string"
+                },
+                "objectId": {
+                    "type": "string"
+                },
+                "selectCluster": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Cluster"
+                    }
+                },
+                "workspaceDescription": {
+                    "type": "string"
+                },
+                "workspaceName": {
                     "type": "string"
                 }
             }
@@ -589,6 +1489,89 @@ const docTemplate = `{
                 },
                 "workspace": {
                     "type": "string"
+                }
+            }
+        },
+        "model.Member": {
+            "type": "object",
+            "required": [
+                "email",
+                "memberId",
+                "memberName",
+                "password"
+            ],
+            "properties": {
+                "contact": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "logined_at": {
+                    "type": "integer"
+                },
+                "memberId": {
+                    "type": "string"
+                },
+                "memberName": {
+                    "type": "string"
+                },
+                "memberRole": {
+                    "type": "string"
+                },
+                "objectId": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 0
+                }
+            }
+        },
+        "model.Monitor": {
+            "type": "object",
+            "properties": {
+                "quorum": {},
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.OSD": {
+            "type": "object",
+            "properties": {
+                "in": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "up": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Object": {
+            "type": "object",
+            "properties": {
+                "degraded": {
+                    "type": "number"
+                },
+                "healthy": {
+                    "type": "number"
+                },
+                "misplaced": {
+                    "type": "number"
+                },
+                "unfound": {
+                    "type": "number"
                 }
             }
         },
@@ -713,6 +1696,31 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/model.VolumeMounts"
                     }
+                }
+            }
+        },
+        "model.PROJECT_DETAIL": {
+            "type": "object",
+            "properties": {
+                "Name": {
+                    "type": "string"
+                },
+                "annotations": {},
+                "clusterName": {
+                    "description": "Project",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "labels": {},
+                "resource": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "resourceUsage": {},
+                "status": {
+                    "type": "string"
                 }
             }
         },
@@ -841,6 +1849,72 @@ const docTemplate = `{
                 }
             }
         },
+        "model.SERVICE": {
+            "type": "object",
+            "properties": {
+                "annotation": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "clusterIp": {
+                    "type": "string"
+                },
+                "createAt": {
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "externalIp": {
+                    "type": "string"
+                },
+                "label": {},
+                "name": {
+                    "type": "string"
+                },
+                "port": {},
+                "project": {
+                    "type": "string"
+                },
+                "selector": {},
+                "sessionAffinity": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SYSTEMPROJECT": {
+            "type": "object",
+            "properties": {
+                "DetailInfo": {
+                    "$ref": "#/definitions/model.PROJECT_DETAIL"
+                },
+                "clusterName": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "events": {},
+                "projectName": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "model.StatusConditions": {
             "type": "object",
             "properties": {
@@ -852,6 +1926,56 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "model.USERPROJECT": {
+            "type": "object",
+            "required": [
+                "memberName",
+                "projectDescription",
+                "projectName",
+                "projectType"
+            ],
+            "properties": {
+                "DetailInfo": {
+                    "description": "Status        string           ` + "`" + `json:\"status,omitempty\"` + "`" + `",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.PROJECT_DETAIL"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "events": {},
+                "istioCheck": {
+                    "type": "string"
+                },
+                "memberName": {
+                    "description": "Owner         primitive.ObjectID ` + "`" + `json:\"projectOwner,omitempty\" bson:\"projectOwner\"` + "`" + `\nCreator       primitive.ObjectID ` + "`" + `json:\"projectCreator,omitempty\" bson:\"projectCreator\"` + "`" + `",
+                    "type": "string"
+                },
+                "objectId": {
+                    "type": "string"
+                },
+                "projectDescription": {
+                    "type": "string"
+                },
+                "projectName": {
+                    "type": "string"
+                },
+                "projectType": {
+                    "type": "string"
+                },
+                "selectCluster": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Cluster"
+                    }
+                },
+                "workspace": {
+                    "$ref": "#/definitions/model.DBWorkspace"
                 }
             }
         },
@@ -891,6 +2015,48 @@ const docTemplate = `{
                     "type": "boolean"
                 }
             }
+        },
+        "model.Workspace": {
+            "type": "object",
+            "required": [
+                "memberName",
+                "workspaceDescription",
+                "workspaceName"
+            ],
+            "properties": {
+                "clusterName": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "memberName": {
+                    "type": "string"
+                },
+                "selectCluster": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.WorkspaceClusters"
+                    }
+                },
+                "workspaceDescription": {
+                    "type": "string"
+                },
+                "workspaceName": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.WorkspaceClusters": {
+            "type": "object",
+            "properties": {
+                "cluster": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -906,7 +2072,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "192.168.160.216:8010",
+	Host:             "192.168.160.230:8013",
 	BasePath:         "/gmcapi/v2",
 	Schemes:          []string{"http"},
 	Title:            "Gedge GM-Center Swagger API",

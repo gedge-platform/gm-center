@@ -21,6 +21,7 @@ import (
 // @Param name path string true "name of the Cronjob"
 // @Param cluster query string true "cluster Name of the Cronjob"
 // @Router /cronjob/{name} [get]
+// @Tags Kubernetes
 func GetCronJobs(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -87,6 +88,7 @@ func GetCronJobs(c echo.Context) (err error) {
 // @Success 200 {object} model.CRONJOB
 // @Security Bearer
 // @Router /cronjobs [get]
+// @Tags Kubernetes
 func GetCronAllJobs(c echo.Context) error {
 	var cronjobs []model.CRONJOB
 	fmt.Printf("## cronjobs", cronjobs)

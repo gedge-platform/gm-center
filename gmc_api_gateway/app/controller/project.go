@@ -46,13 +46,14 @@ func GetProjectDB(name string) *mongo.Collection {
 // Create UserProject godoc
 // @Summary Create userProject
 // @Description Create userProject
-// @Param body body model.userProject true "UserProject Info Body"
+// @Param body body model.USERPROJECT true "UserProject Info Body"
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.UserProject
+// @Success 200 {object} model.USERPROJECT
 // @Header 200 {string} Token "qwerty"
-// @Router /userProjects [post]
+// @Router /projects [post]
+// @Tags Project
 func CreateProject(c echo.Context) (err error) {
 	cdb := GetProjectDB("project")
 	cdb2 := GetProjectDB("member")
@@ -162,7 +163,7 @@ func CreateProject(c echo.Context) (err error) {
 			return err
 		}
 	}
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusCreated, result)
 }
 
 // GetAlluserProject godoc
@@ -170,9 +171,11 @@ func CreateProject(c echo.Context) (err error) {
 // @Description get userProject List
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.UserProject
+// @Success 200 {object} model.USERPROJECT
 // @Security Bearer
 // @Router /userProjects [get]
+// @Param user query string  false "User Name of the Project Owner"
+// @Tags Project
 func ListUserProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -247,10 +250,21 @@ func ListUserProject(c echo.Context) (err error) {
 	// }
 
 	// cur.Close(context.TODO())
-
-	return c.JSON(http.StatusOK, userProjects)
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": userProjects,
+	})
 }
 
+// GetAllsystemProject godoc
+// @Summary Show List systemProject
+// @Description get systemProject List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.SYSTEMPROJECT
+// @Security Bearer
+// @Router /systemProjects [get]
+// @Param user query string  false "User Name of the Project Owner"
+// @Tags Project
 func ListSystemProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -315,6 +329,7 @@ func difference(slice1 []primitive.M, slice2 []model.SYSTEMPROJECT) []model.SYST
 // @Security   Bearer
 // @Param name path string true "name of the userProject"
 // @Router /userProjects/{name} [get]
+// @Tags Project
 func GetUserProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -427,7 +442,9 @@ func GetUserProject(c echo.Context) (err error) {
 // @Produce  json
 // @Security   Bearer
 // @Param name path string true "name of the systemProject"
+// @Param cluster query string true "cluster Name of the systemProject"
 // @Router /systemProjects/{name} [get]
+// @Tags Project
 func GetSystemProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -483,6 +500,17 @@ func GetSystemProject(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, project)
 }
+
+// Delete userProjects godoc
+// @Summary delete userProjects
+// @Description delete userProjects
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the userProjects"
+// @Router /userProjects/{name} [delete]
+// @Tags Project
 func DeleteProject(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",

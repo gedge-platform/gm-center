@@ -6,7 +6,6 @@ A RESTful API for GM-Center Database with Go
 
 ```bash
 # Download this project
-# (not yet) go get github.com/gedge-platform/gm-center/main/gmc_api_gateway
 git clone https://github.com/gedge-platform/gm-center.git
 ```
 
@@ -80,20 +79,34 @@ go run main.go
 #### Lists
 
 - members
-- apps
 - clusters
-- projects
-- deployments
 - workspaces
+- projects
+  - user
+  - system
+- request
+- deployments
 - pods
 - jobs
 - cronjobs
 - services
+- pvs
+- pvcs
+- secrets
+- storageclasses
+- clusterroles
+- roles
+- configmaps
+- daemonsets
+- statefulsets
+- serviceaccounts
+- clusterrolebindings
+- network
 - monitoring
 
 <br />
 
-### members, apps, clusters, projects, deployments, workspaces, pods, jobs, cronjobs, services
+### members, clusters, workspaces, projects, deployments, pods, jobs, cronjobs, services, pvs, pvcs, secrets, storageclasses, clusterroles, roles, configmaps, daemonsets, statefulsets, serviceaccounts, clusterrolebindings
 
 ---
 
@@ -134,7 +147,7 @@ go run main.go
 
 ### To do ✓
 
-- [x] PACAKGEING_DEPLOY
+- [ ] PACAKGEING_DEPLOY
 - [ ] REFACTORING
 
 ### In Progress

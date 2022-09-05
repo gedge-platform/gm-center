@@ -36,6 +36,8 @@ var clusterMetric = map[string]string{
 	"pod_running":     "sum(kube_pod_container_status_running{$1})by(cluster)",
 	"pod_quota":       "sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)",
 	"pod_util":        "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
+	"pod_cpu_util":    "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
+	"pod_memory_util": "round(sum(container_memory_working_set_bytes{pod!=''})by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster) * 100,0.001)",
 	"pod_running_bak": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster)",
 	"pod_quota_bak":   "sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)",
 	"pod_util_bak":    "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
@@ -454,13 +456,13 @@ func metricExpr(val string, filter map[string]string) string {
 }
 
 var dashboardMetric = map[string]string{
-	"dashboard_cpu_used_podList":     "topk(5,sum(rate(container_cpu_usage_seconds_total{$1}[30m])) by (cluster,pod,namespace))",
+	"dashboard_cpu_used_podList":     "topk(5,sum(rate(container_cpu_usage_seconds_total{pod!='',namespace!='',container!='',$1}[30m])) by (cluster,pod,namespace))",
 	"dashboard_mem_used_podList":     "topk(5,sum(container_memory_working_set_bytes{container!='POD',container!='',pod!='',$1}) by (cluster,pod,namespace))",
 	"dashboard_cpu_used_clusterList": "round(sum(rate(container_cpu_usage_seconds_total[1m]))by(cluster),0.01)",
 	"dashboard_mem_used_clusterList": "nvidia_smi_power_limit_watts{$1}",
 	"node_status":                    "kube_node_status_condition{condition='Ready',status='true',$1}==1",
-	"cpu_used_podList":               "topk(5,sum(rate(container_cpu_usage_seconds_total{$1}[5m]))by(pod,namespace,cluster))",
-	"memory_used_podList":            "topk(5,sum(rate(container_memory_usage_bytes{$1}))by(pod,namespace,cluster))",
+	"cpu_used_podList":               "topk(5,sum(rate(container_cpu_usage_seconds_total{pod!='',namespace!='',container!='',$1}[5m]))by(pod,namespace,cluster))",
+	"memory_used_podList":            "topk(5,sum(rate(container_memory_working_set_bytes{pod!='',namespace!='',$1}[5m]))by(pod,namespace,cluster))",
 	"namespace_cpu":                  "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace),0.001)",
 	"namespace_memory":               "sum(container_memory_working_set_bytes{$1})by(namespace)",
 }
@@ -514,7 +516,7 @@ func dashboard_pod_monit(c, kind, query string) []map[string]interface{} {
 			for _, val := range data.(model.Matrix) {
 				value := val.Values[0].Value
 				pod := make(map[string]interface{})
-				fmt.Println(val.Metric["name"])
+				fmt.Println("test : ", val)
 				pod["name"] = val.Metric["pod"]
 				pod["namespace"] = val.Metric["namespace"]
 				pod["cluster"] = val.Metric["cluster"]
@@ -533,12 +535,13 @@ func dashboard_cluster_monit(c, query string) interface{} {
 	var podList []map[string]interface{}
 	var result interface{}
 	config.Init()
+	// fmt.Println("testtest : ", err)
 	addr := os.Getenv("PROMETHEUS")
 
 	temp_filter := map[string]string{
 		"cluster": c,
 	}
-
+	fmt.Println("datddddadd")
 	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
 	fmt.Println("nowMetricExpr(query, temp_filter) : ", nowMetricExpr(query, temp_filter))
 	fmt.Println("data : ", data)
@@ -551,6 +554,7 @@ func dashboard_cluster_monit(c, query string) interface{} {
 				value := val.Values[0].Value
 				pod := make(map[string]interface{})
 				fmt.Println(val.Metric["name"])
+				fmt.Println("#####value: ", value)
 				if c == "all" {
 					pod["cluster"] = val.Metric["cluster"]
 				}
@@ -558,6 +562,11 @@ func dashboard_cluster_monit(c, query string) interface{} {
 				result = pod
 				podList = append(podList, pod)
 			}
+		} else {
+			pod := make(map[string]interface{})
+			pod["value"] = 0
+			result = pod
+			// podList = append(podList, pod)
 		}
 	}
 	sort.SliceStable(podList, func(i, j int) bool {

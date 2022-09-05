@@ -31,7 +31,7 @@ func TotalDashboard(c echo.Context) (err error) {
 	workspaceCount, err := workspaces.CountDocuments(context.Background(), bson.D{})
 	projects := GetClusterDB("project")
 	projectCount, err := projects.CountDocuments(context.Background(), bson.D{})
-	cursor, err := clusters.Find(context.TODO(), bson.D{{"clusterType", "core"}})
+	cursor, err := clusters.Find(context.TODO(), bson.D{{"clusterType", "cloud"}})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,6 +89,7 @@ func CloudDashboard(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	fmt.Println("testdfsfe")
 	cluster := GetDB("cluster", params.Cluster, "clusterName")
 	workspaces := GetDBList(params, "workspace", cluster["_id"].(primitive.ObjectID), "selectCluster")
 	projects := GetDBList(params, "project", cluster["_id"].(primitive.ObjectID), "selectCluster")

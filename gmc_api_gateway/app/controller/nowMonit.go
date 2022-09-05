@@ -89,7 +89,6 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 	config.Init()
 	addr := os.Getenv("PROMETHEUS")
 	// result := map[string]model.Value{}
-
 	result := map[string]interface{}{}
 	for i, metric := range m {
 		if metric == "" {
@@ -111,8 +110,15 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			}
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
-					// mapData[val.Timestamp] = val.Value
+					// mapData[val.Timestamp] = val.Value'
 					value = val.Value
+					fmt.Println("value : ", value)
+					// if val.Value !=  {
+
+					// } else {
+					// 	value = 0
+					// }
+
 				}
 			}
 		case "workspace":

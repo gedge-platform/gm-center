@@ -44,7 +44,6 @@ func CephAPI(path string, methodType string, token string) (result string) {
 		return
 	}
 	body_str := string(body)
-	// temp := common.StringToMapInterface(body_str)
 	return body_str
 }
 

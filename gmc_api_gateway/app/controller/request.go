@@ -158,38 +158,6 @@ func ListRequest(c echo.Context) (err error) {
 		results = append(results, result)
 	}
 
-	// var project model.NewProject
-	// cdb2 := GetRequestDB("project")
-	// ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-
-	// if err := cdb2.FindOne(ctx, bson.M{"_id": showsRequest["project"]}).Decode(&project); err != nil {
-
-	// }
-	// findOptions := options.Find()
-
-	// cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// for cur.Next(context.TODO()) {
-	// 	lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "_id"}, {"as", "cluster"}}}}
-	// 	lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
-	// 	lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "project"}}}}
-
-	// 	showProjectCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace, lookupProject})
-
-	// 	if err = showProjectCursor.All(ctx, &showsRequest); err != nil {
-	// 		panic(err)
-	// 	}
-	// }
-
-	// if err := cur.Err(); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// cur.Close(context.TODO())
-
 	return c.JSON(http.StatusOK, results)
 }
 
@@ -207,9 +175,9 @@ func FindRequest(c echo.Context) (err error) {
 	}
 
 	for cur.Next(context.TODO()) {
-		lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "cluster"}, {"foreignField", "_id"}, {"as", "cluster"}}}}
-		lookupWorkspace := bson.D{{"$lookup", bson.D{{"from", "workspace"}, {"localField", "workspace"}, {"foreignField", "_id"}, {"as", "workspace"}}}}
-		lookupProject := bson.D{{"$lookup", bson.D{{"from", "project"}, {"localField", "project"}, {"foreignField", "_id"}, {"as", "project"}}}}
+		lookupCluster := bson.D{{Key: "$lookup", Value: bson.D{{Key: "from", Value: "cluster"}, {Key: "localField", Value: "cluster"}, {Key: "foreignField", Value: "_id"}, {Key: "as", Value: "cluster"}}}}
+		lookupWorkspace := bson.D{{Key: "$lookup", Value: bson.D{{Key: "from", Value: "workspace"}, {Key: "localField", Value: "workspace"}, {Key: "foreignField", Value: "_id"}, {Key: "as", Value: "workspace"}}}}
+		lookupProject := bson.D{{Key: "$lookup", Value: bson.D{{Key: "from", Value: "project"}, {Key: "localField", Value: "project"}, {Key: "foreignField", Value: "_id"}, {Key: "as", Value: "project"}}}}
 		matchCluster := bson.D{
 			{Key: "$match", Value: bson.D{
 				{Key: "request_id", Value: search_val},

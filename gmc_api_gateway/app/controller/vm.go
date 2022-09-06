@@ -5,14 +5,22 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
+	"context"
+	"errors"
 	"net/http"
+	"time"
 
 	"gmc_api_gateway/app/common"
-
+	db "gmc_api_gateway/app/database"
 	"gmc_api_gateway/app/model"
 
+	// "github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
+
+	"go.mongodb.org/mongo-driver/bson"
+	// "go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/gophercloud/gophercloud"
 	// "github.com/gophercloud/gophercloud/pagination"
@@ -20,7 +28,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	// "github.com/tidwall/gjson"
+	"github.com/tidwall/gjson"
+	// "github.com/tidwall/sjson"
 )
 
 type SystemId struct {
@@ -49,7 +58,7 @@ func GetCloudOS(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	cloudos := StringToInterface(getData)
+	cloudos := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": cloudos,
@@ -75,7 +84,7 @@ func GetALLCredential(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	credential := StringToInterface(getData)
+	credential := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": credential,
@@ -97,13 +106,13 @@ func GetCredential(c echo.Context) (err error) {
 
 	params := model.PARAMS{
 		Kind:   "credential",
-		Name:   c.Param("credentialName"),
+		Name:   c.Param("name"),
 		Method: c.Request().Method,
 		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	credential := StringToInterface(getData)
+	credential := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": credential,
@@ -145,31 +154,69 @@ func CreateCredential(c echo.Context) (err error) {
 		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
-	var credentialInfo model.CredentialInfo
-	err2 := json.Unmarshal([]byte(params.Body), &credentialInfo)
+	var getCredential model.GetCredential
+	err2 := json.Unmarshal([]byte(params.Body), &getCredential)
 	if err2 != nil {
 		log.Fatal(err2)
 	}
 
-	credentialName := credentialInfo.CredentialName
-	providerName := credentialInfo.ProviderName
+	credentialName := getCredential.CredentialName
+	providerName := getCredential.ProviderName
 
-	_ = CheckDriver(c, credentialName, providerName)
-	_ = CheckRegion(c, credentialName, providerName)
-	_ = CheckConnectionConfig(c, credentialName, providerName)
+	_ = CheckDriver(c, getCredential)
+	_ = CheckRegion(c, getCredential)
+	_ = CheckConnectionConfig(c, getCredential)
 
-	// var KeyValues model.KeyValues
-	// KeyValue := model.KeyValue {
-	// 	Key: "Region",
-	// 	Value: "RegionOne",
-	// }
 
-	// KeyValues = append(KeyValues, KeyValue)
+
+	// var credentialInfo model.CredentialInfo
+	// credential Key Value 생성
+	var KeyValues model.KeyValues
+
+	switch providerName {
+	case "AWS":
+		KeyValue := model.KeyValue{
+			Key:   "ClientId",
+			Value:  getCredential.ClientId,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+		KeyValue = model.KeyValue{
+			Key:   "ClientSecret",
+			Value:  getCredential.ClientSecret,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+	case "OPENSTACK":
+		KeyValue := model.KeyValue{
+			Key:   "IdentityEndpoint",
+			Value:  getCredential.IdentityEndpoint,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+		KeyValue = model.KeyValue{
+			Key:   "Username",
+			Value:  getCredential.Username,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+		KeyValue = model.KeyValue{
+			Key:   "Password",
+			Value:  getCredential.Password,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+		KeyValue = model.KeyValue{
+			Key:   "DomainName",
+			Value:  getCredential.DomainName,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+		KeyValue = model.KeyValue{
+			Key:   "ProjectID",
+			Value:  getCredential.ProjectID,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+	}
 
 	createCredentialInfo := model.CredentialInfo{
 		CredentialName:   credentialName,
 		ProviderName:     providerName,
-		KeyValueInfoList: credentialInfo.KeyValueInfoList,
+		KeyValueInfoList: KeyValues,
 	}
 
 	payload, _ := json.Marshal(createCredentialInfo)
@@ -184,7 +231,13 @@ func CreateCredential(c echo.Context) (err error) {
 	if err != nil {
 		fmt.Println("err : ", err)
 	}
-	credential := StringToInterface(getData)
+
+	check := CreateCredentialDB(getCredential)
+	if check != true {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("CreateCredentialDB failed."))
+	}
+
+	credential := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": credential,
@@ -202,7 +255,7 @@ func CreateCredential(c echo.Context) (err error) {
 // @Param credentialName path string true "Name of the credentials"
 // @Tags VM
 func DeleteCredential(c echo.Context) (err error) {
-	credentialName := c.Param("credentialName")
+	credentialName := c.Param("name")
 
 	origName := strings.TrimSuffix(credentialName, "-credential")
 
@@ -218,7 +271,7 @@ func DeleteCredential(c echo.Context) (err error) {
 
 	// region 삭제
 	params = model.PARAMS{
-		Kind:   "region",
+		Kind:   "cloudregion",
 		Name:   origName + "-region",
 		Method: c.Request().Method,
 		Body:   common.ResponseBody_spider(c.Request().Body),
@@ -228,7 +281,7 @@ func DeleteCredential(c echo.Context) (err error) {
 
 	// driver 삭제
 	params = model.PARAMS{
-		Kind:   "driver",
+		Kind:   "clouddriver",
 		Name:   origName + "-driver",
 		Method: c.Request().Method,
 		Body:   common.ResponseBody_spider(c.Request().Body),
@@ -245,7 +298,17 @@ func DeleteCredential(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	credential := StringToInterface(getData)
+	if err != nil {
+		fmt.Println("err : ", err)
+	}
+
+	
+	check := DeleteCredentialDB(credentialName)
+	if check != true {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("DeleteCredentialDB failed."))
+	}
+
+	credential := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": credential,
@@ -261,7 +324,7 @@ func GetALLConnectionconfig(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	connectionconfig := StringToInterface(getData)
+	connectionconfig := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": connectionconfig,
@@ -277,15 +340,18 @@ func GetConnectionconfig(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	connectionconfig := StringToInterface(getData)
+	connectionconfig := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": connectionconfig,
 	})
 }
 
-func CheckConnectionConfig(c echo.Context, CredentialName string, ProviderName string) string {
+func CheckConnectionConfig(c echo.Context, getCredential model.GetCredential) string {
 	fmt.Println("[CheckConnectionConfig in]")
+
+	CredentialName := getCredential.CredentialName
+	ProviderName := getCredential.ProviderName
 
 	connectionConfigName := CredentialName + "-config"
 	regionName := CredentialName + "-region"
@@ -330,7 +396,7 @@ func CreateConnectionconfig(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	connectionconfig := StringToInterface(getData)
+	connectionconfig := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": connectionconfig,
@@ -346,7 +412,7 @@ func DeleteConnectionconfig(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	connectionconfig := StringToInterface(getData)
+	connectionconfig := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": connectionconfig,
@@ -361,7 +427,7 @@ func GetALLClouddriver(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	clouddriver := StringToInterface(getData)
+	clouddriver := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": clouddriver,
@@ -377,7 +443,7 @@ func GetClouddriver(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	clouddriver := StringToInterface(getData)
+	clouddriver := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": clouddriver,
@@ -393,7 +459,7 @@ func RegisterClouddriver(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	clouddriver := StringToInterface(getData)
+	clouddriver := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": clouddriver,
@@ -410,7 +476,7 @@ func UnregisterClouddriver(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	clouddriver := StringToInterface(getData)
+	clouddriver := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": clouddriver,
@@ -425,7 +491,7 @@ func GetALLCloudregion(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	cloudregion := StringToInterface(getData)
+	cloudregion := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": cloudregion,
@@ -441,30 +507,61 @@ func GetCloudregion(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	cloudregion := StringToInterface(getData)
+	cloudregion := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": cloudregion,
 	})
 }
 
-func CheckRegion(c echo.Context, CredentialName string, ProviderName string) string {
+func CheckRegion(c echo.Context,  getCredential model.GetCredential) string {
 	fmt.Println("[CheckRegion in]")
 
+	CredentialName := getCredential.CredentialName
+	ProviderName := getCredential.ProviderName
+	Region := getCredential.Region
+	Zone := getCredential.Zone
+	
 	regionName := CredentialName + "-region"
 
 	// vpc 확인
 	if !DuplicatiCheck(c, "region", CredentialName) {
 		// vpc 생성
 
+
 		// Region Key Value 생성
 		var KeyValues model.KeyValues
-		KeyValue := model.KeyValue{
-			Key:   "Region",
-			Value: "RegionOne",
+		var KeyValue model.KeyValue
+
+		switch ProviderName {
+			case "AWS":
+				KeyValue := model.KeyValue{
+					Key:   "Region",
+					Value:  Region,
+				}
+				KeyValues = append(KeyValues, KeyValue)
+				KeyValue = model.KeyValue{
+					Key:   "Zone",
+					Value:  Zone,
+				}
+				KeyValues = append(KeyValues, KeyValue)
+			case "OPENSTACK":
+				if ProviderName != "" {
+					KeyValue = model.KeyValue{
+						Key:   "Region",
+						Value: "RegionOne",
+					}
+					KeyValues = append(KeyValues, KeyValue)
+				} else {
+					KeyValue = model.KeyValue{
+						Key:   "Region",
+						Value:  Region,
+					}
+					KeyValues = append(KeyValues, KeyValue)
+				}
 		}
 
-		KeyValues = append(KeyValues, KeyValue)
+		fmt.Println("KeyValues is : ", KeyValues)
 
 		createRegionInfo := model.RegionInfo{
 			RegionName:       regionName,
@@ -498,7 +595,7 @@ func RegisterCloudregion(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	cloudregion := StringToInterface(getData)
+	cloudregion := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": cloudregion,
@@ -515,7 +612,7 @@ func UnregisterCloudregion(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	cloudregion := StringToInterface(getData)
+	cloudregion := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": cloudregion,
@@ -533,7 +630,7 @@ func VmControl(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vm := StringToInterface(getData)
+	vm := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vm,
@@ -551,7 +648,7 @@ func VmTerminate(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vm := StringToInterface(getData)
+	vm := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vm,
@@ -559,56 +656,17 @@ func VmTerminate(c echo.Context) (err error) {
 }
 
 func GetALLVm(c echo.Context) (err error) {
-
-	var SystemIds []SystemId
-	// cb-spider 에서 vmstatus 목록 가져와서, SystemId 추려내기 위함
 	params := model.PARAMS{
-		Kind:   "vmstatus",
+		Kind:   "vm",
 		Method: c.Request().Method,
 		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	// vm := common.FindData(getData, "vmstatus", "IId")
-	vms := common.FindingArray(common.Finding(getData, "vmstatus"))
-	for e, _ := range vms {
-		vmSystemId := common.FindData(vms[e].String(), "IId", "SystemId")
-		vm := SystemId{
-			SystemId: common.InterfaceToString(vmSystemId),
-		}
-		SystemIds = append(SystemIds, vm)
-	}
-
-	fmt.Println("vmSystemIds : ", SystemIds)
-
-	if len(SystemIds) == 0 {
-		return c.JSON(http.StatusOK, echo.Map{
-			"count": len(SystemIds),
-			"data":  "VM Not Found",
-		})
-	}
-
-	// TODO: 임시
-	OpenStackAuthOpts := gophercloud.AuthOptions{
-		IdentityEndpoint: "http://192.168.160.220:5000",
-		Username:         "consine2c",
-		Password:         "consine2c",
-		DomainName:       "Default",
-	}
-	// OpenStackAuthOpts := gophercloud.AuthOptions{
-	// 	IdentityEndpoint: c.QueryParam("endpoint"),
-	// 	Username:         c.QueryParam("username"),
-	// 	Password:         c.QueryParam("password"),
-	// 	DomainName:       "Default",
-	// }
-
-	getData2, _ := OpenstackVmList(OpenStackAuthOpts, SystemIds)
-
-	fmt.Println("getData is : ", getData)
+	vm := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"data":  getData2,
-		"count": len(SystemIds),
+		"data": vm,
 	})
 }
 
@@ -647,12 +705,63 @@ func GetVm(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vm := StringToInterface(getData)
+	vm := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vm,
 	})
+}
 
+
+func GetVmList(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+	var ConnectionNameOnly model.ConnectionNameOnly
+	err0 := json.Unmarshal([]byte(params.Body), &ConnectionNameOnly)
+	if err0 != nil {}
+
+	payload, _ := json.Marshal(ConnectionNameOnly)
+	
+	params = model.PARAMS{
+		Kind:   "vm",
+		Method: "GET",
+		Body:   string(payload),
+	}
+
+	getVmData, err := common.DataRequest_spider(params)
+	fmt.Println("getVmData : ", getVmData)
+	
+	params = model.PARAMS{
+		Kind:   "vmstatus",
+		Method: "GET",
+		Body:   string(payload),
+	}
+	
+	getStatusData, err := common.DataRequest_spider(params)	
+	fmt.Println("getStatusData : ", getStatusData)
+	
+	var VMs model.VMStructs
+	vms := gjson.Parse(getVmData).Get("vm").Array()
+	vmsData := gjson.Parse(getVmData).Get("vm").Value()
+
+	common.Transcode(vmsData, &VMs)
+
+	status := common.FindingArray(common.Finding(getStatusData, "vmstatus"))
+	
+	for e, _ := range vms {
+		for e2, _ := range status {
+			if(common.FindData(vms[e].String(), "IId", "SystemId") == common.FindData(status[e2].String(), "IId", "SystemId")) {
+				// fmt.Println("같음 %d = %d", e, e2)				
+				VMs[e].VmStatus = status[e2].Get("VmStatus").String()
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": VMs,
+	})
 }
 
 func CreateVm(c echo.Context) (err error) {
@@ -686,29 +795,74 @@ func CreateVm(c echo.Context) (err error) {
 
 	params := model.PARAMS{
 		Kind:   "vm",
-		Method: c.Request().Method,
+		Method: "POST",
 		Body:   string(payload),
 	}
 
 	getData, _ := common.DataRequest_spider(params)
 
-	vm := StringToInterface(getData)
+	vm := common.StringToInterface(getData)
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vm,
 	})
 }
 
 func DeleteVm(c echo.Context) (err error) {
-
 	params := model.PARAMS{
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+	var ConnectionNameOnly model.ConnectionNameOnly
+	err0 := json.Unmarshal([]byte(params.Body), &ConnectionNameOnly)
+	if err0 != nil {}
+	
+
+	// origName := strings.TrimSuffix(ConnectionNameOnly.ConnectionName, "-config")
+	connectionName := ConnectionNameOnly.ConnectionName
+	payload, _ := json.Marshal(ConnectionNameOnly)
+
+	fmt.Println("connectionName is : ", connectionName)
+
+	// Vpc 삭제
+	params = model.PARAMS{
+		Kind:   "vpc",
+		Name:   connectionName + "-vpc",
+		Method: c.Request().Method,
+		Body:   string(payload),
+	}
+
+	_, err = common.DataRequest_spider(params)
+
+
+	// SecurityGroup 삭제
+	params = model.PARAMS{
+		Kind:   "securitygroup",
+		Name:   connectionName + "-sg",
+		Method: c.Request().Method,
+		Body:   string(payload),
+	}
+
+	_, err = common.DataRequest_spider(params)
+
+	// key 삭제
+	params = model.PARAMS{
+		Kind:   "keypair",
+		Name:   connectionName + "-key",
+		Method: c.Request().Method,
+		Body:   string(payload),
+	}
+
+	_, err = common.DataRequest_spider(params)
+
+	// vm 삭제
+	params = model.PARAMS{
 		Kind:   "vm",
 		Name:   c.Param("vmName"),
 		Method: c.Request().Method,
-		Body:   common.ResponseBody_spider(c.Request().Body),
+		Body:   string(payload),
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vm := StringToInterface(getData)
+	vm := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vm,
@@ -725,7 +879,23 @@ func GetALLVMStatus(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vmstatus := StringToInterface(getData)
+	vmstatus := common.StringToInterface(getData)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": vmstatus,
+	})
+}
+
+func GetALLVMStatusList(c echo.Context) (err error) {
+
+	params := model.PARAMS{
+		Kind:   "vmstatus",
+		Method: "GET",
+		Body:   common.ResponseBody_spider(c.Request().Body),
+	}
+
+	getData, err := common.DataRequest_spider(params)
+	vmstatus := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmstatus,
@@ -779,7 +949,7 @@ func GetVMStatus(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vmstatus := StringToInterface(getData)
+	vmstatus := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmstatus,
@@ -818,7 +988,7 @@ func GetAllVmFlavor(c echo.Context) (err error) {
 
 	fmt.Println("Flavors is : ", Flavors)
 
-	// vmspec := StringToInterface(getData)
+	// vmspec := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": Flavors,
@@ -834,7 +1004,7 @@ func GetALLVMSpec(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vmspec := StringToInterface(getData)
+	vmspec := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmspec,
@@ -851,7 +1021,7 @@ func GetVMSpec(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vmspec := StringToInterface(getData)
+	vmspec := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmspec,
@@ -867,7 +1037,7 @@ func GetALLVMOrgSpec(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vmorgspec := StringToInterface(getData)
+	vmorgspec := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmorgspec,
@@ -884,7 +1054,7 @@ func GetVMOrgSpec(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vmorgspec := StringToInterface(getData)
+	vmorgspec := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmorgspec,
@@ -912,11 +1082,16 @@ func GetALLVMImage(c echo.Context) (err error) {
 	}
 
 	fmt.Println("imageNameIds is : ", imageNameIds)
-	// vmimage := StringToInterface(getData)
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"data": imageNameIds,
-	})
+	// vmimage := common.StringToInterface(getData)
+	if len(imageNameIds) != 0 {
+			return c.JSON(http.StatusOK, echo.Map{
+				"data": imageNameIds,
+			})
+			} else {
+				return c.JSON(http.StatusOK, echo.Map{
+					"data": StringToInterface(getData),
+				})
+	}
 }
 
 func GetVMImage(c echo.Context) (err error) {
@@ -929,7 +1104,7 @@ func GetVMImage(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vmimage := StringToInterface(getData)
+	vmimage := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vmimage,
@@ -945,7 +1120,7 @@ func GetALLVPC(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vpc := StringToInterface(getData)
+	vpc := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vpc,
@@ -962,7 +1137,7 @@ func GetVPC(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vpc := StringToInterface(getData)
+	vpc := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vpc,
@@ -1020,7 +1195,7 @@ func CreateVPC(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vpc := StringToInterface(getData)
+	vpc := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vpc,
@@ -1037,7 +1212,7 @@ func DeleteVPC(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	vpc := StringToInterface(getData)
+	vpc := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": vpc,
@@ -1053,7 +1228,7 @@ func GetALLSecurityGroup(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	securitygroup := StringToInterface(getData)
+	securitygroup := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": securitygroup,
@@ -1070,7 +1245,7 @@ func GetSecurityGroup(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	securitygroup := StringToInterface(getData)
+	securitygroup := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": securitygroup,
@@ -1128,7 +1303,7 @@ func CreateSecurityGroup(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	securitygroup := StringToInterface(getData)
+	securitygroup := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": securitygroup,
@@ -1145,7 +1320,7 @@ func DeleteSecurityGroup(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	securitygroup := StringToInterface(getData)
+	securitygroup := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": securitygroup,
@@ -1161,7 +1336,7 @@ func RegisterSecurityGroup(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	regsecuritygroup := StringToInterface(getData)
+	regsecuritygroup := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": regsecuritygroup,
@@ -1178,7 +1353,7 @@ func UnregisterSecurityGroup(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	regsecuritygroup := StringToInterface(getData)
+	regsecuritygroup := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": regsecuritygroup,
@@ -1194,7 +1369,7 @@ func GetALLKeypair(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	keypair := StringToInterface(getData)
+	keypair := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": keypair,
@@ -1211,7 +1386,7 @@ func GetKeypair(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	keypair := StringToInterface(getData)
+	keypair := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": keypair,
@@ -1257,7 +1432,7 @@ func CreateKeypair(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	keypair := StringToInterface(getData)
+	keypair := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": keypair,
@@ -1274,7 +1449,7 @@ func DeleteKeypair(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	keypair := StringToInterface(getData)
+	keypair := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": keypair,
@@ -1290,7 +1465,7 @@ func RegisterKeypair(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	regkeypair := StringToInterface(getData)
+	regkeypair := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": regkeypair,
@@ -1307,7 +1482,7 @@ func UnregisterKeypair(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
-	regkeypair := StringToInterface(getData)
+	regkeypair := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": regkeypair,
@@ -1328,7 +1503,7 @@ func OpenstackVmList(opts gophercloud.AuthOptions, vmSystemId []SystemId) (model
 
 	client, err := openstack.AuthenticatedClient(opts)
 	if err != nil {
-		panic(err)
+		log.Println("err is : ", err)
 	}
 
 	eo := gophercloud.EndpointOpts{
@@ -1337,7 +1512,7 @@ func OpenstackVmList(opts gophercloud.AuthOptions, vmSystemId []SystemId) (model
 	}
 	compute, err := openstack.NewComputeV2(client, eo)
 	if err != nil {
-		panic(err)
+		log.Println("err is : ", err)
 	}
 
 	var List model.OpenstackVmInfos
@@ -1419,8 +1594,11 @@ func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
 	return Check
 }
 
-func CheckDriver(c echo.Context, CredentialName string, ProviderName string) string {
+func CheckDriver(c echo.Context, getCredential model.GetCredential) string {
 	fmt.Println("[CheckDriver in]")
+
+	CredentialName := getCredential.CredentialName
+	ProviderName := getCredential.ProviderName
 
 	driverName := CredentialName + "-driver"
 	DriverLibFileName := ""
@@ -1458,4 +1636,119 @@ func CheckDriver(c echo.Context, CredentialName string, ProviderName string) str
 	}
 
 	return driverName
+}
+
+
+func GetCredentialDB(name string) *mongo.Collection {
+	db := db.DbManager()
+	cdb := db.Collection(name)
+
+	return cdb
+}
+
+func CreateCredentialDB(getCredential model.GetCredential) bool {
+	cdb := GetCredentialDB("credentials")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	models := model.Credential{
+		CredentialName: getCredential.CredentialName,
+		ProviderName: getCredential.ProviderName,
+		IdentityEndpoint: getCredential.IdentityEndpoint,
+		Username: getCredential.Username,
+		Password: getCredential.Password,
+		DomainName: getCredential.DomainName,
+		ProjectID: getCredential.ProjectID,
+		ClientId: getCredential.ClientId,
+		ClientSecret: getCredential.ClientSecret,
+		Region: getCredential.Region,
+		Zone: getCredential.Zone,
+		Created_at: time.Now(),
+	}	
+	_, err2 := cdb.InsertOne(ctx, models)
+	if err2 != nil {
+		return false
+	}
+
+	return true
+}
+
+// GetAllCredential godoc
+// @Summary Show List credential
+// @Description get credential List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.CREDENTIAL
+// @Security Bearer
+// @Router /credentials [get]
+// @Tags Credential
+func ListCredentialDB(c echo.Context) (err error) {
+	var showsCredential []bson.M
+	
+	cdb := GetCredentialDB("credentials")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	findOptions := options.Find()
+
+	cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = cur.All(ctx, &showsCredential); err != nil {
+		panic(err)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	cur.Close(context.TODO())
+	return c.JSON(http.StatusOK, echo.Map{
+		"status": http.StatusOK,
+		"data": showsCredential,
+	})
+}
+
+
+// GetCredential godoc
+// @Summary Show detail credential
+// @Description get credential Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Crerdential"
+// @Router /credentials/{name} [get]
+// @Tags Credential
+func FindCredentialDB(c echo.Context) (err error) {
+	var credential model.Credential
+	cdb := GetCredentialDB("credentials")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := c.Param("name")
+
+	if err := cdb.FindOne(ctx, bson.M{"name": search_val}).Decode(&credential); err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Credential not found."))
+		return nil
+	}
+
+		return c.JSON(http.StatusOK, echo.Map{
+			"status": http.StatusOK,
+			"data": credential,
+		})
+	// }
+}
+
+
+func DeleteCredentialDB(credentialName string) (bool) {
+	cdb := GetCredentialDB("credentials")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	result, err := cdb.DeleteOne(ctx, bson.M{"name": credentialName})
+	if err != nil {
+		return false
+	}
+	if result.DeletedCount == 0 {
+		return false
+	} else {
+		return true
+	}
 }

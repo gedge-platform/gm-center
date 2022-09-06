@@ -31,7 +31,7 @@ func TotalDashboard(c echo.Context) (err error) {
 	workspaceCount, err := workspaces.CountDocuments(context.Background(), bson.D{})
 	projects := GetClusterDB("project")
 	projectCount, err := projects.CountDocuments(context.Background(), bson.D{})
-	cursor, err := clusters.Find(context.TODO(), bson.D{{"clusterType", "core"}})
+	cursor, err := clusters.Find(context.TODO(), bson.D{{Key: "clusterType", Value: "core"}})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TotalDashboard(c echo.Context) (err error) {
 	if err = cursor.All(ctx, &coreClouds); err != nil {
 		log.Fatal(err)
 	}
-	cursor2, err := clusters.Find(context.TODO(), bson.D{{"clusterType", "edge"}})
+	cursor2, err := clusters.Find(context.TODO(), bson.D{{Key: "clusterType", Value: "edge"}})
 	if err != nil {
 		log.Fatal(err)
 	}

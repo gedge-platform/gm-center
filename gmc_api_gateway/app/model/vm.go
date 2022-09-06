@@ -122,6 +122,22 @@ type KeyValue struct {
 
 type KeyValues []KeyValue
 
+
+type GetCredential struct {
+	CredentialName		string    `json:"CredentialName"`
+	ProviderName	string		`json:"ProviderName"`
+	IdentityEndpoint	string		`json:"IdentityEndpoint"`
+	Username	string		`json:"Username"`
+	Password	string		`json:"Password"`
+	DomainName	string		`json:"DomainName"`
+	ProjectID	string		`json:"ProjectID"`
+	ClientId	string		`json:"ClientId"`
+	ClientSecret	string		`json:"ClientSecret"`
+	Region	string		`json:"Region"`
+	Zone	string		`json:"Zone"`
+}
+
+
 type CredentialInfo struct {
 	CredentialName		string    `json:"CredentialName"`
 	ProviderName	string		`json:"ProviderName"`
@@ -147,6 +163,44 @@ type DriverInfo struct {
 	ProviderName	string		`json:"ProviderName"`
 	DriverLibFileName	string		`json:"DriverLibFileName"`
 }
+
+type IId struct {
+	IId		string    `json:"NameId"`
+	SystemId		string    `json:"SystemId"`
+}
+
+type Region struct {
+	Region	string    `json:"Region"`
+	Zone		string    `json:"Zone"`
+}
+
+type VMStruct struct {
+	IId		IId    `json:"IId"`
+	Region	Region    `json:"Region"`
+	VmStatus	string    `json:"VmStatus"`
+	ImageIId		IId    `json:"ImageIId"`
+	VMSpecName		string    `json:"VMSpecName"`
+	VpcIID		IId    `json:"VpcIID"`
+	SubnetIID		IId    `json:"SubnetIID"`
+	SecurityGroupIIds		IId    `json:"SecurityGroupIIds"`
+	KeyPairIId		IId    `json:"KeyPairIId"`
+	RootDiskType		string    `json:"RootDiskType"`
+	RootDiskSize		string    `json:"RootDiskSize"`
+	RootDeviceName		string    `json:"RootDeviceName"`
+	VMBootDisk		string    `json:"VMBootDisk"`
+	VMBlockDisk		string    `json:"VMBlockDisk"`
+	VMUserId		string    `json:"VMUserId"`
+	VMUserPasswd		string    `json:"VMUserPasswd"`
+	NetworkInterface		string    `json:"NetworkInterface"`
+	PublicIP		string    `json:"PublicIP"`
+	PublicDNS		string    `json:"PublicDNS"`
+	PrivateIP		string    `json:"PrivateIP"`
+	PrivateDNS		string    `json:"PrivateDNS"`
+	SSHAccessPoint		string    `json:"SSHAccessPoint"`
+	KeyValueList		string    `json:"KeyValueList"`
+}
+
+type VMStructs []VMStruct
 
 // type EVENT1 struct {
 // 	Metadata struct {

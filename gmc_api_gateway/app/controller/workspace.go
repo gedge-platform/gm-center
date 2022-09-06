@@ -140,16 +140,6 @@ func ListWorkspace(c echo.Context) (err error) {
 		if err = cur.All(ctx, &showsWorkspace); err != nil {
 			panic(err)
 		}
-		// for cur.Next(context.TODO()) {
-		// 	lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
-
-		// 	fmt.Println("ttt : ", mongo.Pipeline{lookupCluster})
-		// 	showWorkspaceCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster})
-
-		// 	if err = showWorkspaceCursor.All(ctx, &showsWorkspace); err != nil {
-		// 		panic(err)
-		// 	}
-		// }
 
 		if err := cur.Err(); err != nil {
 			log.Fatal(err)
@@ -271,45 +261,7 @@ func FindWorkspace(c echo.Context) (err error) {
 	Workspace.Resource = ResourceCnt
 	Workspace.ResourceUsage = ResourceUsage
 	Workspace.Events = EventList
-	// cdb := GetWorkspaceDB("workspace")
-	// ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	// search_val := c.Param("workspaceName")
-
-	// findOptions := options.Find()
-
-	// cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// for cur.Next(context.TODO()) {
-	// 	lookupCluster := bson.D{{"$lookup", bson.D{{"from", "cluster"}, {"localField", "selectCluster"}, {"foreignField", "_id"}, {"as", "selectCluster"}}}}
-	// 	matchCluster := bson.D{
-	// 		{Key: "$match", Value: bson.D{
-	// 			{Key: "workspaceName", Value: search_val},
-	// 		}},
-	// 	}
-
-	// 	showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, matchCluster})
-
-	// 	if err = showLoadedCursor.All(ctx, &showsWorkspace); err != nil {
-	// 		panic(err)
-	// 	}
-	// 	fmt.Println(showsWorkspace)
-	// }
-
-	// if err := cur.Err(); err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// cur.Close(context.TODO())
-
-	// if showsWorkspace == nil {
-	// 	common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
-	// 	return
-	// } else {
-	// 	return
-	// }
+	
 	return c.JSON(http.StatusOK, Workspace)
 }
 

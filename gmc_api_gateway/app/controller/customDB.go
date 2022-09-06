@@ -23,7 +23,7 @@ func GetDBList(params model.PARAMS, collectionName string, obj primitive.ObjectI
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := obj
 
-	cursor, err := cdb.Find(context.TODO(), bson.D{{search_type, search_val}})
+	cursor, err := cdb.Find(context.TODO(), bson.D{{Key: search_type, Value: search_val}})
 	if err != nil {
 		log.Fatal(err)
 	}

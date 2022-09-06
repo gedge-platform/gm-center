@@ -28,8 +28,8 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
-	"github.com/tidwall/gjson"
-	// "github.com/tidwall/sjson"
+	// "github.com/tidwall/gjson"
+
 )
 
 type SystemId struct {
@@ -38,6 +38,7 @@ type SystemId struct {
 
 type NameId struct {
 	NameId string `json:"NameId"`
+	Status string `json:"Status"`
 }
 
 // GetCloudOS godoc
@@ -712,7 +713,6 @@ func GetVm(c echo.Context) (err error) {
 	})
 }
 
-
 func GetVmList(c echo.Context) (err error) {
 
 	params := model.PARAMS{
@@ -721,46 +721,82 @@ func GetVmList(c echo.Context) (err error) {
 	var ConnectionNameOnly model.ConnectionNameOnly
 	err0 := json.Unmarshal([]byte(params.Body), &ConnectionNameOnly)
 	if err0 != nil {}
-
-	payload, _ := json.Marshal(ConnectionNameOnly)
 	
-	params = model.PARAMS{
-		Kind:   "vm",
-		Method: "GET",
-		Body:   string(payload),
+	check := model.PARAMS{
+		Kind:   "connectionconfig",
+		Name:   ConnectionNameOnly.ConnectionName,
+		Method: c.Request().Method,
 	}
 
-	getVmData, err := common.DataRequest_spider(params)
-	fmt.Println("getVmData : ", getVmData)
-	
+	var ConnectionConfig model.ConnectionConfigInfo
+	getData0, _ := common.DataRequest_spider(check)
+	err1 := json.Unmarshal([]byte(getData0), &ConnectionConfig)
+	if err1 != nil {}
+
+	ProviderName := ConnectionConfig.ProviderName
+	payload, _ := json.Marshal(ConnectionNameOnly)
+	fmt.Println("ProviderName : ", ProviderName)
+	fmt.Println("payload : ", string(payload))
+
+	var NameIds []NameId
+	// cb-spider 에서 vmstatus 목록 가져와서, SystemId 추려내기 위함
 	params = model.PARAMS{
 		Kind:   "vmstatus",
-		Method: "GET",
+		Method: c.Request().Method,
 		Body:   string(payload),
 	}
-	
-	getStatusData, err := common.DataRequest_spider(params)	
-	fmt.Println("getStatusData : ", getStatusData)
-	
-	var VMs model.VMStructs
-	vms := gjson.Parse(getVmData).Get("vm").Array()
-	vmsData := gjson.Parse(getVmData).Get("vm").Value()
-
-	common.Transcode(vmsData, &VMs)
-
-	status := common.FindingArray(common.Finding(getStatusData, "vmstatus"))
-	
+	getData, err := common.DataRequest_spider(params)
+	// vm := common.FindData(getData, "vmstatus", "IId")
+	vms := common.FindingArray(common.Finding(getData, "vmstatus"))
 	for e, _ := range vms {
-		for e2, _ := range status {
-			if(common.FindData(vms[e].String(), "IId", "SystemId") == common.FindData(status[e2].String(), "IId", "SystemId")) {
-				// fmt.Println("같음 %d = %d", e, e2)				
-				VMs[e].VmStatus = status[e2].Get("VmStatus").String()
-			}
+		vmNameId := common.FindDataStr(vms[e].String(), "IId", "NameId")
+		Status := common.FindDataStr(vms[e].String(), "VmStatus", "")
+		fmt.Println("p#2] vmNameId : ", vmNameId)
+		vm := NameId{
+			NameId: vmNameId,
+			Status: Status,
 		}
+		NameIds = append(NameIds, vm)
 	}
 
+	fmt.Println("vmNameId : ", NameIds)
+	
+	if len(NameIds) == 0 {
+		return c.JSON(http.StatusOK, echo.Map{
+			"count": len(NameIds),
+			"data":  "VM Not Found",
+		})
+	}	
+	
+	fmt.Println("##IN##")
+
+	var VMStruct model.VMStruct
+	var VMStructs model.VMStructs
+	for e, _ := range NameIds {
+		vmName := strings.TrimSuffix(common.InterfaceToString(NameIds[e].NameId), "}")
+		vmName = strings.TrimLeft(vmName, "{")
+		// fmt.Println("%d %d", e, i)
+		fmt.Println("[#3]", vmName)
+		params := model.PARAMS{
+			Kind:   "vm",
+			Name:   vmName,
+			Method: c.Request().Method,
+			Body:   string(payload),
+		}
+		getData, _ := common.DataRequest_spider(params)
+		fmt.Println("[#5] getData is ", getData)
+		err := json.Unmarshal([]byte(getData), &VMStruct)
+		if err != nil {}
+		fmt.Println("[#6] VMStruct is ", VMStruct)
+		VMStruct.VmStatus = NameIds[e].Status
+		VMStructs = append(VMStructs, VMStruct)
+	}
+
+	fmt.Println("getData is : ", getData)
+
 	return c.JSON(http.StatusOK, echo.Map{
-		"data": VMs,
+		"data":  VMStructs,
+		"count": len(NameIds),
 	})
 }
 
@@ -1489,7 +1525,7 @@ func UnregisterKeypair(c echo.Context) (err error) {
 	})
 }
 
-func OpenstackVmList(opts gophercloud.AuthOptions, vmSystemId []SystemId) (model.OpenstackVmInfos, error) {
+func OpenstackVmList(opts gophercloud.AuthOptions, vmNameId []NameId) (model.OpenstackVmInfos, error) {
 	fmt.Println("[in VmList Function] Hello ?")
 
 	type IID struct {
@@ -1516,8 +1552,8 @@ func OpenstackVmList(opts gophercloud.AuthOptions, vmSystemId []SystemId) (model
 	}
 
 	var List model.OpenstackVmInfos
-	for i := 0; i < len(vmSystemId); i++ {
-		ServerResult, _ := servers.Get(compute, common.InterfaceToString(vmSystemId[i].SystemId)).Extract()
+	for i := 0; i < len(vmNameId); i++ {
+		ServerResult, _ := servers.Get(compute, common.InterfaceToString(vmNameId[i].NameId)).Extract()
 		ImageResult, _ := images.Get(compute, common.InterfaceToString(ServerResult.Image["id"])).Extract()
 		FlavorResult, _ := flavors.Get(compute, common.InterfaceToString(ServerResult.Flavor["id"])).Extract()
 
@@ -1708,33 +1744,17 @@ func ListCredentialDB(c echo.Context) (err error) {
 	})
 }
 
-
-// GetCredential godoc
-// @Summary Show detail credential
-// @Description get credential Details
-// @ApiImplicitParam
-// @Accept  json
-// @Produce  json
-// @Security   Bearer
-// @Param name path string true "name of the Crerdential"
-// @Router /credentials/{name} [get]
-// @Tags Credential
-func FindCredentialDB(c echo.Context) (err error) {
+func FindCredentialDB(search_val string) (value model.Credential, err error) {
 	var credential model.Credential
 	cdb := GetCredentialDB("credentials")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("name")
 
 	if err := cdb.FindOne(ctx, bson.M{"name": search_val}).Decode(&credential); err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, errors.New("Credential not found."))
-		return nil
+		// fmt.Printcommon.ErrorMsg(c, http.StatusNotFound, errors.New("Credential not found."))
+		return credential, errors.New("Credential not found.")
 	}
 
-		return c.JSON(http.StatusOK, echo.Map{
-			"status": http.StatusOK,
-			"data": credential,
-		})
-	// }
+	return credential, nil
 }
 
 

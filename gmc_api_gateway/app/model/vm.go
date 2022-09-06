@@ -31,6 +31,19 @@ type VMStatus struct {
 	VMStatus       string             `json:"Vmstatus" `
 }
 
+
+type VmInfo struct {
+	Id		string    `json:"id"`
+	Name		string    `json:"name"`
+	Status		string    `json:"status"`
+	ImageName		*images.Image    `json:"image"`
+	Flavor		*flavors.Flavor     `json:"flavor"`
+	Addresses		map[string]interface{}    `json:"addresses"`
+	Key		string    `json:"keypair"`
+	SecurityGroups		[]map[string]interface{}    `json:"securitygroups"`
+	Created		time.Time    `json:"created"`
+}
+
 type OpenstackVmInfo struct {
 	Id		string    `json:"id"`
 	Name		string    `json:"name"`

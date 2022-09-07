@@ -189,6 +189,7 @@ type Region struct {
 
 type VMStruct struct {
 	IId		IId    `json:"IId"`
+	ProviderName	string    `json:"ProviderName"`
 	Region	Region    `json:"Region"`
 	VmStatus	string    `json:"VmStatus"`
 	ImageIId		IId    `json:"ImageIId"`

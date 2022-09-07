@@ -186,7 +186,7 @@ func CreateCredential(c echo.Context) (err error) {
 	}
 	credential := StringToInterface(getData)
 
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"data": credential,
 	})
 }
@@ -332,7 +332,7 @@ func CreateConnectionconfig(c echo.Context) (err error) {
 	getData, err := common.DataRequest_spider(params)
 	connectionconfig := StringToInterface(getData)
 
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"data": connectionconfig,
 	})
 }
@@ -693,7 +693,7 @@ func CreateVm(c echo.Context) (err error) {
 	getData, _ := common.DataRequest_spider(params)
 
 	vm := StringToInterface(getData)
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"data": vm,
 	})
 }
@@ -1022,7 +1022,7 @@ func CreateVPC(c echo.Context) (err error) {
 	getData, err := common.DataRequest_spider(params)
 	vpc := StringToInterface(getData)
 
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"data": vpc,
 	})
 }
@@ -1130,7 +1130,7 @@ func CreateSecurityGroup(c echo.Context) (err error) {
 	getData, err := common.DataRequest_spider(params)
 	securitygroup := StringToInterface(getData)
 
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"data": securitygroup,
 	})
 }
@@ -1259,7 +1259,7 @@ func CreateKeypair(c echo.Context) (err error) {
 	getData, err := common.DataRequest_spider(params)
 	keypair := StringToInterface(getData)
 
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"data": keypair,
 	})
 }

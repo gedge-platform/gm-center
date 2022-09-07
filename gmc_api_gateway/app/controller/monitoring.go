@@ -666,3 +666,54 @@ func namespaceUsage(c, query string) float64 {
 	}
 	return result
 }
+
+var cephMetric = map[string]string{
+	"clusterCount":                   "sum without (instance) (ceph_health_status)",
+	"clusterHealth":                  "sum without (instance) (ceph_health_status) == 0",
+	"ceph_osd_in":                    "sum(ceph_osd_in)",
+	"ceph_osd_up":                    "sum(ceph_osd_up)",
+	"ceph_osd_out":                   "count  (ceph_osd_up) - count  (ceph_osd_in)",
+	"ceph_oud_down":                  "count(ceph_osd_up == 0.0) OR vector(0)",
+	"ceph_pg_active":                 "sum (ceph_pg_active)",
+	"ceph_pg_clean":                  "sum (ceph_pg_clean)",
+	"ceph_pg_incomplete":             "sum (ceph_pg_incomplete)",
+	"ceph_unclean_pgs":               "sum (ceph_unclean_pgs)",
+	"ceph_mon_quorum_status":         "count(ceph_mon_quorum_status)",
+	"ceph_pool_num":                  "count(ceph_pool_metadata)",
+	"ceph_pg_per_osd":                "avg(ceph_osd_numpg)",
+	"cluster_avail_capacity":         "sum(ceph_cluster_total_bytes-ceph_cluster_total_used_bytes)/sum(ceph_cluster_total_bytes)",
+	"ceph_cluster_total_bytes":       "sum(ceph_cluster_total_bytes)/1024/1024/1024",
+	"ceph_cluster_total_used_bytes":  "sum (ceph_cluster_total_used_bytes)/1024/1024/1024",
+	"ceph_cluster_total_avail_bytes": "(sum(ceph_cluster_total_bytes)-sum(ceph_cluster_total_used_bytes))/1024/1024/1024",
+	"write_iops":                     "sum(irate(ceph_osd_op_w[5m]))",
+	"read_iops":                      "sum(irate(ceph_osd_op_r[5m]))",
+	"write_throughput":               "sum(irate(ceph_osd_op_w_in_bytes[5m]))",
+	"read_throughput":                "sum(irate(ceph_osd_op_r_out_bytes[5m]))",
+}
+
+func monitDashboard(query string) interface{} {
+	config.Init()
+	temp_filter := make(map[string]string)
+	addr := os.Getenv("PROMETHEUS")
+	var result interface{}
+	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
+	if err != nil {
+		fmt.Println("err : ", err)
+	} else {
+		if check := len(data.(model.Matrix)) != 0; check {
+			data := data.(model.Matrix)
+			if len(data) > 1 {
+				result = data
+			} else {
+				value := data[0].Values[0].Value
+				resource := common.InterfaceToFloat(value)
+				result = resource
+			}
+			// resource := make(map[string]interface{})
+
+		} else {
+			result = 0
+		}
+	}
+	return result
+}

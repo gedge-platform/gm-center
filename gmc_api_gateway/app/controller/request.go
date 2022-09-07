@@ -86,7 +86,7 @@ func CreateRequest(c echo.Context) (err error) {
 		return nil
 	}
 
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusCreated, result)
 }
 
 func ListRequest(c echo.Context) (err error) {

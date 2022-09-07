@@ -40,6 +40,17 @@ type NameId struct {
 	NameId string `json:"NameId"`
 	Status string `json:"Status"`
 }
+type CredentialName struct {
+	CredentialName string `json:"CredentialName"`
+	ProviderName string `json:"ProviderName"`
+}
+type vmParam struct {
+	NameId string `json:"NameId"`
+	Status string `json:"Status"`
+	Provider string `json:"Provider"`
+	Credential string `json:"Credential"`
+	Connection string `json:"Connection"`
+}
 
 // GetCloudOS godoc
 // @Summary Cloudos
@@ -715,89 +726,132 @@ func GetVm(c echo.Context) (err error) {
 
 func GetVmList(c echo.Context) (err error) {
 
-	params := model.PARAMS{
+	var CredentialNames []CredentialName
+	params0 := model.PARAMS{
+		Kind:   "credential",
+		Method: c.Request().Method,
 		Body:   common.ResponseBody_spider(c.Request().Body),
 	}
-	var ConnectionNameOnly model.ConnectionNameOnly
-	err0 := json.Unmarshal([]byte(params.Body), &ConnectionNameOnly)
-	if err0 != nil {}
-	
-	check := model.PARAMS{
-		Kind:   "connectionconfig",
-		Name:   ConnectionNameOnly.ConnectionName,
-		Method: c.Request().Method,
-	}
 
-	var ConnectionConfig model.ConnectionConfigInfo
-	getData0, _ := common.DataRequest_spider(check)
-	err1 := json.Unmarshal([]byte(getData0), &ConnectionConfig)
-	if err1 != nil {}
-
-	ProviderName := ConnectionConfig.ProviderName
-	payload, _ := json.Marshal(ConnectionNameOnly)
-	fmt.Println("ProviderName : ", ProviderName)
-	fmt.Println("payload : ", string(payload))
-
-	var NameIds []NameId
-	// cb-spider 에서 vmstatus 목록 가져와서, SystemId 추려내기 위함
-	params = model.PARAMS{
-		Kind:   "vmstatus",
-		Method: c.Request().Method,
-		Body:   string(payload),
-	}
-	getData, err := common.DataRequest_spider(params)
-	// vm := common.FindData(getData, "vmstatus", "IId")
-	vms := common.FindingArray(common.Finding(getData, "vmstatus"))
-	for e, _ := range vms {
-		vmNameId := common.FindDataStr(vms[e].String(), "IId", "NameId")
-		Status := common.FindDataStr(vms[e].String(), "VmStatus", "")
-		fmt.Println("p#2] vmNameId : ", vmNameId)
-		vm := NameId{
-			NameId: vmNameId,
-			Status: Status,
+	getData0, _ := common.DataRequest_spider(params0)
+	cds := common.FindingArray(common.Finding(getData0, "credential"))
+	for e, _ := range cds {
+		value := common.FindDataStr(cds[e].String(), "CredentialName", "")
+		value2 := common.FindDataStr(cds[e].String(), "ProviderName", "")
+		cd := CredentialName{
+			CredentialName: value + "-config",
+			ProviderName: value2,
 		}
-		NameIds = append(NameIds, vm)
+		CredentialNames = append(CredentialNames, cd)
 	}
-
-	fmt.Println("vmNameId : ", NameIds)
 	
-	if len(NameIds) == 0 {
+	fmt.Println("p#2] value : ", CredentialNames)
+
+	
+	vmParams := getConnectionVmList(CredentialNames)		
+	if len(vmParams) == 0 {
 		return c.JSON(http.StatusOK, echo.Map{
-			"count": len(NameIds),
+			"count": len(vmParams),
 			"data":  "VM Not Found",
 		})
-	}	
+	}
+
+
+	var VMStructs model.VMStructs
+	for e, _ := range vmParams {
+
+		switch vmParams[e].Provider {
+		case "AWS":
+			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
+			VMStructs = append(VMStructs, VMStruct)
 	
-	fmt.Println("##IN##")
+		case "OPENSTACK":
+			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
+			VMStructs = append(VMStructs, VMStruct)
+		}
+	}
+	
+	fmt.Println("[#8] VMStructs is ", VMStructs)
+	fmt.Println("[#8] VMStructs length is ", len(VMStructs))
+	
+	return c.JSON(http.StatusOK, echo.Map{
+		"data":  VMStructs,
+		"count": len(vmParams),
+	})
+}
+
+func getVmStructs(vmParam vmParam, provider string) (model.VMStruct) {
 
 	var VMStruct model.VMStruct
-	var VMStructs model.VMStructs
-	for e, _ := range NameIds {
-		vmName := strings.TrimSuffix(common.InterfaceToString(NameIds[e].NameId), "}")
-		vmName = strings.TrimLeft(vmName, "{")
-		// fmt.Println("%d %d", e, i)
-		fmt.Println("[#3]", vmName)
+	
+	ConnectionNameOnly := model.ConnectionNameOnly {
+		ConnectionName: vmParam.Connection,
+	}
+		
+	payload, _ := json.Marshal(ConnectionNameOnly)
+
+
+	vmName := strings.TrimSuffix(common.InterfaceToString(vmParam.NameId), "}")
+	vmName = strings.TrimLeft(vmName, "{")
+	fmt.Println("[#3]", vmName)
+
+	params := model.PARAMS{
+		Kind:   "vm",
+		Name:   vmName,
+		Method:	"GET",
+		Body:   string(payload),
+	}
+	getData, _ := common.DataRequest_spider(params)
+	fmt.Println("[#5] getData is ", getData)
+	err := json.Unmarshal([]byte(getData), &VMStruct)
+	if err != nil {}
+	fmt.Println("[#6] VMStruct is ", VMStruct)
+	VMStruct.VmStatus = vmParam.Status
+	VMStruct.ProviderName = provider
+
+	return VMStruct
+}
+
+func getConnectionVmList(CredentialNames []CredentialName) ([]vmParam) {
+
+	var vmParams []vmParam
+	var payload []byte
+	for i, _ := range CredentialNames {
+		ConnectionName := strings.TrimSuffix(common.InterfaceToString(CredentialNames[i].CredentialName), "}")
+	
+		ConnectionNameOnly := model.ConnectionNameOnly {
+			ConnectionName: ConnectionName,
+		}
+		
+		payload, _ = json.Marshal(ConnectionNameOnly)
+
+		// cb-spider 에서 vmstatus 목록 가져와서, SystemId 추려내기 위함
 		params := model.PARAMS{
-			Kind:   "vm",
-			Name:   vmName,
-			Method: c.Request().Method,
+			Kind:   "vmstatus",
+			Method: "GET",
 			Body:   string(payload),
 		}
 		getData, _ := common.DataRequest_spider(params)
-		fmt.Println("[#5] getData is ", getData)
-		err := json.Unmarshal([]byte(getData), &VMStruct)
-		if err != nil {}
-		fmt.Println("[#6] VMStruct is ", VMStruct)
-		VMStruct.VmStatus = NameIds[e].Status
-		VMStructs = append(VMStructs, VMStruct)
+
+		vms := common.FindingArray(common.Finding(getData, "vmstatus"))
+		for j, _ := range vms {
+			vmNameId := common.FindDataStr(vms[j].String(), "IId", "NameId")
+			Status := common.FindDataStr(vms[j].String(), "VmStatus", "")
+			fmt.Println("p#2] vmNameId : ", vmNameId)
+			vm := vmParam{
+				NameId: vmNameId,
+				Status: Status,
+				Provider: CredentialNames[i].ProviderName,
+				Credential: CredentialNames[i].CredentialName,
+				Connection: ConnectionName,
+			}
+			vmParams = append(vmParams, vm)
+		}
+		
+		fmt.Println("vmParams : ", vmParams)
 	}
-
-	fmt.Println("getData is : ", getData)
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"data":  VMStructs,
-		"count": len(NameIds),
-	})
+	
+	return vmParams
 }
 
 func CreateVm(c echo.Context) (err error) {

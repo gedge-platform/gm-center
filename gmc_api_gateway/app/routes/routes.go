@@ -204,9 +204,9 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.GET("/cloudos", c.GetCloudOS)
 
 	r3.GET("/credentials", c.GetALLCredential)
-	r3.GET("/credentials/:credentialName", c.GetCredential)
+	r3.GET("/credentials/:name", c.GetCredential)
 	r3.POST("/credentials", c.CreateCredential)
-	r3.DELETE("/credentials/:credentialName", c.DeleteCredential)
+	r3.DELETE("/credentials/:name", c.DeleteCredential)
 	r3.GET("/credentialsCount", c.GetALLCredentialCount)
 
 	r3.GET("/connectionconfig", c.GetALLConnectionconfig)
@@ -225,6 +225,9 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.DELETE("/cloudregion/:cloudregionName", c.UnregisterCloudregion)
 
 	r3.GET("/vm", c.GetALLVm)
+	r3.GET("/vmList", c.GetVmList)
+	r3.GET("/credentialList", c.ListCredentialDB)
+	r3.POST("/vmStatus", c.GetALLVMStatusList)
 	r3.GET("/vm/:vmName", c.GetVm)
 	r3.POST("/vm", c.CreateVm)
 	r3.DELETE("/vm/:vmName", c.DeleteVm)
@@ -267,5 +270,4 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r3.GET("/controlvm/:vmName", c.VmControl)
 	r3.DELETE("/controlvm/:vmName", c.VmTerminate)
-
 }

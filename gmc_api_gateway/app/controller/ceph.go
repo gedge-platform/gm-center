@@ -38,8 +38,7 @@ import (
 // 		return
 // 	}
 // 	body_str := string(body)
-// 	// temp := common.StringToMapInterface(body_str)
-// 	return body_str
+// // 	return body_str
 // }
 
 // func GetCephAuthToken() (token string, err error) {

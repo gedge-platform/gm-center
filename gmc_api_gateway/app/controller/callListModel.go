@@ -11,8 +11,7 @@ import (
 
 func GetModelList(params model.PARAMS) []string {
 	var DataList []string
-	// userInfo := FindMemberDB(params)
-	// userProjectList := GetDBProjectList(params, userInfo.ObjectId, "projectOwner")
+	
 	fmt.Println("params : ", params)
 	if params.Workspace == "" && params.Cluster == "" && params.Project == "" {
 		fmt.Println("#################ALL List")

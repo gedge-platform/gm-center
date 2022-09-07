@@ -63,7 +63,6 @@ func GetStorageclass(c echo.Context) error {
 
 func GetStorageclasses(c echo.Context) (err error) {
 	var storageclasses []model.STORAGECLASS
-	fmt.Printf("## storageclasses", storageclasses)
 	params := model.PARAMS{
 		Kind:      "storageclasses",
 		Name:      c.Param("name"),
@@ -75,7 +74,6 @@ func GetStorageclasses(c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
-	fmt.Printf("####storageclass data confirm : %s", data)
 
 	for i, _ := range data {
 		var allowVolumeExpansion string

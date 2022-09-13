@@ -18,7 +18,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"go.mongodb.org/mongo-driver/bson"
-	// "go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -51,6 +51,15 @@ type vmParam struct {
 	Credential string `json:"Credential"`
 	Connection string `json:"Connection"`
 }
+
+
+func Conn(name string) *mongo.Collection {
+	db := db.DbManager()
+	cdb := db.Collection(name)
+
+	return cdb
+}
+
 
 // GetCloudOS godoc
 // @Summary Cloudos
@@ -185,7 +194,7 @@ func CreateCredential(c echo.Context) (err error) {
 	// credential Key Value 생성
 	var KeyValues model.KeyValues
 
-	switch providerName {
+	switch strings.ToUpper(providerName) {
 	case "AWS":
 		KeyValue := model.KeyValue{
 			Key:   "ClientId",
@@ -545,7 +554,7 @@ func CheckRegion(c echo.Context,  getCredential model.GetCredential) string {
 		var KeyValues model.KeyValues
 		var KeyValue model.KeyValue
 
-		switch ProviderName {
+		switch strings.ToUpper(ProviderName) {
 			case "AWS":
 				KeyValue := model.KeyValue{
 					Key:   "Region",
@@ -912,36 +921,36 @@ func DeleteVm(c echo.Context) (err error) {
 
 	fmt.Println("connectionName is : ", connectionName)
 
-	// Vpc 삭제
-	params = model.PARAMS{
-		Kind:   "vpc",
-		Name:   connectionName + "-vpc",
-		Method: c.Request().Method,
-		Body:   string(payload),
-	}
+	// // Vpc 삭제
+	// params = model.PARAMS{
+	// 	Kind:   "vpc",
+	// 	Name:   connectionName + "-vpc",
+	// 	Method: c.Request().Method,
+	// 	Body:   string(payload),
+	// }
 
-	_, err = common.DataRequest_spider(params)
+	// _, err = common.DataRequest_spider(params)
 
 
-	// SecurityGroup 삭제
-	params = model.PARAMS{
-		Kind:   "securitygroup",
-		Name:   connectionName + "-sg",
-		Method: c.Request().Method,
-		Body:   string(payload),
-	}
+	// // SecurityGroup 삭제
+	// params = model.PARAMS{
+	// 	Kind:   "securitygroup",
+	// 	Name:   connectionName + "-sg",
+	// 	Method: c.Request().Method,
+	// 	Body:   string(payload),
+	// }
 
-	_, err = common.DataRequest_spider(params)
+	// _, err = common.DataRequest_spider(params)
 
-	// key 삭제
-	params = model.PARAMS{
-		Kind:   "keypair",
-		Name:   connectionName + "-key",
-		Method: c.Request().Method,
-		Body:   string(payload),
-	}
+	// // key 삭제
+	// params = model.PARAMS{
+	// 	Kind:   "keypair",
+	// 	Name:   connectionName + "-key",
+	// 	Method: c.Request().Method,
+	// 	Body:   string(payload),
+	// }
 
-	_, err = common.DataRequest_spider(params)
+	// _, err = common.DataRequest_spider(params)
 
 	// vm 삭제
 	params = model.PARAMS{
@@ -1483,12 +1492,37 @@ func GetKeypair(c echo.Context) (err error) {
 	})
 }
 
+func UpdateKeypairDB(credentialName string, data string) {
+
+	cds := common.FindDataStr(data, "PrivateKey", "")
+	fmt.Println("##%#%# cds : ", cds)
+
+	cdb := Conn("credentials")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := credentialName
+
+	var update primitive.M
+	update = bson.M{"KeyPair": cds}
+	// }
+
+	result, err := cdb.UpdateOne(ctx, bson.M{"name": search_val}, bson.M{"$set": update})
+	if err != nil {
+		fmt.Println("failed to update.")
+	}
+
+	if result.MatchedCount == 1 {
+		if err := cdb.FindOne(ctx, bson.M{"name": search_val}).Decode(&cdb); err != nil {
+			fmt.Println("failed to match Credentials.")
+		}
+	}
+}
+
 func CheckKeyPair(c echo.Context, connectionName string) string {
 	keyPairName := connectionName + "-key"
 
-	// vpc 확인
+	// keypair 확인
 	if !DuplicatiCheck(c, "keypair", connectionName) {
-		// vpc 생성
+		// keypair 생성
 		createKeyPairInfo := model.CreateKeyPair{
 			ConnectionName: connectionName,
 			ReqInfo: model.KeyPairReqInfo{
@@ -1504,10 +1538,16 @@ func CheckKeyPair(c echo.Context, connectionName string) string {
 			Body:   string(payload),
 		}
 
-		_, err := common.DataRequest_spider(params)
+		data, err := common.DataRequest_spider(params)
 		if err != nil {
 			fmt.Println("err : ", err)
 		}
+
+		fmt.Println("[%3] keypair return Value : ", data)
+
+		// db 넣기
+		UpdateKeypairDB(strings.TrimSuffix(connectionName, "-config"), data)
+
 	}
 
 	return keyPairName
@@ -1693,7 +1733,7 @@ func CheckDriver(c echo.Context, getCredential model.GetCredential) string {
 	driverName := CredentialName + "-driver"
 	DriverLibFileName := ""
 
-	switch ProviderName {
+	switch strings.ToUpper(ProviderName) {
 	case "AWS":
 		DriverLibFileName = "aws-driver-v1.0.so"
 	case "OPENSTACK":

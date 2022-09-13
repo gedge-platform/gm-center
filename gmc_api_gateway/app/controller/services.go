@@ -164,7 +164,7 @@ func CreateService(c echo.Context) (err error) {
 		return nil
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"info": common.StringToInterface(postData),
 	})
 }

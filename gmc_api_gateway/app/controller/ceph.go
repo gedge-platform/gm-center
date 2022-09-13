@@ -161,10 +161,11 @@ func CephMonit(c echo.Context) (err error) {
 	healthCluster := common.InterfaceOfLen(monitDashboard(cephMetric["clusterHealth"]))
 	ceph := map[string]interface{}{
 		"clusterStatus":                  strconv.Itoa(healthCluster) + "/" + strconv.Itoa(clusterNum),
+		"ceph_pool_objects":              monitDashboard(cephMetric["ceph_pool_objects"]),
 		"ceph_osd_in":                    monitDashboard(cephMetric["ceph_osd_in"]),
 		"ceph_osd_up":                    monitDashboard(cephMetric["ceph_osd_up"]),
 		"ceph_osd_out":                   monitDashboard(cephMetric["ceph_osd_out"]),
-		"ceph_oud_down":                  monitDashboard(cephMetric["ceph_oud_down"]),
+		"ceph_osd_down":                  monitDashboard(cephMetric["ceph_osd_down"]),
 		"ceph_pg_active":                 monitDashboard(cephMetric["ceph_pg_active"]),
 		"ceph_pg_clean":                  monitDashboard(cephMetric["ceph_pg_clean"]),
 		"ceph_pg_incomplete":             monitDashboard(cephMetric["ceph_pg_incomplete"]),
@@ -173,6 +174,7 @@ func CephMonit(c echo.Context) (err error) {
 		"ceph_pool_num":                  monitDashboard(cephMetric["ceph_pool_num"]),
 		"ceph_pg_per_osd":                monitDashboard(cephMetric["ceph_pg_per_osd"]),
 		"cluster_avail_capacity":         monitDashboard(cephMetric["cluster_avail_capacity"]),
+		"cluster_used_capacity":          monitDashboard(cephMetric["cluster_used_capacity"]),
 		"ceph_cluster_total_bytes":       monitDashboard(cephMetric["ceph_cluster_total_bytes"]),
 		"ceph_cluster_total_used_bytes":  monitDashboard(cephMetric["ceph_cluster_total_used_bytes"]),
 		"write_iops":                     monitDashboard(cephMetric["write_iops"]),
@@ -180,6 +182,8 @@ func CephMonit(c echo.Context) (err error) {
 		"write_throughput":               monitDashboard(cephMetric["write_throughput"]),
 		"read_throughput":                monitDashboard(cephMetric["read_throughput"]),
 		"ceph_cluster_total_avail_bytes": monitDashboard(cephMetric["ceph_cluster_total_avail_bytes"]),
+		"osd_read_latency":               monitDashboard(cephMetric["osd_read_latency"]),
+		"osd_write_latency":              monitDashboard(cephMetric["osd_write_latency"]),
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{

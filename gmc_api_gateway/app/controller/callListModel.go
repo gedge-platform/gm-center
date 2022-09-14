@@ -11,7 +11,7 @@ import (
 
 func GetModelList(params model.PARAMS) []string {
 	var DataList []string
-	
+
 	fmt.Println("params : ", params)
 	if params.Workspace == "" && params.Cluster == "" && params.Project == "" {
 		fmt.Println("#################ALL List")
@@ -20,19 +20,18 @@ func GetModelList(params model.PARAMS) []string {
 			params.Cluster = Clusters[c].Name
 			params.Workspace = Clusters[c].Name
 			getData, err := common.DataRequest(params)
-
 			if err != nil {
 				fmt.Println("###########err : ", err)
 				continue
 			}
 			getData0 := gjson.Get(getData, "items").Array()
 			for k, _ := range getData0 {
-
 				str := getData0[k].String()
 				namespace := gjson.Get(str, "metadata.namespace")
 				params.Project = namespace.String()
 				projectCheck := GetDBProject(params)
-				params.Name = ""
+				params.Project = ""
+				// params.Name = ""
 				strVal, _ := sjson.Set(str, "clusterName", Clusters[c].Name)
 				strVal2, _ := sjson.Set(strVal, "workspaceName", projectCheck.Workspace.Name)
 				strVal3, _ := sjson.Set(strVal2, "userName", projectCheck.MemberName)

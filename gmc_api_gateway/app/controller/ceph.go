@@ -161,11 +161,16 @@ func CephMonit(c echo.Context) (err error) {
 	healthCluster := common.InterfaceOfLen(monitDashboard(cephMetric["clusterHealth"]))
 	ceph := map[string]interface{}{
 		"clusterStatus":                  strconv.Itoa(healthCluster) + "/" + strconv.Itoa(clusterNum),
-		"ceph_pool_objects":              monitDashboard(cephMetric["ceph_pool_objects"]),
+		"ceph_objects_healthy":           monitDashboard(cephMetric["ceph_objects_healthy"]),
+		"ceph_objects_degraded":          monitDashboard(cephMetric["ceph_objects_degraded"]),
+		"ceph_objects_misplaced":         monitDashboard(cephMetric["ceph_objects_misplaced"]),
+		"ceph_objects_unfound":           monitDashboard(cephMetric["ceph_objects_unfound"]),
+		"ceph_mds_count":                 monitDashboard(cephMetric["ceph_mds_count"]),
 		"ceph_osd_in":                    monitDashboard(cephMetric["ceph_osd_in"]),
 		"ceph_osd_up":                    monitDashboard(cephMetric["ceph_osd_up"]),
 		"ceph_osd_out":                   monitDashboard(cephMetric["ceph_osd_out"]),
 		"ceph_osd_down":                  monitDashboard(cephMetric["ceph_osd_down"]),
+		"ceph_pg_total":                  monitDashboard(cephMetric["ceph_pg_total"]),
 		"ceph_pg_active":                 monitDashboard(cephMetric["ceph_pg_active"]),
 		"ceph_pg_clean":                  monitDashboard(cephMetric["ceph_pg_clean"]),
 		"ceph_pg_incomplete":             monitDashboard(cephMetric["ceph_pg_incomplete"]),

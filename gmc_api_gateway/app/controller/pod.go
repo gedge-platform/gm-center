@@ -118,7 +118,7 @@ func GetAllPods(c echo.Context) error {
 		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
-	fmt.Printf("####Pod data confirm : %s", data)
+	// fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
 		var restart int

@@ -237,7 +237,13 @@ func mericResult(c echo.Context, kind string, a []string) error {
 			}
 
 			data, err = QueryRange(addr, metricExpr(resourceCntMetric[a[k]], temp_filter), c)
+		case "ceph":
+			// namespace := c.QueryParam("project")
+			temp_filter := map[string]string{
+				"cluster": "all",
+			}
 
+			data, err = QueryRange(addr, metricExpr(cephMetric[a[k]], temp_filter), c)
 		case "gpu":
 			temp_filter := map[string]string{
 				"cluster": cluster,
@@ -670,15 +676,20 @@ func namespaceUsage(c, query string) float64 {
 var cephMetric = map[string]string{
 	"clusterCount":                   "sum without (instance) (ceph_health_status)",
 	"clusterHealth":                  "sum without (instance) (ceph_health_status) == 0",
-	"ceph_pool_objects":              "sum(ceph_pool_objects)",
+	"ceph_objects_healthy":           "sum(ceph_pool_objects)-sum(ceph_num_objects_degraded)-sum(ceph_num_objects_misplaced)-sum(ceph_num_objects_unfound)",
+	"ceph_objects_degraded":          "sum(ceph_num_objects_degraded)",
+	"ceph_objects_misplaced":         "sum(ceph_num_objects_misplaced)",
+	"ceph_objects_unfound":           "sum(ceph_num_objects_unfound)",
+	"ceph_mds_count":                 "count(ceph_mds_metadata)",
 	"ceph_osd_in":                    "sum(ceph_osd_in)",
 	"ceph_osd_up":                    "sum(ceph_osd_up)",
 	"ceph_osd_out":                   "count  (ceph_osd_up) - count  (ceph_osd_in)",
 	"ceph_osd_down":                  "count(ceph_osd_up == 0.0) OR vector(0)",
-	"ceph_pg_active":                 "sum (ceph_pg_active)",
-	"ceph_pg_clean":                  "sum (ceph_pg_clean)",
-	"ceph_pg_incomplete":             "sum (ceph_pg_incomplete)",
-	"ceph_unclean_pgs":               "sum (ceph_unclean_pgs)",
+	"ceph_pg_active":                 "sum (ceph_pg_active{job='ceph-exporter'})",
+	"ceph_pg_total":                  "sum (ceph_pg_total{job='ceph-exporter'})",
+	"ceph_pg_clean":                  "sum (ceph_pg_clean{job='ceph-exporter'})",
+	"ceph_pg_incomplete":             "sum (ceph_pg_incomplete{job='ceph-exporter'})",
+	"ceph_unclean_pgs":               "sum (ceph_unclean_pgs{job='ceph-exporter'})",
 	"ceph_mon_quorum_status":         "count(ceph_mon_quorum_status)",
 	"ceph_pool_num":                  "count(ceph_pool_metadata)",
 	"ceph_pg_per_osd":                "avg(ceph_osd_numpg)",
@@ -689,6 +700,7 @@ var cephMetric = map[string]string{
 	"ceph_cluster_total_avail_bytes": "round(((sum(ceph_cluster_total_bytes)-sum(ceph_cluster_total_used_bytes))/1024/1024/1024),0.001)",
 	"write_iops":                     "round(sum(rate(ceph_osd_op_w{job='ceph-exporter'}[1m])),0.01)",
 	"read_iops":                      "round(sum(rate(ceph_osd_op_r{job='ceph-exporter'}[1m])),0.01)",
+	"overwrite_iops":                 "round(sum(rate(ceph_osd_op_rw{job='ceph-exporter'}[1m])),0.01)",
 	"write_throughput":               "round(sum(irate(ceph_osd_op_w_in_bytes[5m]))/1000,0.01)",
 	"read_throughput":                "round(sum(irate(ceph_osd_op_r_out_bytes[5m]))/1000,0.01)",
 	"osd_read_latency":               "round(1000*sum(increase(ceph_osd_op_r_latency_sum{job='ceph-exporter'}[1m]))/clamp_min(sum(increase(ceph_osd_op_r_latency_count{job='ceph-exporter'}[1m])),1),0.01)",

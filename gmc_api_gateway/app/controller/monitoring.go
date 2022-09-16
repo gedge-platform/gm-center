@@ -237,7 +237,13 @@ func mericResult(c echo.Context, kind string, a []string) error {
 			}
 
 			data, err = QueryRange(addr, metricExpr(resourceCntMetric[a[k]], temp_filter), c)
+		case "ceph":
+			// namespace := c.QueryParam("project")
+			temp_filter := map[string]string{
+				"cluster": "all",
+			}
 
+			data, err = QueryRange(addr, metricExpr(cephMetric[a[k]], temp_filter), c)
 		case "gpu":
 			temp_filter := map[string]string{
 				"cluster": cluster,
@@ -694,6 +700,7 @@ var cephMetric = map[string]string{
 	"ceph_cluster_total_avail_bytes": "round(((sum(ceph_cluster_total_bytes)-sum(ceph_cluster_total_used_bytes))/1024/1024/1024),0.001)",
 	"write_iops":                     "round(sum(rate(ceph_osd_op_w{job='ceph-exporter'}[1m])),0.01)",
 	"read_iops":                      "round(sum(rate(ceph_osd_op_r{job='ceph-exporter'}[1m])),0.01)",
+	"overwrite_iops":                 "round(sum(rate(ceph_osd_op_rw{job='ceph-exporter'}[1m])),0.01)",
 	"write_throughput":               "round(sum(irate(ceph_osd_op_w_in_bytes[5m]))/1000,0.01)",
 	"read_throughput":                "round(sum(irate(ceph_osd_op_r_out_bytes[5m]))/1000,0.01)",
 	"osd_read_latency":               "round(1000*sum(increase(ceph_osd_op_r_latency_sum{job='ceph-exporter'}[1m]))/clamp_min(sum(increase(ceph_osd_op_r_latency_count{job='ceph-exporter'}[1m])),1),0.01)",

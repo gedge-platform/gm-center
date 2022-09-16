@@ -156,7 +156,7 @@ import (
 // 	})
 // }
 
-func CephMonit(c echo.Context) (err error) {
+func CephDashboard(c echo.Context) (err error) {
 	clusterNum := common.InterfaceOfLen(monitDashboard(cephMetric["clusterCount"]))
 	healthCluster := common.InterfaceOfLen(monitDashboard(cephMetric["clusterHealth"]))
 	ceph := map[string]interface{}{
@@ -182,6 +182,7 @@ func CephMonit(c echo.Context) (err error) {
 		"cluster_used_capacity":          monitDashboard(cephMetric["cluster_used_capacity"]),
 		"ceph_cluster_total_bytes":       monitDashboard(cephMetric["ceph_cluster_total_bytes"]),
 		"ceph_cluster_total_used_bytes":  monitDashboard(cephMetric["ceph_cluster_total_used_bytes"]),
+		"overwrite_iops":                 monitDashboard(cephMetric["overwrite_iops"]),
 		"write_iops":                     monitDashboard(cephMetric["write_iops"]),
 		"read_iops":                      monitDashboard(cephMetric["read_iops"]),
 		"write_throughput":               monitDashboard(cephMetric["write_throughput"]),
@@ -194,4 +195,12 @@ func CephMonit(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": ceph,
 	})
+}
+
+func CephMonit(c echo.Context) (err error) {
+	metric_filter := "write_iops|read_iops|write_throughput|overwrite_iops|read_throughput|osd_read_latency|osd_write_latency"
+	metrics := metricParsing(metric_filter)
+	mericResult(c, "ceph", metrics)
+
+	return nil
 }

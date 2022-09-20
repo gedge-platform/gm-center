@@ -249,7 +249,6 @@ func mericResult(c echo.Context, kind string, a []string) error {
 				"cluster": cluster,
 			}
 			data, err = QueryRange(addr, metricExpr(gpuMetric[a[k]], temp_filter), c)
-
 		default:
 			return c.JSON(http.StatusNotFound, echo.Map{
 				"errors": echo.Map{
@@ -728,4 +727,21 @@ func monitDashboard(query string) interface{} {
 		}
 	}
 	return result
+}
+
+func Query_monit(c echo.Context) (err error) {
+	config.Init()
+	addr := os.Getenv("PROMETHEUS")
+	query := c.QueryParam("query")
+
+	data, err := QueryRange(addr, query, c)
+	if err != nil {
+		fmt.Println("err : ", err)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"errors": err,
+		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"items": data,
+	})
 }

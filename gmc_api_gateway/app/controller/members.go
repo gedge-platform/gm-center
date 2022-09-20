@@ -204,6 +204,7 @@ func UpdateMember(c echo.Context) (err error) {
 	var body primitive.M
 	json.Unmarshal([]byte(params.Body), &body)
 	// common.Transcode(params.Body, &body)
+	fmt.Println("body : ", body)
 	filter := bson.D{{"_id", member.ObjectId}}
 	update := bson.D{{"$set", body}}
 

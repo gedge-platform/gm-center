@@ -249,7 +249,6 @@ func mericResult(c echo.Context, kind string, a []string) error {
 				"cluster": cluster,
 			}
 			data, err = QueryRange(addr, metricExpr(gpuMetric[a[k]], temp_filter), c)
-
 		default:
 			return c.JSON(http.StatusNotFound, echo.Map{
 				"errors": echo.Map{
@@ -390,7 +389,6 @@ func validateParam(c echo.Context) bool {
 }
 
 func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value, error) {
-	fmt.Println("1")
 	// log.Println("queryrange in")
 	// log.Println(query)
 	// log.Println(endpointAddr)
@@ -406,18 +404,15 @@ func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value,
 
 	tm3, _ := time.ParseDuration(c.QueryParam("step"))
 	step = tm3
-	fmt.Println("2")
 	client, err := api.NewClient(api.Config{
 		Address: endpointAddr,
 	})
-	fmt.Println("3")
 	if err != nil {
 		log.Printf("Error creating client: %v\n", err)
 		var tempResult model.Value
 		return tempResult, err
 
 	}
-	fmt.Println("4")
 	v1api := v1.NewAPI(client)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
@@ -440,7 +435,7 @@ func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value,
 	if len(warnings) > 0 {
 		log.Printf("Warnings: %v\n", warnings)
 	}
-	fmt.Println("result : ", result)
+	fmt.Println("result!! : ", result)
 	return result, nil
 }
 
@@ -732,4 +727,21 @@ func monitDashboard(query string) interface{} {
 		}
 	}
 	return result
+}
+
+func Query_monit(c echo.Context) (err error) {
+	config.Init()
+	addr := os.Getenv("PROMETHEUS")
+	query := c.QueryParam("query")
+
+	data, err := QueryRange(addr, query, c)
+	if err != nil {
+		fmt.Println("err : ", err)
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"errors": err,
+		})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"items": data,
+	})
 }

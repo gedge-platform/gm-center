@@ -192,7 +192,7 @@ func GEdgeRoute(e *echo.Echo) {
 	// r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)
 	// r2.Any("/:cluster_name/:namespace_name/:kind_name", api.Kubernetes)
 	// r2.Any("/:cluster_name/:namespace_name/:kind_name/*", api.Kubernetes)
-
+	r2.GET("/monitoring/query", c.Query_monit)
 	r2.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 	r2.GET("/monitoring", echo.WrapHandler(promhttp.Handler()))
 	r2.Any("/monitoring/:kind", c.Monit)

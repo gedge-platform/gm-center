@@ -109,15 +109,15 @@ var appMetric = map[string]string{
 	"namespace_count":  "count(kube_namespace_created{$1})by(cluster)",
 }
 var resourceCntMetric = map[string]string{
-	"pod_count":         "sum(kube_pod_labels{$1})",
-	"cronjob_count":     "sum(kube_cronjob_labels{$1})",
-	"job_count":         "sum(kube_job_labels{$1})",
-	"service_count":     "sum(kube_service_labels{$1})",
-	"daemonset_count":   "sum(kube_daemonset_labels{$1})",
-	"statefulset_count": "sum(kube_statefulset_labels{$1})",
-	"deployment_count":  "sum(kube_deployment_labels{$1})",
-	"pv_count":          "sum(kube_persistentvolumeclaim_info{$1})",
-	"namespace_count":   "sum(kube_namespace_labels{$1})",
+	"pod_count":         "sum(kube_pod_labels{$1})OR on() vector(0)",
+	"cronjob_count":     "sum(kube_cronjob_labels{$1})OR on() vector(0)",
+	"job_count":         "sum(kube_job_labels{$1})OR on() vector(0)",
+	"service_count":     "sum(kube_service_info{$1})OR on() vector(0)",
+	"daemonset_count":   "sum(kube_daemonset_labels{$1})OR on() vector(0)",
+	"statefulset_count": "sum(kube_statefulset_labels{$1})OR on() vector(0)",
+	"deployment_count":  "sum(kube_deployment_labels{$1})OR on() vector(0)",
+	"pv_count":          "sum(kube_persistentvolumeclaim_info{$1})OR on() vector(0)",
+	"namespace_count":   "sum(kube_namespace_labels{$1})OR on() vector(0)",
 }
 
 var gpuMetric = map[string]string{

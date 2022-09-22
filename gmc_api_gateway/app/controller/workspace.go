@@ -268,7 +268,7 @@ func FindWorkspace(c echo.Context) (err error) {
 func DeleteWorkspace(c echo.Context) (err error) {
 	cdb := GetWorkspaceDB("workspace")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("workspaceName")
+	search_val := c.Param("name")
 
 	result, err := cdb.DeleteOne(ctx, bson.M{"workspaceName": search_val})
 	if err != nil {

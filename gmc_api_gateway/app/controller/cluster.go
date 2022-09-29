@@ -289,7 +289,7 @@ func FindClusterDB(value string) *model.Cluster {
 func DeleteCluster(c echo.Context) (err error) {
 	cdb := GetClusterDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := c.Param("clusterName")
+	search_val := c.Param("name")
 
 	result, err := cdb.DeleteOne(ctx, bson.M{"clusterName": search_val})
 	if err != nil {

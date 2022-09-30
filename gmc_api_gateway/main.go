@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"runtime"
 
 	db "gmc_api_gateway/app/database"
 	"gmc_api_gateway/app/routes"
@@ -46,6 +47,8 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
+	
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	// e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 	// 	Skipper: func(c echo.Context) bool {
 	// 		if strings.Contains(c.Path(), "swagger") { // Change "swagger" for your own path

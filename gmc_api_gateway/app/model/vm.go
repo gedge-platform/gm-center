@@ -101,6 +101,7 @@ type VmReqInfo struct {
 	SecurityGroupNames []interface{}    `json:"SecurityGroupNames"`
 	VMSpecName	string    `json:"VMSpecName"`
 	KeyPairName	string    `json:"KeyPairName"`
+	RootDiskSize	string    `json:"RootDiskSize"`
 }
 
 

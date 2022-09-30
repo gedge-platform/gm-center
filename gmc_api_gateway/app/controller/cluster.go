@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -34,6 +33,7 @@ func GetClusterDB(name string) *mongo.Collection {
 // @Param body body model.Cluster true "Cluster Info Body"
 // @ApiImplicitParam
 // @Accept  json
+// @Security Bearer
 // @Produce  json
 // @Success 200 {object} model.Cluster
 // @Header 200 {string} Token "qwerty"
@@ -53,7 +53,7 @@ func CreateCluster(c echo.Context) (err error) {
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
@@ -61,6 +61,10 @@ func CreateCluster(c echo.Context) (err error) {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+	if FindClusterDB(models.Name) !=nil {
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return
 	}
 	if models.Type == "edge" {
 		point := GeoCoder(models.Address)
@@ -147,7 +151,6 @@ func ListCluster(c echo.Context) (err error) {
 		cluster.NodeCnt = common.InterfaceOfLen(common.FindData(getData, "items", ""))
 		tempMetric := []string{"cpu_usage", "memory_usage", "pod_running"}
 		tempresult := NowMonit("cluster", params.Cluster, "", tempMetric)
-		fmt.Println("test : ", tempresult)
 		cluster.ResourceUsage = tempresult
 		results2 = append(results2, cluster)
 	}
@@ -281,7 +284,6 @@ func FindClusterDB(value string) *model.Cluster {
 		// common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
 		return nil
 	} else {
-		fmt.Println("[####cluster] : ", &cluster)
 		return &cluster
 	}
 }
@@ -322,7 +324,7 @@ func UpdateCluster(c echo.Context) (err error) {
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return

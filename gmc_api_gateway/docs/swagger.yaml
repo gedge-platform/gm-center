@@ -9,31 +9,11 @@ definitions:
       namespace:
         type: string
     type: object
-  model.CEPH:
-    properties:
-      capacity:
-        $ref: '#/definitions/model.Capacity'
-      clientPerformance:
-        $ref: '#/definitions/model.ClientPerformance'
-      clusterStatus:
-        type: string
-      hostNum:
-        type: integer
-      monitor:
-        $ref: '#/definitions/model.Monitor'
-      object:
-        $ref: '#/definitions/model.Object'
-      osd:
-        $ref: '#/definitions/model.OSD'
-      pgStatus: {}
-      pgs_per_osd:
-        type: number
-      poolNum:
-        type: integer
-    type: object
   model.CLUSTER:
     properties:
       address:
+        type: string
+      cloudType:
         type: string
       clusterEndpoint:
         type: string
@@ -102,29 +82,11 @@ definitions:
       workspace:
         type: string
     type: object
-  model.Capacity:
-    properties:
-      available:
-        type: number
-      total:
-        type: number
-      used:
-        type: number
-    type: object
-  model.ClientPerformance:
-    properties:
-      read_bytes_sec:
-        type: number
-      read_op_per_sec:
-        type: number
-      write_bytes_sec:
-        type: number
-      write_op_per_sec:
-        type: number
-    type: object
   model.Cluster:
     properties:
       address:
+        type: string
+      cloudType:
         type: string
       clusterEndpoint:
         type: string
@@ -172,6 +134,33 @@ definitions:
       image:
         type: string
       name:
+        type: string
+    type: object
+  model.Credential:
+    properties:
+      ClientId:
+        type: string
+      ClientSecret:
+        type: string
+      CredentialName:
+        type: string
+      DomainName:
+        type: string
+      IdentityEndpoint:
+        type: string
+      Password:
+        type: string
+      ProjectID:
+        type: string
+      ProviderName:
+        type: string
+      Region:
+        type: string
+      Username:
+        type: string
+      Zone:
+        type: string
+      created_at:
         type: string
     type: object
   model.DBWorkspace:
@@ -259,7 +248,7 @@ definitions:
       enabled:
         type: boolean
       logined_at:
-        type: integer
+        type: string
       memberId:
         type: string
       memberName:
@@ -277,32 +266,6 @@ definitions:
     - memberId
     - memberName
     - password
-    type: object
-  model.Monitor:
-    properties:
-      quorum: {}
-      total:
-        type: integer
-    type: object
-  model.OSD:
-    properties:
-      in:
-        type: integer
-      total:
-        type: integer
-      up:
-        type: integer
-    type: object
-  model.Object:
-    properties:
-      degraded:
-        type: number
-      healthy:
-        type: number
-      misplaced:
-        type: number
-      unfound:
-        type: number
     type: object
   model.OwnerReference:
     properties:
@@ -635,7 +598,7 @@ definitions:
       cluster:
         type: string
     type: object
-host: 192.168.160.230:8013
+host: 101.79.1.138:8012
 info:
   contact:
     name: GM-Center
@@ -673,23 +636,6 @@ paths:
       summary: Login
       tags:
       - Login
-  /ceph/health:
-    get:
-      consumes:
-      - application/json
-      description: get Ceph volume Health info
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.CEPH'
-      security:
-      - Bearer: []
-      summary: Show Ceph volume Health
-      tags:
-      - Volume
   /clusters:
     get:
       consumes:
@@ -751,6 +697,23 @@ paths:
       summary: Show detail cluster
       tags:
       - Cluster
+  /credentials:
+    get:
+      consumes:
+      - application/json
+      description: get credential List
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Credential'
+      security:
+      - Bearer: []
+      summary: Show List credential
+      tags:
+      - Credential
   /cronjob/{name}:
     get:
       consumes:
@@ -1341,6 +1304,8 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/model.Workspace'
+      security:
+      - Bearer: []
       summary: Create workspace
       tags:
       - Workspace

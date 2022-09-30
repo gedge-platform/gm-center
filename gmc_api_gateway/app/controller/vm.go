@@ -1807,7 +1807,7 @@ func CreateCredentialDB(getCredential model.GetCredential) bool {
 // @Description get credential List
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.CREDENTIAL
+// @Success 200 {object} model.Credential
 // @Security Bearer
 // @Router /credentials [get]
 // @Tags Credential

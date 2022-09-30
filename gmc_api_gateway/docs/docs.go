@@ -63,34 +63,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/ceph/health": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get Ceph volume Health info",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Volume"
-                ],
-                "summary": "Show Ceph volume Health",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.CEPH"
-                        }
-                    }
-                }
-            }
-        },
         "/clusters": {
             "get": {
                 "security": [
@@ -185,6 +157,34 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            }
+        },
+        "/credentials": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get credential List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Credential"
+                ],
+                "summary": "Show List credential",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Credential"
+                        }
+                    }
+                }
             }
         },
         "/cronjob/{name}": {
@@ -1083,6 +1083,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Create workspace",
                 "consumes": [
                     "application/json"
@@ -1137,39 +1142,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.CEPH": {
-            "type": "object",
-            "properties": {
-                "capacity": {
-                    "$ref": "#/definitions/model.Capacity"
-                },
-                "clientPerformance": {
-                    "$ref": "#/definitions/model.ClientPerformance"
-                },
-                "clusterStatus": {
-                    "type": "string"
-                },
-                "hostNum": {
-                    "type": "integer"
-                },
-                "monitor": {
-                    "$ref": "#/definitions/model.Monitor"
-                },
-                "object": {
-                    "$ref": "#/definitions/model.Object"
-                },
-                "osd": {
-                    "$ref": "#/definitions/model.OSD"
-                },
-                "pgStatus": {},
-                "pgs_per_osd": {
-                    "type": "number"
-                },
-                "poolNum": {
-                    "type": "integer"
-                }
-            }
-        },
         "model.CLUSTER": {
             "type": "object",
             "required": [
@@ -1180,6 +1152,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "cloudType": {
                     "type": "string"
                 },
                 "clusterEndpoint": {
@@ -1271,37 +1246,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Capacity": {
-            "type": "object",
-            "properties": {
-                "available": {
-                    "type": "number"
-                },
-                "total": {
-                    "type": "number"
-                },
-                "used": {
-                    "type": "number"
-                }
-            }
-        },
-        "model.ClientPerformance": {
-            "type": "object",
-            "properties": {
-                "read_bytes_sec": {
-                    "type": "number"
-                },
-                "read_op_per_sec": {
-                    "type": "number"
-                },
-                "write_bytes_sec": {
-                    "type": "number"
-                },
-                "write_op_per_sec": {
-                    "type": "number"
-                }
-            }
-        },
         "model.Cluster": {
             "type": "object",
             "required": [
@@ -1312,6 +1256,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "cloudType": {
                     "type": "string"
                 },
                 "clusterEndpoint": {
@@ -1376,6 +1323,47 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Credential": {
+            "type": "object",
+            "properties": {
+                "ClientId": {
+                    "type": "string"
+                },
+                "ClientSecret": {
+                    "type": "string"
+                },
+                "CredentialName": {
+                    "type": "string"
+                },
+                "DomainName": {
+                    "type": "string"
+                },
+                "IdentityEndpoint": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "ProjectID": {
+                    "type": "string"
+                },
+                "ProviderName": {
+                    "type": "string"
+                },
+                "Region": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                },
+                "Zone": {
+                    "type": "string"
+                },
+                "created_at": {
                     "type": "string"
                 }
             }
@@ -1514,7 +1502,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "logined_at": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "memberId": {
                     "type": "string"
@@ -1532,46 +1520,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 10,
                     "minLength": 0
-                }
-            }
-        },
-        "model.Monitor": {
-            "type": "object",
-            "properties": {
-                "quorum": {},
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.OSD": {
-            "type": "object",
-            "properties": {
-                "in": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
-                },
-                "up": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.Object": {
-            "type": "object",
-            "properties": {
-                "degraded": {
-                    "type": "number"
-                },
-                "healthy": {
-                    "type": "number"
-                },
-                "misplaced": {
-                    "type": "number"
-                },
-                "unfound": {
-                    "type": "number"
                 }
             }
         },
@@ -2072,7 +2020,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "192.168.160.230:8013",
+	Host:             "101.79.1.138:8012",
 	BasePath:         "/gmcapi/v2",
 	Schemes:          []string{"http"},
 	Title:            "Gedge GM-Center Swagger API",

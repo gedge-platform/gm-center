@@ -35,6 +35,7 @@ func GetWorkspaceDB(name string) *mongo.Collection {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Security Bearer
 // @Success 200 {object} model.Workspace
 // @Header 200 {string} Token "qwerty"
 // @Router /workspaces [post]
@@ -52,7 +53,21 @@ func CreateWorkspace(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
+	if err = validate.Struct(models); err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			log.Fatal(err)
+		}
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return
+	}
 
+	if err != nil {
+		log.Fatal(err)
+	}
+	if FindClusterDB(models.Name) !=nil {
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
+		return
+	}
 	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
 
 	var clusterObjectId2 []bson.D
@@ -397,4 +412,17 @@ func GetDBWorkspace(params model.PARAMS) model.DBWorkspace {
 	// }
 	// showsProject.Workspace = workspace
 	return showsWorkspace
+}
+func FindWorkspaceDB(value string) *model.Workspace {
+	var workspace model.Workspace
+	cdb := GetWorkspaceDB("workspace")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := value
+
+	if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&workspace); err != nil {
+		// common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
+		return nil
+	} else {
+		return &workspace
+	}
 }

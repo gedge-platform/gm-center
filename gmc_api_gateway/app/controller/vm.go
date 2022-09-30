@@ -868,6 +868,7 @@ func CreateVm(c echo.Context) (err error) {
 	connectionName := c.QueryParam("config")
 	imageName := c.QueryParam("image")
 	flavorName := c.QueryParam("flavor")
+	diskSize := c.QueryParam("disk")
 	// uniqName := "Ct2W9bAZ3kvcLJ54RzBR"
 
 	vpcName, subnetName := CheckVPC(c, connectionName)
@@ -887,6 +888,7 @@ func CreateVm(c echo.Context) (err error) {
 			SecurityGroupNames: securityGroupNameList,
 			VMSpecName:         flavorName,
 			KeyPairName:        keyPairName,
+			RootDiskSize:				diskSize,
 		},
 	}
 

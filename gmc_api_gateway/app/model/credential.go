@@ -19,5 +19,6 @@ type Credential struct {
 	ClientSecret	string		`json:"ClientSecret,omitempty" bson:"access_token"`
 	Region	string		`json:"Region,omitempty" bson:"region"`
 	Zone	string		`json:"Zone,omitempty" bson:"zone"`
+	KeyPair string		`json:"KeyPair,omitempty" bson:"keypair"`
 	Created_at	time.Time   `json:"created_at"`
 }

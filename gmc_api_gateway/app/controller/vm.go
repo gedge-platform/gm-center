@@ -1840,17 +1840,19 @@ func ListCredentialDB(c echo.Context) (err error) {
 	})
 }
 
-func FindCredentialDB(search_val string) (value model.Credential, err error) {
+func FindCredentialDB(c echo.Context) (err error) {
 	var credential model.Credential
 	cdb := GetCredentialDB("credentials")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
+	search_val := c.Param("name")
+
 	if err := cdb.FindOne(ctx, bson.M{"name": search_val}).Decode(&credential); err != nil {
 		// fmt.Printcommon.ErrorMsg(c, http.StatusNotFound, errors.New("Credential not found."))
-		return credential, errors.New("Credential not found.")
+		return errors.New("Credential not found.")
 	}
 
-	return credential, nil
+	return c.JSON(http.StatusOK, &credential)
 }
 
 

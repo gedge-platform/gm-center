@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -36,6 +35,7 @@ func GetMemberDB(name string) *mongo.Collection {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Security Bearer
 // @Success 200 {object} model.Member
 // @Header 200 {string} Token "qwerty"
 // @Router /members [post]
@@ -63,7 +63,7 @@ func CreateMember(c echo.Context) (err error) {
 	}
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
@@ -72,10 +72,8 @@ func CreateMember(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("models : ", models)
 	params.User = models.Id
 	memberCheck := FindMemberDB(params)
-	fmt.Println("check : ", memberCheck)
 	if memberCheck.Id != "" {
 		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrDuplicated)
 		return c.JSON(http.StatusNotFound, echo.Map{
@@ -158,7 +156,16 @@ func FindMember(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, &member)
 	}
 }
-
+// Delete User godoc
+// @Summary Delete User
+// @Description delete User
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /members/{name} [delete]
+// @Param name path string true "Name of the User"
+// @Tags User
 func DeleteMember(c echo.Context) (err error) {
 	cdb := GetMemberDB("member")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -196,7 +203,6 @@ func UpdateMember(c echo.Context) (err error) {
 
 	params.User = c.Param("memberId")
 	member := FindMemberDB(params)
-	fmt.Println("member : ", member)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
@@ -204,7 +210,6 @@ func UpdateMember(c echo.Context) (err error) {
 	var body primitive.M
 	json.Unmarshal([]byte(params.Body), &body)
 	// common.Transcode(params.Body, &body)
-	fmt.Println("body : ", body)
 	filter := bson.D{{"_id", member.ObjectId}}
 	update := bson.D{{"$set", body}}
 

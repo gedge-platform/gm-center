@@ -50,6 +50,7 @@ func GetProjectDB(name string) *mongo.Collection {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Security   Bearer
 // @Success 200 {object} model.USERPROJECT
 // @Header 200 {string} Token "qwerty"
 // @Router /projects [post]
@@ -60,16 +61,19 @@ func CreateProject(c echo.Context) (err error) {
 	cdb3 := GetProjectDB("workspace")
 	cdb4 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	fmt.Println("1")
 	models := new(model.Project)
 	validate := validator.New()
-	fmt.Println("1.5")
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
-		fmt.Println("1.6")
 		return nil
 	}
-	fmt.Println("2")
+
+	models2 := model.Project{}
+	cdb.FindOne(ctx, bson.M{"projectName": models.Name}).Decode(&models2)
+	if models2.Name != "" {
+		common.ErrorMsg(c, http.StatusUnprocessableEntity, common.ErrDuplicated)
+		return nil
+	}
 	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
 	workspaceObjectId, err := cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 
@@ -78,34 +82,24 @@ func CreateProject(c echo.Context) (err error) {
 	var memberObjectId2 []bson.D
 	var workspaceObjectId2 []bson.D
 	var slice []primitive.ObjectID
-	fmt.Println("3")
 	for i := 0; i < len(models.ClusterName); i++ {
 		clusterObjectId3, _ = cdb4.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
 		clusterObjectId3.All(ctx, &clusterObjectId2)
 		slice = append(slice, clusterObjectId2[0][0].Value.(primitive.ObjectID))
 	}
-	fmt.Println("4")
 	if err = memberObjectId.All(ctx, &memberObjectId2); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("&memberObjectId2 : ", &memberObjectId2)
 	if err = workspaceObjectId.All(ctx, &workspaceObjectId2); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("&&workspaceObjectId : ", workspaceObjectId)
-
-	fmt.Println("&&workspaceObjectId2 : ", &workspaceObjectId2)
-	fmt.Println("5")
 	if err = validate.Struct(models); err != nil {
-		fmt.Println("6")
 		for _, err := range err.(validator.ValidationErrors) {
-			fmt.Println("7")
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
 	}
-	fmt.Println("8")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,7 +115,6 @@ func CreateProject(c echo.Context) (err error) {
 		Selectcluster: slice,
 		IstioCheck:    models.IstioCheck,
 	}
-	fmt.Println("9")
 	// models.Created_at = time.Now()
 	result, err := cdb.InsertOne(ctx, newProject)
 	if err != nil {
@@ -137,17 +130,13 @@ func CreateProject(c echo.Context) (err error) {
 		namespace.Metadata.Labels.IstioCheck = models.IstioCheck
 		url := "https://" + clusterInfo.Endpoint + ":6443/api/v1/namespaces/"
 		Token := clusterInfo.Token
-		// fmt.Println("clusterInfo.Endpoint: ", clusterInfo.Endpoint)
-		// fmt.Println("clusterInfo.Token: ", clusterInfo.Token)
 		data, err := json.Marshal(namespace)
-		fmt.Printf("// %s", data)
 		if err != nil {
 			common.ErrorMsg(c, http.StatusBadRequest, err)
-			return err
+			// return err
 		}
 		var jsonStr = []byte(fmt.Sprint(string(data)))
 		code := RequsetKube(url, "POST", jsonStr, Token)
-		fmt.Println("code", code)
 		switch code {
 		case 200:
 		case 201:
@@ -159,8 +148,9 @@ func CreateProject(c echo.Context) (err error) {
 		// return err
 		default:
 			cdb.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
+
 			common.ErrorMsg(c, http.StatusBadRequest, err)
-			return err
+			return nil
 		}
 	}
 	return c.JSON(http.StatusCreated, result)
@@ -226,7 +216,7 @@ func ListUserProject(c echo.Context) (err error) {
 		UserProject.DBProject = temp_project
 		userProjects = append(userProjects, UserProject)
 	}
-	
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": userProjects,
 	})
@@ -262,7 +252,6 @@ func ListSystemProject(c echo.Context) (err error) {
 	}
 	var projects []model.SYSTEMPROJECT
 	getData := GetModelList(params)
-	fmt.Println("getData : ", getData)
 	for k, _ := range getData {
 		project := model.SYSTEMPROJECT{
 			Name:        common.InterfaceToString(common.FindData(getData[k], "metadata", "name")),
@@ -462,10 +451,11 @@ func DeleteProject(c echo.Context) (err error) {
 	search_val := c.Param("name")
 	params.Project = c.Param("name")
 	project := GetDBProject(params)
-	fmt.Println("project : ", project)
+	if project.Name == "" {
+		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
+		return nil
+	}
 	for _, cluster := range project.Selectcluster {
-		// fmt.Printf("########clusterName : %s", slice[i])
-		// clusters := GetClusterDB(common.InterfaceToString(slice[i]))
 
 		url := "https://" + cluster.Endpoint + ":6443/api/v1/namespaces/" + params.Name
 		Token := cluster.Token
@@ -540,7 +530,7 @@ func UpdateProject(c echo.Context) (err error) {
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
@@ -635,7 +625,6 @@ func GetDBProject(params model.PARAMS) model.DBProject {
 
 func DeleteKubeProject(params model.PARAMS, obj primitive.ObjectID) {
 	project := GetDBProject(params)
-	fmt.Println("project : ", project)
 	for _, cluster := range project.Selectcluster {
 		url := "https://" + cluster.Endpoint + ":6443/api/v1/namespaces/" + params.Name
 		Token := cluster.Token
@@ -645,7 +634,7 @@ func DeleteKubeProject(params model.PARAMS, obj primitive.ObjectID) {
 		case 200:
 		case 202:
 		default:
-			fmt.Print("Project Deleted Complete")
+			log.Println("Project Deleted Complete")
 		}
 	}
 }

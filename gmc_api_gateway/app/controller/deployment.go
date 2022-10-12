@@ -9,6 +9,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Get Deployment godoc
+// @Summary Show detail Deployment
+// @Description get Deployment Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Deployment"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.DEPLOYMENT_DETAIL
+// @Router /deployments/{name} [get]
+// @Tags Kubernetes
 func GetDeployment(c echo.Context) (err error) {
 	// var ServicePorts []model.PORT
 	params := model.PARAMS{
@@ -73,6 +87,20 @@ func GetDeployment(c echo.Context) (err error) {
 		"involvesData": involvesData,
 	})
 }
+
+// Get Deployment godoc
+// @Summary Show List Deployment
+// @Description get Deployment List
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param workspace query string false "name of the Workspace"
+// @Param cluster query string false "name of the Cluster"
+// @Param project query string false "name of the Project"
+// @Success 200 {object} model.WORKLOAD
+// @Router /deployments [get]
+// @Tags Kubernetes
 func GetDeployments(c echo.Context) (err error) {
 	var deployments []model.WORKLOAD
 	params := model.PARAMS{
@@ -127,7 +155,7 @@ func CreateDeployment(c echo.Context) (err error) {
 	fmt.Println("params : ", params)
 	postData, err := common.DataRequest(params)
 	if err != nil {
-		fmt.Println("err : ", err)
+		// fmt.Println("err : ", err)
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}

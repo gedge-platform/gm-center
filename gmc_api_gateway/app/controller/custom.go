@@ -1019,7 +1019,7 @@ func RequsetKube(url string, method string, reqdata []byte, token string) int {
 
 		res, err := client.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 			return 0
 		}
 		defer res.Body.Close()
@@ -1043,7 +1043,7 @@ func RequsetKube(url string, method string, reqdata []byte, token string) int {
 
 		res, err := client.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 			return 500
 		}
 

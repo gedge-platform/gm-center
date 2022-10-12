@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 
@@ -17,7 +16,7 @@ func getCallEvent(params model.PARAMS) []model.EVENT {
 	params.Kind = "events"
 	// fmt.Printf("[#]staticKind : %s\n", staticKind)
 	getData, _ := common.DataRequest(params)
-	fmt.Printf("[###]getData : %+v\n", getData)
+	// fmt.Printf("[###]getData : %+v\n", getData)
 	if staticKind == "nodes" || staticKind == "namespaces" {
 		params.Cluster = params.Name
 		events := common.FindingArray(common.Finding(getData, "items"))

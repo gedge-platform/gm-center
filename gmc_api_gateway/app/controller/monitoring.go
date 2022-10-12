@@ -19,7 +19,7 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-//memory -> GI / Disk -> GB / CPU -> Core / Net -> Kbps
+// memory -> GI / Disk -> GB / CPU -> Core / Net -> Kbps
 var clusterMetric = map[string]string{
 	"cpu_util":        "round(100 - (avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster) * 100),0.01)",
 	"cpu_util_bak":    "round(100-(avg(irate(node_cpu_seconds_total{mode='idle', $1}[5m]))by(cluster)*100),0.1)",
@@ -435,7 +435,6 @@ func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value,
 	if len(warnings) > 0 {
 		log.Printf("Warnings: %v\n", warnings)
 	}
-	fmt.Println("result!! : ", result)
 	return result, nil
 }
 
@@ -476,15 +475,14 @@ func node_status(c string) interface{} {
 		"cluster": c,
 	}
 	data, err := nowQueryRange(addr, nowMetricExpr(dashboardMetric["node_status"], temp_filter))
-	fmt.Println("err : ", err)
+	// log.Println("err : ", err)
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	} else {
 		if check := len(data.(model.Matrix)) != 0; check {
 			// data.(model.Matrix)[0].Values
 			for _, val := range data.(model.Matrix) {
 				node := make(map[string]interface{})
-				fmt.Println(val.Metric["name"])
 				node["name"] = val.Metric["node"]
 				node["status"] = val.Metric["condition"]
 				nodeList = append(nodeList, node)
@@ -508,16 +506,14 @@ func dashboard_pod_monit(c, kind, query string) []map[string]interface{} {
 	}
 
 	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
-	fmt.Println("err : ", err)
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	} else {
 		if check := len(data.(model.Matrix)) != 0; check {
 			// data.(model.Matrix)[0].Values
 			for _, val := range data.(model.Matrix) {
 				value := val.Values[0].Value
 				pod := make(map[string]interface{})
-				fmt.Println("test : ", val)
 				pod["name"] = val.Metric["pod"]
 				pod["namespace"] = val.Metric["namespace"]
 				pod["cluster"] = val.Metric["cluster"]
@@ -542,20 +538,16 @@ func dashboard_cluster_monit(c, query string) interface{} {
 	temp_filter := map[string]string{
 		"cluster": c,
 	}
-	fmt.Println("datddddadd")
 	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
-	fmt.Println("nowMetricExpr(query, temp_filter) : ", nowMetricExpr(query, temp_filter))
-	fmt.Println("data : ", data)
+	log.Println("nowMetricExpr(query, temp_filter) : ", nowMetricExpr(query, temp_filter))
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	} else {
 		if check := len(data.(model.Matrix)) != 0; check {
 			// data.(model.Matrix)[0].Values
 			for _, val := range data.(model.Matrix) {
 				value := val.Values[0].Value
 				pod := make(map[string]interface{})
-				fmt.Println(val.Metric["name"])
-				fmt.Println("#####value: ", value)
 				if c == "all" {
 					pod["cluster"] = val.Metric["cluster"]
 				}
@@ -576,7 +568,6 @@ func dashboard_cluster_monit(c, query string) interface{} {
 	if c == "all" {
 		result = podList
 	}
-	fmt.Println("data : ", result)
 	return result
 }
 
@@ -595,17 +586,12 @@ func resourceCntList(c, n, kind string) map[string]interface{} {
 	for key, _ := range resourceCntMetric {
 		data, err := nowQueryRange(addr, nowMetricExpr(resourceCntMetric[key], temp_filter))
 		if err != nil {
-			fmt.Println("err : ", err)
 		} else {
 			if check := len(data.(model.Matrix)) != 0; check {
 				data := data.(model.Matrix)
 				// resource := make(map[string]interface{})
 				// fmt.Println("data", data)
 				value := data[0].Values[0].Value
-				fmt.Println("value", value)
-				// if value ==  {
-				// 	value = 0
-				// }
 
 				resource[key] = common.InterfaceToInt(value)
 				// resourceList = append(resourceList, resource)
@@ -631,7 +617,7 @@ func resourceCnt(c, kind, key string) int {
 	var result int
 	data, err := nowQueryRange(addr, nowMetricExpr(resourceCntMetric[key], temp_filter))
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	} else {
 		if check := len(data.(model.Matrix)) != 0; check {
 			data := data.(model.Matrix)
@@ -639,7 +625,7 @@ func resourceCnt(c, kind, key string) int {
 			value := data[0].Values[0].Value
 			resource := common.InterfaceToInt(value)
 			result = resource
-			fmt.Println("###########result", result)
+			// fmt.Println("###########result", result)
 		}
 	}
 	return result
@@ -655,7 +641,7 @@ func namespaceUsage(c, query string) float64 {
 	var result float64
 	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	} else {
 		if check := len(data.(model.Matrix)) != 0; check {
 			data := data.(model.Matrix)
@@ -709,7 +695,7 @@ func monitDashboard(query string) interface{} {
 	var result interface{}
 	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	} else {
 		if check := len(data.(model.Matrix)) != 0; check {
 			data := data.(model.Matrix)
@@ -736,7 +722,7 @@ func Query_monit(c echo.Context) (err error) {
 
 	data, err := QueryRange(addr, query, c)
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 		return c.JSON(http.StatusNotFound, echo.Map{
 			"errors": err,
 		})

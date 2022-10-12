@@ -99,3 +99,13 @@ type PROJECT_DETAIL struct {
 	Resource      map[string]interface{} `json:"resource,omitempty"`
 	ResourceUsage interface{}            `json:"resourceUsage,omitempty"`
 }
+
+type POST_PROJECT struct {
+	MemberName         string   `json:"memberName,omitempty"`
+	ProjectName        string   `json:"projectName,omitempty"`
+	ProjectDescription string   `json:"projectDescription,omitempty"`
+	ProjectType        string   `json:"projectType,omitempty"`
+	WorkspaceName      string   `json:"workspaceName,omitempty"`
+	ClusterName        []string `json:"clusterName,omitempty"`
+	IstioCheck         bool     `json:"istioCheck,omitempty"`
+}

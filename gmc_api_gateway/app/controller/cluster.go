@@ -288,6 +288,16 @@ func FindClusterDB(value string) *model.Cluster {
 	}
 }
 
+// Delete Cluster godoc
+// @Summary Delete Cluster
+// @Description delete Cluster
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Router /clusters/{name} [delete]
+// @Param name path string true "Name of the cluster"
+// @Tags Cluster
 func DeleteCluster(c echo.Context) (err error) {
 	cdb := GetClusterDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)

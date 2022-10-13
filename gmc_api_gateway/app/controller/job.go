@@ -1,24 +1,28 @@
 package controller
 
 import (
-	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v4"
 )
 
-// GetJobs godoc
-// @Summary Show detail job
-// @Description get job Details
+// Get Job godoc
+// @Summary Show detail Job
+// @Description get Job Details
+// @ApiImplicitParam
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.JOB
-// @Header 200 {string} Token "qwerty"
-// @Router /job/:name [get]
+// @Security   Bearer
+// @Param name path string true "name of the Job"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.JOB_DETAIL
+// @Router /jobs/{name} [get]
+// @Tags Kubernetes
 func GetJobs(c echo.Context) error {
 	params := model.PARAMS{
 		Kind:      "jobs",
@@ -55,7 +59,7 @@ func GetJobs(c echo.Context) error {
 	common.Transcode(ownerReferencesData, &ownerReferencesInfo)
 
 	involvesData, _ := common.GetModelRelatedList(params)
-	log.Printf("#####involvesData ", involvesData)
+	// log.Printf("#####involvesData ", involvesData)
 
 	var durationTime time.Duration
 
@@ -77,7 +81,7 @@ func GetJobs(c echo.Context) error {
 		CreationTime: common.InterfaceToTime(common.FindData(getData, "status", "completionTime")),
 	}
 
-	jobDetail := model.JOB_DETAL{
+	jobDetail := model.JOB_DETAIL{
 		Lable:       common.FindData(getData, "metadata", "labels"),
 		Annotations: common.FindData(getData, "metadata", "annotations"),
 		// Kind:           common.InterfaceToString(common.FindData(getData, "kind", "")),
@@ -100,17 +104,22 @@ func GetJobs(c echo.Context) error {
 	})
 }
 
-// GetJobs godoc
-// @Summary Show List job
-// @Description get job List
+// Get Job godoc
+// @Summary Show List Job
+// @Description get Job List
+// @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Security   Bearer
+// @Param workspace query string false "name of the Workspace"
+// @Param cluster query string false "name of the Cluster"
+// @Param project query string false "name of the Project"
 // @Success 200 {object} model.JOB
-// @Header 200 {string} Token "qwerty"
 // @Router /jobs [get]
+// @Tags Kubernetes
 func GetAllJobs(c echo.Context) error {
 	var jobs []model.JOB
-	fmt.Printf("## jobs", jobs)
+	// fmt.Printf("## jobs", jobs)
 	params := model.PARAMS{
 		Kind:      "jobs",
 		Name:      c.Param("name"),
@@ -122,7 +131,7 @@ func GetAllJobs(c echo.Context) error {
 		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
-	fmt.Printf("####data confirm : %s", data)
+	// fmt.Printf("####data confirm : %s", data)
 
 	for i, _ := range data {
 		var durationTime time.Duration
@@ -160,6 +169,20 @@ func GetAllJobs(c echo.Context) error {
 	})
 }
 
+// Create Job godoc
+// @Summary Create Job
+// @Description Create Job
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param json body string true "Job Info Body"
+// @Param cluster query string true "name of the Cluster"
+// @Param workspace query string true "name of the Workspace"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.JOB
+// @Router /jobs [post]
+// @Tags Kubernetes
 func CreateJob(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "jobs",
@@ -180,6 +203,20 @@ func CreateJob(c echo.Context) (err error) {
 	})
 }
 
+// Delete Job godoc
+// @Summary Delete Job
+// @Description Delete Job
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Job"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.JOB
+// @Router /jobs/{name} [delete]
+// @Tags Kubernetes
 func DeleteJob(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "jobs",

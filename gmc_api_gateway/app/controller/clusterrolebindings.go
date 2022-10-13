@@ -58,8 +58,8 @@ func GetClusterrolebinding(c echo.Context) error {
 // @Accept  json
 // @Produce  json
 // @Security   Bearer
-// @Param clusterName query string false "name of the Cluster"
-// @Param workspaceName query string false "name of the Workspace"
+// @Param cluster query string false "name of the Cluster"
+// @Param workspace query string false "name of the Workspace"
 // @Success 200 {object} model.CLUSTERROLEBINDING
 // @Router /clusterrolebindings [get]
 // @Tags Kubernetes
@@ -124,7 +124,9 @@ func CreateClusterRolebinding(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   postData,
 	})
 }
 
@@ -145,6 +147,8 @@ func DeleteClusterRolebinding(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Deleted",
+		"code":   http.StatusOK,
+		"data":   postData,
 	})
 }

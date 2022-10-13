@@ -153,7 +153,11 @@ func CreateProject(c echo.Context) (err error) {
 			return nil
 		}
 	}
-	return c.JSON(http.StatusCreated, result)
+	return c.JSON(http.StatusCreated, echo.Map{
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   result,
+	})
 }
 
 // GetAlluserProject godoc

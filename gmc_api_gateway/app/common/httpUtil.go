@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"fmt"
 	db "gmc_api_gateway/app/database"
 	"gmc_api_gateway/app/model"
 	"io"
@@ -94,13 +93,13 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 		return "", ErrDetailNameInvalid
 	}
 
-	log.Printf("[#31] url is %s", url)
+	// log.Printf("[#31] url is %s", url)
 	var responseString, token string
 	reqMethod := params.Method
 	// passBody := responseBody(params.Body)
 	passBody := params.Body
 
-	log.Printf("[#32] passBody is %s", passBody)
+	// log.Printf("[#32] passBody is %s", passBody)
 	token = token_value
 
 	client := resty.New()
@@ -113,13 +112,13 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	})
 	client.OnError(func(req *resty.Request, err error) {
 		if v, ok := err.(*resty.ResponseError); ok {
-			fmt.Println("########################ok")
-			fmt.Println("v : ", v)
-			fmt.Println("ok : ", ok)
+			log.Println("########################ok")
+			log.Println("v : ", v)
+			log.Println("ok : ", ok)
 		} else {
-			fmt.Println("######################## !ok")
-			fmt.Println("v : ", v)
-			fmt.Println("ok : ", ok)
+			log.Println("######################## !ok")
+			log.Println("v : ", v)
+			log.Println("ok : ", ok)
 		}
 
 		// Log the error, increment a metric, etc...
@@ -128,7 +127,7 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	case "GET":
 		if resp, err := client.R().SetAuthToken(token).Get(url); err != nil {
 
-			fmt.Println("##########err : ", err)
+			log.Println(err)
 			break
 		} else {
 			responseString = string(resp.Body())
@@ -136,7 +135,7 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	case "POST":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Post(url); err != nil {
 
-			fmt.Println("##########err : ", err)
+			log.Println(err)
 
 		} else {
 			responseString = string(resp.Body())
@@ -144,7 +143,7 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	case "PATCH":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
 
-			fmt.Println("##########err : ", err)
+			log.Println(err)
 
 		} else {
 			responseString = string(resp.Body())
@@ -182,7 +181,7 @@ func responseBody(req io.ReadCloser) string {
 
 func FindClusterDB(name string) (*model.Cluster, error) {
 	var cluster model.Cluster
-	log.Println("in FindClusterDB")
+	// log.Println("in FindClusterDB")
 	db := db.DbManager()
 	cdb := db.Collection("cluster")
 

@@ -42,7 +42,7 @@ func AuthenticateUser(id string, password string) (bool, string) {
 		if user["password"] != password {
 			return false, ""
 		}
-		fmt.Println("user is : ", user)
+		// fmt.Println("user is : ", user)
 	}
 
 	return true, common.InterfaceToString(user["memberRole"])
@@ -89,7 +89,7 @@ func LoginUser(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, echo.Map{
 			"status":      200,
 			"accessToken": accessToken,
-			"userId": user.Id,
+			"userId":      user.Id,
 		})
 	}
 	return c.JSON(http.StatusUnauthorized, false)

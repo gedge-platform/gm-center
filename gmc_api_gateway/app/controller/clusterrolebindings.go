@@ -1,15 +1,26 @@
 package controller
 
 import (
-	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
+// GetClusterrolebinding godoc
+// @Summary Show detail clusterrolebinding
+// @Description get clusterrolebinding Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Clusterrolebinding"
+// @Param cluster query string true "name of the Cluster"
+// @Param workspace query string true "name of the Workspace"
+// @Success 200 {object} model.CLUSTERROLEBINDING
+// @Router /clusterrolebindings/{name} [get]
+// @Tags Kubernetes
 func GetClusterrolebinding(c echo.Context) error {
 	params := model.PARAMS{
 		Kind:      "clusterrolebindings",
@@ -25,7 +36,6 @@ func GetClusterrolebinding(c echo.Context) error {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	fmt.Println("[##########clusterrolebindings", getData)
 	clusterrolebinding := model.CLUSTERROLEBINDING{
 		Name:        common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Labels:      common.FindData(getData, "metadata", "labels"),
@@ -34,17 +44,28 @@ func GetClusterrolebinding(c echo.Context) error {
 		Annotations: common.FindData(getData, "data", "annotations"),
 		CreateAt:    common.InterfaceToTime(common.FindData(getData, "metadata", "creationTimestamp")),
 		Cluster:     params.Cluster,
+		Workspace:   params.Workspace,
 	}
-	involvesData, _ := common.GetModelRelatedList(params)
-	log.Printf("#####involvesData", involvesData)
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": clusterrolebinding,
 	})
 }
 
+// GetClusterrolebinding godoc
+// @Summary Show List clusterrolebinding
+// @Description get clusterrolebinding List
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param cluster query string false "name of the Cluster"
+// @Param workspace query string false "name of the Workspace"
+// @Success 200 {object} model.CLUSTERROLEBINDING
+// @Router /clusterrolebindings [get]
+// @Tags Kubernetes
 func GetAllClusterrolebindings(c echo.Context) error {
 	var clusterrolebindings []model.CLUSTERROLEBINDING
-	fmt.Printf("## clusterrolebings", clusterrolebindings)
+	// fmt.Printf("## clusterrolebings", clusterrolebindings)
 	params := model.PARAMS{
 		Kind:      "clusterrolebindings",
 		Name:      c.Param("name"),
@@ -55,14 +76,13 @@ func GetAllClusterrolebindings(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	getData, err := common.DataRequest(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
-	}
+	// getData, err := common.DataRequest(params)
+	// if err != nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, err)
+	// 	return nil
+	// }
 
 	data := GetModelList(params)
-	fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
 		clusterrolebinding := model.CLUSTERROLEBINDING{
@@ -70,7 +90,7 @@ func GetAllClusterrolebindings(c echo.Context) error {
 			Subjects:    common.FindData(data[i], "subjects", ""),
 			RoleRef:     common.FindData(data[i], "roleRef", ""),
 			Labels:      common.FindData(data[i], "metadata", "labels"),
-			Annotations: common.FindData(getData, "metadata", "annotations"),
+			Annotations: common.FindData(data[i], "metadata", "annotations"),
 			CreateAt:    common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
 			Cluster:     common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
 			Workspace:   common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
@@ -104,7 +124,9 @@ func CreateClusterRolebinding(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   postData,
 	})
 }
 
@@ -125,6 +147,8 @@ func DeleteClusterRolebinding(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Deleted",
+		"code":   http.StatusOK,
+		"data":   postData,
 	})
 }

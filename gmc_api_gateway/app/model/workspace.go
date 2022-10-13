@@ -12,8 +12,7 @@ type Workspace struct {
 	Description   string              `json:"workspaceDescription,omitempty" bson:"workspaceDescription" validate:"required"`
 	MemberName    string              `json:"memberName,omitempty" bson:"memberName" validate:"required"`
 	ClusterName   []string            `json:"clusterName,omitempty" bson:"selectCluster2"`
-	Selectcluster []WorkspaceClusters `json:"selectCluster,omitempty" 
-	bson:"selectCluster"`
+	// Selectcluster []WorkspaceClusters `json:"selectCluster,omitempty" bson:"selectCluster"`
 	Created_at time.Time `json:"created_at,omitempty"`
 }
 

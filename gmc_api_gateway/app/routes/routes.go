@@ -152,15 +152,16 @@ func GEdgeRoute(e *echo.Echo) {
 
 	r.GET("/configmaps", c.GetAllConfigmaps)
 	r.GET("/configmaps/:name", c.GetConfigmap)
+
 	r.GET("/daemonsets", c.GetAllDaemonsets)
-	// r.POST("/pvs", c.CreateService)
 	r.GET("/daemonsets/:name", c.GetDaemonset)
+	r.POST("/daemonsets", c.CreateDaemonset)
+	r.DELETE("/daemonsets/:name", c.DeleteDaemonset)
 
 	r.GET("/statefulsets", c.GetAllStatefulset)
-	// r.POST("/pvs", c.CreateService)
 	r.GET("/statefulsets/:name", c.GetStatefulset)
-	// // r.PUT("/services/:name", c.UpdateService)
-	// r.DELETE("/pvs/:name", c.DeleteService)
+	r.POST("/statefulsets", c.CreateStatefulset)
+	r.DELETE("/statefulsets/:name", c.DeleteStatefulset)
 
 	r.GET("/serviceaccounts", c.GetAllServiceaccounts)
 	r.GET("/serviceaccounts/:name", c.GetServiceaccount)

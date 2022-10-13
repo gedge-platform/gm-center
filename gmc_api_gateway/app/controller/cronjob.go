@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -54,7 +53,6 @@ func GetCronJobs(c echo.Context) (err error) {
 	common.Transcode(activeData, &activeInfo)
 
 	involvesData, _ := common.GetModelRelatedList(params)
-	log.Printf("#####referDataJob ", involvesData)
 
 	cronjob := model.CRONJOB{
 		Workspace: params.Workspace,

@@ -37,7 +37,7 @@ var nowGpuMetric = map[string]string{
 
 func NowMonit(k string, c string, n string, m []string) interface{} {
 
-	fmt.Println("==================", c, n)
+	// log.Println("==================", c, n)
 
 	switch k {
 	case "namespace":
@@ -106,13 +106,12 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			}
 			data, err := nowQueryRange(addr, nowMetricExpr(nowNamespaceMetric[m[i]], temp_filter))
 			if err != nil {
-				fmt.Println("err : ", err)
+				log.Println("err : ", err)
 			}
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
 					// mapData[val.Timestamp] = val.Value'
 					value = val.Value
-					fmt.Println("value : ", value)
 					// if val.Value !=  {
 
 					// } else {
@@ -127,7 +126,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			}
 			data, err := nowQueryRange(addr, nowMetricExpr(nowWorkspaceMetric[m[i]], temp_filter))
 			if err != nil {
-				fmt.Println("err : ", err)
+				log.Println("err : ", err)
 			}
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {
@@ -141,7 +140,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			}
 			data, err := nowQueryRange(addr, nowMetricExpr(nowClusterMetric[m[i]], temp_filter))
 			if err != nil {
-				fmt.Println("err : ", err)
+				log.Println("err : ", err)
 			}
 
 			if check := len(data.(model.Matrix)) != 0; check {
@@ -245,12 +244,10 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 	}
 
 	data, err := nowQueryRange(addr, nowMetricExpr(nowGpuMetric["gpu_info"], temp_filter))
-	fmt.Println("err : ", err)
+	log.Println("err : ", err)
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	} else {
-		fmt.Println("#####GpuCheck", data)
-		fmt.Println("======value======")
 		if check := len(data.(model.Matrix)) != 0; check {
 			// for _, val := range data.(model.Matrix)[0].Values {
 			// 	// value = val.Value

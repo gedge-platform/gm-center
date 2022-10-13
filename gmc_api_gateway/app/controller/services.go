@@ -9,17 +9,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Get Service godoc
-// @Summary Show detail Service
-// @Description get cronjob Service
+// Get Deployment godoc
+// @Summary Show detail Deployment
+// @Description get Deployment Details
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.SERVICE
 // @Security   Bearer
-// @Param name path string true "name of the Service"
-// @Param cluster query string true "cluster Name of the Service"
-// @Router /services/{name} [get]
+// @Param name path string true "name of the Deployment"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.DEPLOYMENT_DETAIL
+// @Router /deployments/{name} [get]
 // @Tags Kubernetes
 func GetService(c echo.Context) error {
 	params := model.PARAMS{
@@ -75,14 +77,18 @@ func GetService(c echo.Context) error {
 	})
 }
 
-// Get All Serivces godoc
-// @Summary Show List Service
-// @Description get Service List
+// Get Deployment godoc
+// @Summary Show List Deployment
+// @Description get Deployment List
+// @ApiImplicitParam
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.SERVICE
-// @Security Bearer
-// @Router /services [get]
+// @Security   Bearer
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.WORKLOAD
+// @Router /deployments [get]
 // @Tags Kubernetes
 func GetServices(c echo.Context) (err error) {
 	var services []model.SERVICE
@@ -138,7 +144,7 @@ func GetServices(c echo.Context) (err error) {
 // Create Service godoc
 // @Summary Create Service
 // @Description Create Service
-// @Param yaml body string true "Service Info Body"
+// @Param json body string true "Service Info Body"
 // @Param cluster query string true "cluster Name of the Service"
 // @Param project query string true "project Name of the Service"
 // @ApiImplicitParam(yaml = "appUserId", value = "service yaml", required = true)
@@ -169,6 +175,20 @@ func CreateService(c echo.Context) (err error) {
 	})
 }
 
+// Delete Service godoc
+// @Summary Delete Service
+// @Description Delete Service
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Service"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.SERVICE
+// @Router /services/{name} [delete]
+// @Tags Kubernetes
 func DeleteService(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "services",

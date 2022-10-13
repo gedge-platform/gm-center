@@ -63,14 +63,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/ceph/health": {
+        "/clusterrolebindings": {
             "get": {
                 "security": [
                     {
                         "Bearer": []
                     }
                 ],
-                "description": "get Ceph volume Health info",
+                "description": "get clusterrolebinding List",
                 "consumes": [
                     "application/json"
                 ],
@@ -78,14 +78,79 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Volume"
+                    "Kubernetes"
                 ],
-                "summary": "Show Ceph volume Health",
+                "summary": "Show List clusterrolebinding",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.CEPH"
+                            "$ref": "#/definitions/model.CLUSTERROLEBINDING"
+                        }
+                    }
+                }
+            }
+        },
+        "/clusterrolebindings/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get clusterrolebinding Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show detail clusterrolebinding",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Clusterrolebinding",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTERROLEBINDING"
                         }
                     }
                 }
@@ -119,6 +184,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Create Cluster",
                 "consumes": [
                     "application/json"
@@ -185,6 +255,62 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "delete Cluster",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cluster"
+                ],
+                "summary": "Delete Cluster",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the cluster",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/credentials": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get credential List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Credential"
+                ],
+                "summary": "Show List credential",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Credential"
+                        }
+                    }
+                }
             }
         },
         "/cronjob/{name}": {
@@ -259,27 +385,444 @@ const docTemplate = `{
                 }
             }
         },
-        "/job/:name": {
+        "/daemonsets": {
             "get": {
-                "description": "get job Details",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Daemonset List",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Show detail job",
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show List Daemonset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.JOB"
-                        },
-                        "headers": {
-                            "Token": {
-                                "type": "string",
-                                "description": "qwerty"
-                            }
+                            "$ref": "#/definitions/model.WORKLOAD"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Daemonset",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Create Daemonset",
+                "parameters": [
+                    {
+                        "description": "Daemonset Info Body",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.WORKLOAD"
+                        }
+                    }
+                }
+            }
+        },
+        "/daemonsets/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Daemonset Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show detail Daemonset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Daemonset",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.DAEMONSET_DETAIL"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete Daemonset",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Delete Daemonset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Daemonset",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.WORKLOAD"
+                        }
+                    }
+                }
+            }
+        },
+        "/deployments": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Deployment List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show List Deployment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.WORKLOAD"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Deployment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Create Deployment",
+                "parameters": [
+                    {
+                        "description": "Deployment Info Body",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.WORKLOAD"
+                        }
+                    }
+                }
+            }
+        },
+        "/deployments/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Deployment Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show detail Deployment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Deployment",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.DEPLOYMENT_DETAIL"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete Deployment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Delete Deployment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Deployment",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.WORKLOAD"
                         }
                     }
                 }
@@ -287,25 +830,219 @@ const docTemplate = `{
         },
         "/jobs": {
             "get": {
-                "description": "get job List",
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Job List",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Show List job",
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show List Job",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.JOB"
-                        },
-                        "headers": {
-                            "Token": {
-                                "type": "string",
-                                "description": "qwerty"
-                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Job",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Create Job",
+                "parameters": [
+                    {
+                        "description": "Job Info Body",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.JOB"
+                        }
+                    }
+                }
+            }
+        },
+        "/jobs/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Job Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show detail Job",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Job",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.JOB_DETAIL"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete Job",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Delete Job",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Job",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.JOB"
                         }
                     }
                 }
@@ -339,6 +1076,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Create Member",
                 "consumes": [
                     "application/json"
@@ -405,6 +1147,34 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "delete User",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the User",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
             }
         },
         "/pods": {
@@ -414,26 +1184,93 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "get pods List",
+                "description": "get Pod List",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Show List pods",
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show List Pod",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "cluster Name of the pods",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
                         "name": "cluster",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "workspace Name of the pods",
-                        "name": "workspace",
+                        "description": "name of the Project",
+                        "name": "project",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.POD"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Pod",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Create Pod",
+                "parameters": [
+                    {
+                        "description": "Pod Info Body",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -453,33 +1290,99 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "get pods Details",
+                "description": "get Pod Details",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Show detail pods",
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show detail Pod",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "name of the pods",
+                        "description": "name of the Pod",
                         "name": "name",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "cluster Name of the pods",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
                         "name": "cluster",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "workspace Name of the pods",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.POD"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete Pod",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Delete Pod",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Pod",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
                         "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
                         "in": "query",
                         "required": true
                     }
@@ -496,6 +1399,11 @@ const docTemplate = `{
         },
         "/projects": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Create userProject",
                 "consumes": [
                     "application/json"
@@ -592,32 +1500,6 @@ const docTemplate = `{
             }
         },
         "/services": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get Service List",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Kubernetes"
-                ],
-                "summary": "Show List Service",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.SERVICE"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -638,7 +1520,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Service Info Body",
-                        "name": "yaml",
+                        "name": "json",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -677,13 +1559,13 @@ const docTemplate = `{
             }
         },
         "/services/{name}": {
-            "get": {
+            "delete": {
                 "security": [
                     {
                         "Bearer": []
                     }
                 ],
-                "description": "get cronjob Service",
+                "description": "Delete Service",
                 "consumes": [
                     "application/json"
                 ],
@@ -693,7 +1575,7 @@ const docTemplate = `{
                 "tags": [
                     "Kubernetes"
                 ],
-                "summary": "Show detail Service",
+                "summary": "Delete Service",
                 "parameters": [
                     {
                         "type": "string",
@@ -704,8 +1586,22 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "cluster Name of the Service",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
                         "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
                         "in": "query",
                         "required": true
                     }
@@ -848,6 +1744,229 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            }
+        },
+        "/statefulsets": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Statefulset List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show List Statefulset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.WORKLOAD"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Statefulset",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Create Statefulset",
+                "parameters": [
+                    {
+                        "description": "Statefulset Info Body",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.WORKLOAD"
+                        }
+                    }
+                }
+            }
+        },
+        "/statefulsets/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Statefulset Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show detail Statefulset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Statefulset",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.STATEFULSET_DETAIL"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete Statefulset",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Delete Statefulset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Statefulset",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.WORKLOAD"
+                        }
+                    }
+                }
             }
         },
         "/systemProjects": {
@@ -1017,36 +2136,6 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/workspace/{name}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get workspace Details",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Workspace"
-                ],
-                "summary": "Show detail workspace",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "name of the workspace",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/workspaces": {
             "get": {
                 "security": [
@@ -1083,6 +2172,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Create workspace",
                 "consumes": [
                     "application/json"
@@ -1120,6 +2214,64 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/workspaces/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get workspace Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "Show detail workspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the workspace",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "delete Workspace",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "Delete Workspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of the workspaces",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
         }
     },
     "definitions": {
@@ -1137,39 +2289,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.CEPH": {
-            "type": "object",
-            "properties": {
-                "capacity": {
-                    "$ref": "#/definitions/model.Capacity"
-                },
-                "clientPerformance": {
-                    "$ref": "#/definitions/model.ClientPerformance"
-                },
-                "clusterStatus": {
-                    "type": "string"
-                },
-                "hostNum": {
-                    "type": "integer"
-                },
-                "monitor": {
-                    "$ref": "#/definitions/model.Monitor"
-                },
-                "object": {
-                    "$ref": "#/definitions/model.Object"
-                },
-                "osd": {
-                    "$ref": "#/definitions/model.OSD"
-                },
-                "pgStatus": {},
-                "pgs_per_osd": {
-                    "type": "number"
-                },
-                "poolNum": {
-                    "type": "integer"
-                }
-            }
-        },
         "model.CLUSTER": {
             "type": "object",
             "required": [
@@ -1180,6 +2299,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "cloudType": {
                     "type": "string"
                 },
                 "clusterEndpoint": {
@@ -1209,6 +2331,30 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CLUSTERROLEBINDING": {
+            "type": "object",
+            "properties": {
+                "annotations": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "createAt": {
+                    "type": "string"
+                },
+                "labels": {},
+                "name": {
+                    "type": "string"
+                },
+                "roleRef": {},
+                "subjects": {},
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
                     "type": "string"
                 }
             }
@@ -1271,37 +2417,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Capacity": {
-            "type": "object",
-            "properties": {
-                "available": {
-                    "type": "number"
-                },
-                "total": {
-                    "type": "number"
-                },
-                "used": {
-                    "type": "number"
-                }
-            }
-        },
-        "model.ClientPerformance": {
-            "type": "object",
-            "properties": {
-                "read_bytes_sec": {
-                    "type": "number"
-                },
-                "read_op_per_sec": {
-                    "type": "number"
-                },
-                "write_bytes_sec": {
-                    "type": "number"
-                },
-                "write_op_per_sec": {
-                    "type": "number"
-                }
-            }
-        },
         "model.Cluster": {
             "type": "object",
             "required": [
@@ -1312,6 +2427,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "cloudType": {
                     "type": "string"
                 },
                 "clusterEndpoint": {
@@ -1331,6 +2449,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Conditions": {
+            "type": "object",
+            "properties": {
+                "lastProbeTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }
@@ -1380,6 +2512,88 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Credential": {
+            "type": "object",
+            "properties": {
+                "ClientId": {
+                    "type": "string"
+                },
+                "ClientSecret": {
+                    "type": "string"
+                },
+                "CredentialName": {
+                    "type": "string"
+                },
+                "DomainName": {
+                    "type": "string"
+                },
+                "IdentityEndpoint": {
+                    "type": "string"
+                },
+                "KeyPair": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "ProjectID": {
+                    "type": "string"
+                },
+                "ProviderName": {
+                    "type": "string"
+                },
+                "Region": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                },
+                "Zone": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.DAEMONSET_DETAIL": {
+            "type": "object",
+            "properties": {
+                "NodeSelector": {},
+                "annotations": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "containers": {},
+                "createAt": {
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "label": {},
+                "name": {
+                    "type": "string"
+                },
+                "project": {
+                    "type": "string"
+                },
+                "ready": {
+                    "type": "string"
+                },
+                "status": {},
+                "strategy": {},
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
         "model.DBWorkspace": {
             "type": "object",
             "required": [
@@ -1407,6 +2621,49 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workspaceName": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.DEPLOYMENT_DETAIL": {
+            "type": "object",
+            "properties": {
+                "NodeSelector": {},
+                "annotations": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "containers": {},
+                "createAt": {
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "labels": {},
+                "name": {
+                    "type": "string"
+                },
+                "project": {
+                    "type": "string"
+                },
+                "ready": {
+                    "type": "string"
+                },
+                "replica": {
+                    "$ref": "#/definitions/model.REPLICA"
+                },
+                "strategy": {},
+                "updateAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
                     "type": "string"
                 }
             }
@@ -1492,6 +2749,67 @@ const docTemplate = `{
                 }
             }
         },
+        "model.JOB_DETAIL": {
+            "type": "object",
+            "properties": {
+                "annotations": {},
+                "backoffLimit": {
+                    "type": "integer"
+                },
+                "cluster": {
+                    "type": "string"
+                },
+                "completionTime": {
+                    "type": "string"
+                },
+                "completions": {
+                    "type": "string"
+                },
+                "conditions": {
+                    "description": "OwnerReference []OwnerReference ` + "`" + `json:\"ownerReferences,omitempty\"` + "`" + `",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Conditions"
+                    }
+                },
+                "containers": {},
+                "created_at": {
+                    "type": "string"
+                },
+                "duration": {},
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "label": {},
+                "name": {
+                    "type": "string"
+                },
+                "parallelism": {
+                    "type": "integer"
+                },
+                "project": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "volume": {
+                    "type": "integer"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Member": {
             "type": "object",
             "required": [
@@ -1514,7 +2832,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "logined_at": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "memberId": {
                     "type": "string"
@@ -1532,46 +2850,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 10,
                     "minLength": 0
-                }
-            }
-        },
-        "model.Monitor": {
-            "type": "object",
-            "properties": {
-                "quorum": {},
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.OSD": {
-            "type": "object",
-            "properties": {
-                "in": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
-                },
-                "up": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.Object": {
-            "type": "object",
-            "properties": {
-                "degraded": {
-                    "type": "number"
-                },
-                "healthy": {
-                    "type": "number"
-                },
-                "misplaced": {
-                    "type": "number"
-                },
-                "unfound": {
-                    "type": "number"
                 }
             }
         },
@@ -1849,6 +3127,26 @@ const docTemplate = `{
                 }
             }
         },
+        "model.REPLICA": {
+            "type": "object",
+            "properties": {
+                "availableReplicas": {
+                    "type": "integer"
+                },
+                "readyReplicas": {
+                    "type": "integer"
+                },
+                "replicas": {
+                    "type": "integer"
+                },
+                "unavailableReplicas": {
+                    "type": "integer"
+                },
+                "updatedReplicas": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.SERVICE": {
             "type": "object",
             "properties": {
@@ -1886,6 +3184,44 @@ const docTemplate = `{
                 "type": {
                     "type": "string"
                 },
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.STATEFULSET_DETAIL": {
+            "type": "object",
+            "properties": {
+                "NodeSelector": {},
+                "annotations": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "containers": {},
+                "createAt": {
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "label": {},
+                "name": {
+                    "type": "string"
+                },
+                "ownerReferences": {},
+                "project": {
+                    "type": "string"
+                },
+                "ready": {
+                    "type": "string"
+                },
+                "status": {},
                 "user": {
                     "type": "string"
                 },
@@ -2016,6 +3352,33 @@ const docTemplate = `{
                 }
             }
         },
+        "model.WORKLOAD": {
+            "type": "object",
+            "properties": {
+                "NodeSelector": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "createAt": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "project": {
+                    "type": "string"
+                },
+                "ready": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Workspace": {
             "type": "object",
             "required": [
@@ -2031,29 +3394,16 @@ const docTemplate = `{
                     }
                 },
                 "created_at": {
+                    "description": "Selectcluster []WorkspaceClusters ` + "`" + `json:\"selectCluster,omitempty\" bson:\"selectCluster\"` + "`" + `",
                     "type": "string"
                 },
                 "memberName": {
                     "type": "string"
                 },
-                "selectCluster": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.WorkspaceClusters"
-                    }
-                },
                 "workspaceDescription": {
                     "type": "string"
                 },
                 "workspaceName": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.WorkspaceClusters": {
-            "type": "object",
-            "properties": {
-                "cluster": {
                     "type": "string"
                 }
             }
@@ -2072,7 +3422,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "2.0",
-	Host:             "192.168.160.230:8013",
+	Host:             "101.79.1.138:8012",
 	BasePath:         "/gmcapi/v2",
 	Schemes:          []string{"http"},
 	Title:            "Gedge GM-Center Swagger API",

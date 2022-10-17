@@ -9,19 +9,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Get Deployment godoc
-// @Summary Show detail Deployment
-// @Description get Deployment Details
+// Get Service godoc
+// @Summary Show detail Service
+// @Description get Service Details
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
 // @Security   Bearer
-// @Param name path string true "name of the Deployment"
+// @Param name path string true "name of the Service"
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.DEPLOYMENT_DETAIL
-// @Router /deployments/{name} [get]
+// @Success 200 {object} model.SERVICE
+// @Router /services/{name} [get]
 // @Tags Kubernetes
 func GetService(c echo.Context) error {
 	params := model.PARAMS{
@@ -68,7 +68,7 @@ func GetService(c echo.Context) error {
 		// UpdateAt:        common.InterfaceToTime(common.FindData(getData, "metadata.managedFields.#", "time")),
 	}
 
-	involvesData, _ := common.GetModelRelatedList(params) // Pods, Deployments
+	involvesData, _ := common.GetModelRelatedList(params) // Pods, Services
 	// log.Printf("#####involvesData ", involvesData)
 
 	return c.JSON(http.StatusOK, echo.Map{
@@ -77,9 +77,9 @@ func GetService(c echo.Context) error {
 	})
 }
 
-// Get Deployment godoc
-// @Summary Show List Deployment
-// @Description get Deployment List
+// Get Service godoc
+// @Summary Show List Service
+// @Description get Service List
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
@@ -87,8 +87,8 @@ func GetService(c echo.Context) error {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.WORKLOAD
-// @Router /deployments [get]
+// @Success 200 {object} model.SERVICE
+// @Router /services [get]
 // @Tags Kubernetes
 func GetServices(c echo.Context) (err error) {
 	var services []model.SERVICE
@@ -171,7 +171,9 @@ func CreateService(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   postData,
 	})
 }
 
@@ -206,6 +208,8 @@ func DeleteService(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Deleted",
+		"code":   http.StatusOK,
+		"data":   postData,
 	})
 }

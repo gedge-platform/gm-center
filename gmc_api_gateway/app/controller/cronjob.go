@@ -9,17 +9,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetCronjobs godoc
-// @Summary Show detail cronjob
-// @Description get cronjob Details
+// Get Cronjob godoc
+// @Summary Show detail Cronjob
+// @Description get Cronjob Details
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.CRONJOB
 // @Security   Bearer
 // @Param name path string true "name of the Cronjob"
-// @Param cluster query string true "cluster Name of the Cronjob"
-// @Router /cronjob/{name} [get]
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.CRONJOB
+// @Router /cronjobs/{name} [get]
 // @Tags Kubernetes
 func GetCronJobs(c echo.Context) (err error) {
 
@@ -78,13 +80,17 @@ func GetCronJobs(c echo.Context) (err error) {
 	})
 }
 
-// GetCronAllJobs godoc
-// @Summary Show List cronjob
-// @Description get cronjob List
+// Get Cronjob godoc
+// @Summary Show List Cronjob
+// @Description get Cronjob List
+// @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Security   Bearer
+// @Param workspace query string false "name of the Workspace"
+// @Param cluster query string false "name of the Cluster"
+// @Param project query string false "name of the Project"
 // @Success 200 {object} model.CRONJOB
-// @Security Bearer
 // @Router /cronjobs [get]
 // @Tags Kubernetes
 func GetCronAllJobs(c echo.Context) error {
@@ -128,6 +134,20 @@ func GetCronAllJobs(c echo.Context) error {
 	})
 }
 
+// Create Cronjob godoc
+// @Summary Create Cronjob
+// @Description Create Cronjob
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param json body string true "Cronjob Info Body"
+// @Param cluster query string true "name of the Cluster"
+// @Param workspace query string true "name of the Workspace"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.CRONJOB
+// @Router /cronjobs [post]
+// @Tags Kubernetes
 func CreateCronJob(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "cronjobs",
@@ -144,10 +164,26 @@ func CreateCronJob(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   postData,
 	})
 }
 
+// Delete Cronjob godoc
+// @Summary Delete Cronjob
+// @Description Delete Cronjob
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Cronjob"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.CRONJOB
+// @Router /cronjobs/{name} [delete]
+// @Tags Kubernetes
 func DeleteCronJob(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "cronjobs",
@@ -165,6 +201,8 @@ func DeleteCronJob(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Deleted",
+		"code":   http.StatusOK,
+		"data":   postData,
 	})
 }

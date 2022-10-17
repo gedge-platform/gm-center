@@ -134,10 +134,10 @@ func GEdgeRoute(e *echo.Echo) {
 	r.DELETE("/pvcs/:name", c.DeletePVC)
 
 	r.GET("/secrets", c.GetAllSecrets)
-	// r.POST("/pvs", c.CreateService)
+	r.POST("/secrets", c.CreateSecret)
 	r.GET("/secrets/:name", c.GetSecret)
 	// // r.PUT("/services/:name", c.UpdateService)
-	// r.DELETE("/pvs/:name", c.DeleteService)
+	r.DELETE("/secrets/:name", c.DeleteSecret)
 
 	r.GET("/storageclasses/:name", c.GetStorageclass)
 	r.GET("/storageclasses", c.GetStorageclasses)

@@ -147,47 +147,47 @@ func GetAllStatefulset(c echo.Context) (err error) {
 // @Success 200 {object} model.WORKLOAD
 // @Router /statefulsets [get]
 // @Tags Kubernetes
-func GetStatefulsets(c echo.Context) (err error) {
-	var Statefulsets []model.WORKLOAD
-	params := model.PARAMS{
-		Kind:      "statefulsets",
-		Name:      c.Param("name"),
-		Cluster:   c.QueryParam("cluster"),
-		Workspace: c.QueryParam("workspace"),
-		Project:   c.QueryParam("project"),
-		User:      c.QueryParam("user"),
-		Method:    c.Request().Method,
-		Body:      responseBody(c.Request().Body),
-	}
-	data := GetModelList(params)
-	for i, _ := range data {
-		var ReadyReplica string
-		if common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas")) != "" {
-			ReadyReplica = common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))
-		} else {
-			ReadyReplica = "0"
-		}
-		Statefulset := model.WORKLOAD{
-			Name:          common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-			Namespace:     common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-			ClusterName:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-			CreateAt:      common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
-			READY:         ReadyReplica + "/" + common.InterfaceToString(common.FindData(data[i], "spec", "replicas")),
-			WorkspaceName: common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
-			UserName:      common.InterfaceToString(common.FindData(data[i], "userName", "")),
-		}
-		if params.User != "" {
-			if params.User == Statefulset.UserName {
-				Statefulsets = append(Statefulsets, Statefulset)
-			}
-		} else {
-			Statefulsets = append(Statefulsets, Statefulset)
-		}
-	}
-	return c.JSON(http.StatusOK, echo.Map{
-		"data": Statefulsets,
-	})
-}
+// func GetStatefulsets(c echo.Context) (err error) {
+// 	var Statefulsets []model.WORKLOAD
+// 	params := model.PARAMS{
+// 		Kind:      "statefulsets",
+// 		Name:      c.Param("name"),
+// 		Cluster:   c.QueryParam("cluster"),
+// 		Workspace: c.QueryParam("workspace"),
+// 		Project:   c.QueryParam("project"),
+// 		User:      c.QueryParam("user"),
+// 		Method:    c.Request().Method,
+// 		Body:      responseBody(c.Request().Body),
+// 	}
+// 	data := GetModelList(params)
+// 	for i, _ := range data {
+// 		var ReadyReplica string
+// 		if common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas")) != "" {
+// 			ReadyReplica = common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))
+// 		} else {
+// 			ReadyReplica = "0"
+// 		}
+// 		Statefulset := model.WORKLOAD{
+// 			Name:          common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
+// 			Namespace:     common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
+// 			ClusterName:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
+// 			CreateAt:      common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
+// 			READY:         ReadyReplica + "/" + common.InterfaceToString(common.FindData(data[i], "spec", "replicas")),
+// 			WorkspaceName: common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
+// 			UserName:      common.InterfaceToString(common.FindData(data[i], "userName", "")),
+// 		}
+// 		if params.User != "" {
+// 			if params.User == Statefulset.UserName {
+// 				Statefulsets = append(Statefulsets, Statefulset)
+// 			}
+// 		} else {
+// 			Statefulsets = append(Statefulsets, Statefulset)
+// 		}
+// 	}
+// 	return c.JSON(http.StatusOK, echo.Map{
+// 		"data": Statefulsets,
+// 	})
+// }
 
 // Create Statefulset godoc
 // @Summary Create Statefulset
@@ -218,8 +218,9 @@ func CreateStatefulset(c echo.Context) (err error) {
 		return nil
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"status": http.StatusOK,
+	return c.JSON(http.StatusCreated, echo.Map{
+		"status": "Created",
+		"code":   http.StatusCreated,
 		"data":   postData,
 	})
 }
@@ -255,7 +256,8 @@ func DeleteStatefulset(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"status": http.StatusOK,
+		"status": "Deleted",
+		"code":   http.StatusOK,
 		"data":   postData,
 	})
 }

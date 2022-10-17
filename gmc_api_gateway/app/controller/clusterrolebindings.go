@@ -108,6 +108,21 @@ func GetAllClusterrolebindings(c echo.Context) error {
 		"data": clusterrolebindings,
 	})
 }
+
+// Create ClusterRolebinding godoc
+// @Summary Create ClusterRolebinding
+// @Description Create ClusterRolebinding
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param json body string true "ClusterRolebinding Info Body"
+// @Param cluster query string true "name of the Cluster"
+// @Param workspace query string true "name of the Workspace"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.CLUSTERROLEBINDING
+// @Router /clusterrolebindings [post]
+// @Tags Kubernetes
 func CreateClusterRolebinding(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "clusterrolebindings",
@@ -130,6 +145,20 @@ func CreateClusterRolebinding(c echo.Context) (err error) {
 	})
 }
 
+// Delete ClusterRolebinding godoc
+// @Summary Delete ClusterRolebinding
+// @Description Delete ClusterRolebinding
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the ClusterRolebinding"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.CLUSTERROLEBINDING
+// @Router /clusterrolebindings/{name} [delete]
+// @Tags Kubernetes
 func DeleteClusterRolebinding(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "clusterrolebindings",

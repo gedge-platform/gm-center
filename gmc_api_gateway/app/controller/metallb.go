@@ -169,6 +169,7 @@ func GetAllMetallb(c echo.Context) error {
 // 	}
 
 // 	return c.JSON(http.StatusOK, echo.Map{
-// 		"info": common.StringToInterface(postData),
+// 				"status": http.StatusOK,
+// "data":   postData,
 // 	})
 // }

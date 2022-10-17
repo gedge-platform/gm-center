@@ -460,7 +460,8 @@ var dashboardMetric = map[string]string{
 	"dashboard_mem_used_podList":     "topk(5,sum(container_memory_working_set_bytes{container!='POD',container!='',pod!='',$1}) by (cluster,pod,namespace))",
 	"dashboard_cpu_used_clusterList": "round(sum(rate(container_cpu_usage_seconds_total[1m]))by(cluster),0.01)",
 	"dashboard_mem_used_clusterList": "nvidia_smi_power_limit_watts{$1}",
-	"node_status":                    "kube_node_status_condition{condition='Ready',status='true',$1}==1",
+	"node_status":                    "kube_node_status_condition{condition='Ready',status='true',$1}",
+	"node_running":                   "sum(kube_node_status_condition{condition='Ready',status='true',$1}==1)by(cluster)",
 	"cpu_used_podList":               "topk(5,sum(rate(container_cpu_usage_seconds_total{pod!='',namespace!='',container!='',$1}[5m]))by(pod,namespace,cluster))",
 	"memory_used_podList":            "topk(5,sum(rate(container_memory_working_set_bytes{pod!='',namespace!='',$1}[5m]))by(pod,namespace,cluster))",
 	"namespace_cpu":                  "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace),0.001)",
@@ -484,7 +485,12 @@ func node_status(c string) interface{} {
 			for _, val := range data.(model.Matrix) {
 				node := make(map[string]interface{})
 				node["name"] = val.Metric["node"]
-				node["status"] = val.Metric["condition"]
+				if val.Values[0].Value == 1 {
+					node["status"] = "Ready"
+				} else {
+					node["status"] = "NotReady"
+				}
+
 				nodeList = append(nodeList, node)
 			}
 		}
@@ -492,6 +498,26 @@ func node_status(c string) interface{} {
 	}
 	return nodeList
 }
+
+// func node_status(c string) int {
+// 	var value int
+// 	config.Init()
+// 	addr := os.Getenv("PROMETHEUS")
+// 	temp_filter := map[string]string{
+// 		"cluster": c,
+// 	}
+// 	data, err := nowQueryRange(addr, nowMetricExpr(dashboardMetric["node_running"], temp_filter))
+// 	// log.Println("err : ", err)
+// 	if err != nil {
+// 		log.Println("err : ", err)
+// 	} else {
+// 		if check := len(data.(model.Matrix)) != 0; check {
+// 			value = common.InterfaceToInt(data.(model.Matrix)[0].Values[0].Value)
+// 		}
+
+// 	}
+// 	return value
+// }
 
 func dashboard_pod_monit(c, kind, query string) []map[string]interface{} {
 	// var gpuList []interface{}

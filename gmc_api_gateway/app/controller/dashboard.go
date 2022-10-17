@@ -61,6 +61,11 @@ func TotalDashboard(c echo.Context) (err error) {
 
 	json.Unmarshal([]byte(CredentialgetData), &CredentialCount)
 
+	for _, edge := range edgeClouds {
+		log.Println(edge)
+		edge["node_status"] = node_status(common.InterfaceToString(edge["clusterName"]))
+	}
+
 	dashbaordData := model.TOTAL_DASHBOARD{
 		ClusterCnt:     ClusterCount,
 		CoreClusterCnt: len(coreClouds),
@@ -89,7 +94,6 @@ func CloudDashboard(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	fmt.Println("testdfsfe")
 	cluster := GetDB("cluster", params.Cluster, "clusterName")
 	workspaces := GetDBList(params, "workspace", cluster["_id"].(primitive.ObjectID), "selectCluster")
 	projects := GetDBList(params, "project", cluster["_id"].(primitive.ObjectID), "selectCluster")

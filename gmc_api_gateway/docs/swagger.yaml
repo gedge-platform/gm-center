@@ -60,6 +60,25 @@ definitions:
       workspace:
         type: string
     type: object
+  model.CONFIGMAP:
+    properties:
+      annotations: {}
+      cluster:
+        type: string
+      createAt:
+        type: string
+      data: {}
+      dataCnt:
+        type: integer
+      name:
+        type: string
+      namespace:
+        type: string
+      user:
+        type: string
+      workspace:
+        type: string
+    type: object
   model.CRONJOB:
     properties:
       active:
@@ -595,6 +614,51 @@ definitions:
       updatedReplicas:
         type: integer
     type: object
+  model.ROLE:
+    properties:
+      annotations: {}
+      cluster:
+        type: string
+      createAt:
+        type: string
+      label: {}
+      name:
+        type: string
+      project:
+        type: string
+      rules: {}
+      user:
+        type: string
+      workspace:
+        type: string
+    type: object
+  model.SECRET:
+    properties:
+      annotations: {}
+      clusterName:
+        type: string
+      createAt:
+        type: string
+      data: {}
+      dataCnt:
+        type: integer
+      events:
+        items:
+          $ref: '#/definitions/model.EVENT'
+        type: array
+      label: {}
+      name:
+        type: string
+      namespace:
+        type: string
+      ownerReferences: {}
+      type:
+        type: string
+      user:
+        type: string
+      workspaceName:
+        type: string
+    type: object
   model.SERVICE:
     properties:
       annotation: {}
@@ -626,6 +690,26 @@ definitions:
       workspace:
         type: string
     type: object
+  model.SERVICEACCOUNT:
+    properties:
+      annotations: {}
+      cluster:
+        type: string
+      createAt:
+        type: string
+      label: {}
+      name:
+        type: string
+      namespace:
+        type: string
+      secretCnt:
+        type: integer
+      secrets: {}
+      user:
+        type: string
+      workspace:
+        type: string
+    type: object
   model.STATEFULSET_DETAIL:
     properties:
       NodeSelector: {}
@@ -649,6 +733,30 @@ definitions:
         type: string
       status: {}
       user:
+        type: string
+      workspace:
+        type: string
+    type: object
+  model.STORAGECLASS:
+    properties:
+      allowVolumeExpansion:
+        type: string
+      annotations: {}
+      cluster:
+        type: string
+      createAt:
+        type: string
+      labels: {}
+      name:
+        type: string
+      parameters: {}
+      provisioner:
+        type: string
+      reclaimPolicy:
+        type: string
+      user:
+        type: string
+      volumeBindingMode:
         type: string
       workspace:
         type: string
@@ -840,7 +948,82 @@ paths:
       summary: Show List clusterrolebinding
       tags:
       - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create ClusterRolebinding
+      parameters:
+      - description: ClusterRolebinding Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CLUSTERROLEBINDING'
+      security:
+      - Bearer: []
+      summary: Create ClusterRolebinding
+      tags:
+      - Kubernetes
   /clusterrolebindings/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete ClusterRolebinding
+      parameters:
+      - description: name of the ClusterRolebinding
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CLUSTERROLEBINDING'
+      security:
+      - Bearer: []
+      summary: Delete ClusterRolebinding
+      tags:
+      - Kubernetes
     get:
       consumes:
       - application/json
@@ -954,6 +1137,149 @@ paths:
       summary: Show detail cluster
       tags:
       - Cluster
+  /configmaps:
+    get:
+      consumes:
+      - application/json
+      description: get Configmap List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CONFIGMAP'
+      security:
+      - Bearer: []
+      summary: Show List Configmap
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create Configmap
+      parameters:
+      - description: Configmap Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CONFIGMAP'
+      security:
+      - Bearer: []
+      summary: Create Configmap
+      tags:
+      - Kubernetes
+  /configmaps/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Configmap
+      parameters:
+      - description: name of the Configmap
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CONFIGMAP'
+      security:
+      - Bearer: []
+      summary: Delete Configmap
+      tags:
+      - Kubernetes
+    get:
+      consumes:
+      - application/json
+      description: get Configmap Details
+      parameters:
+      - description: name of the Configmap
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CONFIGMAP'
+      security:
+      - Bearer: []
+      summary: Show detail Configmap
+      tags:
+      - Kubernetes
   /credentials:
     get:
       consumes:
@@ -971,20 +1297,98 @@ paths:
       summary: Show List credential
       tags:
       - Credential
-  /cronjob/{name}:
+  /cronjobs:
     get:
       consumes:
       - application/json
-      description: get cronjob Details
+      description: get Cronjob List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CRONJOB'
+      security:
+      - Bearer: []
+      summary: Show List Cronjob
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create Cronjob
+      parameters:
+      - description: Cronjob Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CRONJOB'
+      security:
+      - Bearer: []
+      summary: Create Cronjob
+      tags:
+      - Kubernetes
+  /cronjobs/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Cronjob
       parameters:
       - description: name of the Cronjob
         in: path
         name: name
         required: true
         type: string
-      - description: cluster Name of the Cronjob
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
         in: query
         name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
         required: true
         type: string
       produces:
@@ -996,14 +1400,34 @@ paths:
             $ref: '#/definitions/model.CRONJOB'
       security:
       - Bearer: []
-      summary: Show detail cronjob
+      summary: Delete Cronjob
       tags:
       - Kubernetes
-  /cronjobs:
     get:
       consumes:
       - application/json
-      description: get cronjob List
+      description: get Cronjob Details
+      parameters:
+      - description: name of the Cronjob
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1013,7 +1437,7 @@ paths:
             $ref: '#/definitions/model.CRONJOB'
       security:
       - Bearer: []
-      summary: Show List cronjob
+      summary: Show detail Cronjob
       tags:
       - Kubernetes
   /daemonsets:
@@ -1168,17 +1592,14 @@ paths:
       - description: name of the Workspace
         in: query
         name: workspace
-        required: true
         type: string
       - description: name of the Cluster
         in: query
         name: cluster
-        required: true
         type: string
       - description: name of the Project
         in: query
         name: project
-        required: true
         type: string
       produces:
       - application/json
@@ -1704,40 +2125,750 @@ paths:
     get:
       consumes:
       - application/json
-      description: get pvc List
+      description: get PVC List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
-          headers:
-            Token:
-              description: qwerty
-              type: string
           schema:
             $ref: '#/definitions/model.PVC'
-      summary: Show app PVCs
+      security:
+      - Bearer: []
+      summary: Show List PVC
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create PVC
+      parameters:
+      - description: PVC Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PVC'
+      security:
+      - Bearer: []
+      summary: Create PVC
+      tags:
+      - Kubernetes
+  /pvcs/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete PVC
+      parameters:
+      - description: name of the PVC
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PVC'
+      security:
+      - Bearer: []
+      summary: Delete PVC
+      tags:
+      - Kubernetes
+    get:
+      consumes:
+      - application/json
+      description: get PVC Details
+      parameters:
+      - description: name of the PVC
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PVC'
+      security:
+      - Bearer: []
+      summary: Show detail PVC
+      tags:
+      - Kubernetes
   /pvs:
     get:
       consumes:
       - application/json
-      description: get pv List
+      description: get PV List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
-          headers:
-            Token:
-              description: qwerty
-              type: string
           schema:
             $ref: '#/definitions/model.PV'
-      summary: Show app PVs
-  /pvs/:name:
+      security:
+      - Bearer: []
+      summary: Show List PV
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create PV
+      parameters:
+      - description: PV Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PV'
+      security:
+      - Bearer: []
+      summary: Create PV
+      tags:
+      - Kubernetes
+  /pvs/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete PV
+      parameters:
+      - description: name of the PV
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PV'
+      security:
+      - Bearer: []
+      summary: Delete PV
+      tags:
+      - Kubernetes
     get:
-      responses: {}
+      consumes:
+      - application/json
+      description: get PV Details
+      parameters:
+      - description: name of the PV
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PV'
+      security:
+      - Bearer: []
+      summary: Show detail PV
+      tags:
+      - Kubernetes
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: get Role List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ROLE'
+      security:
+      - Bearer: []
+      summary: Show List Role
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create Role
+      parameters:
+      - description: Role Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ROLE'
+      security:
+      - Bearer: []
+      summary: Create Role
+      tags:
+      - Kubernetes
+  /roles/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Role
+      parameters:
+      - description: name of the Role
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ROLE'
+      security:
+      - Bearer: []
+      summary: Delete Role
+      tags:
+      - Kubernetes
+    get:
+      consumes:
+      - application/json
+      description: get Role Details
+      parameters:
+      - description: name of the Role
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ROLE'
+      security:
+      - Bearer: []
+      summary: Show detail Role
+      tags:
+      - Kubernetes
+  /secrets:
+    get:
+      consumes:
+      - application/json
+      description: get Secret List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SECRET'
+      security:
+      - Bearer: []
+      summary: Show List Secret
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create Secret
+      parameters:
+      - description: Secret Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SECRET'
+      security:
+      - Bearer: []
+      summary: Create Secret
+      tags:
+      - Kubernetes
+  /secrets/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Secret
+      parameters:
+      - description: name of the Secret
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SECRET'
+      security:
+      - Bearer: []
+      summary: Delete Secret
+      tags:
+      - Kubernetes
+    get:
+      consumes:
+      - application/json
+      description: get Secret Details
+      parameters:
+      - description: name of the Secret
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SECRET'
+      security:
+      - Bearer: []
+      summary: Show detail Secret
+      tags:
+      - Kubernetes
+  /serviceaccounts:
+    get:
+      consumes:
+      - application/json
+      description: get ServiceAccount List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SERVICEACCOUNT'
+      security:
+      - Bearer: []
+      summary: Show List ServiceAccount
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create ServiceAccount
+      parameters:
+      - description: ServiceAccount Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SERVICEACCOUNT'
+      security:
+      - Bearer: []
+      summary: Create ServiceAccount
+      tags:
+      - Kubernetes
+  /serviceaccounts/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete ServiceAccount
+      parameters:
+      - description: name of the ServiceAccount
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SERVICEACCOUNT'
+      security:
+      - Bearer: []
+      summary: Delete ServiceAccount
+      tags:
+      - Kubernetes
+    get:
+      consumes:
+      - application/json
+      description: get ServiceAccount Details
+      parameters:
+      - description: name of the ServiceAccount
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SERVICEACCOUNT'
+      security:
+      - Bearer: []
+      summary: Show detail ServiceAccount
+      tags:
+      - Kubernetes
   /services:
+    get:
+      consumes:
+      - application/json
+      description: get Service List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SERVICE'
+      security:
+      - Bearer: []
+      summary: Show List Service
+      tags:
+      - Kubernetes
     post:
       consumes:
       - application/json
@@ -1811,6 +2942,43 @@ paths:
       security:
       - Bearer: []
       summary: Delete Service
+      tags:
+      - Kubernetes
+    get:
+      consumes:
+      - application/json
+      description: get Service Details
+      parameters:
+      - description: name of the Service
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SERVICE'
+      security:
+      - Bearer: []
+      summary: Show detail Service
       tags:
       - Kubernetes
   /spider/cloudos:
@@ -1904,17 +3072,14 @@ paths:
       - description: name of the Workspace
         in: query
         name: workspace
-        required: true
         type: string
       - description: name of the Cluster
         in: query
         name: cluster
-        required: true
         type: string
       - description: name of the Project
         in: query
         name: project
-        required: true
         type: string
       produces:
       - application/json
@@ -2039,6 +3204,149 @@ paths:
       security:
       - Bearer: []
       summary: Show detail Statefulset
+      tags:
+      - Kubernetes
+  /storageclasses:
+    get:
+      consumes:
+      - application/json
+      description: get StorageClass List
+      parameters:
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.STORAGECLASS'
+      security:
+      - Bearer: []
+      summary: Show List StorageClass
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create StorageClass
+      parameters:
+      - description: StorageClass Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.WORKLOAD'
+      security:
+      - Bearer: []
+      summary: Create StorageClass
+      tags:
+      - Kubernetes
+  /storageclasses/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete StorageClass
+      parameters:
+      - description: name of the StorageClass
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.WORKLOAD'
+      security:
+      - Bearer: []
+      summary: Delete StorageClass
+      tags:
+      - Kubernetes
+    get:
+      consumes:
+      - application/json
+      description: get StorageClass Details
+      parameters:
+      - description: name of the StorageClass
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.STORAGECLASS'
+      security:
+      - Bearer: []
+      summary: Show detail StorageClass
       tags:
       - Kubernetes
   /systemProjects:

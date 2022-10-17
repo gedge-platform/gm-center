@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 
@@ -11,17 +10,21 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetPvs godoc
-// @Summary Show app PVs
-// @Description get pv List
+// Get PV godoc
+// @Summary Show List PV
+// @Description get PV List
+// @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Security   Bearer
+// @Param workspace query string false "name of the Workspace"
+// @Param cluster query string false "name of the Cluster"
+// @Param project query string false "name of the Project"
 // @Success 200 {object} model.PV
-// @Header 200 {string} Token "qwerty"
 // @Router /pvs [get]
+// @Tags Kubernetes
 func GetAllPVs(c echo.Context) error {
 	var pvs []model.PV
-	fmt.Printf("## PVs", pvs)
 	params := model.PARAMS{
 		Kind:      "persistentvolumes",
 		Name:      c.Param("name"),
@@ -33,7 +36,6 @@ func GetAllPVs(c echo.Context) error {
 		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
-	fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {
 		pv := model.PV{
@@ -63,17 +65,21 @@ func GetAllPVs(c echo.Context) error {
 	})
 }
 
-// GetPvs godoc
-// @Summary Show detail PVs
-// @Description get PVs Details
+// Get PV godoc
+// @Summary Show detail PV
+// @Description get PV Details
+// @ApiImplicitParam
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.POD
-// @Header 200 {string} Token "qwerty"
-// @Router /pvs/:name [get]
+// @Security   Bearer
+// @Param name path string true "name of the PV"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.PV
+// @Router /pvs/{name} [get]
+// @Tags Kubernetes
 func GetPV(c echo.Context) error {
-	var pvs []model.PV
-	fmt.Printf("## PVs", pvs)
 	params := model.PARAMS{
 		Kind:      "persistentvolumes",
 		Name:      c.Param("name"),
@@ -96,7 +102,6 @@ func GetPV(c echo.Context) error {
 			"error": msg,
 		})
 	}
-	fmt.Printf("####PV data confirm : %s", getData)
 	pv := model.PV{
 		Name:          common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Capacity:      common.InterfaceToString(common.FindData(getData, "spec", "capacity.storage")),
@@ -118,6 +123,20 @@ func GetPV(c echo.Context) error {
 	})
 }
 
+// Create PV godoc
+// @Summary Create PV
+// @Description Create PV
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param json body string true "PV Info Body"
+// @Param cluster query string true "name of the Cluster"
+// @Param workspace query string true "name of the Workspace"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.PV
+// @Router /pvs [post]
+// @Tags Kubernetes
 func CreatePV(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "persistentvolumes",
@@ -134,10 +153,26 @@ func CreatePV(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   postData,
 	})
 }
 
+// Delete PV godoc
+// @Summary Delete PV
+// @Description Delete PV
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the PV"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.PV
+// @Router /pvs/{name} [delete]
+// @Tags Kubernetes
 func DeletePV(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:    "persistentvolumes",
@@ -155,6 +190,8 @@ func DeletePV(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Deleted",
+		"code":   http.StatusOK,
+		"data":   postData,
 	})
 }

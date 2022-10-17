@@ -198,8 +198,10 @@ func CreateJob(c echo.Context) (err error) {
 		return nil
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
+	return c.JSON(http.StatusCreated, echo.Map{
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   postData,
 	})
 }
 
@@ -233,7 +235,9 @@ func DeleteJob(c echo.Context) (err error) {
 		return nil
 	}
 
-	return c.JSON(http.StatusCreated, echo.Map{
-		"info": common.StringToInterface(postData),
+	return c.JSON(http.StatusOK, echo.Map{
+		"status": "Deleted",
+		"code":   http.StatusOK,
+		"data":   postData,
 	})
 }

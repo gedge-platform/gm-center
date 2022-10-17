@@ -201,7 +201,9 @@ func CreatePod(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   postData,
 	})
 }
 
@@ -236,6 +238,7 @@ func DeletePod(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"info": common.StringToInterface(postData),
+		"status": http.StatusOK,
+		"data":   postData,
 	})
 }

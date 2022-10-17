@@ -157,8 +157,9 @@ func CreateDaemonset(c echo.Context) (err error) {
 		return nil
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"status": http.StatusOK,
+	return c.JSON(http.StatusCreated, echo.Map{
+		"status": "Created",
+		"code":   http.StatusCreated,
 		"data":   postData,
 	})
 }
@@ -194,7 +195,8 @@ func DeleteDaemonset(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"status": http.StatusOK,
+		"status": "Deleted",
+		"code":   http.StatusOK,
 		"data":   postData,
 	})
 }

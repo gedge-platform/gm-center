@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
+	"log"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -12,18 +12,17 @@ import (
 func GetModelList(params model.PARAMS) []string {
 	var DataList []string
 
-	fmt.Println("params : ", params)
 	if params.Workspace == "" && params.Cluster == "" && params.Project == "" {
-		fmt.Println("#################ALL List")
+		log.Println("#################ALL List")
 		Clusters := ListClusterDB("cluster")
 		for c, _ := range Clusters {
 			params.Cluster = Clusters[c].Name
 			params.Workspace = Clusters[c].Name
-			getData, err := common.DataRequest(params)
-			if err != nil {
-				fmt.Println("###########err : ", err)
-				continue
-			}
+			getData, _ := common.DataRequest(params)
+			// if err != nil {
+			// 	log.Println("###########err : ", err)
+			// 	continue
+			// }
 			getData0 := gjson.Get(getData, "items").Array()
 			for k, _ := range getData0 {
 				str := getData0[k].String()
@@ -41,7 +40,7 @@ func GetModelList(params model.PARAMS) []string {
 		}
 		return DataList
 	} else if params.Workspace == "" && params.Cluster != "" && params.Project == "" {
-		fmt.Println("#################Cluster List")
+		log.Println("#################Cluster List")
 		getData, _ := common.DataRequest(params)
 		getData0 := gjson.Get(getData, "items").Array()
 		for k, _ := range getData0 {
@@ -57,21 +56,21 @@ func GetModelList(params model.PARAMS) []string {
 		}
 		return DataList
 	} else if params.Workspace != "" && params.Cluster == "" && params.Project == "" {
-		fmt.Println("#################Workspace List")
+		log.Println("#################Workspace List")
 		Workspace := GetDBWorkspace(params)
 		objectID := Workspace.ObjectID
 		Projects := GetDBList(params, "project", objectID, "workspace")
 		for _, Project := range Projects {
 			params.Project = common.InterfaceToString(Project["projectName"])
-			// fmt.Println("[#####params]", params)
+			// log.Println("[#####params]", params)
 			Clusters := GetDBProject(params).Selectcluster
-			// fmt.Println("[#####Clusters]", GetDBProject(params).Selectcluster)
+			// log.Println("[#####Clusters]", GetDBProject(params).Selectcluster)
 			for c := range Clusters {
 				params.Cluster = Clusters[c].Name
 				getData, _ := common.DataRequest(params)
 				getData0 := gjson.Get(getData, "items").Array()
 				for k, _ := range getData0 {
-					// fmt.Println("[#####getData0[k]]", getData0[k])
+					// log.Println("[#####getData0[k]]", getData0[k])
 					str := getData0[k].String()
 					strVal, _ := sjson.Set(str, "clusterName", Clusters[c].Name)
 					strVal2, _ := sjson.Set(strVal, "workspaceName", params.Workspace)
@@ -82,7 +81,7 @@ func GetModelList(params model.PARAMS) []string {
 		}
 		return DataList
 	} else if params.Project != "" && params.Workspace != "" {
-		fmt.Println("#################Project List")
+		log.Println("#################Project List")
 		project := GetDBProject(params)
 		Clusters := project.Selectcluster
 		for c, _ := range Clusters {
@@ -100,12 +99,12 @@ func GetModelList(params model.PARAMS) []string {
 		}
 		return DataList
 	} else if params.Project != "" && params.Name != "" {
-		fmt.Println("#################Project Name List")
+		log.Println("#################Project Name List")
 		Clusters := ListClusterDB("cluster")
 		for c, _ := range Clusters {
 			params.Cluster = Clusters[c].Name
 			getData, _ := common.DataRequest(params)
-			// fmt.Println("#################getData : ", getData)
+			// log.Println("#################getData : ", getData)
 			// getData0 := gjson.Get(getData, "items").Array()
 			// for k, _ := range getData0 {
 			// str := getData.String()
@@ -120,7 +119,7 @@ func GetModelList(params model.PARAMS) []string {
 		// 		workspace := GetDBWorkspace(params)
 		// 		selectCluster := workspace.SelectCluster
 		// 		slice := strings.Split(selectCluster, ",")
-		// 		fmt.Println("#############slice : %s", slice)
+		// 		log.Println("#############slice : %s", slice)
 		// 		for w, _ := range slice {
 		// 			params.Cluster = slice[w]
 		// 			getData, _ := common.DataRequest(params)
@@ -135,7 +134,7 @@ func GetModelList(params model.PARAMS) []string {
 		// 				} else {
 		// 					params.Name = gjson.Get(str, "metadata.namespace").String()
 		// 					projectType := common.InterfaceToString(GetDBProject(params).Type)
-		// 					// fmt.Println("[#####projectType]", projectType)
+		// 					// log.Println("[#####projectType]", projectType)
 		// 					params.Name = ""
 		// 					if projectType == "user" {
 		// 						strVal, _ := sjson.Set(str, "clusterName", params.Cluster)
@@ -149,7 +148,7 @@ func GetModelList(params model.PARAMS) []string {
 		// 	}
 
 		// } else if params.Project != "" && params.Workspace != "" {
-		// 	fmt.Println("#################Project List")
+		// 	log.Println("#################Project List")
 		// 	if params.Workspace == "system" {
 		// 		Clusters := GetAllDBClusters(params)
 		// 		for c, _ := range Clusters {
@@ -174,7 +173,7 @@ func GetModelList(params model.PARAMS) []string {
 		// 			slice := strings.Split(selectCluster, ",")
 		// 			for w, _ := range slice {
 		// 				params.Cluster = slice[w]
-		// 				// fmt.Printf("#################clusterName:%s\n", params.Cluster)
+		// 				// log.Printf("#################clusterName:%s\n", params.Cluster)
 		// 				getData, _ := common.DataRequest(params)
 		// 				getData0 := gjson.Get(getData, "items").Array()
 		// 				// getData0 := common.FindingArray(common.Finding(getData, "items"))
@@ -192,7 +191,7 @@ func GetModelList(params model.PARAMS) []string {
 
 		// 	// project := GetDBProject(params)
 		// 	// if project.Type == "user" {
-		// 	// 	fmt.Println("#################user project")
+		// 	// 	log.Println("#################user project")
 		// 	// 	if project.WorkspaceName != params.Workspace {
 		// 	// 		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
 		// 	// 		DataList = append(DataList, common.InterfaceToString(msg))
@@ -202,7 +201,7 @@ func GetModelList(params model.PARAMS) []string {
 		// 	// 	slice := strings.Split(selectCluster, ",")
 		// 	// 	for w, _ := range slice {
 		// 	// 		params.Cluster = slice[w]
-		// 	// 		// fmt.Printf("#################clusterName:%s\n", params.Cluster)
+		// 	// 		// log.Printf("#################clusterName:%s\n", params.Cluster)
 		// 	// 		getData, _ := common.DataRequest(params)
 		// 	// 		getData0 := gjson.Get(getData, "items").Array()
 		// 	// 		// getData0 := common.FindingArray(common.Finding(getData, "items"))
@@ -234,7 +233,7 @@ func GetModelList(params model.PARAMS) []string {
 		// 	// return DataList
 
 		// } else if params.Project != "" && params.Cluster != "" {
-		// 	fmt.Println("#################Project in Cluster List")
+		// 	log.Println("#################Project in Cluster List")
 		// 	// params.Workspace = params.Cluster
 		// 	getData, _ := common.DataRequest(params)
 		// 	getData0 := gjson.Get(getData, "items").Array()

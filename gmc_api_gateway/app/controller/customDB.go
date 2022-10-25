@@ -219,3 +219,28 @@ func ResourceCnt(params model.PARAMS, kind string) int {
 	deployment_cnt = common.FindingLen2(deployment)
 	return deployment_cnt
 }
+
+func UpdateClusterDB(c, status string) (err error) {
+	cdb := GetMemberDB("cluster")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := c
+
+	var body primitive.M
+	body = bson.M{"status": status}
+	// json.Unmarshal([]byte(params.Body), &body)
+	// common.Transcode(params.Body, &body)
+	filter := bson.D{{"clusterName", c}}
+	update := bson.D{{"$set", body}}
+
+	result, err := cdb.UpdateOne(ctx, filter, update)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if result.MatchedCount == 1 {
+		if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&cdb); err != nil {
+			// common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Member."))
+			return err
+		}
+	}
+	return nil
+}

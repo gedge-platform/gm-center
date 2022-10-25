@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 	"io/ioutil"
@@ -20,6 +20,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// Get TotalDashboard godoc
+// @Summary Show TotalDashboard
+// @Description get TotalDashboard info
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Success 200 {object} model.TOTAL_DASHBOARD
+// @Router /totaldashboard [get]
+// @Tags Dashboard
 func TotalDashboard(c echo.Context) (err error) {
 	clusters := GetClusterDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -83,6 +93,18 @@ func TotalDashboard(c echo.Context) (err error) {
 		"data": dashbaordData,
 	})
 }
+
+// Get TotalDashboard godoc
+// @Summary Show TotalDashboard
+// @Description get TotalDashboard info
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param cluster query string true "name of the Cluster"
+// @Success 200 {object} model.CLOUD_DASHBOARD
+// @Router /cloudDashboard [get]
+// @Tags Dashboard
 func CloudDashboard(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "nodes",
@@ -95,21 +117,16 @@ func CloudDashboard(c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	cluster := GetDB("cluster", params.Cluster, "clusterName")
+	if cluster == nil {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
+		return nil
+	}
 	workspaces := GetDBList(params, "workspace", cluster["_id"].(primitive.ObjectID), "selectCluster")
 	projects := GetDBList(params, "project", cluster["_id"].(primitive.ObjectID), "selectCluster")
 	resourceCnt := resourceCntList(params.Cluster, "", params.Kind)
 	resourceCnt["workspace_count"] = len(workspaces)
 	resourceCnt["project_count"] = len(projects)
 
-	// workspaceCnt := map[string]interface{}{
-	// 	"workspace_count": len(workspaces),
-	// }
-	// projectCnt := map[string]interface{}{
-	// 	"project_count": len(projects),
-	// }
-	// resourceCnt = append(resourceCnt, workspaceCnt)
-	// resourceCnt = append(resourceCnt, projectCnt)
-	// nodeStatus := node_status(params.Cluster)
 	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
@@ -151,6 +168,18 @@ func CloudDashboard(c echo.Context) (err error) {
 	})
 }
 
+// Get ServiceDashboard godoc
+// @Summary Show ServiceDashboard
+// @Description get ServiceDashboard info
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param user query string true "name of the User"
+// @Param workspace query string true "name of the Workspace"
+// @Success 200 {object} model.SERVICE_DASHBOARD
+// @Router /serviceDashboard [get]
+// @Tags Dashboard
 func SADashboard(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "namespaces",
@@ -170,9 +199,15 @@ func SADashboard(c echo.Context) (err error) {
 	workspaces := GetDBList(params, "workspace", userObj, "workspaceOwner")
 	workspace := GetDBWorkspace(params)
 	projects := GetDBList(params, "project", workspace.ObjectID, "workspace")
-	fmt.Println("workspace : ", workspace)
 	allProject := GetDBList(params, "project", userObj, "projectOwner")
-
+	if FindMemberDB(params).Name == "" {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("User not found."))
+		return nil
+	}
+	if workspace.Name == "" {
+		common.ErrorMsg(c, http.StatusNotFound, errors.New("Workspace not found."))
+		return nil
+	}
 	var resource model.Resource_cnt
 	for _, project := range projects {
 		projectName := common.InterfaceToString(project["projectName"])
@@ -226,6 +261,7 @@ func SADashboard(c echo.Context) (err error) {
 		"data": dashboardData,
 	})
 }
+
 func ResourceMonit(c echo.Context) (err error) {
 	metric_filter := "pod_count|cronjob_count|job_count|service_count|daemonset_count|statefulset_count|deployment_count|pv_count"
 	metrics := metricParsing(metric_filter)
@@ -246,19 +282,19 @@ func GeoCoder(add string) (result string) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, httpUrl, nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	body_str := string(body)

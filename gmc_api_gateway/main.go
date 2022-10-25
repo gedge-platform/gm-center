@@ -1,16 +1,15 @@
 package main
 
 import (
-	"net/http"
-	"os"
-	"strconv"
-	"runtime"
-
+	c "gmc_api_gateway/app/controller"
 	db "gmc_api_gateway/app/database"
 	"gmc_api_gateway/app/routes"
 	"gmc_api_gateway/config"
-
 	_ "gmc_api_gateway/docs"
+	"net/http"
+	"os"
+	"runtime"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -37,7 +36,8 @@ import (
 // @name                        Authorization
 // @description "Type \"Bearer \" and then your API Token"
 func main() {
-	// docs.SwaggerInfo.BasePath = "/gmcapi/v2"
+	go c.Test_cron()
+
 	config.Init()
 	config := config.GetConfig()
 
@@ -47,7 +47,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
-	
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 	// 	Skipper: func(c echo.Context) bool {
@@ -78,6 +78,7 @@ func main() {
 	if err := e.Start(GetListenPort(config)); err != nil {
 		panic(err)
 	}
+
 }
 
 // Environment Value ("LISTEN_PORT")

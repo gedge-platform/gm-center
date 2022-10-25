@@ -9,6 +9,7 @@ require (
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/gophercloud/gophercloud v0.25.0
 	github.com/influxdata/influxdb-client-go/v2 v2.9.0
+	github.com/jasonlvhit/gocron v0.0.1
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.8.0
 	github.com/mitchellh/mapstructure v1.1.2

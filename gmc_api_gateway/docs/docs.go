@@ -63,6 +63,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/ceph/monit": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Ceph Dashboard info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Ceph"
+                ],
+                "summary": "Show Ceph Dashboard info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CEPH"
+                        }
+                    }
+                }
+            }
+        },
+        "/cloudDashboard": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get TotalDashboard info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Show TotalDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLOUD_DASHBOARD"
+                        }
+                    }
+                }
+            }
+        },
         "/clusterrolebindings": {
             "get": {
                 "security": [
@@ -2801,6 +2866,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/serviceDashboard": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get ServiceDashboard info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Show ServiceDashboard",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the User",
+                        "name": "user",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SERVICE_DASHBOARD"
+                        }
+                    }
+                }
+            }
+        },
         "/serviceaccounts": {
             "get": {
                 "security": [
@@ -3886,6 +3995,34 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/totaldashboard": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get TotalDashboard info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Show TotalDashboard",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.TOTAL_DASHBOARD"
+                        }
+                    }
+                }
+            }
+        },
         "/userProjects": {
             "get": {
                 "security": [
@@ -4133,6 +4270,57 @@ const docTemplate = `{
                 }
             }
         },
+        "model.CEPH": {
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "$ref": "#/definitions/model.Capacity"
+                },
+                "clientPerformance": {
+                    "$ref": "#/definitions/model.ClientPerformance"
+                },
+                "clusterStatus": {
+                    "type": "number"
+                },
+                "hostNum": {
+                    "type": "integer"
+                },
+                "monitor": {
+                    "$ref": "#/definitions/model.Monitor"
+                },
+                "object": {
+                    "$ref": "#/definitions/model.Object"
+                },
+                "osd": {
+                    "$ref": "#/definitions/model.OSD"
+                },
+                "pgStatus": {},
+                "pgs_per_osd": {
+                    "type": "number"
+                },
+                "poolNum": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.CLOUD_DASHBOARD": {
+            "type": "object",
+            "properties": {
+                "ClusterInfo": {},
+                "cpuTotal": {},
+                "cpuUsage": {},
+                "cpuUtil": {},
+                "diskTotal": {},
+                "diskUsage": {},
+                "diskUtil": {},
+                "memoryTotal": {},
+                "memoryUsage": {},
+                "memoryUtil": {},
+                "nodeInfo": {},
+                "nodeRunning": {},
+                "resourceCnt": {}
+            }
+        },
         "model.CLUSTER": {
             "type": "object",
             "required": [
@@ -4286,6 +4474,37 @@ const docTemplate = `{
                 },
                 "workspace": {
                     "type": "string"
+                }
+            }
+        },
+        "model.Capacity": {
+            "type": "object",
+            "properties": {
+                "available": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "used": {
+                    "type": "number"
+                }
+            }
+        },
+        "model.ClientPerformance": {
+            "type": "object",
+            "properties": {
+                "read_bytes_sec": {
+                    "type": "number"
+                },
+                "read_op_per_sec": {
+                    "type": "number"
+                },
+                "write_bytes_sec": {
+                    "type": "number"
+                },
+                "write_op_per_sec": {
+                    "type": "number"
                 }
             }
         },
@@ -4725,6 +4944,46 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Monitor": {
+            "type": "object",
+            "properties": {
+                "quorum": {},
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.OSD": {
+            "type": "object",
+            "properties": {
+                "in": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "up": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Object": {
+            "type": "object",
+            "properties": {
+                "degraded": {
+                    "type": "number"
+                },
+                "healthy": {
+                    "type": "number"
+                },
+                "misplaced": {
+                    "type": "number"
+                },
+                "unfound": {
+                    "type": "number"
+                }
+            }
+        },
         "model.OwnerReference": {
             "type": "object",
             "properties": {
@@ -5158,6 +5417,23 @@ const docTemplate = `{
                 }
             }
         },
+        "model.SERVICE_DASHBOARD": {
+            "type": "object",
+            "properties": {
+                "podCpuTop5": {},
+                "podMemTop5": {},
+                "projectCnt": {
+                    "type": "integer"
+                },
+                "projectCpuTop5": {},
+                "projectList": {},
+                "projectMemTop5": {},
+                "resource": {},
+                "workspaceCnt": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.STATEFULSET_DETAIL": {
             "type": "object",
             "properties": {
@@ -5263,6 +5539,34 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "model.TOTAL_DASHBOARD": {
+            "type": "object",
+            "properties": {
+                "clusterCnt": {
+                    "type": "integer"
+                },
+                "clusterCpuTop5": {},
+                "clusterMemTop5": {},
+                "coreClusterCnt": {
+                    "type": "integer"
+                },
+                "credentialCnt": {
+                    "type": "integer"
+                },
+                "edgeClusterCnt": {
+                    "type": "integer"
+                },
+                "edgeInfo": {},
+                "podCpuTop5": {},
+                "podMemTop5": {},
+                "projectCnt": {
+                    "type": "integer"
+                },
+                "workspaceCnt": {
+                    "type": "integer"
                 }
             }
         },

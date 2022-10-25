@@ -9,6 +9,44 @@ definitions:
       namespace:
         type: string
     type: object
+  model.CEPH:
+    properties:
+      capacity:
+        $ref: '#/definitions/model.Capacity'
+      clientPerformance:
+        $ref: '#/definitions/model.ClientPerformance'
+      clusterStatus:
+        type: number
+      hostNum:
+        type: integer
+      monitor:
+        $ref: '#/definitions/model.Monitor'
+      object:
+        $ref: '#/definitions/model.Object'
+      osd:
+        $ref: '#/definitions/model.OSD'
+      pgStatus: {}
+      pgs_per_osd:
+        type: number
+      poolNum:
+        type: integer
+    type: object
+  model.CLOUD_DASHBOARD:
+    properties:
+      ClusterInfo: {}
+      cpuTotal: {}
+      cpuUsage: {}
+      cpuUtil: {}
+      diskTotal: {}
+      diskUsage: {}
+      diskUtil: {}
+      memoryTotal: {}
+      memoryUsage: {}
+      memoryUtil: {}
+      nodeInfo: {}
+      nodeRunning: {}
+      resourceCnt: {}
+    type: object
   model.CLUSTER:
     properties:
       address:
@@ -117,6 +155,26 @@ definitions:
         type: string
       workspace:
         type: string
+    type: object
+  model.Capacity:
+    properties:
+      available:
+        type: number
+      total:
+        type: number
+      used:
+        type: number
+    type: object
+  model.ClientPerformance:
+    properties:
+      read_bytes_sec:
+        type: number
+      read_op_per_sec:
+        type: number
+      write_bytes_sec:
+        type: number
+      write_op_per_sec:
+        type: number
     type: object
   model.Cluster:
     properties:
@@ -413,6 +471,32 @@ definitions:
     - memberName
     - password
     type: object
+  model.Monitor:
+    properties:
+      quorum: {}
+      total:
+        type: integer
+    type: object
+  model.OSD:
+    properties:
+      in:
+        type: integer
+      total:
+        type: integer
+      up:
+        type: integer
+    type: object
+  model.Object:
+    properties:
+      degraded:
+        type: number
+      healthy:
+        type: number
+      misplaced:
+        type: number
+      unfound:
+        type: number
+    type: object
   model.OwnerReference:
     properties:
       apiVersion:
@@ -690,6 +774,19 @@ definitions:
       workspace:
         type: string
     type: object
+  model.SERVICE_DASHBOARD:
+    properties:
+      podCpuTop5: {}
+      podMemTop5: {}
+      projectCnt:
+        type: integer
+      projectCpuTop5: {}
+      projectList: {}
+      projectMemTop5: {}
+      resource: {}
+      workspaceCnt:
+        type: integer
+    type: object
   model.SERVICEACCOUNT:
     properties:
       annotations: {}
@@ -783,6 +880,26 @@ definitions:
         type: string
       type:
         type: string
+    type: object
+  model.TOTAL_DASHBOARD:
+    properties:
+      clusterCnt:
+        type: integer
+      clusterCpuTop5: {}
+      clusterMemTop5: {}
+      coreClusterCnt:
+        type: integer
+      credentialCnt:
+        type: integer
+      edgeClusterCnt:
+        type: integer
+      edgeInfo: {}
+      podCpuTop5: {}
+      podMemTop5: {}
+      projectCnt:
+        type: integer
+      workspaceCnt:
+        type: integer
     type: object
   model.USERPROJECT:
     properties:
@@ -922,6 +1039,46 @@ paths:
       summary: Login
       tags:
       - Login
+  /ceph/monit:
+    get:
+      consumes:
+      - application/json
+      description: get Ceph Dashboard info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CEPH'
+      security:
+      - Bearer: []
+      summary: Show Ceph Dashboard info
+      tags:
+      - Ceph
+  /cloudDashboard:
+    get:
+      consumes:
+      - application/json
+      description: get TotalDashboard info
+      parameters:
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CLOUD_DASHBOARD'
+      security:
+      - Bearer: []
+      summary: Show TotalDashboard
+      tags:
+      - Dashboard
   /clusterrolebindings:
     get:
       consumes:
@@ -2693,6 +2850,34 @@ paths:
       summary: Show detail Secret
       tags:
       - Kubernetes
+  /serviceDashboard:
+    get:
+      consumes:
+      - application/json
+      description: get ServiceDashboard info
+      parameters:
+      - description: name of the User
+        in: query
+        name: user
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SERVICE_DASHBOARD'
+      security:
+      - Bearer: []
+      summary: Show ServiceDashboard
+      tags:
+      - Dashboard
   /serviceaccounts:
     get:
       consumes:
@@ -3395,6 +3580,23 @@ paths:
       summary: Show detail systemProject
       tags:
       - Project
+  /totaldashboard:
+    get:
+      consumes:
+      - application/json
+      description: get TotalDashboard info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.TOTAL_DASHBOARD'
+      security:
+      - Bearer: []
+      summary: Show TotalDashboard
+      tags:
+      - Dashboard
   /userProjects:
     get:
       consumes:

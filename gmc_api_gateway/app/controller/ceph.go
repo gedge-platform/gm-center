@@ -156,6 +156,16 @@ import (
 // 	})
 // }
 
+// Get Ceph Dashboard godoc
+// @Summary Show Ceph Dashboard info
+// @Description get Ceph Dashboard info
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Success 200 {object} model.CEPH
+// @Router /ceph/monit [get]
+// @Tags Ceph
 func CephDashboard(c echo.Context) (err error) {
 	clusterNum := common.InterfaceOfLen(monitDashboard(cephMetric["clusterCount"]))
 	healthCluster := common.InterfaceOfLen(monitDashboard(cephMetric["clusterHealth"]))

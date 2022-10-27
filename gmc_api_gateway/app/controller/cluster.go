@@ -62,7 +62,7 @@ func CreateCluster(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if FindClusterDB(models.Name) !=nil {
+	if FindClusterDB(models.Name) != nil {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -165,6 +165,7 @@ func ListCluster(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.CLUSTER_DETAIL
 // @Security   Bearer
 // @Param name path string true "name of the Cluster"
 // @Router /clusters/{name} [get]

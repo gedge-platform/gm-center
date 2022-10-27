@@ -436,6 +436,7 @@ func GetSystemProject(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Error
 // @Security   Bearer
 // @Param name path string true "name of the userProjects"
 // @Router /userProjects/{name} [delete]

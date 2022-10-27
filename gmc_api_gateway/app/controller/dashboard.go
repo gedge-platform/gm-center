@@ -28,7 +28,7 @@ import (
 // @Produce  json
 // @Security   Bearer
 // @Success 200 {object} model.TOTAL_DASHBOARD
-// @Router /totaldashboard [get]
+// @Router /totalDashboard [get]
 // @Tags Dashboard
 func TotalDashboard(c echo.Context) (err error) {
 	clusters := GetClusterDB("cluster")

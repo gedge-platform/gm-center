@@ -36,7 +36,7 @@ import (
 // @name                        Authorization
 // @description "Type \"Bearer \" and then your API Token"
 func main() {
-	go c.Test_cron()
+	go c.Cluster_Status_Cron()
 
 	config.Init()
 	config := config.GetConfig()

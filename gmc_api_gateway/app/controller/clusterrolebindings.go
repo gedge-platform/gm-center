@@ -156,7 +156,7 @@ func CreateClusterRolebinding(c echo.Context) (err error) {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.CLUSTERROLEBINDING
+// @Success 200 {object} model.Error
 // @Router /clusterrolebindings/{name} [delete]
 // @Tags Kubernetes
 func DeleteClusterRolebinding(c echo.Context) (err error) {

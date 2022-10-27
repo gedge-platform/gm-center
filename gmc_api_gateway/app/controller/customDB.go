@@ -226,7 +226,7 @@ func UpdateClusterDB(c, status string) (err error) {
 	search_val := c
 
 	var body primitive.M
-	body = bson.M{"status": status}
+	body = bson.M{"status": status, "updated_at": time.Now()}
 	// json.Unmarshal([]byte(params.Body), &body)
 	// common.Transcode(params.Body, &body)
 	filter := bson.D{{"clusterName", c}}

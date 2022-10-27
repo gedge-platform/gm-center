@@ -329,7 +329,214 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.CLUSTERROLEBINDING"
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/clusterroles": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Clusterroles List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show List Clusterroles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTERROLE"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create Clusterrole",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Create Clusterrole",
+                "parameters": [
+                    {
+                        "description": "Clusterrole Info Body",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTERROLE"
+                        }
+                    }
+                }
+            }
+        },
+        "/clusterroles/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get Clusterroles Details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Show detail Clusterroles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Clusterroles",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTERROLE"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete Clusterrole",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Kubernetes"
+                ],
+                "summary": "Delete Clusterrole",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name of the Clusterrole",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Workspace",
+                        "name": "workspace",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Cluster",
+                        "name": "cluster",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "name of the Project",
+                        "name": "project",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -433,7 +640,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CLUSTER_DETAIL"
+                        }
+                    }
+                }
             },
             "delete": {
                 "security": [
@@ -678,7 +892,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.CONFIGMAP"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -926,7 +1140,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.CRONJOB"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1146,7 +1360,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.WORKLOAD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1366,7 +1580,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.WORKLOAD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1586,7 +1800,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.JOB"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1718,7 +1932,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
             }
         },
         "/pods": {
@@ -1935,7 +2156,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.POD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -2200,7 +2421,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.PVC"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -2420,7 +2641,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.PV"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -2640,7 +2861,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.ROLE"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -2860,7 +3081,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SECRET"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -3124,7 +3345,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SERVICEACCOUNT"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -3346,7 +3567,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SERVICE"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -3391,7 +3612,14 @@ const docTemplate = `{
                     "VM"
                 ],
                 "summary": "Credential",
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Credential"
+                        }
+                    }
+                }
             },
             "post": {
                 "security": [
@@ -3479,7 +3707,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
             }
         },
         "/statefulsets": {
@@ -3696,7 +3931,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.WORKLOAD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -3916,7 +4151,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.WORKLOAD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -3995,7 +4230,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/totaldashboard": {
+        "/totalDashboard": {
             "get": {
                 "security": [
                     {
@@ -4114,7 +4349,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
             }
         },
         "/workspaces": {
@@ -4251,11 +4493,29 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
+        "model.ADDRESSES": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Active": {
             "type": "object",
             "properties": {
@@ -4367,6 +4627,29 @@ const docTemplate = `{
                 }
             }
         },
+        "model.CLUSTERROLE": {
+            "type": "object",
+            "properties": {
+                "annotations": {},
+                "cluster": {
+                    "type": "string"
+                },
+                "createAt": {
+                    "type": "string"
+                },
+                "label": {},
+                "name": {
+                    "type": "string"
+                },
+                "rules": {},
+                "user": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
+                }
+            }
+        },
         "model.CLUSTERROLEBINDING": {
             "type": "object",
             "properties": {
@@ -4387,6 +4670,62 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workspace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CLUSTER_DETAIL": {
+            "type": "object",
+            "required": [
+                "clusterEndpoint",
+                "clusterName",
+                "clusterType",
+                "token"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "cloudType": {
+                    "type": "string"
+                },
+                "clusterEndpoint": {
+                    "type": "string"
+                },
+                "clusterName": {
+                    "type": "string"
+                },
+                "clusterType": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EVENT"
+                    }
+                },
+                "gpu": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "nodes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.NODE"
+                    }
+                },
+                "point": {},
+                "resource": {},
+                "status": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }
@@ -4802,6 +5141,18 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Error": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Email    string ` + "`" + `json:\"email\"` + "`" + `",
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "model.FieldRef": {
             "type": "object",
             "properties": {
@@ -4950,6 +5301,43 @@ const docTemplate = `{
                 "quorum": {},
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.NODE": {
+            "type": "object",
+            "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ADDRESSES"
+                    }
+                },
+                "allocatable": {},
+                "annotations": {},
+                "capacity": {},
+                "containerRuntimeVersion": {},
+                "created_at": {
+                    "type": "string"
+                },
+                "kernel": {
+                    "type": "string"
+                },
+                "kubeVersion": {
+                    "type": "string"
+                },
+                "labels": {},
+                "name": {
+                    "type": "string"
+                },
+                "nodeIP": {
+                    "type": "string"
+                },
+                "os": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },

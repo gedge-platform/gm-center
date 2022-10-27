@@ -1,13 +1,13 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
-	"strings"
-	"context"
-	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"gmc_api_gateway/app/common"
@@ -29,7 +29,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
 	// "github.com/tidwall/gjson"
-
 )
 
 type SystemId struct {
@@ -42,16 +41,15 @@ type NameId struct {
 }
 type CredentialName struct {
 	CredentialName string `json:"CredentialName"`
-	ProviderName string `json:"ProviderName"`
+	ProviderName   string `json:"ProviderName"`
 }
 type vmParam struct {
-	NameId string `json:"NameId"`
-	Status string `json:"Status"`
-	Provider string `json:"Provider"`
+	NameId     string `json:"NameId"`
+	Status     string `json:"Status"`
+	Provider   string `json:"Provider"`
 	Credential string `json:"Credential"`
 	Connection string `json:"Connection"`
 }
-
 
 func Conn(name string) *mongo.Collection {
 	db := db.DbManager()
@@ -59,7 +57,6 @@ func Conn(name string) *mongo.Collection {
 
 	return cdb
 }
-
 
 // GetCloudOS godoc
 // @Summary Cloudos
@@ -94,6 +91,7 @@ func GetCloudOS(c echo.Context) (err error) {
 // @Accept  json
 // @Produce  json
 // @Security   Bearer
+// @Success 200 {object} model.Credential
 // @Router /spider/credentials [get]
 // @Tags VM
 func GetALLCredential(c echo.Context) (err error) {
@@ -188,8 +186,6 @@ func CreateCredential(c echo.Context) (err error) {
 	_ = CheckRegion(c, getCredential)
 	_ = CheckConnectionConfig(c, getCredential)
 
-
-
 	// var credentialInfo model.CredentialInfo
 	// credential Key Value 생성
 	var KeyValues model.KeyValues
@@ -198,38 +194,38 @@ func CreateCredential(c echo.Context) (err error) {
 	case "AWS":
 		KeyValue := model.KeyValue{
 			Key:   "ClientId",
-			Value:  getCredential.ClientId,
+			Value: getCredential.ClientId,
 		}
 		KeyValues = append(KeyValues, KeyValue)
 		KeyValue = model.KeyValue{
 			Key:   "ClientSecret",
-			Value:  getCredential.ClientSecret,
+			Value: getCredential.ClientSecret,
 		}
 		KeyValues = append(KeyValues, KeyValue)
 	case "OPENSTACK":
 		KeyValue := model.KeyValue{
 			Key:   "IdentityEndpoint",
-			Value:  getCredential.IdentityEndpoint,
+			Value: getCredential.IdentityEndpoint,
 		}
 		KeyValues = append(KeyValues, KeyValue)
 		KeyValue = model.KeyValue{
 			Key:   "Username",
-			Value:  getCredential.Username,
+			Value: getCredential.Username,
 		}
 		KeyValues = append(KeyValues, KeyValue)
 		KeyValue = model.KeyValue{
 			Key:   "Password",
-			Value:  getCredential.Password,
+			Value: getCredential.Password,
 		}
 		KeyValues = append(KeyValues, KeyValue)
 		KeyValue = model.KeyValue{
 			Key:   "DomainName",
-			Value:  getCredential.DomainName,
+			Value: getCredential.DomainName,
 		}
 		KeyValues = append(KeyValues, KeyValue)
 		KeyValue = model.KeyValue{
 			Key:   "ProjectID",
-			Value:  getCredential.ProjectID,
+			Value: getCredential.ProjectID,
 		}
 		KeyValues = append(KeyValues, KeyValue)
 	}
@@ -272,6 +268,7 @@ func CreateCredential(c echo.Context) (err error) {
 // @Accept  json
 // @Produce  json
 // @Security   Bearer
+// @Success 200 {object} model.Error
 // @Router /spider/credentials/{credentialName} [delete]
 // @Param credentialName path string true "Name of the credentials"
 // @Tags VM
@@ -323,7 +320,6 @@ func DeleteCredential(c echo.Context) (err error) {
 		fmt.Println("err : ", err)
 	}
 
-	
 	check := DeleteCredentialDB(credentialName)
 	if check != true {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("DeleteCredentialDB failed."))
@@ -535,51 +531,50 @@ func GetCloudregion(c echo.Context) (err error) {
 	})
 }
 
-func CheckRegion(c echo.Context,  getCredential model.GetCredential) string {
+func CheckRegion(c echo.Context, getCredential model.GetCredential) string {
 	fmt.Println("[CheckRegion in]")
 
 	CredentialName := getCredential.CredentialName
 	ProviderName := getCredential.ProviderName
 	Region := getCredential.Region
 	Zone := getCredential.Zone
-	
+
 	regionName := CredentialName + "-region"
 
 	// vpc 확인
 	if !DuplicatiCheck(c, "region", CredentialName) {
 		// vpc 생성
 
-
 		// Region Key Value 생성
 		var KeyValues model.KeyValues
 		var KeyValue model.KeyValue
 
 		switch strings.ToUpper(ProviderName) {
-			case "AWS":
-				KeyValue := model.KeyValue{
-					Key:   "Region",
-					Value:  Region,
-				}
-				KeyValues = append(KeyValues, KeyValue)
+		case "AWS":
+			KeyValue := model.KeyValue{
+				Key:   "Region",
+				Value: Region,
+			}
+			KeyValues = append(KeyValues, KeyValue)
+			KeyValue = model.KeyValue{
+				Key:   "Zone",
+				Value: Zone,
+			}
+			KeyValues = append(KeyValues, KeyValue)
+		case "OPENSTACK":
+			if ProviderName != "" {
 				KeyValue = model.KeyValue{
-					Key:   "Zone",
-					Value:  Zone,
+					Key:   "Region",
+					Value: "RegionOne",
 				}
 				KeyValues = append(KeyValues, KeyValue)
-			case "OPENSTACK":
-				if ProviderName != "" {
-					KeyValue = model.KeyValue{
-						Key:   "Region",
-						Value: "RegionOne",
-					}
-					KeyValues = append(KeyValues, KeyValue)
-				} else {
-					KeyValue = model.KeyValue{
-						Key:   "Region",
-						Value:  Region,
-					}
-					KeyValues = append(KeyValues, KeyValue)
+			} else {
+				KeyValue = model.KeyValue{
+					Key:   "Region",
+					Value: Region,
 				}
+				KeyValues = append(KeyValues, KeyValue)
+			}
 		}
 
 		fmt.Println("KeyValues is : ", KeyValues)
@@ -749,22 +744,20 @@ func GetVmList(c echo.Context) (err error) {
 		value2 := common.FindDataStr(cds[e].String(), "ProviderName", "")
 		cd := CredentialName{
 			CredentialName: value + "-config",
-			ProviderName: value2,
+			ProviderName:   value2,
 		}
 		CredentialNames = append(CredentialNames, cd)
 	}
-	
+
 	fmt.Println("p#2] value : ", CredentialNames)
 
-	
-	vmParams := getConnectionVmList(CredentialNames)		
+	vmParams := getConnectionVmList(CredentialNames)
 	if len(vmParams) == 0 {
 		return c.JSON(http.StatusOK, echo.Map{
 			"count": len(vmParams),
 			"data":  "VM Not Found",
 		})
 	}
-
 
 	var VMStructs model.VMStructs
 	for e, _ := range vmParams {
@@ -773,32 +766,31 @@ func GetVmList(c echo.Context) (err error) {
 		case "AWS":
 			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
 			VMStructs = append(VMStructs, VMStruct)
-	
+
 		case "OPENSTACK":
 			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
 			VMStructs = append(VMStructs, VMStruct)
 		}
 	}
-	
+
 	fmt.Println("[#8] VMStructs is ", VMStructs)
 	fmt.Println("[#8] VMStructs length is ", len(VMStructs))
-	
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"data":  VMStructs,
 		"count": len(vmParams),
 	})
 }
 
-func getVmStructs(vmParam vmParam, provider string) (model.VMStruct) {
+func getVmStructs(vmParam vmParam, provider string) model.VMStruct {
 
 	var VMStruct model.VMStruct
-	
-	ConnectionNameOnly := model.ConnectionNameOnly {
+
+	ConnectionNameOnly := model.ConnectionNameOnly{
 		ConnectionName: vmParam.Connection,
 	}
-		
-	payload, _ := json.Marshal(ConnectionNameOnly)
 
+	payload, _ := json.Marshal(ConnectionNameOnly)
 
 	vmName := strings.TrimSuffix(common.InterfaceToString(vmParam.NameId), "}")
 	vmName = strings.TrimLeft(vmName, "{")
@@ -807,13 +799,14 @@ func getVmStructs(vmParam vmParam, provider string) (model.VMStruct) {
 	params := model.PARAMS{
 		Kind:   "vm",
 		Name:   vmName,
-		Method:	"GET",
+		Method: "GET",
 		Body:   string(payload),
 	}
 	getData, _ := common.DataRequest_spider(params)
 	fmt.Println("[#5] getData is ", getData)
 	err := json.Unmarshal([]byte(getData), &VMStruct)
-	if err != nil {}
+	if err != nil {
+	}
 	fmt.Println("[#6] VMStruct is ", VMStruct)
 	VMStruct.VmStatus = vmParam.Status
 	VMStruct.ProviderName = provider
@@ -821,17 +814,17 @@ func getVmStructs(vmParam vmParam, provider string) (model.VMStruct) {
 	return VMStruct
 }
 
-func getConnectionVmList(CredentialNames []CredentialName) ([]vmParam) {
+func getConnectionVmList(CredentialNames []CredentialName) []vmParam {
 
 	var vmParams []vmParam
 	var payload []byte
 	for i, _ := range CredentialNames {
 		ConnectionName := strings.TrimSuffix(common.InterfaceToString(CredentialNames[i].CredentialName), "}")
-	
-		ConnectionNameOnly := model.ConnectionNameOnly {
+
+		ConnectionNameOnly := model.ConnectionNameOnly{
 			ConnectionName: ConnectionName,
 		}
-		
+
 		payload, _ = json.Marshal(ConnectionNameOnly)
 
 		// cb-spider 에서 vmstatus 목록 가져와서, SystemId 추려내기 위함
@@ -848,18 +841,18 @@ func getConnectionVmList(CredentialNames []CredentialName) ([]vmParam) {
 			Status := common.FindDataStr(vms[j].String(), "VmStatus", "")
 			fmt.Println("p#2] vmNameId : ", vmNameId)
 			vm := vmParam{
-				NameId: vmNameId,
-				Status: Status,
-				Provider: CredentialNames[i].ProviderName,
+				NameId:     vmNameId,
+				Status:     Status,
+				Provider:   CredentialNames[i].ProviderName,
 				Credential: CredentialNames[i].CredentialName,
 				Connection: ConnectionName,
 			}
 			vmParams = append(vmParams, vm)
 		}
-		
+
 		fmt.Println("vmParams : ", vmParams)
 	}
-	
+
 	return vmParams
 }
 
@@ -888,7 +881,7 @@ func CreateVm(c echo.Context) (err error) {
 			SecurityGroupNames: securityGroupNameList,
 			VMSpecName:         flavorName,
 			KeyPairName:        keyPairName,
-			RootDiskSize:				diskSize,
+			RootDiskSize:       diskSize,
 		},
 	}
 
@@ -910,12 +903,12 @@ func CreateVm(c echo.Context) (err error) {
 
 func DeleteVm(c echo.Context) (err error) {
 	params := model.PARAMS{
-		Body:   common.ResponseBody_spider(c.Request().Body),
+		Body: common.ResponseBody_spider(c.Request().Body),
 	}
 	var ConnectionNameOnly model.ConnectionNameOnly
 	err0 := json.Unmarshal([]byte(params.Body), &ConnectionNameOnly)
-	if err0 != nil {}
-	
+	if err0 != nil {
+	}
 
 	// origName := strings.TrimSuffix(ConnectionNameOnly.ConnectionName, "-config")
 	connectionName := ConnectionNameOnly.ConnectionName
@@ -932,7 +925,6 @@ func DeleteVm(c echo.Context) (err error) {
 	// }
 
 	// _, err = common.DataRequest_spider(params)
-
 
 	// // SecurityGroup 삭제
 	// params = model.PARAMS{
@@ -1185,13 +1177,13 @@ func GetALLVMImage(c echo.Context) (err error) {
 	fmt.Println("imageNameIds is : ", imageNameIds)
 	// vmimage := common.StringToInterface(getData)
 	if len(imageNameIds) != 0 {
-			return c.JSON(http.StatusOK, echo.Map{
-				"data": imageNameIds,
-			})
-			} else {
-				return c.JSON(http.StatusOK, echo.Map{
-					"data": StringToInterface(getData),
-				})
+		return c.JSON(http.StatusOK, echo.Map{
+			"data": imageNameIds,
+		})
+	} else {
+		return c.JSON(http.StatusOK, echo.Map{
+			"data": StringToInterface(getData),
+		})
 	}
 }
 
@@ -1770,7 +1762,6 @@ func CheckDriver(c echo.Context, getCredential model.GetCredential) string {
 	return driverName
 }
 
-
 func GetCredentialDB(name string) *mongo.Collection {
 	db := db.DbManager()
 	cdb := db.Collection(name)
@@ -1783,19 +1774,19 @@ func CreateCredentialDB(getCredential model.GetCredential) bool {
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
 	models := model.Credential{
-		CredentialName: getCredential.CredentialName,
-		ProviderName: getCredential.ProviderName,
+		CredentialName:   getCredential.CredentialName,
+		ProviderName:     getCredential.ProviderName,
 		IdentityEndpoint: getCredential.IdentityEndpoint,
-		Username: getCredential.Username,
-		Password: getCredential.Password,
-		DomainName: getCredential.DomainName,
-		ProjectID: getCredential.ProjectID,
-		ClientId: getCredential.ClientId,
-		ClientSecret: getCredential.ClientSecret,
-		Region: getCredential.Region,
-		Zone: getCredential.Zone,
-		Created_at: time.Now(),
-	}	
+		Username:         getCredential.Username,
+		Password:         getCredential.Password,
+		DomainName:       getCredential.DomainName,
+		ProjectID:        getCredential.ProjectID,
+		ClientId:         getCredential.ClientId,
+		ClientSecret:     getCredential.ClientSecret,
+		Region:           getCredential.Region,
+		Zone:             getCredential.Zone,
+		Created_at:       time.Now(),
+	}
 	_, err2 := cdb.InsertOne(ctx, models)
 	if err2 != nil {
 		return false
@@ -1815,7 +1806,7 @@ func CreateCredentialDB(getCredential model.GetCredential) bool {
 // @Tags Credential
 func ListCredentialDB(c echo.Context) (err error) {
 	var showsCredential []bson.M
-	
+
 	cdb := GetCredentialDB("credentials")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
@@ -1836,7 +1827,7 @@ func ListCredentialDB(c echo.Context) (err error) {
 	cur.Close(context.TODO())
 	return c.JSON(http.StatusOK, echo.Map{
 		"status": http.StatusOK,
-		"data": showsCredential,
+		"data":   showsCredential,
 	})
 }
 
@@ -1855,8 +1846,7 @@ func FindCredentialDB(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, &credential)
 }
 
-
-func DeleteCredentialDB(credentialName string) (bool) {
+func DeleteCredentialDB(credentialName string) bool {
 	cdb := GetCredentialDB("credentials")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 

@@ -156,12 +156,14 @@ func FindMember(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, &member)
 	}
 }
+
 // Delete User godoc
 // @Summary Delete User
 // @Description delete User
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Error
 // @Security   Bearer
 // @Router /members/{name} [delete]
 // @Param name path string true "Name of the User"

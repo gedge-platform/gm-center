@@ -153,7 +153,7 @@ func GetDeployments(c echo.Context) (err error) {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.WORKLOAD
+// @Success 200 {object} model.Error
 // @Router /deployments [post]
 // @Tags Kubernetes
 func CreateDeployment(c echo.Context) (err error) {
@@ -189,7 +189,7 @@ func CreateDeployment(c echo.Context) (err error) {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.WORKLOAD
+// @Success 200 {object} model.Error
 // @Router /deployments/{name} [delete]
 // @Tags Kubernetes
 func DeleteDeployment(c echo.Context) (err error) {

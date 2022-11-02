@@ -35,7 +35,7 @@ func GetWorkspaceDB(name string) *mongo.Collection {
 // @Accept  json
 // @Produce  json
 // @Security Bearer
-// @Success 200 {object} model.Workspace
+// @Success 200 {object} model.Error
 // @Header 200 {string} Token "qwerty"
 // @Router /workspaces [post]
 // @Tags Workspace
@@ -59,7 +59,7 @@ func CreateWorkspace(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
 	}
-	
+
 	// log.Fatal(checkModel)
 	// log.Fatal(models.Name)
 	// log.Fatal(FindWorkspaceDB(models.Name))
@@ -101,7 +101,7 @@ func CreateWorkspace(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	newWorkspace := model.NewWorkspace{
 		Name:          models.Name,
 		Description:   models.Description,
@@ -109,7 +109,7 @@ func CreateWorkspace(c echo.Context) (err error) {
 		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Selectcluster: slice,
 	}
-	
+
 	newWorkspace.Created_at = time.Now()
 	result, err := cdb.InsertOne(ctx, newWorkspace)
 	if err != nil {
@@ -190,6 +190,7 @@ func ListWorkspace(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Workspace
 // @Security   Bearer
 // @Param name path string true "name of the workspace"
 // @Router /workspaces/{name} [get]
@@ -281,7 +282,7 @@ func FindWorkspace(c echo.Context) (err error) {
 	Workspace.Resource = ResourceCnt
 	Workspace.ResourceUsage = ResourceUsage
 	Workspace.Events = EventList
-	
+
 	return c.JSON(http.StatusOK, Workspace)
 }
 
@@ -291,6 +292,7 @@ func FindWorkspace(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Error
 // @Security   Bearer
 // @Router /workspaces/{name} [delete]
 // @Param name path string true "Name of the workspaces"

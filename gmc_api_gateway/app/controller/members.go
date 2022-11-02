@@ -36,7 +36,7 @@ func GetMemberDB(name string) *mongo.Collection {
 // @Accept  json
 // @Produce  json
 // @Security Bearer
-// @Success 200 {object} model.Member
+// @Success 200 {object} model.Error
 // @Header 200 {string} Token "qwerty"
 // @Router /members [post]
 // @Tags User
@@ -138,6 +138,7 @@ func ListMember(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Member
 // @Security   Bearer
 // @Param name path string true "name of the Member"
 // @Router /members/{name} [get]
@@ -156,12 +157,14 @@ func FindMember(c echo.Context) (err error) {
 		return c.JSON(http.StatusOK, &member)
 	}
 }
+
 // Delete User godoc
 // @Summary Delete User
 // @Description delete User
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Error
 // @Security   Bearer
 // @Router /members/{name} [delete]
 // @Param name path string true "Name of the User"

@@ -180,7 +180,7 @@ func GetAllJobs(c echo.Context) error {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.JOB
+// @Success 200 {object} model.Error
 // @Router /jobs [post]
 // @Tags Kubernetes
 func CreateJob(c echo.Context) (err error) {
@@ -216,7 +216,7 @@ func CreateJob(c echo.Context) (err error) {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.JOB
+// @Success 200 {object} model.Error
 // @Router /jobs/{name} [delete]
 // @Tags Kubernetes
 func DeleteJob(c echo.Context) (err error) {

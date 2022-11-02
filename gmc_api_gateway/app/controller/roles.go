@@ -122,7 +122,7 @@ func GetRoles(c echo.Context) (err error) {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.ROLE
+// @Success 200 {object} model.Error
 // @Router /roles [post]
 // @Tags Kubernetes
 func CreateRole(c echo.Context) (err error) {
@@ -158,7 +158,7 @@ func CreateRole(c echo.Context) (err error) {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.ROLE
+// @Success 200 {object} model.Error
 // @Router /roles/{name} [delete]
 // @Tags Kubernetes
 func DeleteRole(c echo.Context) (err error) {

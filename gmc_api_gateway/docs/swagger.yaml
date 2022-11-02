@@ -1,5 +1,12 @@
 basePath: /gmcapi/v2
 definitions:
+  model.ADDRESSES:
+    properties:
+      address:
+        type: string
+      type:
+        type: string
+    type: object
   model.Active:
     properties:
       kind:
@@ -80,6 +87,61 @@ definitions:
     - clusterName
     - clusterType
     - token
+    type: object
+  model.CLUSTER_DETAIL:
+    properties:
+      address:
+        type: string
+      cloudType:
+        type: string
+      clusterEndpoint:
+        type: string
+      clusterName:
+        type: string
+      clusterType:
+        type: string
+      created_at:
+        type: string
+      events:
+        items:
+          $ref: '#/definitions/model.EVENT'
+        type: array
+      gpu:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      nodes:
+        items:
+          $ref: '#/definitions/model.NODE'
+        type: array
+      point: {}
+      resource: {}
+      status:
+        type: string
+      token:
+        type: string
+    required:
+    - clusterEndpoint
+    - clusterName
+    - clusterType
+    - token
+    type: object
+  model.CLUSTERROLE:
+    properties:
+      annotations: {}
+      cluster:
+        type: string
+      createAt:
+        type: string
+      label: {}
+      name:
+        type: string
+      rules: {}
+      user:
+        type: string
+      workspace:
+        type: string
     type: object
   model.CLUSTERROLEBINDING:
     properties:
@@ -374,6 +436,15 @@ definitions:
       type:
         type: string
     type: object
+  model.Error:
+    properties:
+      code:
+        type: string
+      data:
+        type: string
+      status:
+        type: string
+    type: object
   model.FieldRef:
     properties:
       apiVersion:
@@ -441,6 +512,13 @@ definitions:
       workspace:
         type: string
     type: object
+  model.KeyValue:
+    properties:
+      Key:
+        type: string
+      Value:
+        type: string
+    type: object
   model.Member:
     properties:
       contact:
@@ -476,6 +554,32 @@ definitions:
       quorum: {}
       total:
         type: integer
+    type: object
+  model.NODE:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/model.ADDRESSES'
+        type: array
+      allocatable: {}
+      annotations: {}
+      capacity: {}
+      containerRuntimeVersion: {}
+      created_at:
+        type: string
+      kernel:
+        type: string
+      kubeVersion:
+        type: string
+      labels: {}
+      name:
+        type: string
+      nodeIP:
+        type: string
+      os:
+        type: string
+      type:
+        type: string
     type: object
   model.OSD:
     properties:
@@ -1137,7 +1241,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CLUSTERROLEBINDING'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create ClusterRolebinding
@@ -1175,7 +1279,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CLUSTERROLEBINDING'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete ClusterRolebinding
@@ -1211,6 +1315,140 @@ paths:
       security:
       - Bearer: []
       summary: Show detail clusterrolebinding
+      tags:
+      - Kubernetes
+  /clusterroles:
+    get:
+      consumes:
+      - application/json
+      description: get Clusterroles List
+      parameters:
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CLUSTERROLE'
+      security:
+      - Bearer: []
+      summary: Show List Clusterroles
+      tags:
+      - Kubernetes
+    post:
+      consumes:
+      - application/json
+      description: Create Clusterrole
+      parameters:
+      - description: Clusterrole Info Body
+        in: body
+        name: json
+        required: true
+        schema:
+          type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
+      security:
+      - Bearer: []
+      summary: Create Clusterrole
+      tags:
+      - Kubernetes
+  /clusterroles/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Clusterrole
+      parameters:
+      - description: name of the Clusterrole
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Project
+        in: query
+        name: project
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
+      security:
+      - Bearer: []
+      summary: Delete Clusterrole
+      tags:
+      - Kubernetes
+    get:
+      consumes:
+      - application/json
+      description: get Clusterroles Details
+      parameters:
+      - description: name of the Clusterroles
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: name of the Cluster
+        in: query
+        name: cluster
+        required: true
+        type: string
+      - description: name of the Workspace
+        in: query
+        name: workspace
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CLUSTERROLE'
+      security:
+      - Bearer: []
+      summary: Show detail Clusterroles
       tags:
       - Kubernetes
   /clusters:
@@ -1251,7 +1489,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.Cluster'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Cluster
@@ -1270,7 +1508,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Cluster
@@ -1288,7 +1530,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CLUSTER_DETAIL'
       security:
       - Bearer: []
       summary: Show detail cluster
@@ -1356,7 +1602,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CONFIGMAP'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Configmap
@@ -1394,7 +1640,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CONFIGMAP'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Configmap
@@ -1516,7 +1762,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CRONJOB'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Cronjob
@@ -1554,7 +1800,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CRONJOB'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Cronjob
@@ -1659,7 +1905,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Daemonset
@@ -1697,7 +1943,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Daemonset
@@ -1802,7 +2048,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Deployment
@@ -1840,7 +2086,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Deployment
@@ -1945,7 +2191,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.JOB'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Job
@@ -1983,7 +2229,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.JOB'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Job
@@ -2064,7 +2310,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.Member'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Member
@@ -2083,7 +2329,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete User
@@ -2101,7 +2351,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Member'
       security:
       - Bearer: []
       summary: Show detail Member
@@ -2169,7 +2423,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.POD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Pod
@@ -2207,7 +2461,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.POD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Pod
@@ -2272,7 +2526,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.USERPROJECT'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create userProject
@@ -2340,7 +2594,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.PVC'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create PVC
@@ -2378,7 +2632,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.PVC'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete PVC
@@ -2483,7 +2737,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.PV'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create PV
@@ -2521,7 +2775,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.PV'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete PV
@@ -2626,7 +2880,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.ROLE'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Role
@@ -2664,7 +2918,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.ROLE'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Role
@@ -2769,7 +3023,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SECRET'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Secret
@@ -2807,7 +3061,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SECRET'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Secret
@@ -2940,7 +3194,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SERVICEACCOUNT'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create ServiceAccount
@@ -2978,7 +3232,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SERVICEACCOUNT'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete ServiceAccount
@@ -3085,7 +3339,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.SERVICE'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Service
@@ -3123,7 +3377,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SERVICE'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Service
@@ -3173,7 +3427,11 @@ paths:
       description: get CloudOS
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.KeyValue'
       security:
       - Bearer: []
       summary: Cloudos
@@ -3186,7 +3444,11 @@ paths:
       description: get ALLCredential
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Credential'
       security:
       - Bearer: []
       summary: Credential
@@ -3205,7 +3467,11 @@ paths:
           type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Credential
@@ -3224,7 +3490,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Credential
@@ -3242,7 +3512,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Credential'
       security:
       - Bearer: []
       summary: Credential
@@ -3310,7 +3584,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Statefulset
@@ -3348,7 +3622,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Statefulset
@@ -3453,7 +3727,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create StorageClass
@@ -3491,7 +3765,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete StorageClass
@@ -3574,13 +3848,17 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PROJECT_DETAIL'
       security:
       - Bearer: []
       summary: Show detail systemProject
       tags:
       - Project
-  /totaldashboard:
+  /totalDashboard:
     get:
       consumes:
       - application/json
@@ -3632,7 +3910,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: delete userProjects
@@ -3650,7 +3932,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PROJECT_DETAIL'
       security:
       - Bearer: []
       summary: Show detail userProject
@@ -3699,7 +3985,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.Workspace'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create workspace
@@ -3718,7 +4004,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Workspace
@@ -3736,7 +4026,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Workspace'
       security:
       - Bearer: []
       summary: Show detail workspace

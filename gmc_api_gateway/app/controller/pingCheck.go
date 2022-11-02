@@ -6,7 +6,7 @@ import (
 	"github.com/jasonlvhit/gocron"
 )
 
-func Task() {
+func ClusterStatusCheck() {
 	clusters := ListDB("cluster")
 	for _, cluster := range clusters {
 		val := node_running(common.InterfaceToString(cluster["clusterName"]))
@@ -33,9 +33,9 @@ func Task() {
 	// fmt.Println("stats : ", stats)
 }
 
-func Test_cron() {
+func Cluster_Status_Cron() {
 	// s := gocron.NewScheduler()
-	gocron.Every(5).Minute().Do(Task)
+	gocron.Every(5).Minute().Do(ClusterStatusCheck)
 	// gocron.Every(5).Seconds().Do(Task)
 	// s.Every(5).Minute().Do(Task)
 	<-gocron.Start()

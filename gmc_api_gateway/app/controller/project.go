@@ -51,7 +51,7 @@ func GetProjectDB(name string) *mongo.Collection {
 // @Accept  json
 // @Produce  json
 // @Security   Bearer
-// @Success 200 {object} model.USERPROJECT
+// @Success 200 {object} model.Error
 // @Header 200 {string} Token "qwerty"
 // @Router /projects [post]
 // @Tags Project
@@ -296,6 +296,7 @@ func difference(slice1 []primitive.M, slice2 []model.SYSTEMPROJECT) []model.SYST
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.PROJECT_DETAIL
 // @Security   Bearer
 // @Param name path string true "name of the userProject"
 // @Router /userProjects/{name} [get]
@@ -369,6 +370,7 @@ func GetUserProject(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.PROJECT_DETAIL
 // @Security   Bearer
 // @Param name path string true "name of the systemProject"
 // @Param cluster query string true "cluster Name of the systemProject"
@@ -436,6 +438,7 @@ func GetSystemProject(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Error
 // @Security   Bearer
 // @Param name path string true "name of the userProjects"
 // @Router /userProjects/{name} [delete]

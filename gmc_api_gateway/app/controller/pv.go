@@ -134,7 +134,7 @@ func GetPV(c echo.Context) error {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.PV
+// @Success 200 {object} model.Error
 // @Router /pvs [post]
 // @Tags Kubernetes
 func CreatePV(c echo.Context) (err error) {
@@ -170,7 +170,7 @@ func CreatePV(c echo.Context) (err error) {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.PV
+// @Success 200 {object} model.Error
 // @Router /pvs/{name} [delete]
 // @Tags Kubernetes
 func DeletePV(c echo.Context) (err error) {

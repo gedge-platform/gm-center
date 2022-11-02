@@ -9,6 +9,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Get Clusterroles godoc
+// @Summary Show detail Clusterroles
+// @Description get Clusterroles Details
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Clusterroles"
+// @Param cluster query string true "name of the Cluster"
+// @Param workspace query string true "name of the Workspace"
+// @Success 200 {object} model.CLUSTERROLE
+// @Router /clusterroles/{name} [get]
+// @Tags Kubernetes
 func GetClusterRole(c echo.Context) error {
 	params := model.PARAMS{
 		Kind:      "clusterroles",
@@ -24,7 +37,6 @@ func GetClusterRole(c echo.Context) error {
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	}
-	fmt.Printf("####clusterroles data confirm : %s", getData)
 	clusterrole := model.CLUSTERROLE{
 		Name:        common.InterfaceToString(common.FindData(getData, "metadata", "name")),
 		Lable:       common.FindData(getData, "metadata", "labels"),
@@ -38,6 +50,18 @@ func GetClusterRole(c echo.Context) error {
 	})
 }
 
+// GetClusterroles godoc
+// @Summary Show List Clusterroles
+// @Description get Clusterroles List
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param cluster query string false "name of the Cluster"
+// @Param workspace query string false "name of the Workspace"
+// @Success 200 {object} model.CLUSTERROLE
+// @Router /clusterroles [get]
+// @Tags Kubernetes
 func GetClusterRoles(c echo.Context) (err error) {
 	var clusterroles []model.CLUSTERROLE
 	params := model.PARAMS{
@@ -51,7 +75,7 @@ func GetClusterRoles(c echo.Context) (err error) {
 		Body:      responseBody(c.Request().Body),
 	}
 	data := GetModelList(params)
-	fmt.Printf("#################clusterroles : %s", data)
+	fmt.Println(data)
 	for i, _ := range data {
 		clusterrole := model.CLUSTERROLE{
 			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
@@ -74,5 +98,78 @@ func GetClusterRoles(c echo.Context) (err error) {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": clusterroles,
+	})
+}
+
+// Create Clusterrole godoc
+// @Summary Create Clusterrole
+// @Description Create Clusterrole
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param json body string true "Clusterrole Info Body"
+// @Param cluster query string true "name of the Cluster"
+// @Param workspace query string true "name of the Workspace"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.Error
+// @Router /clusterroles [post]
+// @Tags Kubernetes
+func CreateClusterrole(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "clusterroles",
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusCreated, echo.Map{
+		"status": "Created",
+		"code":   http.StatusCreated,
+		"data":   postData,
+	})
+}
+
+// Delete Clusterrole godoc
+// @Summary Delete Clusterrole
+// @Description Delete Clusterrole
+// @ApiImplicitParam
+// @Accept  json
+// @Produce  json
+// @Security   Bearer
+// @Param name path string true "name of the Clusterrole"
+// @Param workspace query string true "name of the Workspace"
+// @Param cluster query string true "name of the Cluster"
+// @Param project query string true "name of the Project"
+// @Success 200 {object} model.Error
+// @Router /clusterroles/{name} [delete]
+// @Tags Kubernetes
+func DeleteClusterrole(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:    "clusterroles",
+		Name:    c.Param("name"),
+		Cluster: c.QueryParam("cluster"),
+		Project: c.QueryParam("project"),
+		Method:  c.Request().Method,
+		Body:    responseBody(c.Request().Body),
+	}
+
+	postData, err := common.DataRequest(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"status": "Deleted",
+		"code":   http.StatusOK,
+		"data":   postData,
 	})
 }

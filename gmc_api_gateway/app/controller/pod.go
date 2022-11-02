@@ -182,7 +182,7 @@ func GetAllPods(c echo.Context) error {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.POD
+// @Success 200 {object} model.Error
 // @Router /pods [post]
 // @Tags Kubernetes
 func CreatePod(c echo.Context) (err error) {
@@ -218,7 +218,7 @@ func CreatePod(c echo.Context) (err error) {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.POD
+// @Success 200 {object} model.Error
 // @Router /pods/{name} [delete]
 // @Tags Kubernetes
 func DeletePod(c echo.Context) (err error) {

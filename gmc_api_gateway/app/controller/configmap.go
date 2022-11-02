@@ -126,7 +126,7 @@ func GetAllConfigmaps(c echo.Context) error {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.CONFIGMAP
+// @Success 200 {object} model.Error
 // @Router /configmaps [post]
 // @Tags Kubernetes
 func CreateConfigmap(c echo.Context) (err error) {
@@ -162,7 +162,7 @@ func CreateConfigmap(c echo.Context) (err error) {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.CONFIGMAP
+// @Success 200 {object} model.Error
 // @Router /configmaps/{name} [delete]
 // @Tags Kubernetes
 func DeleteConfigmap(c echo.Context) (err error) {

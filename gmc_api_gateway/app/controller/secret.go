@@ -129,7 +129,7 @@ func GetSecret(c echo.Context) error {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.SECRET
+// @Success 200 {object} model.Error
 // @Router /secrets [post]
 // @Tags Kubernetes
 func CreateSecret(c echo.Context) (err error) {
@@ -165,7 +165,7 @@ func CreateSecret(c echo.Context) (err error) {
 // @Param workspace query string true "name of the Workspace"
 // @Param cluster query string true "name of the Cluster"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.SECRET
+// @Success 200 {object} model.Error
 // @Router /secrets/{name} [delete]
 // @Tags Kubernetes
 func DeleteSecret(c echo.Context) (err error) {

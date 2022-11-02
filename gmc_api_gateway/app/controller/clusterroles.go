@@ -112,7 +112,7 @@ func GetClusterRoles(c echo.Context) (err error) {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.CLUSTERROLE
+// @Success 200 {object} model.Error
 // @Router /clusterroles [post]
 // @Tags Kubernetes
 func CreateClusterrole(c echo.Context) (err error) {

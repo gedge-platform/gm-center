@@ -35,7 +35,7 @@ func GetWorkspaceDB(name string) *mongo.Collection {
 // @Accept  json
 // @Produce  json
 // @Security Bearer
-// @Success 200 {object} model.Workspace
+// @Success 200 {object} model.Error
 // @Header 200 {string} Token "qwerty"
 // @Router /workspaces [post]
 // @Tags Workspace
@@ -190,6 +190,7 @@ func ListWorkspace(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Workspace
 // @Security   Bearer
 // @Param name path string true "name of the workspace"
 // @Router /workspaces/{name} [get]

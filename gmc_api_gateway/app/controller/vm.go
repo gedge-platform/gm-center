@@ -64,6 +64,7 @@ func Conn(name string) *mongo.Collection {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.KeyValue
 // @Security   Bearer
 // @Router /spider/cloudos [get]
 // @Tags VM
@@ -117,6 +118,7 @@ func GetALLCredential(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Credential
 // @Security   Bearer
 // @Router /spider/credentials/{credentialName} [get]
 // @Param credentialName path string true "Name of the credentials"
@@ -163,6 +165,7 @@ func GetALLCredentialCount(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Error
 // @Security   Bearer
 // @Router /spider/credentials [post]
 // @Tags VM

@@ -438,8 +438,9 @@ definitions:
     type: object
   model.Error:
     properties:
+      code:
+        type: string
       data:
-        description: Email    string `json:"email"`
         type: string
       status:
         type: string
@@ -509,6 +510,13 @@ definitions:
       volume:
         type: integer
       workspace:
+        type: string
+    type: object
+  model.KeyValue:
+    properties:
+      Key:
+        type: string
+      Value:
         type: string
     type: object
   model.Member:
@@ -1233,7 +1241,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CLUSTERROLEBINDING'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create ClusterRolebinding
@@ -1367,7 +1375,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CLUSTERROLE'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Clusterrole
@@ -1481,7 +1489,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.Cluster'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Cluster
@@ -1500,7 +1508,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Delete Cluster
@@ -1590,7 +1602,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CONFIGMAP'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Configmap
@@ -1750,7 +1762,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.CRONJOB'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Cronjob
@@ -1893,7 +1905,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Daemonset
@@ -2036,7 +2048,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Deployment
@@ -2179,7 +2191,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.JOB'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Job
@@ -2298,7 +2310,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.Member'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Member
@@ -2339,7 +2351,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Member'
       security:
       - Bearer: []
       summary: Show detail Member
@@ -2407,7 +2423,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.POD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Pod
@@ -2510,7 +2526,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.USERPROJECT'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create userProject
@@ -2578,7 +2594,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.PVC'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create PVC
@@ -2721,7 +2737,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.PV'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create PV
@@ -2864,7 +2880,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.ROLE'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Role
@@ -3007,7 +3023,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SECRET'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Secret
@@ -3178,7 +3194,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.SERVICEACCOUNT'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create ServiceAccount
@@ -3323,7 +3339,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.SERVICE'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Service
@@ -3411,7 +3427,11 @@ paths:
       description: get CloudOS
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.KeyValue'
       security:
       - Bearer: []
       summary: Cloudos
@@ -3447,7 +3467,11 @@ paths:
           type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Credential
@@ -3488,7 +3512,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Credential'
       security:
       - Bearer: []
       summary: Credential
@@ -3556,7 +3584,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create Statefulset
@@ -3699,7 +3727,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WORKLOAD'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create StorageClass
@@ -3820,7 +3848,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PROJECT_DETAIL'
       security:
       - Bearer: []
       summary: Show detail systemProject
@@ -3900,7 +3932,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PROJECT_DETAIL'
       security:
       - Bearer: []
       summary: Show detail userProject
@@ -3949,7 +3985,7 @@ paths:
               description: qwerty
               type: string
           schema:
-            $ref: '#/definitions/model.Workspace'
+            $ref: '#/definitions/model.Error'
       security:
       - Bearer: []
       summary: Create workspace
@@ -3990,7 +4026,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Workspace'
       security:
       - Bearer: []
       summary: Show detail workspace

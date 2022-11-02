@@ -120,7 +120,7 @@ func GetAllClusterrolebindings(c echo.Context) error {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.CLUSTERROLEBINDING
+// @Success 200 {object} model.Error
 // @Router /clusterrolebindings [post]
 // @Tags Kubernetes
 func CreateClusterRolebinding(c echo.Context) (err error) {

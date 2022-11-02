@@ -140,7 +140,7 @@ func GetPVC(c echo.Context) error {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.PVC
+// @Success 200 {object} model.Error
 // @Router /pvcs [post]
 // @Tags Kubernetes
 func CreatePVC(c echo.Context) (err error) {

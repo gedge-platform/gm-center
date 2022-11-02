@@ -145,7 +145,7 @@ func GetCronAllJobs(c echo.Context) error {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.CRONJOB
+// @Success 200 {object} model.Error
 // @Router /cronjobs [post]
 // @Tags Kubernetes
 func CreateCronJob(c echo.Context) (err error) {

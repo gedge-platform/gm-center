@@ -35,7 +35,7 @@ func GetClusterDB(name string) *mongo.Collection {
 // @Accept  json
 // @Security Bearer
 // @Produce  json
-// @Success 200 {object} model.Cluster
+// @Success 200 {object} model.Error
 // @Header 200 {string} Token "qwerty"
 // @Router /clusters [post]
 // @Tags Cluster
@@ -295,6 +295,7 @@ func FindClusterDB(value string) *model.Cluster {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Error
 // @Security   Bearer
 // @Router /clusters/{name} [delete]
 // @Param name path string true "Name of the cluster"

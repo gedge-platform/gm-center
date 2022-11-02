@@ -222,7 +222,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.CLUSTERROLEBINDING"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -429,7 +429,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.CLUSTERROLE"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -601,7 +601,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Cluster"
+                            "$ref": "#/definitions/model.Error"
                         },
                         "headers": {
                             "Token": {
@@ -675,7 +675,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
             }
         },
         "/configmaps": {
@@ -778,7 +785,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.CONFIGMAP"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1026,7 +1033,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.CRONJOB"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1246,7 +1253,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.WORKLOAD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1466,7 +1473,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.WORKLOAD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1686,7 +1693,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.JOB"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -1865,7 +1872,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Member"
+                            "$ref": "#/definitions/model.Error"
                         },
                         "headers": {
                             "Token": {
@@ -1904,7 +1911,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Member"
+                        }
+                    }
+                }
             },
             "delete": {
                 "security": [
@@ -2042,7 +2056,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.POD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -2195,7 +2209,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.USERPROJECT"
+                            "$ref": "#/definitions/model.Error"
                         },
                         "headers": {
                             "Token": {
@@ -2307,7 +2321,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.PVC"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -2527,7 +2541,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.PV"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -2747,7 +2761,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.ROLE"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -2967,7 +2981,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SECRET"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -3231,7 +3245,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SERVICEACCOUNT"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -3447,7 +3461,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.SERVICE"
+                            "$ref": "#/definitions/model.Error"
                         },
                         "headers": {
                             "Token": {
@@ -3591,7 +3605,14 @@ const docTemplate = `{
                     "VM"
                 ],
                 "summary": "Cloudos",
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.KeyValue"
+                        }
+                    }
+                }
             }
         },
         "/spider/credentials": {
@@ -3649,7 +3670,14 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
             }
         },
         "/spider/credentials/{credentialName}": {
@@ -3679,7 +3707,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Credential"
+                        }
+                    }
+                }
             },
             "delete": {
                 "security": [
@@ -3817,7 +3852,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.WORKLOAD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -4037,7 +4072,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.WORKLOAD"
+                            "$ref": "#/definitions/model.Error"
                         }
                     }
                 }
@@ -4227,7 +4262,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.PROJECT_DETAIL"
+                        }
+                    }
+                }
             }
         },
         "/totalDashboard": {
@@ -4321,7 +4363,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.PROJECT_DETAIL"
+                        }
+                    }
+                }
             },
             "delete": {
                 "security": [
@@ -4426,7 +4475,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Workspace"
+                            "$ref": "#/definitions/model.Error"
                         },
                         "headers": {
                             "Token": {
@@ -4465,7 +4514,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Workspace"
+                        }
+                    }
+                }
             },
             "delete": {
                 "security": [
@@ -5144,8 +5200,10 @@ const docTemplate = `{
         "model.Error": {
             "type": "object",
             "properties": {
+                "code": {
+                    "type": "string"
+                },
                 "data": {
-                    "description": "Email    string ` + "`" + `json:\"email\"` + "`" + `",
                     "type": "string"
                 },
                 "status": {
@@ -5248,6 +5306,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "workspace": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.KeyValue": {
+            "type": "object",
+            "properties": {
+                "Key": {
+                    "type": "string"
+                },
+                "Value": {
                     "type": "string"
                 }
             }

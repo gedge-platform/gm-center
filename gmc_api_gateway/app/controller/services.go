@@ -151,7 +151,7 @@ func GetServices(c echo.Context) (err error) {
 // @Accept  json
 // @Security Bearer
 // @Produce  json
-// @Success 200 {object} model.SERVICE
+// @Success 200 {object} model.Error
 // @Header 200 {string} Token "qwerty"
 // @Router /services [post]
 // @Tags Kubernetes

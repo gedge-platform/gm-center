@@ -144,7 +144,7 @@ func GetStorageclasses(c echo.Context) (err error) {
 // @Param cluster query string true "name of the Cluster"
 // @Param workspace query string true "name of the Workspace"
 // @Param project query string true "name of the Project"
-// @Success 200 {object} model.WORKLOAD
+// @Success 200 {object} model.Error
 // @Router /storageclasses [post]
 // @Tags Kubernetes
 func CreateStorageclasses(c echo.Context) (err error) {

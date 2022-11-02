@@ -36,7 +36,7 @@ func GetMemberDB(name string) *mongo.Collection {
 // @Accept  json
 // @Produce  json
 // @Security Bearer
-// @Success 200 {object} model.Member
+// @Success 200 {object} model.Error
 // @Header 200 {string} Token "qwerty"
 // @Router /members [post]
 // @Tags User
@@ -138,6 +138,7 @@ func ListMember(c echo.Context) (err error) {
 // @ApiImplicitParam
 // @Accept  json
 // @Produce  json
+// @Success 200 {object} model.Member
 // @Security   Bearer
 // @Param name path string true "name of the Member"
 // @Router /members/{name} [get]

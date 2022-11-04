@@ -34,7 +34,11 @@ func GetAllPVCs(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	// Name        string           `json:"name"`
 	// Capacity   string           `json:"capacity"`
 	// AccessMode      []string `json:"accessMode"`
@@ -86,7 +90,7 @@ func GetAllPVCs(c echo.Context) error {
 // @Success 200 {object} model.PVC
 // @Router /pvcs/{name} [get]
 // @Tags Kubernetes
-func GetPVC(c echo.Context) error {
+func GetPVC(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "persistentvolumeclaims",
 		Name:      c.Param("name"),
@@ -95,6 +99,11 @@ func GetPVC(c echo.Context) error {
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
+	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
 	}
 	getData, err := common.DataRequest(params)
 	// if err != nil {

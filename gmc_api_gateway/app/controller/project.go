@@ -181,6 +181,11 @@ func ListUserProject(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	var showsProject []bson.M
 	// var userProject model.NewProject
 	var userProjects []model.USERPROJECT
@@ -247,6 +252,7 @@ func ListSystemProject(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+
 	Projects := ListDB("project")
 	params.Project = ""
 	clusters := GetDB("cluster", params.Cluster, "clusterName")
@@ -255,7 +261,12 @@ func ListSystemProject(c echo.Context) (err error) {
 		return
 	}
 	var projects []model.SYSTEMPROJECT
-	getData := GetModelList(params)
+	getData, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
 	for k, _ := range getData {
 		project := model.SYSTEMPROJECT{
 			Name:        common.InterfaceToString(common.FindData(getData[k], "metadata", "name")),
@@ -311,6 +322,12 @@ func GetUserProject(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
 	params.Project = params.Name
 	project := GetDBProject(params)
 	if project.Name == "" {
@@ -386,19 +403,25 @@ func GetSystemProject(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	clusters := GetDB("cluster", params.Cluster, "clusterName")
-	if params.Cluster == "" {
-		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrClusterNotFound)
-		return c.JSON(http.StatusNotFound, echo.Map{
-			"error": msg,
-		})
-	} else if params.Cluster != "" && clusters == nil {
-		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrClusterNotFound)
-		return c.JSON(http.StatusNotFound, echo.Map{
-			"error": msg,
-		})
-	}
 	params.Project = params.Name
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	// clusters := GetDB("cluster", params.Cluster, "clusterName")
+	// if params.Cluster == "" {
+	// 	msg := common.ErrorMsg2(http.StatusNotFound, common.ErrClusterNotFound)
+	// 	return c.JSON(http.StatusNotFound, echo.Map{
+	// 		"error": msg,
+	// 	})
+	// } else if params.Cluster != "" && clusters == nil {
+	// 	msg := common.ErrorMsg2(http.StatusNotFound, common.ErrClusterNotFound)
+	// 	return c.JSON(http.StatusNotFound, echo.Map{
+	// 		"error": msg,
+	// 	})
+	// }
+
 	getData, err := common.DataRequest(params)
 	if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
 		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)

@@ -23,7 +23,7 @@ import (
 // @Success 200 {object} model.JOB_DETAIL
 // @Router /jobs/{name} [get]
 // @Tags Kubernetes
-func GetJobs(c echo.Context) error {
+func GetJobs(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "jobs",
 		Name:      c.Param("name"),
@@ -34,7 +34,11 @@ func GetJobs(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	getData, err := common.DataRequest(params)
 	// if err != nil {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)
@@ -130,7 +134,12 @@ func GetAllJobs(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
 	// fmt.Printf("####data confirm : %s", data)
 
 	for i, _ := range data {

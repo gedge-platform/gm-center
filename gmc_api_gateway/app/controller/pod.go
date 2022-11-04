@@ -32,6 +32,11 @@ func GetPods(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	getData, err := common.DataRequest(params)
 	// if err != nil {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)
@@ -121,7 +126,11 @@ func GetAllPods(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	// fmt.Printf("####Pod data confirm : %s", data)
 
 	for i, _ := range data {

@@ -23,7 +23,7 @@ import (
 // @Success 200 {object} model.SERVICE
 // @Router /services/{name} [get]
 // @Tags Kubernetes
-func GetService(c echo.Context) error {
+func GetService(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "services",
 		Name:      c.Param("name"),
@@ -33,6 +33,11 @@ func GetService(c echo.Context) error {
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
+	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
 	}
 	if params.Cluster == "" || GetDB("cluster", params.Cluster, "clusterName") == nil {
 		common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found Cluster"))
@@ -108,7 +113,11 @@ func GetServices(c echo.Context) (err error) {
 			return nil
 		}
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	// fmt.Printf("#################dataerr : %s", data)
 	for i, _ := range data {
 		service := model.SERVICE{

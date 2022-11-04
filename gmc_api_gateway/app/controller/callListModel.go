@@ -9,11 +9,13 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-func GetModelList(params model.PARAMS) []string {
-	var DataList []string
+func GetModelList(params model.PARAMS) (DataList []string, err error) {
+	err = CheckParam(params)
+
+	// var DataList []string
 
 	if params.Workspace == "" && params.Cluster == "" && params.Project == "" {
-		log.Println("#################ALL List")
+		// log.Println("#################ALL List")
 		Clusters := ListClusterDB("cluster")
 		for c, _ := range Clusters {
 			params.Cluster = Clusters[c].Name
@@ -38,9 +40,9 @@ func GetModelList(params model.PARAMS) []string {
 
 			}
 		}
-		return DataList
+		return DataList, err
 	} else if params.Workspace == "" && params.Cluster != "" && params.Project == "" {
-		log.Println("#################Cluster List")
+		// log.Println("#################Cluster List")
 		getData, _ := common.DataRequest(params)
 		getData0 := gjson.Get(getData, "items").Array()
 		for k, _ := range getData0 {
@@ -54,7 +56,7 @@ func GetModelList(params model.PARAMS) []string {
 			strVal3, _ := sjson.Set(strVal2, "userName", projectCheck.MemberName)
 			DataList = append(DataList, strVal3)
 		}
-		return DataList
+		return DataList, err
 	} else if params.Workspace != "" && params.Cluster == "" && params.Project == "" {
 		log.Println("#################Workspace List")
 		Workspace := GetDBWorkspace(params)
@@ -79,9 +81,9 @@ func GetModelList(params model.PARAMS) []string {
 				}
 			}
 		}
-		return DataList
+		return DataList, err
 	} else if params.Project != "" && params.Workspace != "" {
-		log.Println("#################Project List")
+		// log.Println("#################Project List")
 		project := GetDBProject(params)
 		Clusters := project.Selectcluster
 		for c, _ := range Clusters {
@@ -97,9 +99,9 @@ func GetModelList(params model.PARAMS) []string {
 			}
 
 		}
-		return DataList
+		return DataList, err
 	} else if params.Project != "" && params.Name != "" {
-		log.Println("#################Project Name List")
+		// log.Println("#################Project Name List")
 		Clusters := ListClusterDB("cluster")
 		for c, _ := range Clusters {
 			params.Cluster = Clusters[c].Name
@@ -114,7 +116,7 @@ func GetModelList(params model.PARAMS) []string {
 			DataList = append(DataList, strVal)
 
 		}
-		return DataList
+		return DataList, err
 		// 	} else {
 		// 		workspace := GetDBWorkspace(params)
 		// 		selectCluster := workspace.SelectCluster
@@ -247,6 +249,6 @@ func GetModelList(params model.PARAMS) []string {
 		// 	return DataList
 
 	}
-	return nil
+	return nil, nil
 
 }

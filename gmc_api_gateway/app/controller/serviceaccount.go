@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} model.SERVICEACCOUNT
 // @Router /serviceaccounts [get]
 // @Tags Kubernetes
-func GetServiceaccount(c echo.Context) error {
+func GetServiceaccount(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "serviceaccounts",
 		Name:      c.Param("name"),
@@ -31,6 +31,12 @@ func GetServiceaccount(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
 	getData, err := common.DataRequest(params)
 	// if err != nil {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)
@@ -91,7 +97,11 @@ func GetAllServiceaccounts(c echo.Context) error {
 	// 	return nil
 	// }
 
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	for i, _ := range data {
 		serviceaccount := model.SERVICEACCOUNT{
 			Name:      common.InterfaceToString(common.FindData(data[i], "metadata", "name")),

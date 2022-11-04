@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 	"net/http"
@@ -35,6 +34,12 @@ func GetCronJobs(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
 	getData, err := common.DataRequest(params)
 	// if err != nil {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)
@@ -95,7 +100,7 @@ func GetCronJobs(c echo.Context) (err error) {
 // @Tags Kubernetes
 func GetCronAllJobs(c echo.Context) error {
 	var cronjobs []model.CRONJOB
-	fmt.Printf("## cronjobs", cronjobs)
+	// fmt.Printf("## cronjobs", cronjobs)
 	params := model.PARAMS{
 		Kind:      "cronjobs",
 		Name:      c.Param("name"),
@@ -106,8 +111,12 @@ func GetCronAllJobs(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
-	fmt.Printf("####data confirm : %s", data)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	// fmt.Printf("####data confirm : %s", data)
 	for i, _ := range data {
 
 		cronjob := model.CRONJOB{

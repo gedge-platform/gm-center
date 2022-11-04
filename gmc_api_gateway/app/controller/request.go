@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -57,7 +56,7 @@ func CreateRequest(c echo.Context) (err error) {
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
@@ -127,8 +126,8 @@ func ListRequest(c echo.Context) (err error) {
 	for _, request := range showsRequest {
 		var tmp_request model.NewRequest
 		common.Transcode(request, &tmp_request)
-		fmt.Println("request : ", request)
-		fmt.Println("tmp_request : ", tmp_request)
+		// fmt.Println("request : ", request)
+		// fmt.Println("tmp_request : ", tmp_request)
 		var project model.NewProject
 		cdb2 := GetRequestDB("project")
 		ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -137,10 +136,10 @@ func ListRequest(c echo.Context) (err error) {
 		}
 		params.Project = project.Name
 		tmp_project := GetDBProject(params)
-		fmt.Println("request : ", request)
+		// fmt.Println("request : ", request)
 		cluster := GetDB("cluster", tmp_request.Cluster, "_id")
 		member := GetDB("member", request["requestCreator"], "_id")
-		fmt.Println("member : ", member)
+		// fmt.Println("member : ", member)
 		result := model.DBRequest{
 			ObjectID:   request["_id"],
 			Id:         tmp_request.Id,
@@ -187,9 +186,9 @@ func FindRequest(c echo.Context) (err error) {
 		showLoadedCursor, err := cdb.Aggregate(ctx, mongo.Pipeline{lookupCluster, lookupWorkspace, lookupProject, matchCluster})
 
 		if err = showLoadedCursor.All(ctx, &showsRequest); err != nil {
-			panic(err)
+			log.Println(err)
 		}
-		fmt.Println(showsRequest)
+		// fmt.Println(showsRequest)
 	}
 
 	if err := cur.Err(); err != nil {
@@ -250,7 +249,7 @@ func UpdateRequest(c echo.Context) (err error) {
 
 	if err = validate.Struct(models); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, err)
 		return
@@ -268,7 +267,7 @@ func UpdateRequest(c echo.Context) (err error) {
 		update = bson.M{"status": models.Status, "reason": models.Reason, "date": models.Date, "code": models.Code, "cluster": clusterObjectId2[0][0].Value.(primitive.ObjectID)}
 	}
 
-	fmt.Println(update)
+	// fmt.Println(update)
 
 	result, err := cdb.UpdateOne(ctx, bson.M{"request_id": search_val}, bson.M{"$set": update})
 	if err != nil {
@@ -291,7 +290,7 @@ func UpdateRequest(c echo.Context) (err error) {
 func StringToInterface(i string) interface{} {
 	var x interface{}
 	if err := json.Unmarshal([]byte(i), &x); err != nil {
-		fmt.Printf("Error : %s\n", err)
+		log.Printf("Error : %s\n", err)
 	}
 	return x
 }

@@ -22,7 +22,7 @@ import (
 // @Success 200 {object} model.CONFIGMAP
 // @Router /configmaps/{name} [get]
 // @Tags Kubernetes
-func GetConfigmap(c echo.Context) error {
+func GetConfigmap(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "configmaps",
 		Name:      c.Param("name"),
@@ -31,6 +31,11 @@ func GetConfigmap(c echo.Context) error {
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
+	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
 	}
 	getData, err := common.DataRequest(params)
 	if err != nil {
@@ -69,7 +74,7 @@ func GetConfigmap(c echo.Context) error {
 // @Success 200 {object} model.CONFIGMAP
 // @Router /configmaps [get]
 // @Tags Kubernetes
-func GetAllConfigmaps(c echo.Context) error {
+func GetAllConfigmaps(c echo.Context) (err error) {
 	var configmaps []model.CONFIGMAP
 	params := model.PARAMS{
 		Kind:      "configmaps",
@@ -86,8 +91,16 @@ func GetAllConfigmaps(c echo.Context) error {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)
 	// 	return nil
 	// }
-
-	data := GetModelList(params)
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 
 	for i, _ := range data {
 		configmap := model.CONFIGMAP{

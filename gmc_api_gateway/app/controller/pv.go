@@ -35,7 +35,11 @@ func GetAllPVs(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 
 	for i, _ := range data {
 		pv := model.PV{
@@ -79,7 +83,7 @@ func GetAllPVs(c echo.Context) error {
 // @Success 200 {object} model.PV
 // @Router /pvs/{name} [get]
 // @Tags Kubernetes
-func GetPV(c echo.Context) error {
+func GetPV(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "persistentvolumes",
 		Name:      c.Param("name"),
@@ -90,7 +94,11 @@ func GetPV(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	getData, err := common.DataRequest(params)
 	// if err != nil {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)

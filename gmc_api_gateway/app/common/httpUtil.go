@@ -68,6 +68,7 @@ var nsTemplates = map[string]string{
 }
 
 func DataRequest(params model.PARAMS) (data string, err error) {
+
 	var endPoint, token_value string
 
 	if err := validate(params); err != nil {
@@ -75,7 +76,7 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	}
 	// clusters, _ := FindClusterDB(params.Cluster)
 	// fmt.Println("[####cluster] : ", clusters)
-	if data, err := FindClusterDB(params.Cluster); err != nil || data.Status == "fail" {
+	if data, err := FindClusterDB(params.Cluster); err != nil || data.Status == "false" {
 		return "", err
 	} else {
 		endPoint = data.Endpoint

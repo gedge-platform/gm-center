@@ -34,11 +34,14 @@ func GetDeployment(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 
-	deploymentName := params.Name
-	params.Name = params.Project
-	params.Name = deploymentName
 	getData, err := common.DataRequest(params)
+
 	if err != nil || common.InterfaceToString(common.FindData(getData, "status", "")) == "Failure" {
 		msg := common.ErrorMsg2(http.StatusNotFound, common.ErrNotFound)
 		return c.JSON(http.StatusNotFound, echo.Map{
@@ -112,7 +115,18 @@ func GetDeployments(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	// msg := CheckParam(c, params)
+	// if msg != nil {
+	// 	common.ErrorMsg(c, http.StatusNotFound, msg)
+	// 	return nil
+	// }
+
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
 	for i, _ := range data {
 		var ReadyReplica string
 		if common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas")) != "" {

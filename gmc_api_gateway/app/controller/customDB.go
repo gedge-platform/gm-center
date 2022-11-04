@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 	"log"
@@ -163,7 +162,7 @@ func GetUserProjectResource(params model.PARAMS, clusters []model.Cluster) (mode
 		result := &model.Resource_usage{}
 		tempresult := NowMonit("namespace", params.Cluster, params.Name, tempMetric)
 		if err := mapstructure.Decode(tempresult, &result); err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		cpu_usage += result.Namespace_cpu
 		memory_usage += result.Namespace_memory
@@ -196,7 +195,7 @@ func GetUserProjectResource(params model.PARAMS, clusters []model.Cluster) (mode
 }
 
 func ResourceCnt(params model.PARAMS, kind string) int {
-	fmt.Printf("[###Params] : %+v", params)
+	// fmt.Printf("[###Params] : %+v", params)
 	params.Kind = kind
 	params.Project = params.Name
 	params.Name = ""
@@ -240,6 +239,36 @@ func UpdateClusterDB(c, status string) (err error) {
 		if err := cdb.FindOne(ctx, bson.M{"memberId": search_val}).Decode(&cdb); err != nil {
 			// common.ErrorMsg(c, http.StatusNotFound, errors.New("failed to match Member."))
 			return err
+		}
+	}
+	return nil
+}
+
+func CheckParam(params model.PARAMS) (err error) {
+	log.Println(params)
+	if params.Cluster != "" {
+		cluster := FindClusterDB(params.Cluster)
+		if cluster == nil {
+			return common.ErrClusterNotFound
+		}
+	}
+	if params.Workspace != "" {
+		workspace := GetDBWorkspace(params)
+		if workspace.Name == "" {
+			return common.ErrWorkspaceNotFound
+		}
+	}
+	if params.Project != "" {
+		project, _ := Check_namespace(namespaceMetric["namespace_check"], params.Project)
+		if project == 0 {
+			return common.ErrProjectNotFound
+		}
+	}
+
+	if params.User != "" {
+		user := FindMemberDB(params)
+		if user.Name == "" {
+			return common.ErrMemberNotFound
 		}
 	}
 	return nil

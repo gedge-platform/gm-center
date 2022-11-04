@@ -32,7 +32,11 @@ func GetStatefulset(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	getData, err := common.DataRequest(params)
 	// if err != nil {
 	// 	common.ErrorMsg(c, http.StatusNotFound, err)
@@ -101,7 +105,11 @@ func GetAllStatefulset(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	for i, _ := range data {
 		var ReadyReplica string
 		if common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas")) != "" {
@@ -133,61 +141,6 @@ func GetAllStatefulset(c echo.Context) (err error) {
 		"data": daemonsets,
 	})
 }
-
-// Get Statefulset godoc
-// @Summary Show List Statefulset
-// @Description get Statefulset List
-// @ApiImplicitParam
-// @Accept  json
-// @Produce  json
-// @Security   Bearer
-// @Param workspace query string true "name of the Workspace"
-// @Param cluster query string true "name of the Cluster"
-// @Param project query string true "name of the Project"
-// @Success 200 {object} model.WORKLOAD
-// @Router /statefulsets [get]
-// @Tags Kubernetes
-// func GetStatefulsets(c echo.Context) (err error) {
-// 	var Statefulsets []model.WORKLOAD
-// 	params := model.PARAMS{
-// 		Kind:      "statefulsets",
-// 		Name:      c.Param("name"),
-// 		Cluster:   c.QueryParam("cluster"),
-// 		Workspace: c.QueryParam("workspace"),
-// 		Project:   c.QueryParam("project"),
-// 		User:      c.QueryParam("user"),
-// 		Method:    c.Request().Method,
-// 		Body:      responseBody(c.Request().Body),
-// 	}
-// 	data := GetModelList(params)
-// 	for i, _ := range data {
-// 		var ReadyReplica string
-// 		if common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas")) != "" {
-// 			ReadyReplica = common.InterfaceToString(common.FindData(data[i], "status", "readyReplicas"))
-// 		} else {
-// 			ReadyReplica = "0"
-// 		}
-// 		Statefulset := model.WORKLOAD{
-// 			Name:          common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
-// 			Namespace:     common.InterfaceToString(common.FindData(data[i], "metadata", "namespace")),
-// 			ClusterName:   common.InterfaceToString(common.FindData(data[i], "clusterName", "")),
-// 			CreateAt:      common.InterfaceToTime(common.FindData(data[i], "metadata", "creationTimestamp")),
-// 			READY:         ReadyReplica + "/" + common.InterfaceToString(common.FindData(data[i], "spec", "replicas")),
-// 			WorkspaceName: common.InterfaceToString(common.FindData(data[i], "workspaceName", "")),
-// 			UserName:      common.InterfaceToString(common.FindData(data[i], "userName", "")),
-// 		}
-// 		if params.User != "" {
-// 			if params.User == Statefulset.UserName {
-// 				Statefulsets = append(Statefulsets, Statefulset)
-// 			}
-// 		} else {
-// 			Statefulsets = append(Statefulsets, Statefulset)
-// 		}
-// 	}
-// 	return c.JSON(http.StatusOK, echo.Map{
-// 		"data": Statefulsets,
-// 	})
-// }
 
 // Create Statefulset godoc
 // @Summary Create Statefulset

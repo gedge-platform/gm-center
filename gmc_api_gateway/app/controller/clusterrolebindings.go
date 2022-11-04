@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} model.CLUSTERROLEBINDING
 // @Router /clusterrolebindings/{name} [get]
 // @Tags Kubernetes
-func GetClusterrolebinding(c echo.Context) error {
+func GetClusterrolebinding(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "clusterrolebindings",
 		Name:      c.Param("name"),
@@ -31,6 +31,12 @@ func GetClusterrolebinding(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+
 	getData, err := common.DataRequest(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)
@@ -82,8 +88,11 @@ func GetAllClusterrolebindings(c echo.Context) error {
 	// 	return nil
 	// }
 
-	data := GetModelList(params)
-
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	for i, _ := range data {
 		clusterrolebinding := model.CLUSTERROLEBINDING{
 			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),

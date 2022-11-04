@@ -145,6 +145,11 @@ func ListWorkspace(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	var showsWorkspace []bson.M
 	var Workspace []model.DBWorkspace
 
@@ -206,6 +211,11 @@ func FindWorkspace(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	var deployment_count int
 	var daemonset_count int
 	var Statefulset_count int
@@ -220,10 +230,10 @@ func FindWorkspace(c echo.Context) (err error) {
 	var EventList []model.EVENT
 	params.Workspace = params.Name
 	workspace := GetDBWorkspace(params)
-	if workspace.Name == "" {
-		common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found Workspace"))
-		return
-	}
+	// if workspace.Name == "" {
+	// 	common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found Workspace"))
+	// 	return
+	// }
 	var Workspace model.Workspace_detail
 	var projectList []model.Workspace_project
 	Workspace.DBWorkspace = workspace

@@ -50,6 +50,7 @@ func CreateMember(c echo.Context) (err error) {
 		// Method:    c.Request().Method,
 		// Body:      responseBody(c.Request().Body),
 	}
+
 	cdb := GetMemberDB("member")
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)

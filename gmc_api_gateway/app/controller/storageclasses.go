@@ -24,7 +24,7 @@ import (
 // @Success 200 {object} model.STORAGECLASS
 // @Router /storageclasses/{name} [get]
 // @Tags Kubernetes
-func GetStorageclass(c echo.Context) error {
+func GetStorageclass(c echo.Context) (err error) {
 	// var storageclasses []model.STORAGECLASS
 	params := model.PARAMS{
 		Kind:      "storageclasses",
@@ -34,6 +34,11 @@ func GetStorageclass(c echo.Context) error {
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
+	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
 	}
 
 	getData, err := common.DataRequest(params)
@@ -99,7 +104,11 @@ func GetStorageclasses(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 
 	for i, _ := range data {
 		var allowVolumeExpansion string

@@ -22,7 +22,7 @@ import (
 // @Success 200 {object} model.ROLE
 // @Router /roles/{name} [get]
 // @Tags Kubernetes
-func GetRole(c echo.Context) error {
+func GetRole(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "roles",
 		Name:      c.Param("name"),
@@ -31,6 +31,11 @@ func GetRole(c echo.Context) error {
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
+	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
 	}
 	getData, err := common.DataRequest(params)
 	// if err != nil {
@@ -84,7 +89,11 @@ func GetRoles(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	for i, _ := range data {
 		role := model.ROLE{
 			Name:        common.InterfaceToString(common.FindData(data[i], "metadata", "name")),

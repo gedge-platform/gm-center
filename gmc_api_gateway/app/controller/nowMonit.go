@@ -256,7 +256,7 @@ func GpuCheck(c string) ([]map[string]interface{}, bool) {
 			for _, val := range data.(model.Matrix) {
 				gpu := make(map[string]interface{})
 				// value = val.Value
-				fmt.Println(val.Metric["name"])
+				// fmt.Println(val.Metric["name"])
 				gpu["name"] = val.Metric["name"]
 				gpu["node"] = val.Metric["node"]
 				gpu["uuid"] = val.Metric["uuid"]

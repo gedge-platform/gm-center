@@ -35,7 +35,11 @@ func GetAllSecrets(c echo.Context) error {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	data := GetModelList(params)
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
 	for i, _ := range data {
 		secret := model.SECRET{
 			Name:      common.InterfaceToString(common.FindData(data[i], "metadata", "name")),
@@ -79,7 +83,7 @@ func GetAllSecrets(c echo.Context) error {
 // @Success 200 {object} model.SECRET
 // @Router /secrets/{name} [get]
 // @Tags Kubernetes
-func GetSecret(c echo.Context) error {
+func GetSecret(c echo.Context) (err error) {
 	params := model.PARAMS{
 		Kind:      "secrets",
 		Name:      c.Param("name"),
@@ -88,6 +92,11 @@ func GetSecret(c echo.Context) error {
 		Project:   c.QueryParam("project"),
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
+	}
+	err = CheckParam(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
 	}
 	getData, err := common.DataRequest(params)
 	// if err != nil {

@@ -59,6 +59,7 @@ var namespaceMetric = map[string]string{
 	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
 	"namespace_memory":    "round(sum(sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)/1024/1024/1024,0.1)",
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
+	"namespace_check":     "kube_namespace_labels{$1} OR vector(0)",
 }
 
 var podMetric = map[string]string{
@@ -758,4 +759,26 @@ func Query_monit(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, echo.Map{
 		"items": data,
 	})
+}
+
+func Check_namespace(query string, n string) (result int, err error) {
+	config.Init()
+	temp_filter := make(map[string]string)
+	addr := os.Getenv("PROMETHEUS")
+
+	temp_filter["namespace"] = n
+
+	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
+	if err != nil {
+		log.Println("err : ", err)
+	} else {
+		if check := len(data.(model.Matrix)) != 0; check {
+			data := data.(model.Matrix)
+			// resource := make(map[string]interface{})
+			value := data[0].Values[0].Value
+			resource := common.InterfaceToInt(value)
+			result = resource
+		}
+	}
+	return result, nil
 }

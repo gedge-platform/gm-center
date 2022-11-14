@@ -249,7 +249,7 @@ func CreateCredential(c echo.Context) (err error) {
 
 	getData, err := common.DataRequest_spider(params)
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	}
 
 	check := CreateCredentialDB(getCredential)
@@ -320,7 +320,7 @@ func DeleteCredential(c echo.Context) (err error) {
 
 	getData, err := common.DataRequest_spider(params)
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	}
 
 	check := DeleteCredentialDB(credentialName)
@@ -368,7 +368,7 @@ func GetConnectionconfig(c echo.Context) (err error) {
 }
 
 func CheckConnectionConfig(c echo.Context, getCredential model.GetCredential) string {
-	fmt.Println("[CheckConnectionConfig in]")
+	// fmt.Println("[CheckConnectionConfig in]")
 
 	CredentialName := getCredential.CredentialName
 	ProviderName := getCredential.ProviderName
@@ -400,7 +400,7 @@ func CheckConnectionConfig(c echo.Context, getCredential model.GetCredential) st
 
 		_, err := common.DataRequest_spider(params)
 		if err != nil {
-			fmt.Println("err : ", err)
+			log.Println("err : ", err)
 		}
 	}
 
@@ -1862,4 +1862,23 @@ func DeleteCredentialDB(credentialName string) bool {
 	} else {
 		return true
 	}
+}
+
+func GetSpecList(c echo.Context) (err error) {
+	Provider := c.QueryParam("provider")
+	Type := c.QueryParam("type")
+	cdb := GetClusterDB("vm")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := Provider
+	search_val2 := Type
+	cursor, err := cdb.Find(context.TODO(), bson.D{{Key: "provider", Value: search_val}, {Key: "Type", Value: search_val2}})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var results []bson.M
+	if err = cursor.All(ctx, &results); err != nil {
+		log.Fatal(err)
+	}
+	return c.JSON(http.StatusOK, echo.Map{"data": results})
 }

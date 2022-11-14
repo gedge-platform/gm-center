@@ -213,6 +213,8 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.DELETE("/credentials/:name", c.DeleteCredential)
 	r3.GET("/credentialsCount", c.GetALLCredentialCount)
 
+	r3.GET("/specList", c.GetSpecList)
+
 	r3.GET("/connectionconfig", c.GetALLConnectionconfig)
 	r3.GET("/connectionconfig/:configName", c.GetConnectionconfig)
 	r3.POST("/connectionconfig", c.CreateConnectionconfig)

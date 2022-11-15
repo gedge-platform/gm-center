@@ -899,7 +899,7 @@ func CreateVm(c echo.Context) (err error) {
 	getData, _ := common.DataRequest_spider(params)
 
 	vm := common.StringToInterface(getData)
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusCreated, echo.Map{
 		"data": vm,
 	})
 }
@@ -1834,6 +1834,44 @@ func ListCredentialDB(c echo.Context) (err error) {
 	})
 }
 
+
+// GetAllCredential godoc
+// @Summary Show List credential
+// @Description get credential List
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} model.Credential
+// @Security Bearer
+// @Router /credentials [get]
+// @Tags Credential
+func TypeCredentialDB(c echo.Context) (err error) {
+	var showsCredential []bson.M
+	_type := c.Param("type")
+
+	cdb := GetCredentialDB("credentials")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+
+	findOptions := options.Find()
+
+	cur, err := cdb.Find(context.TODO(), bson.D{{"type", strings.ToUpper(_type)}}, findOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = cur.All(ctx, &showsCredential); err != nil {
+		panic(err)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	cur.Close(context.TODO())
+	return c.JSON(http.StatusOK, echo.Map{
+		"status": http.StatusOK,
+		"data":   showsCredential,
+	})
+}
+
 func FindCredentialDB(c echo.Context) (err error) {
 	var credential model.Credential
 	cdb := GetCredentialDB("credentials")
@@ -1862,4 +1900,22 @@ func DeleteCredentialDB(credentialName string) bool {
 	} else {
 		return true
 	}
+}
+
+func GetSpecList(c echo.Context) (err error) {
+	Provider := c.QueryParam("provider")
+	Type := c.QueryParam("type")
+	cdb := GetClusterDB("vm")
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	search_val := Provider
+	search_val2 := Type
+	cursor, err := cdb.Find(context.TODO(), bson.D{{Key: "provider", Value: search_val}, {Key: "Type", Value: search_val2}})
+	if err != nil {
+			log.Fatal(err)
+	}
+	var results []bson.M
+	if err = cursor.All(ctx, &results); err != nil {
+			log.Fatal(err)
+	}
+	return c.JSON(http.StatusOK, echo.Map{"data": results})
 }

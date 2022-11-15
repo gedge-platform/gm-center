@@ -231,6 +231,8 @@ func GEdgeRoute(e *echo.Echo) {
 	r3.GET("/vm", c.GetALLVm)
 	r3.GET("/vmList", c.GetVmList)
 	r3.GET("/credentialList", c.ListCredentialDB)
+	r3.GET("/credentialList/:type", c.TypeCredentialDB)
+	r3.GET("/specList", c.GetSpecList)
 	r3.POST("/vmStatus", c.GetALLVMStatusList)
 	r3.GET("/vm/:vmName", c.GetVm)
 	r3.POST("/vm", c.CreateVm)

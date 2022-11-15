@@ -249,7 +249,7 @@ func CreateCredential(c echo.Context) (err error) {
 
 	getData, err := common.DataRequest_spider(params)
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	}
 
 	check := CreateCredentialDB(getCredential)
@@ -320,7 +320,7 @@ func DeleteCredential(c echo.Context) (err error) {
 
 	getData, err := common.DataRequest_spider(params)
 	if err != nil {
-		fmt.Println("err : ", err)
+		log.Println("err : ", err)
 	}
 
 	check := DeleteCredentialDB(credentialName)
@@ -368,7 +368,7 @@ func GetConnectionconfig(c echo.Context) (err error) {
 }
 
 func CheckConnectionConfig(c echo.Context, getCredential model.GetCredential) string {
-	fmt.Println("[CheckConnectionConfig in]")
+	// fmt.Println("[CheckConnectionConfig in]")
 
 	CredentialName := getCredential.CredentialName
 	ProviderName := getCredential.ProviderName
@@ -400,7 +400,7 @@ func CheckConnectionConfig(c echo.Context, getCredential model.GetCredential) st
 
 		_, err := common.DataRequest_spider(params)
 		if err != nil {
-			fmt.Println("err : ", err)
+			log.Println("err : ", err)
 		}
 	}
 

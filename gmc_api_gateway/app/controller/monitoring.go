@@ -684,8 +684,8 @@ func namespaceUsage(c, query string) float64 {
 }
 
 var cephMetric = map[string]string{
-	"clusterCount":                   "sum without (instance) (ceph_health_status)",
-	"clusterHealth":                  "sum without (instance) (ceph_health_status) == 0",
+	"clusterCount":                   "count(sum without (instance) (ceph_health_status))",
+	"clusterHealth":                  "count(sum without (instance) (ceph_health_status) == 0)",
 	"ceph_objects_healthy":           "sum(ceph_pool_objects)-sum(ceph_num_objects_degraded)-sum(ceph_num_objects_misplaced)-sum(ceph_num_objects_unfound)",
 	"ceph_objects_degraded":          "sum(ceph_num_objects_degraded)",
 	"ceph_objects_misplaced":         "sum(ceph_num_objects_misplaced)",

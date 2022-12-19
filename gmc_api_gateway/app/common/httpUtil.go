@@ -74,8 +74,7 @@ func DataRequest(params model.PARAMS) (data string, err error) {
 	if err := validate(params); err != nil {
 		return "", err
 	}
-	// clusters, _ := FindClusterDB(params.Cluster)
-	// fmt.Println("[####cluster] : ", clusters)
+
 	if data, err := FindClusterDB(params.Cluster); err != nil || data.Status == "false" {
 		return "", err
 	} else {
@@ -202,7 +201,6 @@ func UrlExpr(endpoint, project, item, kind string) string {
 
 	defaultUrl := "https://" + endpoint + ":6443"
 	var returnUrl string
-	// fmt.Printf("##### teststest : %v,%v \n", check_project, check_item)
 	if check_project || check_item {
 		// project or item value exist
 		// if err := errCheck(project, item, kind); err != "" {

@@ -2,8 +2,8 @@ package controller
 
 import (
 	"gmc_api_gateway/app/common"
+	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -167,10 +167,13 @@ import (
 // @Router /ceph/monit [get]
 // @Tags Ceph
 func CephDashboard(c echo.Context) (err error) {
-	clusterNum := common.InterfaceOfLen(monitDashboard(cephMetric["clusterCount"]))
-	healthCluster := common.InterfaceOfLen(monitDashboard(cephMetric["clusterHealth"]))
+	log.Println("test1")
+	clusterNum := common.InterfaceToString(monitDashboard(cephMetric["clusterCount"]))
+	healthCluster := common.InterfaceToString(monitDashboard(cephMetric["clusterHealth"]))
+
 	ceph := map[string]interface{}{
-		"clusterStatus":                  strconv.Itoa(healthCluster) + "/" + strconv.Itoa(clusterNum),
+		// "clusterStatus":                  strconv.Itoa(healthCluster) + "/" + strconv.Itoa(clusterNum),
+		"clusterStatus":                  healthCluster + "/" + clusterNum,
 		"ceph_objects_healthy":           monitDashboard(cephMetric["ceph_objects_healthy"]),
 		"ceph_objects_degraded":          monitDashboard(cephMetric["ceph_objects_degraded"]),
 		"ceph_objects_misplaced":         monitDashboard(cephMetric["ceph_objects_misplaced"]),

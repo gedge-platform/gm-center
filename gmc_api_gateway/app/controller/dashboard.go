@@ -72,7 +72,7 @@ func TotalDashboard(c echo.Context) (err error) {
 	json.Unmarshal([]byte(CredentialgetData), &CredentialCount)
 
 	for _, edge := range edgeClouds {
-		log.Println(edge)
+		// log.Println(edge)
 		edge["node_status"] = node_status(common.InterfaceToString(edge["clusterName"]))
 	}
 

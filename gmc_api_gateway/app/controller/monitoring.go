@@ -568,7 +568,7 @@ func dashboard_cluster_monit(c, query string) interface{} {
 		"cluster": c,
 	}
 	data, err := nowQueryRange(addr, nowMetricExpr(query, temp_filter))
-	log.Println("nowMetricExpr(query, temp_filter) : ", nowMetricExpr(query, temp_filter))
+	// log.Println("nowMetricExpr(query, temp_filter) : ", nowMetricExpr(query, temp_filter))
 	if err != nil {
 		log.Println("err : ", err)
 	} else {

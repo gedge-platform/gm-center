@@ -535,7 +535,7 @@ func GetCloudregion(c echo.Context) (err error) {
 }
 
 func CheckRegion(c echo.Context, getCredential model.GetCredential) string {
-	fmt.Println("[CheckRegion in]")
+	// fmt.Println("[CheckRegion in]")
 
 	CredentialName := getCredential.CredentialName
 	ProviderName := getCredential.ProviderName
@@ -580,7 +580,7 @@ func CheckRegion(c echo.Context, getCredential model.GetCredential) string {
 			}
 		}
 
-		fmt.Println("KeyValues is : ", KeyValues)
+		// fmt.Println("KeyValues is : ", KeyValues)
 
 		createRegionInfo := model.RegionInfo{
 			RegionName:       regionName,
@@ -598,7 +598,7 @@ func CheckRegion(c echo.Context, getCredential model.GetCredential) string {
 
 		_, err := common.DataRequest_spider(params)
 		if err != nil {
-			fmt.Println("err : ", err)
+			log.Println("err : ", err)
 		}
 	}
 
@@ -752,7 +752,7 @@ func GetVmList(c echo.Context) (err error) {
 		CredentialNames = append(CredentialNames, cd)
 	}
 
-	fmt.Println("p#2] value : ", CredentialNames)
+	// fmt.Println("p#2] value : ", CredentialNames)
 
 	vmParams := getConnectionVmList(CredentialNames)
 	if len(vmParams) == 0 {
@@ -776,8 +776,8 @@ func GetVmList(c echo.Context) (err error) {
 		}
 	}
 
-	fmt.Println("[#8] VMStructs is ", VMStructs)
-	fmt.Println("[#8] VMStructs length is ", len(VMStructs))
+	// fmt.Println("[#8] VMStructs is ", VMStructs)
+	// fmt.Println("[#8] VMStructs length is ", len(VMStructs))
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"data":  VMStructs,
@@ -797,7 +797,7 @@ func getVmStructs(vmParam vmParam, provider string) model.VMStruct {
 
 	vmName := strings.TrimSuffix(common.InterfaceToString(vmParam.NameId), "}")
 	vmName = strings.TrimLeft(vmName, "{")
-	fmt.Println("[#3]", vmName)
+	// fmt.Println("[#3]", vmName)
 
 	params := model.PARAMS{
 		Kind:   "vm",
@@ -806,11 +806,11 @@ func getVmStructs(vmParam vmParam, provider string) model.VMStruct {
 		Body:   string(payload),
 	}
 	getData, _ := common.DataRequest_spider(params)
-	fmt.Println("[#5] getData is ", getData)
+	// fmt.Println("[#5] getData is ", getData)
 	err := json.Unmarshal([]byte(getData), &VMStruct)
 	if err != nil {
 	}
-	fmt.Println("[#6] VMStruct is ", VMStruct)
+	// fmt.Println("[#6] VMStruct is ", VMStruct)
 	VMStruct.VmStatus = vmParam.Status
 	VMStruct.ProviderName = provider
 
@@ -842,7 +842,7 @@ func getConnectionVmList(CredentialNames []CredentialName) []vmParam {
 		for j, _ := range vms {
 			vmNameId := common.FindDataStr(vms[j].String(), "IId", "NameId")
 			Status := common.FindDataStr(vms[j].String(), "VmStatus", "")
-			fmt.Println("p#2] vmNameId : ", vmNameId)
+			// fmt.Println("p#2] vmNameId : ", vmNameId)
 			vm := vmParam{
 				NameId:     vmNameId,
 				Status:     Status,
@@ -853,7 +853,7 @@ func getConnectionVmList(CredentialNames []CredentialName) []vmParam {
 			vmParams = append(vmParams, vm)
 		}
 
-		fmt.Println("vmParams : ", vmParams)
+		// fmt.Println("vmParams : ", vmParams)
 	}
 
 	return vmParams
@@ -914,10 +914,10 @@ func DeleteVm(c echo.Context) (err error) {
 	}
 
 	// origName := strings.TrimSuffix(ConnectionNameOnly.ConnectionName, "-config")
-	connectionName := ConnectionNameOnly.ConnectionName
+	// connectionName := ConnectionNameOnly.ConnectionName
 	payload, _ := json.Marshal(ConnectionNameOnly)
 
-	fmt.Println("connectionName is : ", connectionName)
+	// fmt.Println("connectionName is : ", connectionName)
 
 	// // Vpc 삭제
 	// params = model.PARAMS{
@@ -1082,7 +1082,7 @@ func GetAllVmFlavor(c echo.Context) (err error) {
 		Flavors = append(Flavors, flavorInfo)
 	}
 
-	fmt.Println("Flavors is : ", Flavors)
+	// fmt.Println("Flavors is : ", Flavors)
 
 	// vmspec := common.StringToInterface(getData)
 
@@ -1177,7 +1177,7 @@ func GetALLVMImage(c echo.Context) (err error) {
 		imageNameIds = append(imageNameIds, image)
 	}
 
-	fmt.Println("imageNameIds is : ", imageNameIds)
+	// fmt.Println("imageNameIds is : ", imageNameIds)
 	// vmimage := common.StringToInterface(getData)
 	if len(imageNameIds) != 0 {
 		return c.JSON(http.StatusOK, echo.Map{
@@ -1275,7 +1275,7 @@ func CheckVPC(c echo.Context, connectionName string) (string, string) {
 
 		_, err := common.DataRequest_spider(params)
 		if err != nil {
-			fmt.Println("err : ", err)
+			log.Println("err : ", err)
 		}
 	}
 
@@ -1383,7 +1383,7 @@ func CheckSecurityGroup(c echo.Context, connectionName string) string {
 
 		_, err := common.DataRequest_spider(params)
 		if err != nil {
-			fmt.Println("err : ", err)
+			log.Println("err : ", err)
 		}
 	}
 
@@ -1492,7 +1492,7 @@ func GetKeypair(c echo.Context) (err error) {
 func UpdateKeypairDB(credentialName string, data string) {
 
 	cds := common.FindDataStr(data, "PrivateKey", "")
-	fmt.Println("##%#%# cds : ", cds)
+	// fmt.Println("##%#%# cds : ", cds)
 
 	cdb := Conn("credentials")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
@@ -1504,12 +1504,12 @@ func UpdateKeypairDB(credentialName string, data string) {
 
 	result, err := cdb.UpdateOne(ctx, bson.M{"name": search_val}, bson.M{"$set": update})
 	if err != nil {
-		fmt.Println("failed to update.")
+		log.Println("failed to update.")
 	}
 
 	if result.MatchedCount == 1 {
 		if err := cdb.FindOne(ctx, bson.M{"name": search_val}).Decode(&cdb); err != nil {
-			fmt.Println("failed to match Credentials.")
+			log.Println("failed to match Credentials.")
 		}
 	}
 }
@@ -1537,10 +1537,10 @@ func CheckKeyPair(c echo.Context, connectionName string) string {
 
 		data, err := common.DataRequest_spider(params)
 		if err != nil {
-			fmt.Println("err : ", err)
+			log.Println("err : ", err)
 		}
 
-		fmt.Println("[%3] keypair return Value : ", data)
+		// fmt.Println("[%3] keypair return Value : ", data)
 
 		// db 넣기
 		UpdateKeypairDB(strings.TrimSuffix(connectionName, "-config"), data)
@@ -1617,7 +1617,7 @@ func UnregisterKeypair(c echo.Context) (err error) {
 }
 
 func OpenstackVmList(opts gophercloud.AuthOptions, vmNameId []NameId) (model.OpenstackVmInfos, error) {
-	fmt.Println("[in VmList Function] Hello ?")
+	// fmt.Println("[in VmList Function] Hello ?")
 
 	type IID struct {
 		NameId   string
@@ -1667,7 +1667,7 @@ func OpenstackVmList(opts gophercloud.AuthOptions, vmNameId []NameId) (model.Ope
 }
 
 func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
-	fmt.Println("[DuplicatiCheck]")
+	log.Println("[DuplicatiCheck]")
 
 	_Connection := model.ConnectionNameOnly{
 		ConnectionName: connectionName,
@@ -1686,8 +1686,8 @@ func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
 	getData, _ := common.DataRequest_spider(params)
 	kind := common.FindingArray(common.Finding(getData, _kind))
 
-	fmt.Println("_kind is : ", _kind)
-	fmt.Println("kind is : ", kind)
+	// fmt.Println("_kind is : ", _kind)
+	// fmt.Println("kind is : ", kind)
 	var containValue string
 
 	switch _kind {
@@ -1707,8 +1707,8 @@ func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
 
 	for e, _ := range kind {
 		kindNameId := common.FindData(kind[e].String(), "IId", "NameId")
-		fmt.Println("kindNameId is : ", kindNameId)
-		fmt.Println("kindNameId contains is : ", connectionName+containValue)
+		// fmt.Println("kindNameId is : ", kindNameId)
+		// fmt.Println("kindNameId contains is : ", connectionName+containValue)
 		if strings.Contains(common.InterfaceToString(kindNameId), connectionName+containValue) {
 			Check = true
 		}
@@ -1722,7 +1722,7 @@ func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
 }
 
 func CheckDriver(c echo.Context, getCredential model.GetCredential) string {
-	fmt.Println("[CheckDriver in]")
+	// fmt.Println("[CheckDriver in]")
 
 	CredentialName := getCredential.CredentialName
 	ProviderName := getCredential.ProviderName
@@ -1758,7 +1758,7 @@ func CheckDriver(c echo.Context, getCredential model.GetCredential) string {
 
 		_, err := common.DataRequest_spider(params)
 		if err != nil {
-			fmt.Println("err : ", err)
+			log.Println("err : ", err)
 		}
 	}
 
@@ -1833,7 +1833,6 @@ func ListCredentialDB(c echo.Context) (err error) {
 		"data":   showsCredential,
 	})
 }
-
 
 // GetAllCredential godoc
 // @Summary Show List credential
@@ -1911,11 +1910,11 @@ func GetSpecList(c echo.Context) (err error) {
 	search_val2 := Type
 	cursor, err := cdb.Find(context.TODO(), bson.D{{Key: "provider", Value: search_val}, {Key: "Type", Value: search_val2}})
 	if err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 	var results []bson.M
 	if err = cursor.All(ctx, &results); err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 	return c.JSON(http.StatusOK, echo.Map{"data": results})
 }

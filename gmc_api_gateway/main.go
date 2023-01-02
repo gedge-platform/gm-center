@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	c "gmc_api_gateway/app/controller"
 	db "gmc_api_gateway/app/database"
 	"gmc_api_gateway/app/routes"
@@ -10,7 +11,10 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"time"
 
+	cache "github.com/SporkHubr/echo-http-cache"
+	"github.com/SporkHubr/echo-http-cache/adapter/redis"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger" // echo-swagger middleware
@@ -35,6 +39,7 @@ import (
 // @in                          header
 // @name                        Authorization
 // @description "Type \"Bearer \" and then your API Token"
+
 func main() {
 	go c.Cluster_Status_Cron()
 
@@ -64,6 +69,25 @@ func main() {
 	// 			<h3>GEdge Platform :: GM-Center API Server :)</h3>
 	// 	`)
 	// })
+	ringOpt := &redis.RingOptions{
+		Addrs: map[string]string{
+			"server": ":30631",
+		},
+	}
+	cacheClient, err := cache.NewClient(
+		cache.ClientWithAdapter(redis.NewAdapter(ringOpt)),
+		cache.ClientWithTTL(10*time.Minute),
+		cache.ClientWithRefreshKey("opn"),
+	)
+	if err != nil {
+		fmt.Println(err)
+		// os.Exit(1)
+	}
+	// router := echo.New()
+	e.Use(cacheClient.Middleware())
+	// router.GET("/", example(c))
+	// e.Start(":8080")
+
 	e.GET("/", func(c echo.Context) error {
 		return c.HTML(http.StatusOK, `
 				<h1>Welcome to GEdge API-Gateway!</h1>
@@ -79,6 +103,9 @@ func main() {
 		panic(err)
 	}
 
+}
+func example(c echo.Context) {
+	c.String(http.StatusOK, "Ok")
 }
 
 // Environment Value ("LISTEN_PORT")

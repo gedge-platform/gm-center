@@ -69,9 +69,10 @@ func main() {
 	// 			<h3>GEdge Platform :: GM-Center API Server :)</h3>
 	// 	`)
 	// })
+	redisAddr := os.Getenv("REDIS")
 	ringOpt := &redis.RingOptions{
 		Addrs: map[string]string{
-			"server": ":30631",
+			"server": redisAddr,
 		},
 	}
 	cacheClient, err := cache.NewClient(
@@ -103,9 +104,6 @@ func main() {
 		panic(err)
 	}
 
-}
-func example(c echo.Context) {
-	c.String(http.StatusOK, "Ok")
 }
 
 // Environment Value ("LISTEN_PORT")

@@ -216,9 +216,13 @@ func nowMetricExpr(val string, filter map[string]string) string {
 	var returnVal string
 
 	for k, v := range filter {
-
+		if v == "allCluster" {
+			val = strings.Replace(val, "by(cluster)", "", -1)
+		}
 		switch v {
 		case "all":
+			returnVal += fmt.Sprintf(`%s!="",`, k)
+		case "allCluster":
 			returnVal += fmt.Sprintf(`%s!="",`, k)
 		default:
 			returnVal += fmt.Sprintf(`%s="%s",`, k, v)

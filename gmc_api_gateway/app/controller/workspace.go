@@ -47,7 +47,7 @@ func CreateWorkspace(c echo.Context) (err error) {
 
 	models := new(model.Workspace)
 	validate := validator.New()
-
+	// log.Println("workspaceBody : ", responseBody(c.Request().Body))
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
@@ -69,7 +69,7 @@ func CreateWorkspace(c echo.Context) (err error) {
 	// 	return
 	// }
 	// log.Fatal("test2")
-	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberId": models.MemberName})
 
 	var clusterObjectId2 []bson.D
 	var clusterObjectId3 *mongo.Cursor

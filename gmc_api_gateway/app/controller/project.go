@@ -74,7 +74,7 @@ func CreateProject(c echo.Context) (err error) {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, common.ErrDuplicated)
 		return nil
 	}
-	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberId": models.MemberName})
 	workspaceObjectId, err := cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
 
 	var clusterObjectId2 []bson.D

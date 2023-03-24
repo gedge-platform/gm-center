@@ -29,10 +29,10 @@ var clusterMetric = map[string]string{
 	"memory_util":     "round(avg((1 - (node_memory_MemAvailable_bytes{$1} / (node_memory_MemTotal_bytes{$1})))* 100)by(cluster),0.01)",
 	"memory_util_bak": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)",
 	"memory_usage":    "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
-	"memory_total":    "round(sum(node_memory_MemTotal_bytes{$1})by(cluster)/1024/1024/1024,0.01)",
+	"memory_total":    "round(sum(machine_memory_bytes{$1})by(cluster)/1024/1024/1024,0.01)",
 	"disk_util":       "round(((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)))*100,0.1)",
-	"disk_usage":      "round((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/1000/1000/1000,0.01)",
-	"disk_total":      "round(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)/1000/1000/1000,0.01)",
+	"disk_usage":      "round((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/1024/1024/1024,0.01)",
+	"disk_total":      "round(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)/1024/1024/1024,0.01)",
 	"pod_running":     "sum(kube_pod_container_status_running{$1})by(cluster)",
 	"pod_quota":       "sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)",
 	"pod_util":        "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
@@ -44,15 +44,23 @@ var clusterMetric = map[string]string{
 
 	"apiserver_request_rate": "round(sum(irate(apiserver_request_total{$1}[5m]))by(cluster),0.001)",
 	// latency 보완 필요 (응답속도 느림)
-	"apiserver_latency": "histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{verb!~'CONNECT|WATCH',$1}[1m])) by (le,cluster))",
-
-	"scheduler_attempts":       "sum(increase(scheduler_schedule_attempts_total{$1}[1m]))by(result,cluster)",
+	"apiserver_latency":        "histogram_quantile(0.90, sum(rate(apiserver_request_duration_seconds_bucket{verb!~'CONNECT|WATCH',$1}[5m])) by (le))",
+	"scheduler_attempts":       "sum(increase(scheduler_schedule_attempts_total{$1}[1m]))by(result)",
 	"scheduler_attempts_total": "sum(scheduler_pod_scheduling_attempts_count{$1})by(cluster)",
 	"scheduler_fail":           "sum(rate(scheduler_pending_pods{$1}[1m]))by(cluster)",
 	"scheduler_fail_total":     "sum(scheduler_pending_pods{$1})by(cluster)",
 	//에러
 	// "scheduler_latency": "histogram_quantile(0.95,sum(rate(scheduler_e2e_scheduling_duration_seconds_bucket{$1}[5m]))by(le,cluster))",
-	"scheduler_latency": "histogram_quantile(0.95,sum(scheduler_e2e_scheduling_duration_seconds_bucket{$1})by(le,cluster))",
+	"scheduler_latency":          "histogram_quantile(0.95,sum(scheduler_e2e_scheduling_duration_seconds_bucket{$1})by(le))",
+	"total_cluster_cpu_util":     "round(100 - (avg(irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100),0.01)",
+	"total_cluster_cpu_usage":    "round(sum (rate (container_cpu_usage_seconds_total{id='/',kubernetes_io_hostname=~'^.*$'}[2m])),0.01)",
+	"total_cluster_cpu_total":    "sum(machine_cpu_cores)",
+	"total_cluster_memory_util":  "round(avg((1 - (node_memory_MemAvailable_bytes / (node_memory_MemTotal_bytes)))* 100),0.01)",
+	"total_cluster_memory_usage": "round(sum (container_memory_working_set_bytes{id='/',kubernetes_io_hostname=~'^.*$'})/1024/1024/1024,0.01)",
+	"total_cluster_memory_total": "round(sum(machine_memory_bytes)/1024/1024/1024,0.01)",
+	"total_cluster_disk_util":    "round(((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', }))/(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs'})))*100,0.1)",
+	"total_cluster_disk_usage":   "round(sum (container_fs_usage_bytes{id='/'})/1024/1024/1024,0.01)",
+	"total_cluster_disk_total":   "round(sum (container_fs_limit_bytes{id='/'})/1024/1024/1024,0.01)",
 }
 
 var namespaceMetric = map[string]string{
@@ -83,8 +91,8 @@ var nodeMetric = map[string]string{ //쿼리 수정 필요
 	"node_memory_usage":          "((node_memory_MemTotal_bytes{$1} * on(instance) group_left(nodename) node_uname_info ) - (node_memory_MemFree_bytes{$1}* on(instance) group_left(nodename) node_uname_info) - (node_memory_Buffers_bytes{$1}* on(instance) group_left(nodename) node_uname_info) - (node_memory_Cached_bytes{$1}* on(instance) group_left(nodename) node_uname_info) - (node_memory_SReclaimable_bytes{$1}* on(instance) group_left(nodename) node_uname_info))/1024/1024/1024",
 	"node_memory_total":          "sum(node_memory_MemTotal_bytes{$1} * on(instance) group_left(nodename) node_uname_info)by(cluster,nodename)/1024/1024/1024",
 	"node_disk_util":             "100- (node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info) /  (node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info) *100",
-	"node_disk_usage":            "((node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info) - (node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info))/1000/1000/1000",
-	"node_disk_total":            "((node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1})* on(instance) group_left(nodename) node_uname_info ) /1000/1000/1000",
+	"node_disk_usage":            "((node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info) - (node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs',$1}* on(instance) group_left(nodename) node_uname_info))/1024/1024/1024",
+	"node_disk_total":            "((node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs',$1})* on(instance) group_left(nodename) node_uname_info ) /1024/1024/1024",
 	"node_pod_running":           "sum(kubelet_running_pods{node!='',$1}) by(cluster,node)",
 	"node_pod_quota":             "max(kube_node_status_capacity{resource='pods',$1}) by (node,cluster) unless on (node,cluster) (kube_node_status_condition{condition='Ready',status=~'unknown|false',$1} > 0)",
 	"node_disk_inode_util":       "100 - ((node_filesystem_files_free{mountpoint=`/`,$1}* on(instance) group_left(nodename) node_uname_info) / (node_filesystem_files{mountpoint='/',$1}* on(instance) group_left(nodename) node_uname_info) * 100)",
@@ -415,7 +423,7 @@ func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value,
 
 	}
 	v1api := v1.NewAPI(client)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
 	defer cancel()
 
@@ -441,11 +449,14 @@ func QueryRange(endpointAddr string, query string, c echo.Context) (model.Value,
 
 func metricExpr(val string, filter map[string]string) string {
 	var returnVal string
-
 	for k, v := range filter {
-
+		if v == "allCluster" {
+			val = strings.Replace(val, "by(cluster)", "", -1)
+		}
 		switch v {
 		case "all":
+			returnVal += fmt.Sprintf(`%s!="",`, k)
+		case "allCluster":
 			returnVal += fmt.Sprintf(`%s!="",`, k)
 		default:
 			returnVal += fmt.Sprintf(`%s="%s",`, k, v)

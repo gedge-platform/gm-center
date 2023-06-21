@@ -126,7 +126,7 @@ func NowMonit(k string, c string, n string, m []string) interface{} {
 			}
 			data, err := nowQueryRange(addr, nowMetricExpr(nowWorkspaceMetric[m[i]], temp_filter))
 			if err != nil {
-				log.Println("err : ", err)
+				log.Println("err3 : ", err)
 			}
 			if check := len(data.(model.Matrix)) != 0; check {
 				for _, val := range data.(model.Matrix)[0].Values {

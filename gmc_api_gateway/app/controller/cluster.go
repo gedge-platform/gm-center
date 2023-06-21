@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"gmc_api_gateway/app/common"
@@ -370,4 +371,38 @@ func UpdateCluster(c echo.Context) (err error) {
 		"status": http.StatusOK,
 		"data":   search_val + " Updated Complete",
 	})
+}
+
+func AddWorkerNode(c echo.Context) (err error) {
+	params := model.PARAMS{
+		Kind:      "secrets",
+		Name:      c.Param("name"),
+		Cluster:   c.QueryParam("cluster"),
+		User:      c.QueryParam("user"),
+		Workspace: c.QueryParam("workspace"),
+		Project:   c.QueryParam("project"),
+		Method:    c.Request().Method,
+		Body:      responseBody(c.Request().Body),
+	}
+
+	params.Project = "kube-system"
+	token := ""
+	data, err := GetModelList(params)
+	if err != nil {
+		common.ErrorMsg(c, http.StatusNotFound, err)
+		return nil
+	}
+	for _, secret := range data {
+		if strings.Contains(secret, "bootstrap-token") {
+			log.Println(secret)
+
+			token = secret
+			// kubeadm join <Kubernetes API Server:PORT> --token <2. Token 값> --discovery-token-ca-cert-hash sha256:<3. Hash 값>
+		}
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": token,
+	})
+	// log.Println(secret)
+
 }

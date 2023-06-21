@@ -32,7 +32,7 @@ type RequestWorkspace struct {
 }
 
 type NewWorkspace struct {
-	_id           primitive.ObjectID   `json:"objectId,omitempty" bson:"_id"`
+	ObjectID      primitive.ObjectID   `json:"objectId,omitempty" bson:"_id"`
 	Name          string               `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
 	Description   string               `json:"workspaceDescription,omitempty" bson:"workspaceDescription" validate:"required"`
 	Owner         primitive.ObjectID   `json:"workspaceOwner,omitempty" bson:"workspaceOwner" validate:"required"`

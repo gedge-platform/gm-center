@@ -492,7 +492,7 @@ func node_status(c string) interface{} {
 	data, err := nowQueryRange(addr, nowMetricExpr(dashboardMetric["node_status"], temp_filter))
 	// log.Println("err : ", err)
 	if err != nil {
-		log.Println("err : ", err)
+		log.Println("err2 : ", err)
 	} else {
 		if check := len(data.(model.Matrix)) != 0; check {
 			// data.(model.Matrix)[0].Values

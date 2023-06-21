@@ -3,6 +3,7 @@ package controller
 import (
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
+	"log"
 
 	"net/http"
 	// "github.com/tidwall/sjson"
@@ -162,6 +163,7 @@ func CreatePVC(c echo.Context) (err error) {
 	}
 	postData, err := common.DataRequest(params)
 	if err != nil {
+		log.Println("err : ", err)
 		common.ErrorMsg(c, http.StatusNotFound, err)
 		return nil
 	} else {

@@ -105,7 +105,7 @@ func CreateProject(c echo.Context) (err error) {
 	}
 
 	newProject := model.NewProject{
-		Name:          models.Name,
+		Name:          models.Name + "-" + workspaceObjectId2[0][0].Value.(primitive.ObjectID).Hex(),
 		Description:   models.Description,
 		Type:          models.Type,
 		Owner:         memberObjectId2[0][0].Value.(primitive.ObjectID),
@@ -126,8 +126,8 @@ func CreateProject(c echo.Context) (err error) {
 		namespace := Namespace{}
 		namespace.APIVersion = "v1"
 		namespace.Kind = "Namespace"
-		namespace.Metadata.Name = models.Name
-		namespace.Metadata.Labels.IstioCheck = models.IstioCheck
+		namespace.Metadata.Name = newProject.Name
+		namespace.Metadata.Labels.IstioCheck = newProject.IstioCheck
 		url := "https://" + clusterInfo.Endpoint + ":6443/api/v1/namespaces/"
 		Token := clusterInfo.Token
 		data, err := json.Marshal(namespace)
@@ -476,18 +476,22 @@ func DeleteProject(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	log.Println("params : ", params)
 	cdb := GetProjectDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("name")
 	params.Project = c.Param("name")
 	project := GetDBProject(params)
+	log.Println("project : ", project)
 	if project.Name == "" {
 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		return nil
 	}
+	log.Println("project.Selectcluster : ", project.Selectcluster)
 	for _, cluster := range project.Selectcluster {
 
 		url := "https://" + cluster.Endpoint + ":6443/api/v1/namespaces/" + params.Name
+		log.Println("url : ", url)
 		Token := cluster.Token
 
 		if err != nil {

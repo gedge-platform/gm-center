@@ -44,7 +44,8 @@ func CreateWorkspace(c echo.Context) (err error) {
 	cdb2 := GetProjectDB("member")
 	cdb3 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-
+	workspaceObjectID := CreateObjectId()
+	log.Println(workspaceObjectID)
 	models := new(model.Workspace)
 	validate := validator.New()
 	// log.Println("workspaceBody : ", responseBody(c.Request().Body))
@@ -103,7 +104,8 @@ func CreateWorkspace(c echo.Context) (err error) {
 	}
 
 	newWorkspace := model.NewWorkspace{
-		Name:          models.Name,
+		ObjectID:      workspaceObjectID,
+		Name:          models.Name + "-" + workspaceObjectID.Hex(),
 		Description:   models.Description,
 		Owner:         memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),

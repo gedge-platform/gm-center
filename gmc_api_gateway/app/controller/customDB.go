@@ -17,6 +17,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func CreateObjectId() primitive.ObjectID {
+	objectId := primitive.NewObjectID()
+	return objectId
+}
+
 func GetDBList(params model.PARAMS, collectionName string, obj primitive.ObjectID, search_type string) []bson.M {
 	cdb := GetClusterDB(collectionName)
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)

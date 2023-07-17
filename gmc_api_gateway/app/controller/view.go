@@ -18,10 +18,13 @@ func GetView(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
-	err = CheckParam(params)
-	if err != nil {
-		common.ErrorMsg(c, http.StatusNotFound, err)
-		return nil
+	if params.Kind != "storageclasses" {
+		err = CheckParam(params)
+		if err != nil {
+			common.ErrorMsg(c, http.StatusNotFound, err)
+			return nil
+		}
+
 	}
 	getData, err := common.DataRequest(params)
 	// if err != nil {

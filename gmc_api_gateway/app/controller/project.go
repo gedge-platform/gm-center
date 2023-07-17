@@ -62,20 +62,21 @@ func CreateProject(c echo.Context) (err error) {
 	cdb4 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	models := new(model.Project)
+	models_ws :=model.DBWorkspace{}
 	validate := validator.New()
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-
 	models2 := model.Project{}
 	cdb.FindOne(ctx, bson.M{"projectName": models.Name}).Decode(&models2)
 	if models2.Name != "" {
 		common.ErrorMsg(c, http.StatusUnprocessableEntity, common.ErrDuplicated)
 		return nil
 	}
-	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberName": models.MemberName})
+	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberId": models.MemberName})
 	workspaceObjectId, err := cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
+  cdb3.FindOne(ctx, bson.M{"workspaceName": models.WorkspaceName}).Decode(&models_ws)
 
 	var clusterObjectId2 []bson.D
 	var clusterObjectId3 *mongo.Cursor
@@ -103,15 +104,16 @@ func CreateProject(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// clusterObjectId3, _ = cdb4.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
 	newProject := model.NewProject{
-		Name:          models.Name,
+		Name:          models.Name + "-" + models_ws.UUID,
 		Description:   models.Description,
 		Type:          models.Type,
 		Owner:         memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Created_at:    time.Now(),
 		Workspace:     workspaceObjectId2[0][0].Value.(primitive.ObjectID),
+		Tag : models.Name,
 		Selectcluster: slice,
 		IstioCheck:    models.IstioCheck,
 	}
@@ -126,8 +128,8 @@ func CreateProject(c echo.Context) (err error) {
 		namespace := Namespace{}
 		namespace.APIVersion = "v1"
 		namespace.Kind = "Namespace"
-		namespace.Metadata.Name = models.Name
-		namespace.Metadata.Labels.IstioCheck = models.IstioCheck
+		namespace.Metadata.Name = newProject.Name
+		// namespace.Metadata.Labels.IstioCheck = newProject.IstioCheck
 		url := "https://" + clusterInfo.Endpoint + ":6443/api/v1/namespaces/"
 		Token := clusterInfo.Token
 		data, err := json.Marshal(namespace)
@@ -148,9 +150,11 @@ func CreateProject(c echo.Context) (err error) {
 		// return err
 		default:
 			cdb.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
-
-			common.ErrorMsg(c, http.StatusBadRequest, err)
-			return nil
+			return c.JSON(http.StatusCreated, echo.Map{
+				"status": "Failed",
+				"code":   code,
+				"data":   err,
+			})
 		}
 	}
 	return c.JSON(http.StatusCreated, echo.Map{
@@ -476,18 +480,22 @@ func DeleteProject(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+	log.Println("params : ", params)
 	cdb := GetProjectDB("project")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	search_val := c.Param("name")
 	params.Project = c.Param("name")
 	project := GetDBProject(params)
+	log.Println("project : ", project)
 	if project.Name == "" {
 		common.ErrorMsg(c, http.StatusNotFound, common.ErrNotFound)
 		return nil
 	}
+	log.Println("project.Selectcluster : ", project.Selectcluster)
 	for _, cluster := range project.Selectcluster {
 
 		url := "https://" + cluster.Endpoint + ":6443/api/v1/namespaces/" + params.Name
+		log.Println("url : ", url)
 		Token := cluster.Token
 
 		if err != nil {

@@ -88,6 +88,12 @@ func TotalDashboard(c echo.Context) (err error) {
 		ClusterMemTop5: dashboard_cluster_monit("all", clusterMetric["memory_usage"]),
 		EdgeCloud:      edgeClouds,
 		CredentialCnt:  len(CredentialCount.CredentialNames),
+		TotalCpu:       monitDashboard(clusterMetric["total_cluster_cpu_total"]),
+		TotalMem:       monitDashboard(clusterMetric["total_cluster_memory_total"]),
+		TotalDisk:      monitDashboard(clusterMetric["total_cluster_disk_total"]),
+		UsageTotalCpu:  monitDashboard(clusterMetric["total_cluster_cpu_usage"]),
+		UsageTotalMem:  monitDashboard(clusterMetric["total_cluster_memory_usage"]),
+		UsageTotalDisk: monitDashboard(clusterMetric["total_cluster_disk_usage"]),
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"data": dashbaordData,

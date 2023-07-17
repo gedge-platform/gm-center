@@ -1018,7 +1018,7 @@ func RequsetKube(url string, method string, reqdata []byte, token string) int {
 
 		res, err := client.Do(req)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("err : ", err)
 			return 0
 		}
 		defer res.Body.Close()

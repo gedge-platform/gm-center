@@ -7,6 +7,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-resty/resty/v2 v2.6.0
+	github.com/google/uuid v1.1.2
 	github.com/gophercloud/gophercloud v0.25.0
 	github.com/influxdata/influxdb-client-go/v2 v2.9.0
 	github.com/jasonlvhit/gocron v0.0.1

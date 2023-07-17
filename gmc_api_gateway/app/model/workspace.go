@@ -12,6 +12,8 @@ type Workspace struct {
 	Description string             `json:"workspaceDescription,omitempty" bson:"workspaceDescription"`
 	MemberName  string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`
 	ClusterName []string           `json:"clusterName,omitempty" bson:"selectCluster2" validate:"required"`
+	// Tag string             `json:"workspaceTag,omitempty" bson:"workspaceTag" validate:"required"`
+	// UUID string             `json:"workspaceUUID,omitempty" bson:"workspaceUUID" validate:"required"`
 	// Selectcluster []WorkspaceClusters `json:"selectCluster,omitempty" bson:"selectCluster"`
 	Created_at time.Time `json:"created_at,omitempty"`
 }
@@ -32,9 +34,11 @@ type RequestWorkspace struct {
 }
 
 type NewWorkspace struct {
-	ObjectID      primitive.ObjectID   `json:"objectId,omitempty" bson:"_id"`
+	_id           primitive.ObjectID   `json:"objectId,omitempty" bson:"_id"`
 	Name          string               `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
 	Description   string               `json:"workspaceDescription,omitempty" bson:"workspaceDescription" validate:"required"`
+	Tag string             `json:"workspaceTag,omitempty" bson:"workspaceTag" validate:"required"`
+	UUID string             `json:"workspaceUUID,omitempty" bson:"workspaceUUID" validate:"required"`
 	Owner         primitive.ObjectID   `json:"workspaceOwner,omitempty" bson:"workspaceOwner" validate:"required"`
 	Creator       primitive.ObjectID   `json:"workspaceCreator,omitempty" bson:"workspaceCreator" validate:"required"`
 	Selectcluster []primitive.ObjectID `json:"selectCluster,omitempty" bson:"selectCluster"`
@@ -46,6 +50,8 @@ type DBWorkspace struct {
 	Name          string             `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
 	Description   string             `json:"workspaceDescription,omitempty" bson:"workspaceDescription" validate:"required"`
 	MemberName    string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`
+	Tag string             `json:"workspaceTag,omitempty" bson:"workspaceTag" validate:"required"`
+	UUID string             `json:"workspaceUUID,omitempty" bson:"workspaceUUID" validate:"required"`
 	Selectcluster []Cluster          `json:"selectCluster,omitempty" bson:"selectCluster"`
 	Created_at    time.Time          `json:"created_at,omitempty"`
 }

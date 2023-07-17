@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/google/uuid"
 )
 
 func GetWorkspaceDB(name string) *mongo.Collection {
@@ -44,8 +45,6 @@ func CreateWorkspace(c echo.Context) (err error) {
 	cdb2 := GetProjectDB("member")
 	cdb3 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	workspaceObjectID := CreateObjectId()
-	log.Println(workspaceObjectID)
 	models := new(model.Workspace)
 	validate := validator.New()
 	// log.Println("workspaceBody : ", responseBody(c.Request().Body))
@@ -102,10 +101,11 @@ func CreateWorkspace(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	uuid := uuid.New()
 	newWorkspace := model.NewWorkspace{
-		ObjectID:      workspaceObjectID,
-		Name:          models.Name + "-" + workspaceObjectID.Hex(),
+		Name:          models.Name + "-" + uuid.String(),
+		Tag: models.Name,
+		UUID:  uuid.String(),
 		Description:   models.Description,
 		Owner:         memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),
@@ -147,6 +147,7 @@ func ListWorkspace(c echo.Context) (err error) {
 		Method:    c.Request().Method,
 		Body:      responseBody(c.Request().Body),
 	}
+
 	err = CheckParam(params)
 	if err != nil {
 		common.ErrorMsg(c, http.StatusNotFound, err)

@@ -62,12 +62,12 @@ func CreateProject(c echo.Context) (err error) {
 	cdb4 := GetProjectDB("cluster")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	models := new(model.Project)
+	models_ws :=model.DBWorkspace{}
 	validate := validator.New()
 	if err = c.Bind(models); err != nil {
 		common.ErrorMsg(c, http.StatusBadRequest, err)
 		return nil
 	}
-
 	models2 := model.Project{}
 	cdb.FindOne(ctx, bson.M{"projectName": models.Name}).Decode(&models2)
 	if models2.Name != "" {
@@ -76,6 +76,7 @@ func CreateProject(c echo.Context) (err error) {
 	}
 	memberObjectId, err := cdb2.Find(ctx, bson.M{"memberId": models.MemberName})
 	workspaceObjectId, err := cdb3.Find(ctx, bson.M{"workspaceName": models.WorkspaceName})
+  cdb3.FindOne(ctx, bson.M{"workspaceName": models.WorkspaceName}).Decode(&models_ws)
 
 	var clusterObjectId2 []bson.D
 	var clusterObjectId3 *mongo.Cursor
@@ -103,15 +104,16 @@ func CreateProject(c echo.Context) (err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// clusterObjectId3, _ = cdb4.Find(ctx, bson.M{"clusterName": models.ClusterName[i]})
 	newProject := model.NewProject{
-		Name:          models.Name + "-" + workspaceObjectId2[0][0].Value.(primitive.ObjectID).Hex(),
+		Name:          models.Name + "-" + models_ws.UUID,
 		Description:   models.Description,
 		Type:          models.Type,
 		Owner:         memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Creator:       memberObjectId2[0][0].Value.(primitive.ObjectID),
 		Created_at:    time.Now(),
 		Workspace:     workspaceObjectId2[0][0].Value.(primitive.ObjectID),
+		Tag : models.Name,
 		Selectcluster: slice,
 		IstioCheck:    models.IstioCheck,
 	}
@@ -127,7 +129,7 @@ func CreateProject(c echo.Context) (err error) {
 		namespace.APIVersion = "v1"
 		namespace.Kind = "Namespace"
 		namespace.Metadata.Name = newProject.Name
-		namespace.Metadata.Labels.IstioCheck = newProject.IstioCheck
+		// namespace.Metadata.Labels.IstioCheck = newProject.IstioCheck
 		url := "https://" + clusterInfo.Endpoint + ":6443/api/v1/namespaces/"
 		Token := clusterInfo.Token
 		data, err := json.Marshal(namespace)
@@ -148,9 +150,11 @@ func CreateProject(c echo.Context) (err error) {
 		// return err
 		default:
 			cdb.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
-
-			common.ErrorMsg(c, http.StatusBadRequest, err)
-			return nil
+			return c.JSON(http.StatusCreated, echo.Map{
+				"status": "Failed",
+				"code":   code,
+				"data":   err,
+			})
 		}
 	}
 	return c.JSON(http.StatusCreated, echo.Map{

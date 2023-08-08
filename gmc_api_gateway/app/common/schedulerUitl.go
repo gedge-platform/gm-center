@@ -6,68 +6,53 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"time"
 
 	"gmc_api_gateway/app/model"
-	"gmc_api_gateway/config"
 
 	"github.com/go-resty/resty/v2"
 )
 
-var listTemplates_spider = map[string]string{
-	"cloudos":          "/spider/cloudos",
-	"credential":       "/spider/credential",
-	"connectionconfig": "/spider/connectionconfig",
-	"clouddriver":      "/spider/driver",
-	"cloudregion":      "/spider/region",
-	"vm":               "/spider/vm",
-	"controlvm":        "/spider/controlvm",
-	"vmstatus":         "/spider/vmstatus",
-	"vmspec":           "/spider/vmspec",
-	"vmorgspec":        "/spider/vmorgspec",
-	"vmimage":          "/spider/vmimage",
-	"vpc":              "/spider/vpc",
-	"securitygroup":    "/spider/securitygroup",
-	"regsecuritygroup": "/spider/regsecuritygroup",
-	"keypair":          "/spider/keypair",
-	"regkeypair":       "/spider/regkeypair",
-}
+// var listTemplates_spider = map[string]string{
+// 	"cloudos":          "/spider/cloudos",
+// 	"credential":       "/spider/credential",
+// 	"connectionconfig": "/spider/connectionconfig",
+// 	"clouddriver":      "/spider/driver",
+// 	"cloudregion":      "/spider/region",
+// 	"vm":               "/spider/vm",
+// 	"controlvm":        "/spider/controlvm",
+// 	"vmstatus":         "/spider/vmstatus",
+// 	"vmspec":           "/spider/vmspec",
+// 	"vmorgspec":        "/spider/vmorgspec",
+// 	"vmimage":          "/spider/vmimage",
+// 	"vpc":              "/spider/vpc",
+// 	"securitygroup":    "/spider/securitygroup",
+// 	"regsecuritygroup": "/spider/regsecuritygroup",
+// 	"keypair":          "/spider/keypair",
+// 	"regkeypair":       "/spider/regkeypair",
+// // }
 
-var nsTemplates_spider = map[string]string{
-	"credential": "/gmcapi/v2/spider/$1",
-}
+// var nsTemplates_spider = map[string]string{
+// 	"credential": "/gmcapi/v2/spider/$1",
+// }
 
-func DataRequest_spider(params model.PARAMS) (data string, err error) {
+func DataRequest_scheduler(params model.PARAMS) (data string, err error) {
+	
 	var endPoint, token_value string
-	config := config.GetConfig()
+	// config := config.GetConfig()s
+	endPoint = os.Getenv("GS_SCHEDULER")
 
-	endPoint = config.URL.Spider
-
-	// log.Printf("[#endPoint] is %s", endPoint)
-
-	// log.Printf("[#params.Name] is %s", params.Name)
-	// log.Printf("[#params.Kind] is %s", params.Kind)
-	// log.Printf("[#params.Action] is %s", params.Action)
-	// log.Printf("[#params.Body] is %s", params.Body)
-	// log.Printf("[#############]")
-
-	url := UrlExpr_spider(endPoint, params.Name, params.Kind, params.Action)
-
+	url := endPoint + "?" + params.QueryString
 	log.Println("url is", url)
-
-	switch url {
-	case "noname":
-		return "", ErrWorkspaceInvalid
-	case "nodetail":
-		return "", ErrDetailNameInvalid
-	}
+	log.Println("body is", params.Body)
 
 	// log.Printf("[#31] url is %s", url)
 	var responseString, token string
 	r := io.NopCloser(strings.NewReader(params.Body))
 	reqMethod := params.Method
-	passBody := ResponseBody_spider(r)
+	passBody := ResponseBody_scheduler(r)
 	//passBody := params.Body
 
 	//body := ResponseBody(_body)
@@ -85,7 +70,6 @@ func DataRequest_spider(params model.PARAMS) (data string, err error) {
 	})
 	client.SetAllowGetMethodPayload(true)
 	client.SetDebug(true)
-
 	switch reqMethod {
 	case "GET":
 		if resp, err := client.R().SetBody([]byte(params.Body)).Get(url); err != nil {
@@ -97,10 +81,13 @@ func DataRequest_spider(params model.PARAMS) (data string, err error) {
 		if resp, err := client.R().SetBody([]byte(string(passBody))).
 			SetAuthToken(token).
 			Post(url); err != nil {
+		
 			// panic(err)
+			log.Println("test err: " ,err)
+			err = err
 		} else {
+			log.Println("test resp: " ,resp)
 			responseString = string(resp.Body())
-
 		}
 
 	case "PATCH":
@@ -123,10 +110,10 @@ func DataRequest_spider(params model.PARAMS) (data string, err error) {
 		}
 	}
 
-	return responseString, nil
+	return responseString, err
 }
 
-func ResponseBody_spider(req io.ReadCloser) string {
+func ResponseBody_scheduler(req io.ReadCloser) string {
 	var bodyBytes []byte
 	if req != nil {
 		bodyBytes, _ = ioutil.ReadAll(req)
@@ -140,7 +127,7 @@ func ResponseBody_spider(req io.ReadCloser) string {
 
 	return newStr
 }
-func UrlExpr_spider(endpoint, item, kind string, action string) string {
+func UrlExpr_scheduler(endpoint, item, kind string, action string) string {
 	check_item := strings.Compare(item, "") != 0
 	check_action := strings.Compare(action, "") != 0
 	var returnUrl string

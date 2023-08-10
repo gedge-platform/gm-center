@@ -39,7 +39,7 @@ import (
 // }
 
 func DataRequest_scheduler(params model.PARAMS) (data string, err error) {
-	
+
 	var endPoint, token_value string
 	// config := config.GetConfig()s
 	endPoint = os.Getenv("GS_SCHEDULER")
@@ -81,12 +81,87 @@ func DataRequest_scheduler(params model.PARAMS) (data string, err error) {
 		if resp, err := client.R().SetBody([]byte(string(passBody))).
 			SetAuthToken(token).
 			Post(url); err != nil {
-		
+
 			// panic(err)
-			log.Println("test err: " ,err)
+			log.Println("test err: ", err)
 			err = err
 		} else {
-			log.Println("test resp: " ,resp)
+			log.Println("test resp: ", resp)
+			responseString = string(resp.Body())
+		}
+
+	case "PATCH":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
+			// panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "PUT":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
+			// panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "DELETE":
+		if resp, err := client.R().SetAuthToken(token).SetBody([]byte(params.Body)).Delete(url); err != nil {
+			// panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	}
+
+	return responseString, err
+}
+
+func DataRequest_Loki(endPoint string, query string, params model.PARAMS) (data string, err error) {
+
+	var token_value string
+	// config := config.GetConfig()s
+	// endPoint = os.Getenv("GS_SCHEDULER")
+
+	url := "http://" + endPoint + ":31603/loki/api/v1/query_range?query=" + query
+	log.Println("url is", url)
+	log.Println("body is", params.Body)
+
+	// log.Printf("[#31] url is %s", url)
+	var responseString, token string
+	r := io.NopCloser(strings.NewReader(params.Body))
+	reqMethod := params.Method
+	passBody := ResponseBody_scheduler(r)
+	//passBody := params.Body
+
+	//body := ResponseBody(_body)
+
+	// log.Printf("[#32] passBody is %s", passBody)
+	token = token_value
+
+	client := resty.New()
+	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	client.SetTimeout(2 * time.Minute)
+	client.SetHeaders(map[string]string{
+		"Access-Control-Allow-Origin": "*",
+		"Content-Type":                "application/json; charset=utf-8",
+		"Accept":                      "application/json; charset=utf-8",
+	})
+	client.SetAllowGetMethodPayload(true)
+	client.SetDebug(true)
+	switch reqMethod {
+	case "GET":
+		if resp, err := client.R().SetBody([]byte(params.Body)).Get(url); err != nil {
+			// panic(err)
+		} else {
+			responseString = string(resp.Body())
+		}
+	case "POST":
+		if resp, err := client.R().SetBody([]byte(string(passBody))).
+			SetAuthToken(token).
+			Post(url); err != nil {
+
+			// panic(err)
+			log.Println("test err: ", err)
+			err = err
+		} else {
+			log.Println("test resp: ", resp)
 			responseString = string(resp.Body())
 		}
 

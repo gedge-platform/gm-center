@@ -7,6 +7,7 @@ type PARAMS struct {
 	Workspace   string `json:"workspace,omitempty"`
 	Project     string `json:"project,omitempty"`
 	User        string `json:"user,omitempty"`
+	Query       string `json:"query,omitempty"`
 	Uid         string `json:"uid,omitempty"`
 	Compare     string `json:"compare,omitempty"`
 	Method      string `json:"reqMethod,omitempty"`

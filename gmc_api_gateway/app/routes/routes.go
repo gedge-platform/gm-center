@@ -190,7 +190,7 @@ func GEdgeRoute(e *echo.Echo) {
 	r.GET("/cluster/addWorkNode", c.AddWorkerNode)
 
 	r.POST("/gs-scheduler", c.PostScheduler)
-	
+	r.GET("/loki", c.GetLogs)
 	r2 := e.Group("/kube/v1", middleware.BasicAuth(func(id, password string, echo echo.Context) (bool, error) {
 		userChk, _ := c.AuthenticateUser(id, password)
 		return userChk, nil

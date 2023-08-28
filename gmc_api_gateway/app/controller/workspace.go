@@ -122,7 +122,8 @@ func CreateWorkspace(c echo.Context) (err error) {
 	return c.JSON(http.StatusCreated, echo.Map{
 		"status": "Created",
 		"code":   http.StatusCreated,
-		"data":   result,
+		"result" :result,
+		"data":   newWorkspace.Name,
 	})
 }
 

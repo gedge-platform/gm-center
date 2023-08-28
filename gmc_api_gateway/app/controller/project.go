@@ -139,7 +139,7 @@ func CreateProject(c echo.Context) (err error) {
 		}
 		var jsonStr = []byte(fmt.Sprint(string(data)))
 		code := RequsetKube(url, "POST", jsonStr, Token)
-		switch code {
+	switch code {
 		case 200:
 		case 201:
 		case 202:
@@ -150,7 +150,7 @@ func CreateProject(c echo.Context) (err error) {
 		// return err
 		default:
 			cdb.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
-			return c.JSON(http.StatusCreated, echo.Map{
+			return c.JSON(http.StatusBadRequest, echo.Map{
 				"status": "Failed",
 				"code":   code,
 				"data":   err,
@@ -160,7 +160,8 @@ func CreateProject(c echo.Context) (err error) {
 	return c.JSON(http.StatusCreated, echo.Map{
 		"status": "Created",
 		"code":   http.StatusCreated,
-		"data":   result,
+		"result" :result,
+		"data":   newProject.Name,
 	})
 }
 

@@ -139,7 +139,7 @@ func DataRequest_Loki(endPoint string, query string, params model.PARAMS) (data 
 		log.Fatalf("Error making request: %v", err)
 	}
 	if response.StatusCode() == 200 {
-		fmt.Println("Response Body:", response.String())
+		// fmt.Println("Response Body:", response.String())
 		responseString = response.String()
 	
 	} else {

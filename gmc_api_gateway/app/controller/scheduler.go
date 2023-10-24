@@ -27,23 +27,46 @@ func PostScheduler(c echo.Context) (err error) {
 	// 	})
 	// }
 
+	
 	postData, err := common.DataRequest_scheduler(params)
-	if err != nil {
-		// common.ErrorMsg(c, http.StatusNotFound, err)
-		// return nil
+	// deploy_check,_ := scheduler_check("kube_pod_labels{cluster='innogrid-k8s-master',namespace='testinno-649906ca06cc37d12d5645b5',pod='nginx14'}")
+	// log.Println("deploy_check : ", deploy_check)
 
-		return c.JSON(http.StatusNotFound, echo.Map{
-			"status": "error",
-			"code":   http.StatusNotFound,
-			"data":   err,
-		})
-	} else {
-		return c.JSON(http.StatusCreated, echo.Map{
+	if err != nil ||  common.StringToMapInterface(postData)["error"] != nil  {
+			return c.JSON(http.StatusBadRequest, echo.Map{
+				"status": "error",
+				"code":   http.StatusBadRequest,
+				"data":   common.StringToMapInterface(postData)["error"],
+			})
+		} else {
+			return c.JSON(http.StatusCreated, echo.Map{
 			"status": "Created",
 			"code":   http.StatusCreated,
 			"data":   postData,
-		})
-	}
+			})
+		} 
+		
+	// if err != nil {
+	// 	return c.JSON(http.StatusNotFound, echo.Map{
+	// 		"status": "error",
+	// 		"code":   http.StatusNotFound,
+	// 		"data":   err,
+	// 	})
+	// } else {
+	// 	if deploy_check != 0{
+	// 	return c.JSON(http.StatusCreated, echo.Map{
+	// 		"status": "Created",
+	// 		"code":   http.StatusCreated,
+	// 		"data":   postData,
+	// 	})
+	// } else {
+	// 	return c.JSON(http.StatusNotFound, echo.Map{
+	// 		"status": "error",
+	// 		"code":   http.StatusNotFound,
+	// 		"data":   err,
+	// 	})
+	// }
+	// }
 }
 
 func CallbackScheduler(c echo.Context) (err error) {
@@ -52,7 +75,7 @@ func CallbackScheduler(c echo.Context) (err error) {
 		Method:      c.Request().Method,
 		Body:        responseBody(c.Request().Body),
 	}
-log.Println("body : ", params.Body)
+log.Println("callback : ", params.Body)
 		return c.JSON(http.StatusCreated, echo.Map{
 			"err":   err,
 			"data":  params.Body,

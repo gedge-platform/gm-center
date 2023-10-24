@@ -195,6 +195,8 @@ func GEdgeRoute(e *echo.Echo) {
 		userChk, _ := c.AuthenticateUser(id, password)
 		return userChk, nil
 	}))
+
+	r.GET("/gpu", c.GetGpu)
 	// r2.Any("/:cluster_name", api.Kubernetes)
 	// r2.Any("/:cluster_name/:namespace_name", api.Kubernetes)
 	// r2.Any("/:cluster_name/:namespace_name/:kind_name", api.Kubernetes)

@@ -4,7 +4,6 @@ import (
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
 	"net/http"
-"log"
 	// "github.com/grafana/loki/pkg/promtail/client"
 	"github.com/labstack/echo/v4"
 )
@@ -21,14 +20,14 @@ func GetLogs(c echo.Context) (err error) {
 	endPoint := common.InterfaceToString(cluster["clusterEndpoint"])
 	getData, err := common.DataRequest_Loki(endPoint, params.Query, params)
 	if err != nil {
-		log.Println("getData1: ",getData)
+		// log.Println("getData1: ",getData)
 		return c.JSON(http.StatusNotFound, echo.Map{
 			"status": "error",
 			"code":   http.StatusNotFound,
 			"data":   err,
 		})
 	} else {
-		log.Println("getData2: ", getData)
+		// log.Println("getData2: ", getData)
 		return c.JSON(http.StatusOK, common.StringToInterface(getData))
 	}
 }

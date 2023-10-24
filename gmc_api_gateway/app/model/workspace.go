@@ -7,7 +7,7 @@ import (
 )
 
 type Workspace struct {
-	_id         primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
+	ObjectId         primitive.ObjectID `json:"objectId,omitempty" bson:"_id"`
 	Name        string             `json:"workspaceName,omitempty" bson:"workspaceName" validate:"required"`
 	Description string             `json:"workspaceDescription,omitempty" bson:"workspaceDescription"`
 	MemberName  string             `json:"memberName,omitempty" bson:"memberName" validate:"required"`

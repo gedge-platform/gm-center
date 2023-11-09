@@ -85,7 +85,7 @@ func GetModelList(params model.PARAMS) (DataList []string, err error) {
 		}
 		return DataList, err
 	} else if params.Project != "" && params.Workspace != "" {
-		// log.Println("#################Project List")
+		log.Println("#################Project List")
 		project := GetDBProject(params)
 		Clusters := project.Selectcluster
 		for c, _ := range Clusters {

@@ -188,6 +188,7 @@ func CreateCredential(c echo.Context) (err error) {
 	_ = CheckDriver(c, getCredential)
 	_ = CheckRegion(c, getCredential)
 	_ = CheckConnectionConfig(c, getCredential)
+	_ = CheckKeyPair(c, getCredential)
 
 	// var credentialInfo model.CredentialInfo
 	// credential Key Value 생성
@@ -800,7 +801,6 @@ func GetVmList(c echo.Context) (err error) {
 		case "OPENSTACK":
 			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
 			VMStructs = append(VMStructs, VMStruct)
-
 		case "GCP":
 			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
 			VMStructs = append(VMStructs, VMStruct)
@@ -901,7 +901,7 @@ func CreateVm(c echo.Context) (err error) {
 
 	vpcName, subnetName := CheckVPC(c, connectionName)
 	securityGroupName := CheckSecurityGroup(c, connectionName)
-	keyPairName := CheckKeyPair(c, connectionName)
+	keyPairName := CheckKeyPairVM(c, connectionName)
 
 	var securityGroupNameList []interface{}
 	securityGroupNameList = append(securityGroupNameList, securityGroupName)
@@ -1582,8 +1582,52 @@ func UpdateKeypairDB(credentialName string, data string) {
 	}
 }
 
-func CheckKeyPair(c echo.Context, connectionName string) string {
+
+func CheckKeyPair(c echo.Context, getCredential model.GetCredential) string {
+	CredentialName := getCredential.CredentialName
+	connectionConfigName := CredentialName + "-config"
+
+
+	keyPairName := connectionConfigName + "-key"
+
+	// keypair 확인
+	if !DuplicatiCheck(c, "keypair", keyPairName) {
+		// keypair 생성
+		createKeyPairInfo := model.CreateKeyPair{
+			ConnectionName: connectionConfigName,
+			ReqInfo: model.KeyPairReqInfo{
+				Name: keyPairName,
+			},
+		}
+
+		payload, _ := json.Marshal(createKeyPairInfo)
+
+		params := model.PARAMS{
+			Kind:   "keypair",
+			Method: "POST",
+			Body:   string(payload),
+		}
+
+		data, err := common.DataRequest_spider(params)
+		if err != nil {
+			log.Println("err : ", err)
+		}
+
+		// fmt.Println("[%3] keypair return Value : ", data)
+
+		// db 넣기
+		UpdateKeypairDB(strings.TrimSuffix(connectionConfigName, "-config"), data)
+
+	}
+
+	return keyPairName
+}
+
+func CheckKeyPairVM(c echo.Context, connectionName string) string {
 	keyPairName := connectionName + "-key"
+
+	log.Println("################################ connectionName : ", connectionName);
+	log.Println("################################ key : ", keyPairName);
 
 	// keypair 확인
 	if !DuplicatiCheck(c, "keypair", connectionName) {

@@ -231,6 +231,22 @@ func CreateCredential(c echo.Context) (err error) {
 			Value: getCredential.ProjectID,
 		}
 		KeyValues = append(KeyValues, KeyValue)
+	case "GCP":
+		KeyValue := model.KeyValue{
+			Key:   "PrivateKey",
+			Value: getCredential.ClientSecret,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+		KeyValue = model.KeyValue{
+			Key:   "ProjectID",
+			Value: getCredential.ProjectID,
+		}
+		KeyValues = append(KeyValues, KeyValue)
+		KeyValue = model.KeyValue{
+			Key:   "ClientEmail",
+			Value: getCredential.ClientId,
+		}
+		KeyValues = append(KeyValues, KeyValue)
 	}
 
 	createCredentialInfo := model.CredentialInfo{
@@ -578,6 +594,17 @@ func CheckRegion(c echo.Context, getCredential model.GetCredential) string {
 				}
 				KeyValues = append(KeyValues, KeyValue)
 			}
+		case "GCP":
+			KeyValue := model.KeyValue{
+				Key:   "Region",
+				Value: Region,
+			}
+			KeyValues = append(KeyValues, KeyValue)
+			KeyValue = model.KeyValue{
+				Key:   "Zone",
+				Value: Zone,
+			}
+			KeyValues = append(KeyValues, KeyValue)
 		}
 
 		// fmt.Println("KeyValues is : ", KeyValues)
@@ -765,12 +792,16 @@ func GetVmList(c echo.Context) (err error) {
 	var VMStructs model.VMStructs
 	for e, _ := range vmParams {
 
-		switch vmParams[e].Provider {
+		switch strings.ToUpper(vmParams[e].Provider) {
 		case "AWS":
 			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
 			VMStructs = append(VMStructs, VMStruct)
 
 		case "OPENSTACK":
+			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
+			VMStructs = append(VMStructs, VMStruct)
+
+		case "GCP":
 			VMStruct := getVmStructs(vmParams[e], vmParams[e].Provider)
 			VMStructs = append(VMStructs, VMStruct)
 		}
@@ -865,6 +896,7 @@ func CreateVm(c echo.Context) (err error) {
 	imageName := c.QueryParam("image")
 	flavorName := c.QueryParam("flavor")
 	diskSize := c.QueryParam("disk")
+	providerName := c.QueryParam("provider")
 	// uniqName := "Ct2W9bAZ3kvcLJ54RzBR"
 
 	vpcName, subnetName := CheckVPC(c, connectionName)
@@ -874,18 +906,51 @@ func CreateVm(c echo.Context) (err error) {
 	var securityGroupNameList []interface{}
 	securityGroupNameList = append(securityGroupNameList, securityGroupName)
 
-	vmInfo := model.CreateVMInfo{
-		ConnectionName: connectionName,
-		ReqInfo: model.VmReqInfo{
-			Name:               vmName,
-			ImageName:          imageName,
-			VPCName:            vpcName,
-			SubnetName:         subnetName,
-			SecurityGroupNames: securityGroupNameList,
-			VMSpecName:         flavorName,
-			KeyPairName:        keyPairName,
-			RootDiskSize:       diskSize,
-		},
+	var vmInfo model.CreateVMInfo
+	switch strings.ToUpper(providerName) {
+	case "AWS":
+		vmInfo = model.CreateVMInfo{
+			ConnectionName: connectionName,
+			ReqInfo: model.VmReqInfo{
+				Name:               vmName,
+				ImageName:          imageName,
+				VPCName:            vpcName,
+				SubnetName:         subnetName,
+				SecurityGroupNames: securityGroupNameList,
+				VMSpecName:         flavorName,
+				KeyPairName:        keyPairName,
+				RootDiskSize:       diskSize,
+			},
+		}
+	case "OPENSTACK":
+		vmInfo = model.CreateVMInfo{
+			ConnectionName: connectionName,
+			ReqInfo: model.VmReqInfo{
+				Name:               vmName,
+				ImageName:          imageName,
+				VPCName:            vpcName,
+				SubnetName:         subnetName,
+				SecurityGroupNames: securityGroupNameList,
+				VMSpecName:         flavorName,
+				KeyPairName:        keyPairName,
+				RootDiskSize:       diskSize,
+			},
+		}
+	case "GCP":
+		vmInfo = model.CreateVMInfo{
+			ConnectionName: connectionName,
+			ReqInfo: model.VmReqInfo{
+				Name:               vmName,
+				ImageType:          "PublicImage",
+				ImageName:          "https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/" + imageName,
+				VPCName:            vpcName,
+				SubnetName:         subnetName,
+				SecurityGroupNames: securityGroupNameList,
+				VMSpecName:         flavorName,
+				KeyPairName:        keyPairName,
+				RootDiskSize:       diskSize,
+			},
+		}
 	}
 
 	payload, _ := json.Marshal(vmInfo)
@@ -1216,6 +1281,9 @@ func GetALLVPC(c echo.Context) (err error) {
 	}
 
 	getData, err := common.DataRequest_spider(params)
+
+	fmt.Println("getData ", getData)
+
 	vpc := common.StringToInterface(getData)
 
 	return c.JSON(http.StatusOK, echo.Map{
@@ -1722,7 +1790,6 @@ func DuplicatiCheck(c echo.Context, _kind string, connectionName string) bool {
 }
 
 func CheckDriver(c echo.Context, getCredential model.GetCredential) string {
-	// fmt.Println("[CheckDriver in]")
 
 	CredentialName := getCredential.CredentialName
 	ProviderName := getCredential.ProviderName
@@ -1735,6 +1802,8 @@ func CheckDriver(c echo.Context, getCredential model.GetCredential) string {
 		DriverLibFileName = "aws-driver-v1.0.so"
 	case "OPENSTACK":
 		DriverLibFileName = "openstack-driver-v1.0.so"
+	case "GCP":
+		DriverLibFileName = "gcp-driver-v1.0.so"
 	}
 
 	// vpc 확인

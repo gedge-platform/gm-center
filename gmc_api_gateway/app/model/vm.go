@@ -91,6 +91,7 @@ type KeyPairReqInfo struct {
 
 type VmReqInfo struct {
 	Name               string        `json:"Name"`
+	ImageType          string        `json:"imageType"`
 	ImageName          string        `json:"ImageName"`
 	VPCName            string        `json:"VPCName"`
 	SubnetName         string        `json:"SubnetName"`
@@ -123,7 +124,6 @@ type CreateVMInfo struct {
 	ConnectionName string `json:"ConnectionName"`
 	ReqInfo        VmReqInfo
 }
-
 type KeyValue struct {
 	Key   string `json:"Key"`
 	Value string `json:"Value"`

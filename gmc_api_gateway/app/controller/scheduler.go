@@ -3,13 +3,16 @@ package controller
 import (
 	"gmc_api_gateway/app/common"
 	"gmc_api_gateway/app/model"
-	"net/http"
 	"log"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
 func PostScheduler(c echo.Context) (err error) {
 	params := model.PARAMS{
+		Kind:      "requestQueue",
+		Type : "scheduler",
 		QueryString: c.QueryString(),
 		Method:      c.Request().Method,
 		Body:        responseBody(c.Request().Body),
@@ -31,7 +34,7 @@ func PostScheduler(c echo.Context) (err error) {
 	postData, err := common.DataRequest_scheduler(params)
 	// deploy_check,_ := scheduler_check("kube_pod_labels{cluster='innogrid-k8s-master',namespace='testinno-649906ca06cc37d12d5645b5',pod='nginx14'}")
 	// log.Println("deploy_check : ", deploy_check)
-
+	
 	if err != nil ||  common.StringToMapInterface(postData)["error"] != nil  {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"status": "error",

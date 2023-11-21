@@ -3,49 +3,29 @@ package common
 import (
 	"bytes"
 	"crypto/tls"
+	"fmt"
+	"gmc_api_gateway/app/model"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
- "fmt"
-	"gmc_api_gateway/app/model"
 
 	"github.com/go-resty/resty/v2"
 )
 
-// var listTemplates_spider = map[string]string{
-// 	"cloudos":          "/spider/cloudos",
-// 	"credential":       "/spider/credential",
-// 	"connectionconfig": "/spider/connectionconfig",
-// 	"clouddriver":      "/spider/driver",
-// 	"cloudregion":      "/spider/region",
-// 	"vm":               "/spider/vm",
-// 	"controlvm":        "/spider/controlvm",
-// 	"vmstatus":         "/spider/vmstatus",
-// 	"vmspec":           "/spider/vmspec",
-// 	"vmorgspec":        "/spider/vmorgspec",
-// 	"vmimage":          "/spider/vmimage",
-// 	"vpc":              "/spider/vpc",
-// 	"securitygroup":    "/spider/securitygroup",
-// 	"regsecuritygroup": "/spider/regsecuritygroup",
-// 	"keypair":          "/spider/keypair",
-// 	"regkeypair":       "/spider/regkeypair",
-// // }
-
-// var nsTemplates_spider = map[string]string{
-// 	"credential": "/gmcapi/v2/spider/$1",
-// }
-
 func DataRequest_scheduler(params model.PARAMS) (data string, err error) {
-
-	var endPoint, token_value string
+	log.Println("this")
+	var token_value, Url string;
 	// config := config.GetConfig()s
-	endPoint = os.Getenv("GS_SCHEDULER")
-
-	url := endPoint + "?" + params.QueryString
-	log.Println("url is", url)
+	if(params.Type == "scheduler"){
+		Url = UrlExpr_scheduler(os.Getenv("GS_SCHEDULER"), params)
+ } else if(params.Type =="faas"){
+		Url = UrlExpr_scheduler(os.Getenv("GS_FAAS"), params)
+	}
+	
+	log.Println("url is", Url)
 	log.Println("body is", params.Body)
 
 	// log.Printf("[#31] url is %s", url)
@@ -72,15 +52,16 @@ func DataRequest_scheduler(params model.PARAMS) (data string, err error) {
 	client.SetDebug(true)
 	switch reqMethod {
 	case "GET":
-		if resp, err := client.R().SetBody([]byte(params.Body)).Get(url); err != nil {
-			// panic(err)
+		if resp, err := client.R().SetBody([]byte(params.Body)).Get(Url); err != nil {
+			log.Println("test err: ", err)
 		} else {
 			responseString = string(resp.Body())
+			log.Println("responseString: ", responseString)
 		}
 	case "POST":
 		if resp, err := client.R().SetBody([]byte(string(passBody))).
 			SetAuthToken(token).
-			Post(url); err != nil {
+			Post(Url); err != nil {
 
 			// panic(err)
 			log.Println("test err: ", err)
@@ -91,19 +72,19 @@ func DataRequest_scheduler(params model.PARAMS) (data string, err error) {
 		}
 
 	case "PATCH":
-		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(url); err != nil {
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Patch(Url); err != nil {
 			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "PUT":
-		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(url); err != nil {
+		if resp, err := client.R().SetBody([]byte(string(passBody))).SetAuthToken(token).Put(Url); err != nil {
 			// panic(err)
 		} else {
 			responseString = string(resp.Body())
 		}
 	case "DELETE":
-		if resp, err := client.R().SetAuthToken(token).SetBody([]byte(params.Body)).Delete(url); err != nil {
+		if resp, err := client.R().SetAuthToken(token).SetBody([]byte(params.Body)).Delete(Url); err != nil {
 			// panic(err)
 		} else {
 			responseString = string(resp.Body())
@@ -234,21 +215,20 @@ func ResponseBody_scheduler(req io.ReadCloser) string {
 
 	return newStr
 }
-func UrlExpr_scheduler(endpoint, item, kind string, action string) string {
-	check_item := strings.Compare(item, "") != 0
-	check_action := strings.Compare(action, "") != 0
+func UrlExpr_scheduler(endpoint string, params model.PARAMS) string {
 	var returnUrl string
-	defaultUrl := "http://" + endpoint + ":1024"
-
-	if check_item {
-		if check_action {
-			returnUrl = defaultUrl + listTemplates_spider[kind] + "/" + item + "?action=" + action
-		} else {
-			returnUrl = defaultUrl + listTemplates_spider[kind] + "/" + item
+	defaultUrl := endpoint; 
+		if params.Type == "scheduler" {
+			returnUrl = defaultUrl + "/GEP/GSCH/" + params.Kind +"?" + params.QueryString
+		} else if params.Type == "faas" {
+			if params.Name != "" {
+				returnUrl = defaultUrl + "/GEP/FAAS/users/" + params.Project + "/" + params.Kind + "/" + params.Name
+			} else {
+				returnUrl = defaultUrl + "/GEP/FAAS/users/" + params.Project + "/" + params.Kind
+			}
+			
 		}
-	} else {
-		returnUrl = defaultUrl + listTemplates_spider[kind]
-	}
+ 
 
 	return returnUrl
 

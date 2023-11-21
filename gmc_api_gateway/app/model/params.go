@@ -13,5 +13,6 @@ type PARAMS struct {
 	Method      string `json:"reqMethod,omitempty"`
 	Body        string `json:"reqBody,omitempty"`
 	Action      string `json:"action,omitempty"`
+	Type  string `json:"type,omitempty"`
 	QueryString string `json:"queryString,omitempty"`
 }

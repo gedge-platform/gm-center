@@ -122,7 +122,8 @@ func CreateWorkspace(c echo.Context) (err error) {
 	return c.JSON(http.StatusCreated, echo.Map{
 		"status": "Created",
 		"code":   http.StatusCreated,
-		"data":   result,
+		"result" :result,
+		"data":   newWorkspace.Name,
 	})
 }
 
@@ -442,16 +443,13 @@ func GetDBWorkspace(params model.PARAMS) model.DBWorkspace {
 	// showsProject.Workspace = workspace
 	return showsWorkspace
 }
-func FindWorkspaceDB(value string) *model.DBWorkspace {
-	var workspace model.DBWorkspace
-	cdb := GetWorkspaceDB("workspace")
+func FindWorkspaceDB(params model.PARAMS) model.Workspace {
+	var workspace model.Workspace
+	cdb := GetClusterDB("workspace")
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	search_val := value
+	search_val := params.Workspace
 
 	if err := cdb.FindOne(ctx, bson.M{"workspaceName": search_val}).Decode(&workspace); err != nil {
-		// common.ErrorMsg(c, http.StatusNotFound, errors.New("Cluster not found."))
-		return nil
-	} else {
-		return &workspace
 	}
+	return workspace
 }

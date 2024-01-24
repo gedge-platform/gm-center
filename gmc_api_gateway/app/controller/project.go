@@ -139,7 +139,7 @@ func CreateProject(c echo.Context) (err error) {
 		}
 		var jsonStr = []byte(fmt.Sprint(string(data)))
 		code := RequsetKube(url, "POST", jsonStr, Token)
-		switch code {
+	switch code {
 		case 200:
 		case 201:
 		case 202:
@@ -150,7 +150,7 @@ func CreateProject(c echo.Context) (err error) {
 		// return err
 		default:
 			cdb.DeleteOne(ctx, bson.M{"_id": result.InsertedID})
-			return c.JSON(http.StatusCreated, echo.Map{
+			return c.JSON(http.StatusBadRequest, echo.Map{
 				"status": "Failed",
 				"code":   code,
 				"data":   err,
@@ -160,7 +160,8 @@ func CreateProject(c echo.Context) (err error) {
 	return c.JSON(http.StatusCreated, echo.Map{
 		"status": "Created",
 		"code":   http.StatusCreated,
-		"data":   result,
+		"result" :result,
+		"data":   newProject.Name,
 	})
 }
 
@@ -194,13 +195,46 @@ func ListUserProject(c echo.Context) (err error) {
 	// var userProject model.NewProject
 	var userProjects []model.USERPROJECT
 
-	if params.User == "" {
+	if params.User !="" && params.Workspace =="" {
+		userObj := FindMemberDB(params)
+		if userObj.Name == "" {
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found User"))
+			return
+		}
+		showsProject = GetDBList(params, "project", userObj.ObjectId, "projectOwner")
+	} else if params.Workspace !="" && params.User =="" {
+		workspaceObj := FindWorkspaceDB(params)
+		if workspaceObj.Name == "" {
+			common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found workspace"))
+			return
+		}
+		showsProject = GetDBList(params, "project", workspaceObj.ObjectId, "workspace")
+	} else if params.Workspace !="" && params.User !="" {
+		workspaceObj := FindWorkspaceDB(params)
+		userObj := FindMemberDB(params)
+		//
 		cdb := GetProjectDB("project")
-
 		ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 
+		filter := bson.M{
+			"workspace": workspaceObj.ObjectId,
+			"projectOwner":  userObj.ObjectId,
+	}
+		cur, err := cdb.Find(context.TODO(), filter)
+		if err != nil {
+				log.Fatal(err)
+		}
+		if err = cur.All(ctx, &showsProject); err != nil {
+			panic(err)
+		}
+		if err := cur.Err(); err != nil {
+			log.Fatal(err)
+		}
+		cur.Close(context.TODO())
+	}	else {
+		cdb := GetProjectDB("project")
+		ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 		findOptions := options.Find()
-
 		cur, err := cdb.Find(context.TODO(), bson.D{{}}, findOptions)
 		if err != nil {
 			log.Fatal(err)
@@ -211,17 +245,9 @@ func ListUserProject(c echo.Context) (err error) {
 		if err := cur.Err(); err != nil {
 			log.Fatal(err)
 		}
-
 		cur.Close(context.TODO())
-
-	} else {
-		userObj := FindMemberDB(params)
-		if userObj.Name == "" {
-			common.ErrorMsg(c, http.StatusNotFound, errors.New("Not Found User"))
-			return
-		}
-		showsProject = GetDBList(params, "project", userObj.ObjectId, "projectOwner")
 	}
+	
 	for _, project := range showsProject {
 		params.Project = common.InterfaceToString(project["projectName"])
 		temp_project := GetDBProject(params)

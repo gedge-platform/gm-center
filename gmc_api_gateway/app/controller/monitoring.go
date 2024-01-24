@@ -29,10 +29,10 @@ var clusterMetric = map[string]string{
 	"memory_util":     "round(avg((1 - (node_memory_MemAvailable_bytes{$1} / (node_memory_MemTotal_bytes{$1})))* 100)by(cluster),0.01)",
 	"memory_util_bak": "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/sum(node_memory_MemTotal_bytes)by(cluster)*100,0.1)",
 	"memory_usage":    "round(sum(node_memory_MemTotal_bytes{$1}-node_memory_MemFree_bytes-node_memory_Buffers_bytes-node_memory_Cached_bytes-node_memory_SReclaimable_bytes)by(cluster)/1024/1024/1024,0.01)",
-	"memory_total":    "round(sum(machine_memory_bytes{$1})by(cluster)/1024/1024/1024,0.01)",
+	"memory_total":    "round(node_memory_MemTotal_bytes{$1}/1024/1024/1024,0.01)",
 	"disk_util":       "round(((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)))*100,0.1)",
-	"disk_usage":      "round((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/1024/1024/1024,0.01)",
-	"disk_total":      "round(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)/1024/1024/1024,0.01)",
+	"disk_usage":      "round((sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)-sum(node_filesystem_avail_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster))/1000/1000/1000,0.01)",
+	"disk_total":      "round(sum(node_filesystem_size_bytes{mountpoint='/',fstype!='rootfs', $1})by(cluster)/1000/1000/1000,0.01)",
 	"pod_running":     "sum(kube_pod_container_status_running{$1})by(cluster)",
 	"pod_quota":       "sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster)",
 	"pod_util":        "round((count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(cluster,pod))by(cluster))/(sum(max(kube_node_status_capacity{resource='pods', $1})by(node,cluster)unless on(node,cluster)(kube_node_status_condition{condition='Ready',status=~'unknown|false'}>0))by(cluster))*100,0.1)",
@@ -67,7 +67,8 @@ var namespaceMetric = map[string]string{
 	"namespace_cpu":       "round(sum(sum(irate(container_cpu_usage_seconds_total{job='kubelet',pod!='',image!='', $1}[5m]))by(namespace,pod,cluster))by(namespace,cluster),0.001)",
 	"namespace_memory":    "round(sum(sum(container_memory_rss{job='kubelet',pod!='',image!='', $1})by(namespace,pod,cluster))by(namespace,cluster)/1024/1024/1024,0.1)",
 	"namespace_pod_count": "count(count(container_spec_memory_reservation_limit_bytes{pod!='', $1})by(pod,cluster,namespace))by(cluster,namespace)",
-	"namespace_check":     "kube_namespace_labels{$1} OR vector(0)",
+	"namespace_check" : "kube_namespace_status_phase{phase='Active',$1} OR vector(0)",
+	// "namespace_check":     "kube_namespace_labels{$1} OR vector(0)",
 }
 
 var podMetric = map[string]string{
@@ -141,6 +142,10 @@ var gpuMetric = map[string]string{
 	"gpu_fan_speed":    "nvidia_smi_fan_speed_ratio{$1}",
 	"gpu_info":         "nvidia_smi_gpu_info{$1}",
 }
+
+// var schedulerCheckMetric = = map[string]string{
+// 	"pod_check" : "kube_pod_labels{$1,$2,$3} on() vector(0)"
+// }
 
 func Monit(c echo.Context) (err error) {
 
@@ -772,6 +777,25 @@ func Query_monit(c echo.Context) (err error) {
 	})
 }
 
+func scheduler_check(query string) (result int, err error) {
+	config.Init()
+	addr := os.Getenv("PROMETHEUS")
+
+	data, err :=  nowQueryRange(addr, query)
+		if err != nil {
+			log.Println("err : ", err)
+		} else {
+			if check := len(data.(model.Matrix)) != 0; check {
+				data := data.(model.Matrix)
+				// resource := make(map[string]interface{})
+				value := data[0].Values[0].Value
+				resource := common.InterfaceToInt(value)
+				result = resource
+			}
+		}
+		return result, nil
+	}
+	
 func Check_namespace(query string, n string) (result int, err error) {
 	config.Init()
 	temp_filter := make(map[string]string)
